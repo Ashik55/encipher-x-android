@@ -8,7 +8,9 @@
 package io.element.android.appconfig
 
 object AuthenticationConfig {
-    const val MATRIX_ORG_URL = "https://matrix.org"
+//    const val MATRIX_ORG_URL = "https://matrix.org"
+//    const val MATRIX_ORG_URL = "https://enciph-er.com"
+    const val MATRIX_ORG_URL = "https://encipher-server.kainotomia.tech"
 
     /**
      * Default homeserver url to sign in with, unless the user selects a different one.
