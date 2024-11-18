@@ -19,6 +19,7 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.PreviewParameter
@@ -153,12 +154,13 @@ private fun RoomListScaffold(
             if (state.displayActions) {
                 FloatingActionButton(
                     // FIXME align on Design system theme
-                    containerColor = MaterialTheme.colorScheme.primary,
+                    containerColor = Color(0xFF002F25),
                     onClick = onCreateRoomClick
                 ) {
                     Icon(
                         // Note cannot use Icons.Outlined.EditSquare, it does not exist :/
                         imageVector = CompoundIcons.Compose(),
+                        tint = Color(0xFFFFFFFF),
                         contentDescription = stringResource(id = R.string.screen_roomlist_a11y_create_message)
                     )
                 }
