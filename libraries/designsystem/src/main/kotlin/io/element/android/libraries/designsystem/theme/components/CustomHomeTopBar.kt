@@ -2,6 +2,7 @@ package io.element.android.libraries.designsystem.theme.components
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
@@ -34,6 +35,7 @@ import io.element.android.libraries.designsystem.preview.PreviewGroup
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CustomHomeTopAppBar(
+    title: @Composable () -> Unit,
     modifier: Modifier = Modifier,
     navigationIcon: @Composable () -> Unit = {},
     actions: @Composable RowScope.() -> Unit = {},
@@ -41,61 +43,56 @@ fun CustomHomeTopAppBar(
     colors: TopAppBarColors = TopAppBarDefaults.mediumTopAppBarColors(),
     scrollBehavior: TopAppBarScrollBehavior? = null
 ) {
-    Box(
+    TopAppBar(
         modifier = modifier
             .background(
-                color = Color(0xFF002F25),
-//                color = colorResource(id = R.color.primary_color),
-                shape = RoundedCornerShape(48.dp) // Rounded background
-            )
-            .padding(end = 16.dp) // Ensure padding inside rounded corners
-            .padding(start = 8.dp) // Adjust top padding if necessary
-            .fillMaxWidth() // Ensure the box takes up the full width
-            .height(60.dp)
-    ) {
-        Row(
-            modifier = Modifier
-                .align(Alignment.CenterStart) // Align navigation icon to the start
-        ) {
-            navigationIcon()
-        }
-
-        Row(
-            modifier = Modifier
-                .align(Alignment.Center) // Align logo at the center
-        ) {
-            // Center: Logo (replace with your logo resource)
-            Image(
-                painter = painterResource(id = io.element.android.libraries.designsystem.R.drawable.ic_encipher_text_logo), // Replace with your logo resource
-                contentDescription = "Logo",
-                modifier = Modifier.align(Alignment.CenterVertically)
-            )
-        }
-
-        Row(
-            modifier = Modifier
-                .align(Alignment.CenterEnd) // Align actions to the end
-        ) {
+                color = Color(0xFF002F25),  // Set the background color
+                shape = RoundedCornerShape(48.dp)  // Apply rounded corners at the bottom
+            ),
+        navigationIcon = navigationIcon,
+        actions = {
             CompositionLocalProvider(LocalContentColor provides ElementTheme.colors.textActionPrimary) {
                 actions()
             }
+        },
+        windowInsets = windowInsets,
+        colors = colors,
+        scrollBehavior = scrollBehavior,
+        title = {
+            // Use Row to align title horizontally between navigationIcon and actions
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.Center,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                title()  // This will allow your title composable to be injected
+            }
         }
-    }
+    )
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Preview(group = PreviewGroup.AppBars)
 @Composable
 internal fun CustomHomeTopAppBarPreview() = ElementThemedPreview {
-    CustomHomeTopAppBar(
+    TopAppBar(
+        title = {
+            // Here, we include an image inside the title composable
+            Image(
+                painter = painterResource(id = io.element.android.libraries.designsystem.R.drawable.ic_encipher_text_logo),
+                contentDescription = "Logo"
+            )
+        },
         navigationIcon = { BackButton(onClick = {}) },
         actions = {
+            TextButton(text = "Action", onClick = {})
             IconButton(onClick = {}) {
                 Icon(
                     imageVector = CompoundIcons.ShareAndroid(),
                     contentDescription = null,
                 )
             }
-        }
+        },
+        modifier = Modifier.background(Color(0xFF002F25)) // Optional background color
     )
 }

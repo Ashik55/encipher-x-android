@@ -21,7 +21,7 @@ open class DeveloperSettingsStateProvider : PreviewParameterProvider<DeveloperSe
             ),
             aDeveloperSettingsState(
                 customElementCallBaseUrlState = aCustomElementCallBaseUrlState(
-                    baseUrl = "https://call.element.ahoy",
+                    baseUrl = "https://call.enciph-er.com",
                 )
             ),
         )
@@ -46,7 +46,7 @@ fun aDeveloperSettingsState(
 
 fun aCustomElementCallBaseUrlState(
     baseUrl: String? = null,
-    defaultUrl: String = "https://call.element.io",
+    defaultUrl: String = "https://call.enciph-er.com",
     validator: (String?) -> Boolean = { true },
 ) = CustomElementCallBaseUrlState(
     baseUrl = baseUrl,

@@ -7,12 +7,14 @@
 
 package io.element.android.features.roomlist.impl.components
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBars
@@ -38,6 +40,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalInspectionMode
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.DpSize
@@ -129,7 +132,7 @@ private fun DefaultRoomListTopBar(
     } else {
         null
     }
-//    val collapsedFraction = scrollBehavior.state.collapsedFraction
+    val collapsedFraction = scrollBehavior.state.collapsedFraction
     var appBarHeight by remember {
         mutableIntStateOf(previewAppBarHeight ?: 0)
     }
@@ -143,20 +146,20 @@ private fun DefaultRoomListTopBar(
     val statusBarPadding = with(LocalDensity.current) { WindowInsets.statusBars.getTop(this).toDp() }
 
     Box(modifier = modifier) {
-//        val collapsedTitleTextStyle = ElementTheme.typography.aliasScreenTitle
-//        val expandedTitleTextStyle = ElementTheme.typography.fontHeadingLgBold.copy(
-//            // Due to a limitation of MediumTopAppBar, and to avoid the text to be truncated,
-//            // ensure that the font size will never be bigger than 28.dp.
-//            fontSize = 28.dp.applyScaleDown().toSp()
-//        )
+        val collapsedTitleTextStyle = ElementTheme.typography.aliasScreenTitle
+        val expandedTitleTextStyle = ElementTheme.typography.fontHeadingLgBold.copy(
+            // Due to a limitation of MediumTopAppBar, and to avoid the text to be truncated,
+            // ensure that the font size will never be bigger than 28.dp.
+            fontSize = 28.dp.applyScaleDown().toSp()
+        )
         MaterialTheme(
             colorScheme = ElementTheme.materialColors,
             shapes = MaterialTheme.shapes,
-            typography = ElementTheme.materialTypography
-//            typography = ElementTheme.materialTypography.copy(
-//                headlineSmall = expandedTitleTextStyle,
-//                titleLarge = collapsedTitleTextStyle
-//            ),
+//            typography = ElementTheme.materialTypography
+            typography = ElementTheme.materialTypography.copy(
+                headlineSmall = expandedTitleTextStyle,
+                titleLarge = collapsedTitleTextStyle
+            ),
         ) {
             Column(
                 modifier = Modifier
@@ -173,36 +176,40 @@ private fun DefaultRoomListTopBar(
                         },
                         blurSize = DpSize(avatarBloomSize, avatarBloomSize),
                         offset = DpOffset(24.dp, 24.dp + statusBarPadding),
-                        clipToSize = DpSize.Unspecified,
-//                        clipToSize = if (appBarHeight > 0) {
-//                            DpSize(
-//                                avatarBloomSize,
-//                                appBarHeight.toDp()
-//                            )
-//                        } else {
-//                            DpSize.Unspecified
-//                        },
-//                        bottomSoftEdgeColor = ElementTheme.materialColors.background,
-//                        bottomSoftEdgeAlpha = if (displayFilters) {
-//                            1f
-//                        } else {
-//                            1f - collapsedFraction
-//                        },
+//                        clipToSize = DpSize.Unspecified,
+                        clipToSize = if (appBarHeight > 0) {
+                            DpSize(
+                                avatarBloomSize,
+                                appBarHeight.toDp()
+                            )
+                        } else {
+                            DpSize.Unspecified
+                        },
+                        bottomSoftEdgeColor = ElementTheme.materialColors.background,
+                        bottomSoftEdgeAlpha = if (displayFilters) {
+                            1f
+                        } else {
+                            1f - collapsedFraction
+                        },
                         alpha = if (areSearchResultsDisplayed) 0f else 1f,
                     )
                     .statusBarsPadding(),
             ) {
                 Box(
-                    modifier = Modifier.padding(16.dp) // Add padding outside the TopAppBar
+                    modifier = Modifier.padding(16.dp)
+                        .height(56.dp)
                 ) {
                     CustomHomeTopAppBar(
                         colors = TopAppBarDefaults.mediumTopAppBarColors(
                             containerColor = Color.Transparent,
                             scrolledContainerColor = Color.Transparent,
                         ),
-//                        title = {
-//                            Text(text = stringResource(id = R.string.screen_roomlist_main_space_title))
-//                        },
+                        title = {
+                            Image(
+                                painter = painterResource(id = io.element.android.libraries.designsystem.R.drawable.ic_encipher_text_logo),
+                                contentDescription = "Logo"
+                            )
+                        },
                         navigationIcon = {
                             NavigationIcon(
                                 avatarData = avatarData,
