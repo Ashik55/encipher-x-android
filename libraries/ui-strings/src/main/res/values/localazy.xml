@@ -71,7 +71,7 @@
   <string name="action_invite_people_to_app">"Invite people to %1$s"</string>
   <string name="action_invites_list">"Invites"</string>
   <string name="action_join">"Join"</string>
-  <string name="action_learn_more">"Learn more"</string>
+  <string name="action_learn_more">""</string>
   <string name="action_leave">"Leave"</string>
   <string name="action_leave_conversation">"Leave conversation"</string>
   <string name="action_leave_room">"Leave room"</string>
@@ -164,7 +164,7 @@ Reason: %1$s."</string>
   <string name="common_image">"Image"</string>
   <string name="common_in_reply_to">"In reply to %1$s"</string>
   <string name="common_install_apk_android">"Install APK"</string>
-  <string name="common_invite_unknown_profile">"This Matrix ID can\'t be found, so the invite might not be received."</string>
+  <string name="common_invite_unknown_profile">"This Encipher ID can\'t be found, so the invite might not be received."</string>
   <string name="common_leaving_room">"Leaving room"</string>
   <string name="common_light">"Light"</string>
   <string name="common_link_copied_to_clipboard">"Link copied to clipboard"</string>
@@ -269,7 +269,7 @@ Reason: %1$s."</string>
   <string name="dialog_title_warning">"Warning"</string>
   <string name="dialog_unsaved_changes_description_android">"Your changes have not been saved. Are you sure you want to go back?"</string>
   <string name="dialog_unsaved_changes_title">"Save changes?"</string>
-  <string name="error_account_creation_not_possible">"Your homeserver needs to be upgraded to support Matrix Authentication Service and account creation."</string>
+  <string name="error_account_creation_not_possible">"Your homeserver needs to be upgraded to support Encipher Authentication Service and account creation."</string>
   <string name="error_failed_creating_the_permalink">"Failed creating the permalink"</string>
   <string name="error_failed_loading_map">"%1$s could not load the map. Please try again later."</string>
   <string name="error_failed_loading_messages">"Failed loading messages"</string>

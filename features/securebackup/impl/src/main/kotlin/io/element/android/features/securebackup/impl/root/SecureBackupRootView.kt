@@ -70,7 +70,7 @@ fun SecureBackupRootView(
                     ),
                 )
             },
-            onClick = onLearnMoreClick,
+//            onClick = onLearnMoreClick,
         )
 
         // Disable / Enable key storage

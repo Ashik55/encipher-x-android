@@ -106,7 +106,7 @@ android {
 
     buildTypes {
         getByName("debug") {
-            resValue("string", "app_name", "$baseAppName dbg")
+            resValue("string", "app_name", "$baseAppName")
             applicationIdSuffix = ".debug"
             signingConfig = signingConfigs.getByName("debug")
         }

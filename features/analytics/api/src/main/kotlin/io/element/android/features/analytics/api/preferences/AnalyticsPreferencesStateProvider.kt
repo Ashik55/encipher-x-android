@@ -17,8 +17,8 @@ open class AnalyticsPreferencesStateProvider : PreviewParameterProvider<Analytic
 }
 
 fun aAnalyticsPreferencesState() = AnalyticsPreferencesState(
-    applicationName = "Element X",
+    applicationName = "Encipher X",
     isEnabled = false,
-    policyUrl = "https://element.io",
+    policyUrl = "https://new.enciph-er.com",
     eventSink = {}
 )

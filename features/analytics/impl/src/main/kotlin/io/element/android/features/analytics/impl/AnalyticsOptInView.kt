@@ -96,25 +96,25 @@ private fun AnalyticsOptInHeader(
             subtitle = stringResource(id = R.string.screen_analytics_prompt_help_us_improve),
             iconStyle = BigIcon.Style.Default(CompoundIcons.Chart())
         )
-        val text = buildAnnotatedStringWithStyledPart(
-            R.string.screen_analytics_prompt_read_terms,
-            R.string.screen_analytics_prompt_read_terms_content_link,
-            color = Color.Unspecified,
-            underline = false,
-            bold = true,
-            tagAndLink = LINK_TAG to AnalyticsConfig.POLICY_LINK,
-        )
-        ClickableLinkText(
-            annotatedString = text,
-            onClick = { onClickTerms() },
-            modifier = Modifier
-                .padding(8.dp),
-            style = ElementTheme.typography.fontBodyMdRegular
-                .copy(
-                    color = MaterialTheme.colorScheme.secondary,
-                    textAlign = TextAlign.Center,
-                )
-        )
+//        val text = buildAnnotatedStringWithStyledPart(
+//            R.string.screen_analytics_prompt_read_terms,
+//            R.string.screen_analytics_prompt_read_terms_content_link,
+//            color = Color.Unspecified,
+//            underline = false,
+//            bold = true,
+//            tagAndLink = LINK_TAG to AnalyticsConfig.POLICY_LINK,
+//        )
+//        ClickableLinkText(
+//            annotatedString = text,
+//            onClick = { onClickTerms() },
+//            modifier = Modifier
+//                .padding(8.dp),
+//            style = ElementTheme.typography.fontBodyMdRegular
+//                .copy(
+//                    color = MaterialTheme.colorScheme.secondary,
+//                    textAlign = TextAlign.Center,
+//                )
+//        )
     }
 }
 
