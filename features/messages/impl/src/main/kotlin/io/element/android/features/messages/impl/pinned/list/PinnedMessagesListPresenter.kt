@@ -134,9 +134,9 @@ class PinnedMessagesListPresenter @AssistedInject constructor(
         targetEvent: TimelineItem.Event,
     ) = launch {
         when (action) {
-            TimelineItemAction.ViewSource -> {
-                navigator.onShowEventDebugInfoClick(targetEvent.eventId, targetEvent.debugInfo)
-            }
+//            TimelineItemAction.ViewSource -> {
+//                navigator.onShowEventDebugInfoClick(targetEvent.eventId, targetEvent.debugInfo)
+//            }
             TimelineItemAction.Forward -> {
                 targetEvent.eventId?.let { eventId ->
                     navigator.onForwardEventClick(eventId)

@@ -197,31 +197,31 @@ private fun ColumnScope.GeneralSection(
     onSignOutClick: () -> Unit,
     onDeactivateClick: () -> Unit,
 ) {
-    ListItem(
-        headlineContent = { Text(stringResource(id = CommonStrings.common_about)) },
-        leadingContent = ListItemContent.Icon(IconSource.Vector(CompoundIcons.Info())),
-        onClick = onOpenAbout,
-    )
-    ListItem(
-        headlineContent = { Text(stringResource(id = CommonStrings.common_report_a_problem)) },
-        leadingContent = ListItemContent.Icon(IconSource.Vector(CompoundIcons.ChatProblem())),
-        onClick = onOpenRageShake
-    )
-    if (state.showAnalyticsSettings) {
-        ListItem(
-            headlineContent = { Text(stringResource(id = CommonStrings.common_analytics)) },
-            leadingContent = ListItemContent.Icon(IconSource.Vector(CompoundIcons.Chart())),
-            onClick = onOpenAnalytics,
-        )
-    }
+//    ListItem(
+//        headlineContent = { Text(stringResource(id = CommonStrings.common_about)) },
+//        leadingContent = ListItemContent.Icon(IconSource.Vector(CompoundIcons.Info())),
+//        onClick = onOpenAbout,
+//    )
+//    ListItem(
+//        headlineContent = { Text(stringResource(id = CommonStrings.common_report_a_problem)) },
+//        leadingContent = ListItemContent.Icon(IconSource.Vector(CompoundIcons.ChatProblem())),
+//        onClick = onOpenRageShake
+//    )
+//    if (state.showAnalyticsSettings) {
+//        ListItem(
+//            headlineContent = { Text(stringResource(id = CommonStrings.common_analytics)) },
+//            leadingContent = ListItemContent.Icon(IconSource.Vector(CompoundIcons.Chart())),
+//            onClick = onOpenAnalytics,
+//        )
+//    }
     ListItem(
         headlineContent = { Text(stringResource(id = CommonStrings.common_advanced_settings)) },
         leadingContent = ListItemContent.Icon(IconSource.Vector(CompoundIcons.Settings())),
         onClick = onOpenAdvancedSettings,
     )
-    if (state.showDeveloperSettings) {
-        DeveloperPreferencesView(onOpenDeveloperSettings)
-    }
+//    if (state.showDeveloperSettings) {
+//        DeveloperPreferencesView(onOpenDeveloperSettings)
+//    }
     ListItem(
         headlineContent = { Text(stringResource(id = CommonStrings.action_signout)) },
         leadingContent = ListItemContent.Icon(IconSource.Vector(CompoundIcons.SignOut())),
@@ -266,14 +266,14 @@ private fun ColumnScope.Footer(
     )
 }
 
-@Composable
-private fun DeveloperPreferencesView(onOpenDeveloperSettings: () -> Unit) {
-    ListItem(
-        headlineContent = { Text(stringResource(id = CommonStrings.common_developer_options)) },
-        leadingContent = ListItemContent.Icon(IconSource.Resource(CommonDrawables.ic_developer_options)),
-        onClick = onOpenDeveloperSettings
-    )
-}
+//@Composable
+//private fun DeveloperPreferencesView(onOpenDeveloperSettings: () -> Unit) {
+//    ListItem(
+//        headlineContent = { Text(stringResource(id = CommonStrings.common_developer_options)) },
+//        leadingContent = ListItemContent.Icon(IconSource.Resource(CommonDrawables.ic_developer_options)),
+//        onClick = onOpenDeveloperSettings
+//    )
+//}
 
 @PreviewWithLargeHeight
 @Composable

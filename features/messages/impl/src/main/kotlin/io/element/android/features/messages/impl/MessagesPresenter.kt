@@ -270,12 +270,12 @@ class MessagesPresenter @AssistedInject constructor(
     ) = launch {
         when (action) {
             TimelineItemAction.Copy -> handleCopyContents(targetEvent)
-            TimelineItemAction.CopyLink -> handleCopyLink(targetEvent)
+//            TimelineItemAction.CopyLink -> handleCopyLink(targetEvent)
             TimelineItemAction.Redact -> handleActionRedact(targetEvent)
             TimelineItemAction.Edit -> handleActionEdit(targetEvent, composerState, enableTextFormatting)
             TimelineItemAction.Reply,
             TimelineItemAction.ReplyInThread -> handleActionReply(targetEvent, composerState, timelineProtectionState)
-            TimelineItemAction.ViewSource -> handleShowDebugInfoAction(targetEvent)
+//            TimelineItemAction.ViewSource -> handleShowDebugInfoAction(targetEvent)
             TimelineItemAction.Forward -> handleForwardAction(targetEvent)
             TimelineItemAction.ReportContent -> handleReportAction(targetEvent)
             TimelineItemAction.EndPoll -> handleEndPollAction(targetEvent, timelineState)
@@ -426,19 +426,19 @@ class MessagesPresenter @AssistedInject constructor(
         event.eventId?.let { timelineState.eventSink(TimelineEvents.EndPoll(it)) }
     }
 
-    private suspend fun handleCopyLink(event: TimelineItem.Event) {
-        event.eventId ?: return
-        room.getPermalinkFor(event.eventId).fold(
-            onSuccess = { permalink ->
-                clipboardHelper.copyPlainText(permalink)
-                snackbarDispatcher.post(SnackbarMessage(CommonStrings.common_link_copied_to_clipboard))
-            },
-            onFailure = {
-                Timber.e(it, "Failed to get permalink for event ${event.eventId}")
-                snackbarDispatcher.post(SnackbarMessage(CommonStrings.common_error))
-            }
-        )
-    }
+//    private suspend fun handleCopyLink(event: TimelineItem.Event) {
+//        event.eventId ?: return
+//        room.getPermalinkFor(event.eventId).fold(
+//            onSuccess = { permalink ->
+//                clipboardHelper.copyPlainText(permalink)
+//                snackbarDispatcher.post(SnackbarMessage(CommonStrings.common_link_copied_to_clipboard))
+//            },
+//            onFailure = {
+//                Timber.e(it, "Failed to get permalink for event ${event.eventId}")
+//                snackbarDispatcher.post(SnackbarMessage(CommonStrings.common_error))
+//            }
+//        )
+//    }
 
     private suspend fun handleCopyContents(event: TimelineItem.Event) {
         val content = when (event.content) {

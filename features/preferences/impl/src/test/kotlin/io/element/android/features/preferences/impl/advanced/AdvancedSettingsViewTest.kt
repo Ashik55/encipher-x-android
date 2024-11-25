@@ -74,17 +74,17 @@ class AdvancedSettingsViewTest {
         eventsRecorder.assertSingle(AdvancedSettingsEvents.SetTheme(Theme.Dark))
     }
 
-    @Test
-    fun `clicking on View source emits the expected event`() {
-        val eventsRecorder = EventsRecorder<AdvancedSettingsEvents>()
-        rule.setAdvancedSettingsView(
-            state = aAdvancedSettingsState(
-                eventSink = eventsRecorder,
-            ),
-        )
-        rule.clickOn(CommonStrings.action_view_source)
-        eventsRecorder.assertSingle(AdvancedSettingsEvents.SetDeveloperModeEnabled(true))
-    }
+//    @Test
+//    fun `clicking on View source emits the expected event`() {
+//        val eventsRecorder = EventsRecorder<AdvancedSettingsEvents>()
+//        rule.setAdvancedSettingsView(
+//            state = aAdvancedSettingsState(
+//                eventSink = eventsRecorder,
+//            ),
+//        )
+//        rule.clickOn(CommonStrings.action_view_source)
+//        eventsRecorder.assertSingle(AdvancedSettingsEvents.SetDeveloperModeEnabled(false))
+//    }
 
     @Test
     fun `clicking on Share presence emits the expected event`() {

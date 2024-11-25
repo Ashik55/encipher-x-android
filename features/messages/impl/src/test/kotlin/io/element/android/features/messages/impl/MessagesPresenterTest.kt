@@ -262,7 +262,7 @@ class MessagesPresenterTest {
             presenter.present()
         }.test {
             val initialState = awaitItem()
-            initialState.eventSink(MessagesEvents.HandleAction(TimelineItemAction.CopyLink, event))
+//            initialState.eventSink(MessagesEvents.HandleAction(TimelineItemAction.CopyLink, event))
             skipItems(2)
             assertThat(clipboardHelper.clipboardContents).isEqualTo("a link")
         }
@@ -542,7 +542,7 @@ class MessagesPresenterTest {
             presenter.present()
         }.test {
             val initialState = awaitItem()
-            initialState.eventSink(MessagesEvents.HandleAction(TimelineItemAction.ViewSource, aMessageEvent()))
+//            initialState.eventSink(MessagesEvents.HandleAction(TimelineItemAction.ViewSource, aMessageEvent()))
             assertThat(awaitItem().actionListState.target).isEqualTo(ActionListState.Target.None)
             assertThat(navigator.onShowEventDebugInfoClickedCount).isEqualTo(1)
         }
