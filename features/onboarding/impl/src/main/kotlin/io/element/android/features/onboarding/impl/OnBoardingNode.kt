@@ -55,10 +55,10 @@ class OnBoardingNode @AssistedInject constructor(
             state = state,
             modifier = modifier,
             onSignIn = ::onSignIn,
-            onCreateAccount = ::onSignUp,
-            onSignInWithQrCode = ::onSignInWithQrCode,
+//            onCreateAccount = ::onSignUp,
+//            onSignInWithQrCode = ::onSignInWithQrCode,
             onOpenDeveloperSettings = ::onOpenDeveloperSettings,
-            onReportProblem = ::onReportProblem,
+//            onReportProblem = ::onReportProblem,
         )
     }
 }

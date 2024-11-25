@@ -7,7 +7,9 @@
 
 package io.element.android.features.login.impl.screens.confirmaccountprovider
 
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountCircle
@@ -89,14 +91,15 @@ fun ConfirmAccountProviderView(
                         .fillMaxWidth()
                         .testTag(TestTags.loginContinue)
                 )
-                TextButton(
-                    text = stringResource(id = R.string.screen_account_provider_change),
-                    onClick = onChange,
-                    enabled = true,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .testTag(TestTags.loginChangeServer)
-                )
+                Spacer(modifier = Modifier.height(8.dp))
+//                TextButton(
+//                    text = stringResource(id = R.string.screen_account_provider_change),
+//                    onClick = onChange,
+//                    enabled = true,
+//                    modifier = Modifier
+//                        .fillMaxWidth()
+//                        .testTag(TestTags.loginChangeServer)
+//                )
             }
         }
     ) {

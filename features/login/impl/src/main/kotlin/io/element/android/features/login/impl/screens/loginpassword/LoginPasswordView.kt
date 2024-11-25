@@ -143,7 +143,7 @@ fun LoginPasswordView(
                             .fillMaxWidth()
                             .testTag(TestTags.loginContinue)
                     )
-                    Spacer(modifier = Modifier.height(48.dp))
+                    Spacer(modifier = Modifier.height(8.dp))
                 }
             }
 
@@ -172,7 +172,7 @@ private fun LoginForm(
     Column {
         Text(
             text = stringResource(R.string.screen_login_form_header),
-            modifier = Modifier.padding(start = 16.dp),
+            modifier = Modifier.padding(start = 0.dp),
             style = ElementTheme.typography.fontBodyMdRegular,
         )
 

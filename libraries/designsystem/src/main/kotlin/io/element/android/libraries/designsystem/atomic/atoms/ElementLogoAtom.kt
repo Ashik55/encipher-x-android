@@ -13,7 +13,6 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -98,7 +97,7 @@ fun ElementLogoAtom(
 //                    shape = RoundedCornerShape(100.dp), // Changed to RoundedCornerShape
 //                    ambientColor = Color(0x80000000),
 //                ),
-            painter = painterResource(id = R.drawable.ic_lock_green),
+            painter = painterResource(id = R.drawable.ic_lock_dark),
             contentDescription = null,
             colorFilter = if (isSystemInDarkTheme()) {
                 ColorFilter.tint(Color.White)

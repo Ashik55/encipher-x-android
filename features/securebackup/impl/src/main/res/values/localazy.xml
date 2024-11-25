@@ -21,11 +21,11 @@
   <string name="screen_create_new_recovery_key_list_item_5">"Save your new recovery key in a password manager or encrypted note"</string>
   <string name="screen_create_new_recovery_key_title">"Reset the encryption for your account using another device"</string>
   <string name="screen_encryption_reset_action_continue_reset">"Continue reset"</string>
-  <string name="screen_encryption_reset_bullet_1">"Your account details, contacts, preferences, and chat list will be kept"</string>
-  <string name="screen_encryption_reset_bullet_2">"You will lose any message history that’s stored only on the server"</string>
-  <string name="screen_encryption_reset_bullet_3">"You will need to verify all your existing devices and contacts again"</string>
-  <string name="screen_encryption_reset_footer">"Only reset your identity if you don’t have access to another signed-in device and you’ve lost your recovery key."</string>
-  <string name="screen_encryption_reset_title">"Can\'t confirm? You’ll need to reset your identity."</string>
+  <string name="screen_encryption_reset_bullet_1">"Your account information, contacts, preferences, and chat list will be preserved."</string>
+  <string name="screen_encryption_reset_bullet_2">"Message history that is stored solely on the server will be lost."</string>
+  <string name="screen_encryption_reset_bullet_3">"Verification of all your devices and contacts will be required again."</string>
+  <string name="screen_encryption_reset_footer">"Reset your identity only if you're unable to access another signed-in device and have lost your recovery key."</string>
+  <string name="screen_encryption_reset_title">"Can\'t verify? A reset of your identity is required."</string>
   <string name="screen_key_backup_disable_confirmation_action_turn_off">"Turn off"</string>
   <string name="screen_key_backup_disable_confirmation_description">"You will lose your encrypted messages if you are signed out of all devices."</string>
   <string name="screen_key_backup_disable_confirmation_title">"Are you sure you want to turn off backup?"</string>
@@ -61,10 +61,10 @@
   <string name="screen_recovery_key_setup_success">"Recovery setup successful"</string>
   <string name="screen_recovery_key_setup_title">"Set up recovery"</string>
   <string name="screen_reset_encryption_confirmation_alert_action">"Yes, reset now"</string>
-  <string name="screen_reset_encryption_confirmation_alert_subtitle">"This process is irreversible."</string>
-  <string name="screen_reset_encryption_confirmation_alert_title">"Are you sure you want to reset your identity?"</string>
+  <string name="screen_reset_encryption_confirmation_alert_subtitle">"This action cannot be undone."</string>
+  <string name="screen_reset_encryption_confirmation_alert_title">"Are you sure about resetting your identity?"</string>
   <string name="screen_reset_encryption_password_error">"An unknown error happened. Please check your account password is correct and try again."</string>
   <string name="screen_reset_encryption_password_placeholder">"Enter…"</string>
-  <string name="screen_reset_encryption_password_subtitle">"Confirm that you want to reset your identity."</string>
+  <string name="screen_reset_encryption_password_subtitle">"Verify that you want to reset your identity."</string>
   <string name="screen_reset_encryption_password_title">"Enter your account password to continue"</string>
 </resources>

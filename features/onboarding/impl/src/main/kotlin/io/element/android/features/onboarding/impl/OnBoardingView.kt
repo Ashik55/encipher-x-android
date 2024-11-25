@@ -53,11 +53,11 @@ import io.element.android.libraries.ui.strings.CommonStrings
 @Composable
 fun OnBoardingView(
     state: OnBoardingState,
-    onSignInWithQrCode: () -> Unit,
+//    onSignInWithQrCode: () -> Unit,
     onSignIn: () -> Unit,
-    onCreateAccount: () -> Unit,
+//    onCreateAccount: () -> Unit,
     onOpenDeveloperSettings: () -> Unit,
-    onReportProblem: () -> Unit,
+//    onReportProblem: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     OnBoardingPage(
@@ -71,10 +71,10 @@ fun OnBoardingView(
         footer = {
             OnBoardingButtons(
                 state = state,
-                onSignInWithQrCode = onSignInWithQrCode,
+//                onSignInWithQrCode = onSignInWithQrCode,
                 onSignIn = onSignIn,
-                onCreateAccount = onCreateAccount,
-                onReportProblem = onReportProblem,
+//                onCreateAccount = onCreateAccount,
+//                onReportProblem = onReportProblem,
             )
         }
     )
@@ -92,7 +92,7 @@ private fun OnBoardingContent(
             modifier = Modifier.fillMaxSize(),
             contentAlignment = BiasAlignment(
                 horizontalBias = 0f,
-                verticalBias = -0.4f
+                verticalBias = -0.6f
             )
         ) {
             ElementLogoAtom(
@@ -104,7 +104,7 @@ private fun OnBoardingContent(
             modifier = Modifier.fillMaxSize(),
             contentAlignment = BiasAlignment(
                 horizontalBias = 0f,
-                verticalBias = 0.6f
+                verticalBias = 0.4f
             )
         ) {
             Column(
@@ -127,27 +127,27 @@ private fun OnBoardingContent(
                 )
             }
         }
-        if (state.isDebugBuild) {
-            IconButton(
-                modifier = Modifier.align(Alignment.TopEnd),
-                onClick = onOpenDeveloperSettings,
-            ) {
-                Icon(
-                    imageVector = CompoundIcons.SettingsSolid(),
-                    contentDescription = stringResource(CommonStrings.common_settings)
-                )
-            }
-        }
+//        if (state.isDebugBuild) {
+//            IconButton(
+//                modifier = Modifier.align(Alignment.TopEnd),
+//                onClick = onOpenDeveloperSettings,
+//            ) {
+//                Icon(
+//                    imageVector = CompoundIcons.SettingsSolid(),
+//                    contentDescription = stringResource(CommonStrings.common_settings)
+//                )
+//            }
+//        }
     }
 }
 
 @Composable
 private fun OnBoardingButtons(
     state: OnBoardingState,
-    onSignInWithQrCode: () -> Unit,
+//    onSignInWithQrCode: () -> Unit,
     onSignIn: () -> Unit,
-    onCreateAccount: () -> Unit,
-    onReportProblem: () -> Unit,
+//    onCreateAccount: () -> Unit,
+//    onReportProblem: () -> Unit,
 ) {
     ButtonColumnMolecule {
         val signInButtonStringRes = if (state.canLoginWithQrCode || state.canCreateAccount) {
@@ -155,14 +155,14 @@ private fun OnBoardingButtons(
         } else {
             CommonStrings.action_continue
         }
-        if (state.canLoginWithQrCode) {
-            Button(
-                text = stringResource(id = R.string.screen_onboarding_sign_in_with_qr_code),
-                leadingIcon = IconSource.Vector(Icons.Default.QrCode),
-                onClick = onSignInWithQrCode,
-                modifier = Modifier.fillMaxWidth()
-            )
-        }
+//        if (state.canLoginWithQrCode) {
+//            Button(
+//                text = stringResource(id = R.string.screen_onboarding_sign_in_with_qr_code),
+//                leadingIcon = IconSource.Vector(Icons.Default.QrCode),
+//                onClick = onSignInWithQrCode,
+//                modifier = Modifier.fillMaxWidth()
+//            )
+//        }
         Button(
             text = stringResource(id = signInButtonStringRes),
             onClick = onSignIn,
@@ -170,23 +170,24 @@ private fun OnBoardingButtons(
                 .fillMaxWidth()
                 .testTag(TestTags.onBoardingSignIn)
         )
-        if (state.canCreateAccount) {
-            TextButton(
-                text = stringResource(id = R.string.screen_onboarding_sign_up),
-                onClick = onCreateAccount,
-                modifier = Modifier
-                    .fillMaxWidth()
-            )
-        }
+        Spacer(modifier = Modifier.height(8.dp))
+//        if (state.canCreateAccount) {
+//            TextButton(
+//                text = stringResource(id = R.string.screen_onboarding_sign_up),
+//                onClick = onCreateAccount,
+//                modifier = Modifier
+//                    .fillMaxWidth()
+//            )
+//        }
         // Add a report problem text button. Use a Text since we need a special theme here.
-        Text(
-            modifier = Modifier
-                .padding(16.dp)
-                .clickable(onClick = onReportProblem),
-            text = stringResource(id = CommonStrings.common_report_a_problem),
-            style = ElementTheme.typography.fontBodySmRegular,
-            color = ElementTheme.colors.textSecondary,
-        )
+//        Text(
+//            modifier = Modifier
+//                .padding(16.dp)
+//                .clickable(onClick = onReportProblem),
+//            text = stringResource(id = CommonStrings.common_report_a_problem),
+//            style = ElementTheme.typography.fontBodySmRegular,
+//            color = ElementTheme.colors.textSecondary,
+//        )
     }
 }
 
@@ -197,10 +198,10 @@ internal fun OnBoardingViewPreview(
 ) = ElementPreview {
     OnBoardingView(
         state = state,
-        onSignInWithQrCode = {},
+//        onSignInWithQrCode = {},
         onSignIn = {},
-        onCreateAccount = {},
+//        onCreateAccount = {},
         onOpenDeveloperSettings = {},
-        onReportProblem = {},
+//        onReportProblem = {},
     )
 }
