@@ -73,7 +73,8 @@ class CallIntentDataParserTest {
     fun `Element Call url with no url returns null`() {
         val embeddedUrl = VALID_CALL_URL_WITH_PARAM
         val encodedUrl = URLEncoder.encode(embeddedUrl, "utf-8")
-        val url = "io.element.call:/?no_url=$encodedUrl"
+        val url = "call.enciph-er.com:/?no_url=$encodedUrl"
+//        val url = "io.element.call:/?no_url=$encodedUrl"
         assertThat(callIntentDataParser.parse(url)).isNull()
     }
 
@@ -93,7 +94,8 @@ class CallIntentDataParserTest {
 
     @Test
     fun `Element Call url with no data returns null`() {
-        val url = "io.element.call:/?url="
+        val url = "call.enciph-er.com:/?url="
+//        val url = "io.element.call:/?url="
         assertThat(callIntentDataParser.parse(url)).isNull()
     }
 
@@ -204,13 +206,15 @@ class CallIntentDataParserTest {
             assertThat(callIntentDataParser.parse(urlScheme1)).isEqualTo(expectedResult)
 
             // Test embedded url, scheme 2
-            val urlScheme2 = "io.element.call:/?url=$encodedUrl"
+            val urlScheme2 = "call.enciph-er.com:/?url=$encodedUrl"
+//            val urlScheme2 = "io.element.call:/?url=$encodedUrl"
             assertThat(callIntentDataParser.parse(urlScheme2)).isEqualTo(expectedResult)
         }
     }
 
     companion object {
-        const val VALID_CALL_URL_WITH_PARAM = "https://call.element.io/some-actual-call?with=parameters"
+//        const val VALID_CALL_URL_WITH_PARAM = "https://call.element.io/some-actual-call?with=parameters"
+        const val VALID_CALL_URL_WITH_PARAM = "https://call.enciph-er.com/some-actual-call?with=parameters"
         const val EXTRA_PARAMS = "appPrompt=false&confineToRoom=true"
     }
 }

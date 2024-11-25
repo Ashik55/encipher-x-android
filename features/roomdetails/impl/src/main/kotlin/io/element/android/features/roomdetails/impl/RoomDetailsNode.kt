@@ -35,7 +35,7 @@ class RoomDetailsNode @AssistedInject constructor(
     @Assisted buildContext: BuildContext,
     @Assisted plugins: List<Plugin>,
     private val presenter: RoomDetailsPresenter,
-    private val room: MatrixRoom,
+//    private val room: MatrixRoom,
     private val analyticsService: AnalyticsService,
 ) : Node(buildContext, plugins = plugins) {
     interface Callback : Plugin {
@@ -80,20 +80,20 @@ class RoomDetailsNode @AssistedInject constructor(
         callbacks.forEach { it.onJoinCall() }
     }
 
-    private fun CoroutineScope.onShareRoom(context: Context) = launch {
-        room.getPermalink()
-            .onSuccess { permalink ->
-                context.startSharePlainTextIntent(
-                    activityResultLauncher = null,
-                    chooserTitle = context.getString(R.string.screen_room_details_share_room_title),
-                    text = permalink,
-                    noActivityFoundMessage = context.getString(AndroidUtilsR.string.error_no_compatible_app_found)
-                )
-            }
-            .onFailure {
-                Timber.e(it)
-            }
-    }
+//    private fun CoroutineScope.onShareRoom(context: Context) = launch {
+//        room.getPermalink()
+//            .onSuccess { permalink ->
+//                context.startSharePlainTextIntent(
+//                    activityResultLauncher = null,
+//                    chooserTitle = context.getString(R.string.screen_room_details_share_room_title),
+//                    text = permalink,
+//                    noActivityFoundMessage = context.getString(AndroidUtilsR.string.error_no_compatible_app_found)
+//                )
+//            }
+//            .onFailure {
+//                Timber.e(it)
+//            }
+//    }
 
     private fun onEditRoomDetails() {
         callbacks.forEach { it.editRoomDetails() }
@@ -113,12 +113,12 @@ class RoomDetailsNode @AssistedInject constructor(
 
     @Composable
     override fun View(modifier: Modifier) {
-        val context = LocalContext.current
+//        val context = LocalContext.current
         val state = presenter.present()
 
-        fun onShareRoom() {
-            lifecycleScope.onShareRoom(context)
-        }
+//        fun onShareRoom() {
+//            lifecycleScope.onShareRoom(context)
+//        }
 
         fun onActionClick(action: RoomDetailsAction) {
             when (action) {
@@ -132,7 +132,7 @@ class RoomDetailsNode @AssistedInject constructor(
             modifier = modifier,
             goBack = this::navigateUp,
             onActionClick = ::onActionClick,
-            onShareRoom = ::onShareRoom,
+//            onShareRoom = ::onShareRoom,
             openRoomMemberList = ::openRoomMemberList,
             openRoomNotificationSettings = ::openRoomNotificationSettings,
             invitePeople = ::invitePeople,

@@ -95,7 +95,7 @@ fun RoomDetailsView(
     state: RoomDetailsState,
     goBack: () -> Unit,
     onActionClick: (RoomDetailsAction) -> Unit,
-    onShareRoom: () -> Unit,
+//    onShareRoom: () -> Unit,
     openRoomMemberList: () -> Unit,
     openRoomNotificationSettings: () -> Unit,
     invitePeople: () -> Unit,
@@ -155,7 +155,7 @@ fun RoomDetailsView(
             Spacer(Modifier.height(32.dp))
             MainActionsSection(
                 state = state,
-                onShareRoom = onShareRoom,
+//                onShareRoom = onShareRoom,
                 onInvitePeople = invitePeople,
                 onCall = onJoinCallClick,
             )
@@ -270,7 +270,7 @@ private fun RoomDetailsTopBar(
 @Composable
 private fun MainActionsSection(
     state: RoomDetailsState,
-    onShareRoom: () -> Unit,
+//    onShareRoom: () -> Unit,
     onInvitePeople: () -> Unit,
     onCall: () -> Unit,
 ) {
@@ -317,11 +317,11 @@ private fun MainActionsSection(
                 )
             }
             // Share CTA should be hidden for DMs
-            MainActionButton(
-                title = stringResource(CommonStrings.action_share),
-                imageVector = CompoundIcons.ShareAndroid(),
-                onClick = onShareRoom
-            )
+//            MainActionButton(
+//                title = stringResource(CommonStrings.action_share),
+//                imageVector = CompoundIcons.ShareAndroid(),
+//                onClick = onShareRoom
+//            )
         }
     }
 }
@@ -604,7 +604,7 @@ private fun ContentToPreview(state: RoomDetailsState) {
         state = state,
         goBack = {},
         onActionClick = {},
-        onShareRoom = {},
+//        onShareRoom = {},
         openRoomMemberList = {},
         openRoomNotificationSettings = {},
         invitePeople = {},

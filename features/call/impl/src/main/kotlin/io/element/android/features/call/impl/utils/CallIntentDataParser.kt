@@ -17,13 +17,15 @@ class CallIntentDataParser @Inject constructor() {
         val parsedUrl = data?.let { Uri.parse(data) } ?: return null
         val scheme = parsedUrl.scheme
         return when {
-            scheme in validHttpSchemes && parsedUrl.host == "call.element.io" -> parsedUrl
-            scheme == "element" && parsedUrl.host == "call" -> {
+            scheme in validHttpSchemes && parsedUrl.host == "call.enciph-er.com" -> parsedUrl
+            scheme == "encipher" && parsedUrl.host == "call" -> {
+                //call.enciph-er.com
+                //io.element.call
                 // We use this custom scheme to load arbitrary URLs for other instances of Element Call,
                 // so we can only verify it's an HTTP/HTTPs URL with a non-empty host
                 parsedUrl.getUrlParameter()
             }
-            scheme == "io.element.call" && parsedUrl.host == null -> {
+            scheme == "call.enciph-er.com" && parsedUrl.host == null -> {
                 // We use this custom scheme to load arbitrary URLs for other instances of Element Call,
                 // so we can only verify it's an HTTP/HTTPs URL with a non-empty host
                 parsedUrl.getUrlParameter()
