@@ -196,7 +196,7 @@ private fun ButtonInternal(
                     alpha = if (enabled) 1f else 0.5f
                 )
             } else {
-                if(ElementTheme.isLightTheme && !destructive) Color(0xFF002F25).copy(
+                if(ElementTheme.isLightTheme && !destructive) Color(0xFF0A8741).copy(
                     alpha = if (enabled) 1f else 0.5f
                 ) else ElementTheme.colors.borderInteractiveSecondary
             }
@@ -306,7 +306,7 @@ internal enum class ButtonStyle {
     fun getColors(destructive: Boolean): ButtonColors = when (this) {
         Filled -> ButtonDefaults.buttonColors(
             containerColor = getPrimaryColor(destructive),
-            contentColor = if(!(ElementTheme.isLightTheme) && !destructive) Color(0xFF002F25) else ElementTheme.materialColors.onPrimary,
+            contentColor = if(!(ElementTheme.isLightTheme) && !destructive) Color(0xFF0A8741) else ElementTheme.materialColors.onPrimary,
             disabledContainerColor = if (destructive) {
                 ElementTheme.colors.bgCriticalPrimary.copy(alpha = 0.5f)
             } else {
@@ -316,7 +316,7 @@ internal enum class ButtonStyle {
         )
         Outlined -> ButtonDefaults.buttonColors(
             containerColor = Color.Transparent,
-            contentColor = if(ElementTheme.isLightTheme && !destructive) Color(0xFF002F25) else getPrimaryColor(destructive),
+            contentColor = if(ElementTheme.isLightTheme && !destructive) Color(0xFF0A8741) else getPrimaryColor(destructive),
             disabledContainerColor = Color.Transparent,
             disabledContentColor = getDisabledContentColor(destructive),
         )
@@ -338,7 +338,7 @@ internal enum class ButtonStyle {
             ElementTheme.colors.bgCriticalPrimary
         } else {
             if(ElementTheme.isLightTheme){
-                Color(0xFF002F25)
+                Color(0xFF0A8741)
             } else{
                 ElementTheme.materialColors.primary
             }

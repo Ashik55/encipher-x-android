@@ -55,10 +55,12 @@ class OnBoardingNode @AssistedInject constructor(
             state = state,
             modifier = modifier,
             onSignIn = ::onSignIn,
-//            onCreateAccount = ::onSignUp,
-//            onSignInWithQrCode = ::onSignInWithQrCode,
-            onOpenDeveloperSettings = ::onOpenDeveloperSettings,
-//            onReportProblem = ::onReportProblem,
+//            onOpenDeveloperSettings = ::onOpenDeveloperSettings,
+            onPageChange = { newPage ->
+                // You'll need to add a method to update the page in your presenter
+                // This might look something like:
+                presenter.setPage(newPage)
+            }
         )
     }
 }
