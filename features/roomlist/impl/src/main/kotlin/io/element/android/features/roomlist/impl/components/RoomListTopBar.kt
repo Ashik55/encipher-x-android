@@ -15,6 +15,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBars
@@ -36,12 +37,14 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
@@ -72,9 +75,11 @@ import io.element.android.libraries.designsystem.theme.components.Icon
 import io.element.android.libraries.designsystem.theme.components.IconButton
 import io.element.android.libraries.designsystem.theme.components.MediumTopAppBar
 import io.element.android.libraries.designsystem.theme.components.Text
+import io.element.android.libraries.designsystem.theme.components.TopAppBar
 import io.element.android.libraries.matrix.api.core.UserId
 import io.element.android.libraries.matrix.api.user.MatrixUser
 import io.element.android.libraries.matrix.ui.model.getAvatarData
+import io.element.android.libraries.matrix.ui.model.getBestName
 import io.element.android.libraries.testtags.TestTags
 import io.element.android.libraries.testtags.testTag
 import io.element.android.libraries.ui.strings.CommonStrings
@@ -196,19 +201,41 @@ private fun DefaultRoomListTopBar(
                     .statusBarsPadding(),
             ) {
                 Box(
-                    modifier = Modifier.padding(16.dp)
+                    modifier = Modifier.padding(start = 16.dp, top = 16.dp, bottom = 16.dp, end = 8.dp)
                         .height(56.dp)
                 ) {
-                    CustomHomeTopAppBar(
+                    TopAppBar(
                         colors = TopAppBarDefaults.mediumTopAppBarColors(
                             containerColor = Color.Transparent,
                             scrolledContainerColor = Color.Transparent,
                         ),
                         title = {
-                            Image(
-                                painter = painterResource(id = io.element.android.libraries.designsystem.R.drawable.ic_encipher_text_logo),
-                                contentDescription = "Logo"
-                            )
+                            Column(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(start = 8.dp)
+                            ) {
+                                // Name
+                                Text(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    text = matrixUser.getBestName(),
+                                    maxLines = 1,
+                                    style = ElementTheme.typography.fontHeadingSmMedium,
+                                    overflow = TextOverflow.Ellipsis,
+                                    color = ElementTheme.materialColors.primary,
+                                )
+                                // ID
+                                if (!matrixUser.displayName.isNullOrEmpty()) {
+                                    Text(
+                                        modifier = Modifier.fillMaxWidth(),
+                                        text = matrixUser.userId.value,
+                                        style = ElementTheme.typography.fontBodyMdRegular,
+                                        color = ElementTheme.materialColors.secondary,
+                                        maxLines = 1,
+                                        overflow = TextOverflow.Ellipsis
+                                    )
+                                }
+                            }
                         },
                         navigationIcon = {
                             NavigationIcon(
@@ -225,7 +252,8 @@ private fun DefaultRoomListTopBar(
                                     Icon(
                                         imageVector = CompoundIcons.Search(),
                                         contentDescription = stringResource(CommonStrings.action_search),
-                                        tint = Color.White
+                                        tint = Color(0xFF0A8741),
+                                        modifier = Modifier.size(32.dp)
                                     )
                                 }
                                 if (RoomListConfig.HAS_DROP_DOWN_MENU) {
@@ -309,25 +337,41 @@ private fun NavigationIcon(
 ) {
     IconButton(
         modifier = Modifier.testTag(TestTags.homeScreenSettings)
-            .size(48.dp) // Size of the avatar
-            .clip(CircleShape) // Ensures the avatar is circular
+            .size(52.dp)
+            .clip(CircleShape)
+            .drawBehind {
+                // Draw shadow behind the border
+                val shadowColor = Color(0xFF0A8741)
+                val radius = 16.dp.toPx() // Larger blur radius for a more prominent shadow
+                val offsetX = 6.dp.toPx() // Horizontal offset for depth effect
+                val offsetY = 8.dp.toPx()
+
+                drawCircle(
+                    color = shadowColor,
+                    radius = size.minDimension / 2 + radius,
+                    center = center.copy(x = center.x + offsetX, y = center.y + offsetY),
+                )
+            }
+            .background(color = Color.White)
             .border(
-                width = 2.dp, // Thickness of the border
-                color = Color.White, // Border color
-                shape = CircleShape // Circular border
+                width = 4.dp,
+                color = Color(0xFF0A8741),
+                shape = CircleShape
             ),
         onClick = onClick,
     ) {
         Box {
             Avatar(
                 modifier = Modifier
-                    .size(48.dp),
+                    .size(40.dp),
                 avatarData = avatarData,
                 contentDescription = stringResource(CommonStrings.common_settings),
             )
             if (showAvatarIndicator) {
                 RedIndicatorAtom(
-                    modifier = Modifier.align(Alignment.TopEnd)
+                    modifier = Modifier
+                        .align(Alignment.TopEnd)
+//                        .offset(x = -4.dp, y = 8.dp)
                 )
             }
         }

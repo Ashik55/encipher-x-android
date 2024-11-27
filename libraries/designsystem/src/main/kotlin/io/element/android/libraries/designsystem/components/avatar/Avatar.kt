@@ -7,6 +7,7 @@
 
 package io.element.android.libraries.designsystem.components.avatar
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -28,6 +29,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import coil.compose.AsyncImagePainter
+import androidx.compose.ui.res.painterResource
 import coil.compose.SubcomposeAsyncImage
 import coil.compose.SubcomposeAsyncImageContent
 import io.element.android.compound.theme.ElementTheme
@@ -119,17 +121,24 @@ private fun InitialsAvatar(
     Box(
         modifier.background(color = avatarColors.background)
     ) {
-        val fontSize = (forcedAvatarSize ?: avatarData.size.dp).toSp() / 2
-        val originalFont = ElementTheme.typography.fontHeadingMdBold
-        val ratio = fontSize.value / originalFont.fontSize.value
-        val lineHeight = originalFont.lineHeight * ratio
-        Text(
+//        val fontSize = (forcedAvatarSize ?: avatarData.size.dp).toSp() / 2
+//        val originalFont = ElementTheme.typography.fontHeadingMdBold
+//        val ratio = fontSize.value / originalFont.fontSize.value
+//        val lineHeight = originalFont.lineHeight * ratio
+//        Text(
+//            modifier = Modifier
+//                .clearAndSetSemantics {}
+//                .align(Alignment.Center),
+//            text = avatarData.initial,
+//            style = originalFont.copy(fontSize = fontSize, lineHeight = lineHeight, letterSpacing = 0.sp),
+//            color = avatarColors.foreground,
+//        )
+        Image(
+            painter = painterResource(id = io.element.android.libraries.designsystem.R.drawable.ic_avatar_placeholder),
+            contentDescription = null,
             modifier = Modifier
-                .clearAndSetSemantics {}
-                .align(Alignment.Center),
-            text = avatarData.initial,
-            style = originalFont.copy(fontSize = fontSize, lineHeight = lineHeight, letterSpacing = 0.sp),
-            color = avatarColors.foreground,
+                .align(Alignment.Center)
+                .size(forcedAvatarSize ?: avatarData.size.dp) 
         )
     }
 }

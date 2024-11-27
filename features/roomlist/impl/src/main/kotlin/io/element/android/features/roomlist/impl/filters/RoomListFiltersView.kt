@@ -143,7 +143,7 @@ private fun RoomListClearFiltersButton(
     modifier: Modifier = Modifier
 ) {
     val closeBoxColor = if (ElementTheme.colors.isLight) {
-        Color(0xFF002F25)
+        Color(0xFF0A8741)
     } else {
         Color(0xFFCCCCCC)
     }
@@ -190,23 +190,23 @@ private fun RoomListFilterView(
     )
     // Define fill color based on theme mode
     val containerColor = if (ElementTheme.colors.isLight) {
-        Color(0xFF002F25) 
+        Color(0xFF0A8741)
     } else {
         Color(0xFFCCCCCC)
     }
 
     // Define Text color based on theme mode
     val textColor = if (ElementTheme.colors.isLight) {
-        Color(0xFF002F25) // Outline color for light theme
+        Color(0xFF0A8741)
     } else {
-        Color(0xFFCCCCCC) // Outline color for dark theme
+        Color(0xFFCCCCCC)
     }
 
     // Define outline color based on theme mode
     val outlineColor = if (ElementTheme.colors.isLight) {
-        Color(0xFF002F25) // Outline color for light theme
+        Color(0xFF0A8741)
     } else {
-        Color(0xFFCCCCCC) // Outline color for dark theme
+        Color(0xFFCCCCCC)
     }
 
     FilterChip(
@@ -222,7 +222,7 @@ private fun RoomListFilterView(
         ),
         border = BorderStroke(
             width = 1.dp,
-            color = outlineColor // Outline color
+            color = outlineColor
         ),
         label = {
             Text(text = stringResource(id = roomListFilter.stringResource))

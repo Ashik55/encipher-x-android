@@ -154,7 +154,7 @@ private fun RoomListScaffold(
             if (state.displayActions) {
                 FloatingActionButton(
                     // FIXME align on Design system theme
-                    containerColor = Color(0xFF002F25),
+                    containerColor = Color(0xFF0A8741),
                     onClick = onCreateRoomClick
                 ) {
                     Icon(
