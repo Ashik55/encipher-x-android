@@ -144,9 +144,9 @@ private fun ColumnScope.ManageAppSection(
             onClick = onSecureBackupClick,
         )
     }
-    if (state.showNotificationSettings || state.showLockScreenSettings || state.showSecureBackup) {
-        HorizontalDivider()
-    }
+//    if (state.showNotificationSettings || state.showLockScreenSettings || state.showSecureBackup) {
+//        HorizontalDivider()
+//    }
 }
 
 @Composable
@@ -181,9 +181,9 @@ private fun ColumnScope.ManageAccountSection(
         )
     }
 
-    if (state.accountManagementUrl != null || state.devicesManagementUrl != null || state.showBlockedUsersItem) {
-        HorizontalDivider()
-    }
+//    if (state.accountManagementUrl != null || state.devicesManagementUrl != null || state.showBlockedUsersItem) {
+//        HorizontalDivider()
+//    }
 }
 
 @Composable
