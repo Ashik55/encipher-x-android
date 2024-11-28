@@ -68,6 +68,7 @@ import io.element.android.features.messages.impl.pinned.banner.PinnedMessagesBan
 import io.element.android.features.messages.impl.timeline.FOCUS_ON_PINNED_EVENT_DEBOUNCE_DURATION_IN_MILLIS
 import io.element.android.features.messages.impl.timeline.TimelineEvents
 import io.element.android.features.messages.impl.timeline.TimelineView
+import io.element.android.features.messages.impl.timeline.components.AudioCallMenuItem
 import io.element.android.features.messages.impl.timeline.components.CallMenuItem
 import io.element.android.features.messages.impl.timeline.components.customreaction.CustomReactionBottomSheet
 import io.element.android.features.messages.impl.timeline.components.customreaction.CustomReactionEvents
@@ -506,6 +507,10 @@ private fun MessagesViewTopBar(
             }
         },
         actions = {
+//            AudioCallMenuItem(
+//                roomCallState = roomCallState,
+//                onJoinCallClick = onJoinCallClick,
+//            )
             CallMenuItem(
                 roomCallState = roomCallState,
                 onJoinCallClick = onJoinCallClick,
