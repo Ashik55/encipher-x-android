@@ -70,7 +70,9 @@ fun PreferencesRootView(
         snackbarHost = { SnackbarHost(snackbarHostState) }
     ) {
         UserPreferences(
-            modifier = Modifier.clickable {
+            modifier = Modifier
+                .padding(bottom = 8.dp)
+                .clickable {
                 onOpenUserProfile(state.myUser)
             },
             user = state.myUser,

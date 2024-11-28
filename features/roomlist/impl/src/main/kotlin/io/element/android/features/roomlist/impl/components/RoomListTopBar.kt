@@ -13,6 +13,7 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
@@ -38,7 +39,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.draw.paint
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalInspectionMode
@@ -168,40 +171,47 @@ private fun DefaultRoomListTopBar(
         ) {
             Column(
                 modifier = Modifier
-                    .onSizeChanged {
-                        appBarHeight = it.height
-                    }
-                    .avatarBloom(
-                        avatarData = avatarData,
-                        background = if (ElementTheme.isLightTheme) {
-                            // Workaround to display a very subtle bloom for avatars with very soft colors
-                            Color(0xFFF9F9F9)
-                        } else {
-                            ElementTheme.materialColors.background
-                        },
-                        blurSize = DpSize(avatarBloomSize, avatarBloomSize),
-                        offset = DpOffset(24.dp, 24.dp + statusBarPadding),
-//                        clipToSize = DpSize.Unspecified,
-                        clipToSize = if (appBarHeight > 0) {
-                            DpSize(
-                                avatarBloomSize,
-                                appBarHeight.toDp()
-                            )
-                        } else {
-                            DpSize.Unspecified
-                        },
-                        bottomSoftEdgeColor = ElementTheme.materialColors.background,
-                        bottomSoftEdgeAlpha = if (displayFilters) {
-                            1f
-                        } else {
-                            1f - collapsedFraction
-                        },
-                        alpha = if (areSearchResultsDisplayed) 0f else 1f,
+                    .fillMaxWidth()
+                    .aspectRatio(2.2f)
+                    .paint(
+                        painter = painterResource(id = R.drawable.home_top_bg),
+                        contentScale = ContentScale.FillBounds
                     )
+//                    .onSizeChanged {
+//                        appBarHeight = it.height
+//                    }
+//                    .avatarBloom(
+//                        avatarData = avatarData,
+//                        background = if (ElementTheme.isLightTheme) {
+//                            // Workaround to display a very subtle bloom for avatars with very soft colors
+//                            Color(0xFFF9F9F9)
+//                        } else {
+//                            ElementTheme.materialColors.background
+//                        },
+//                        blurSize = DpSize(avatarBloomSize, avatarBloomSize),
+//                        offset = DpOffset(24.dp, 24.dp + statusBarPadding),
+////                        clipToSize = DpSize.Unspecified,
+//                        clipToSize = if (appBarHeight > 0) {
+//                            DpSize(
+//                                avatarBloomSize,
+//                                appBarHeight.toDp()
+//                            )
+//                        } else {
+//                            DpSize.Unspecified
+//                        },
+//                        bottomSoftEdgeColor = ElementTheme.materialColors.background,
+//                        bottomSoftEdgeAlpha = if (displayFilters) {
+//                            1f
+//                        } else {
+//                            1f - collapsedFraction
+//                        },
+//                        alpha = if (areSearchResultsDisplayed) 0f else 1f,
+//                    )
                     .statusBarsPadding(),
             ) {
                 Box(
-                    modifier = Modifier.padding(start = 16.dp, top = 16.dp, bottom = 16.dp, end = 8.dp)
+                    modifier = Modifier
+                        .padding(start = 16.dp, top = 16.dp, bottom = 16.dp, end = 8.dp)
                         .height(56.dp)
                 ) {
                     TopAppBar(
@@ -339,19 +349,6 @@ private fun NavigationIcon(
         modifier = Modifier.testTag(TestTags.homeScreenSettings)
             .size(52.dp)
             .clip(CircleShape)
-            .drawBehind {
-                // Draw shadow behind the border
-                val shadowColor = Color(0xFF0A8741)
-                val radius = 16.dp.toPx() // Larger blur radius for a more prominent shadow
-                val offsetX = 6.dp.toPx() // Horizontal offset for depth effect
-                val offsetY = 8.dp.toPx()
-
-                drawCircle(
-                    color = shadowColor,
-                    radius = size.minDimension / 2 + radius,
-                    center = center.copy(x = center.x + offsetX, y = center.y + offsetY),
-                )
-            }
             .background(color = Color.White)
             .border(
                 width = 4.dp,
@@ -371,7 +368,7 @@ private fun NavigationIcon(
                 RedIndicatorAtom(
                     modifier = Modifier
                         .align(Alignment.TopEnd)
-//                        .offset(x = -4.dp, y = 8.dp)
+                        .offset(x = (-2.3).dp, y = 4.dp)
                 )
             }
         }

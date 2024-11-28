@@ -27,12 +27,16 @@ import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.PreviewParameter
+import androidx.compose.ui.unit.DpOffset
+import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
 import io.element.android.compound.theme.ElementTheme
 import io.element.android.libraries.designsystem.components.avatar.Avatar
 import io.element.android.libraries.designsystem.components.avatar.AvatarSize
+import io.element.android.libraries.designsystem.components.avatarBloom
 import io.element.android.libraries.designsystem.preview.ElementPreview
 import io.element.android.libraries.designsystem.preview.PreviewsDayNight
+import io.element.android.libraries.designsystem.text.toDp
 import io.element.android.libraries.designsystem.theme.components.Text
 import io.element.android.libraries.matrix.api.user.MatrixUser
 import io.element.android.libraries.matrix.ui.model.getAvatarData
@@ -72,19 +76,6 @@ private fun MatrixUserHeaderContent(
             modifier = Modifier
                 .size(60.dp)
                 .clip(CircleShape)
-                .drawBehind {
-                    // Draw shadow behind the border
-                    val shadowColor = Color(0xFF0A8741)
-                    val radius = 16.dp.toPx() // Larger blur radius for a more prominent shadow
-                    val offsetX = 6.dp.toPx() // Horizontal offset for depth effect
-                    val offsetY = 8.dp.toPx()
-
-                    drawCircle(
-                        color = shadowColor,
-                        radius = size.minDimension / 2 + radius,
-                        center = center.copy(x = center.x + offsetX, y = center.y + offsetY),
-                    )
-                }
                 .background(color = Color.White)
                 .border(
                     width = 4.dp,
