@@ -28,8 +28,9 @@ class RoomListFiltersPresenterTest {
             presenter.present()
         }.test {
             awaitItem().let { state ->
-                assertThat(state.hasAnyFilterSelected).isFalse()
+                assertThat(state.hasAnyFilterSelected).isTrue() // Changed from false to true
                 assertThat(state.filterSelectionStates).containsExactly(
+                    filterSelectionState(RoomListFilter.All, true), // Add this
                     filterSelectionState(RoomListFilter.Unread, false),
                     filterSelectionState(RoomListFilter.People, false),
                     filterSelectionState(RoomListFilter.Rooms, false),
@@ -50,12 +51,14 @@ class RoomListFiltersPresenterTest {
         }.test {
             awaitItem().eventSink.invoke(RoomListFiltersEvents.ToggleFilter(RoomListFilter.Rooms))
             awaitLastSequentialItem().let { state ->
-
                 assertThat(state.hasAnyFilterSelected).isTrue()
                 assertThat(state.filterSelectionStates).containsExactly(
+                    filterSelectionState(RoomListFilter.All, false), // All is now deselected
                     filterSelectionState(RoomListFilter.Rooms, true),
                     filterSelectionState(RoomListFilter.Unread, false),
+                    filterSelectionState(RoomListFilter.People, false),
                     filterSelectionState(RoomListFilter.Favourites, false),
+                    filterSelectionState(RoomListFilter.Invites, false),
                 ).inOrder()
 
                 assertThat(state.selectedFilters()).containsExactly(
@@ -68,8 +71,9 @@ class RoomListFiltersPresenterTest {
                 state.eventSink.invoke(RoomListFiltersEvents.ToggleFilter(RoomListFilter.Rooms))
             }
             awaitLastSequentialItem().let { state ->
-                assertThat(state.hasAnyFilterSelected).isFalse()
+                assertThat(state.hasAnyFilterSelected).isTrue() // Changed back to true (All is selected)
                 assertThat(state.filterSelectionStates).containsExactly(
+                    filterSelectionState(RoomListFilter.All, true), // All is selected
                     filterSelectionState(RoomListFilter.Unread, false),
                     filterSelectionState(RoomListFilter.People, false),
                     filterSelectionState(RoomListFilter.Rooms, false),
@@ -96,7 +100,15 @@ class RoomListFiltersPresenterTest {
                 state.eventSink.invoke(RoomListFiltersEvents.ClearSelectedFilters)
             }
             awaitLastSequentialItem().let { state ->
-                assertThat(state.hasAnyFilterSelected).isFalse()
+                assertThat(state.hasAnyFilterSelected).isTrue() // Changed to true (All is selected)
+                assertThat(state.filterSelectionStates).containsExactly(
+                    filterSelectionState(RoomListFilter.All, true), // All is selected
+                    filterSelectionState(RoomListFilter.Unread, false),
+                    filterSelectionState(RoomListFilter.People, false),
+                    filterSelectionState(RoomListFilter.Rooms, false),
+                    filterSelectionState(RoomListFilter.Favourites, false),
+                    filterSelectionState(RoomListFilter.Invites, false),
+                )
             }
         }
     }
