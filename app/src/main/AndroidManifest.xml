@@ -103,7 +103,7 @@
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
 
-                <data android:scheme="element" />
+                <data android:scheme="encipher" />
                 <data android:host="user" />
                 <data android:host="room" />
             </intent-filter>

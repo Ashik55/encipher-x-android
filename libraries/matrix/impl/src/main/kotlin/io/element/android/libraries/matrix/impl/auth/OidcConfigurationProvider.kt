@@ -16,7 +16,7 @@ class OidcConfigurationProvider @Inject constructor(
     private val baseDirectory: File,
 ) {
     fun get(): OidcConfiguration = OidcConfiguration(
-        clientName = "Element",
+        clientName = "Encipher",
         redirectUri = OidcConfig.REDIRECT_URI,
         clientUri = "https://element.io",
         logoUri = "https://element.io/mobile-icon.png",

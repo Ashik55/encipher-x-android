@@ -143,7 +143,7 @@ fun aMessagesState(
     enableTextFormatting = true,
     enableVoiceMessages = enableVoiceMessages,
     roomCallState = roomCallState,
-    appName = "Element",
+    appName = "Encipher",
     pinnedMessagesBannerState = pinnedMessagesBannerState,
     eventSink = eventSink,
 )
