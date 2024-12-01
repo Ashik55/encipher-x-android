@@ -12,6 +12,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.runtime.Composable
@@ -138,7 +139,8 @@ private fun InitialsAvatar(
             contentDescription = null,
             modifier = Modifier
                 .align(Alignment.Center)
-                .size(forcedAvatarSize ?: avatarData.size.dp) 
+                .padding(10.dp) // Add padding around the image
+                .size(forcedAvatarSize ?: avatarData.size.dp)
         )
     }
 }
