@@ -48,7 +48,7 @@
   <string name="action_copy_link">"Copy link"</string>
   <string name="action_copy_link_to_message">"Copy link to message"</string>
   <string name="action_create">"Create"</string>
-  <string name="action_create_a_room">"Create a room"</string>
+  <string name="action_create_a_room">"Create a group"</string>
   <string name="action_deactivate">"Deactivate"</string>
   <string name="action_deactivate_account">"Deactivate account"</string>
   <string name="action_decline">"Decline"</string>
@@ -74,7 +74,7 @@
   <string name="action_learn_more">""</string>
   <string name="action_leave">"Leave"</string>
   <string name="action_leave_conversation">"Leave conversation"</string>
-  <string name="action_leave_room">"Leave room"</string>
+  <string name="action_leave_room">"Leave group"</string>
   <string name="action_load_more">"Load more"</string>
   <string name="action_manage_account">"Manage account"</string>
   <string name="action_manage_devices">"Manage devices"</string>
@@ -134,8 +134,8 @@
   <string name="common_chat_backup">"Chat backup"</string>
   <string name="common_copied_to_clipboard">"Copied to clipboard"</string>
   <string name="common_copyright">"Copyright"</string>
-  <string name="common_creating_room">"Creating room…"</string>
-  <string name="common_current_user_left_room">"Left room"</string>
+  <string name="common_creating_room">"Creating group…"</string>
+  <string name="common_current_user_left_room">"Left group"</string>
   <string name="common_dark">"Dark"</string>
   <string name="common_decryption_error">"Decryption error"</string>
   <string name="common_developer_options">"Developer options"</string>
@@ -165,7 +165,7 @@ Reason: %1$s."</string>
   <string name="common_in_reply_to">"In reply to %1$s"</string>
   <string name="common_install_apk_android">"Install APK"</string>
   <string name="common_invite_unknown_profile">"This Encipher ID can\'t be found, so the invite might not be received."</string>
-  <string name="common_leaving_room">"Leaving room"</string>
+  <string name="common_leaving_room">"Leaving group"</string>
   <string name="common_light">"Light"</string>
   <string name="common_link_copied_to_clipboard">"Link copied to clipboard"</string>
   <string name="common_loading">"Loading…"</string>
@@ -180,7 +180,7 @@ Reason: %1$s."</string>
   <string name="common_modern">"Modern"</string>
   <string name="common_mute">"Mute"</string>
   <string name="common_no_results">"No results"</string>
-  <string name="common_no_room_name">"No room name"</string>
+  <string name="common_no_room_name">"No group name"</string>
   <string name="common_offline">"Offline"</string>
   <string name="common_open_source_licenses">"Open source licenses"</string>
   <string name="common_or">"or"</string>
@@ -208,8 +208,8 @@ Reason: %1$s."</string>
   <string name="common_report_a_problem">"Report a problem"</string>
   <string name="common_report_submitted">"Report submitted"</string>
   <string name="common_rich_text_editor">"Rich text editor"</string>
-  <string name="common_room">"Room"</string>
-  <string name="common_room_name">"Room name"</string>
+  <string name="common_room">"Group"</string>
+  <string name="common_room_name">"Group name"</string>
   <string name="common_room_name_placeholder">"e.g. your project name"</string>
   <string name="common_saved_changes">"Saved changes"</string>
   <string name="common_saving">"Saving"</string>
@@ -238,7 +238,7 @@ Reason: %1$s."</string>
   <string name="common_third_party_notices">"Third-party notices"</string>
   <string name="common_thread">"Thread"</string>
   <string name="common_topic">"Topic"</string>
-  <string name="common_topic_placeholder">"What is this room about?"</string>
+  <string name="common_topic_placeholder">"What is this group about?"</string>
   <string name="common_unable_to_decrypt">"Unable to decrypt"</string>
   <string name="common_unable_to_decrypt_insecure_device">"Sent from an insecure device"</string>
   <string name="common_unable_to_decrypt_no_access">"You don\'t have access to this message"</string>

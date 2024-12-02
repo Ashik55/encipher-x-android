@@ -172,7 +172,8 @@ private fun DefaultRoomListTopBar(
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .aspectRatio(2.2f)
+//                    .aspectRatio(2.2f)
+                    .height(230.dp) // Increase the height here
                     .paint(
                         painter = painterResource(id = R.drawable.home_top_bg),
                         contentScale = ContentScale.FillBounds
@@ -320,10 +321,22 @@ private fun DefaultRoomListTopBar(
                         windowInsets = WindowInsets(0.dp),
                     )
                 }
+                Text(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp,), // Adjust padding as needed
+                    text = "My Chats",
+                    maxLines = 1,
+                    style = ElementTheme.typography.fontHeadingLgBold,
+                    overflow = TextOverflow.Ellipsis,
+                    color = ElementTheme.materialColors.primary,
+
+                    )
+
                 if (displayFilters) {
                     RoomListFiltersView(
                         state = filtersState,
-                        modifier = Modifier.padding(bottom = 16.dp)
+                        modifier = Modifier.padding(vertical = 16.dp)
                     )
                 }
             }
@@ -346,7 +359,8 @@ private fun NavigationIcon(
     onClick: () -> Unit,
 ) {
     IconButton(
-        modifier = Modifier.testTag(TestTags.homeScreenSettings)
+        modifier = Modifier
+            .testTag(TestTags.homeScreenSettings)
             .size(52.dp)
             .clip(CircleShape)
             .background(color = Color.White)
