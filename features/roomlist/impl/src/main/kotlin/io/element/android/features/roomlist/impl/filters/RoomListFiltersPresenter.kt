@@ -46,7 +46,6 @@ class RoomListFiltersPresenter @Inject constructor(
                             return@mapNotNull null
                         }
                         when (filterState.filter) {
-                            RoomListFilter.All -> null
                             RoomListFilter.Rooms -> MatrixRoomListFilter.Category.Group
                             RoomListFilter.People -> MatrixRoomListFilter.Category.People
                             RoomListFilter.Unread -> MatrixRoomListFilter.Unread

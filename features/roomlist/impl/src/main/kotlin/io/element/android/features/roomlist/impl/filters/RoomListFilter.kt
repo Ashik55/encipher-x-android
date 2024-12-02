@@ -14,7 +14,6 @@ import io.element.android.features.roomlist.impl.R
  * Order is important, it'll be used as initial order in the UI.
  */
 enum class RoomListFilter(val stringResource: Int) {
-    All(R.string.screen_roomlist_filter_all),
     Unread(R.string.screen_roomlist_filter_unreads),
     People(R.string.screen_roomlist_filter_people),
     Rooms(R.string.screen_roomlist_filter_rooms),
@@ -23,11 +22,10 @@ enum class RoomListFilter(val stringResource: Int) {
 
     val incompatibleFilters: Set<RoomListFilter>
         get() = when (this) {
-            All -> emptySet()
-            Rooms -> setOf(All, People, Invites)
-            People -> setOf(All, Rooms, Invites)
-            Unread -> setOf(All, Invites)
-            Favourites -> setOf(All, Invites)
-            Invites -> setOf(All, Rooms, People, Unread, Favourites)
+            Rooms -> setOf(People, Invites)
+            People -> setOf(Rooms, Invites)
+            Unread -> setOf(Invites)
+            Favourites -> setOf(Invites)
+            Invites -> setOf(Rooms, People, Unread, Favourites)
         }
 }
