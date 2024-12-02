@@ -32,16 +32,15 @@ For now, you can deselect filters in order to see your other chats"</string>
   <string name="screen_roomlist_filter_invites">"Invites"</string>
   <string name="screen_roomlist_filter_invites_empty_state_title">"You don\'t have any pending invites."</string>
   <string name="screen_roomlist_filter_low_priority">"Low Priority"</string>
-  <string name="screen_roomlist_filter_mixed_empty_state_subtitle">"You can deselect filters in order to see your other chats"</string>
-  <string name="screen_roomlist_filter_mixed_empty_state_title">"You don’t have chats for this selection"</string>
+  <string name="screen_roomlist_filter_mixed_empty_state_subtitle">"Deselecting filters will allow you to access your other chats."</string>
+  <string name="screen_roomlist_filter_mixed_empty_state_title">"There are no chats available for this selection"</string>
   <string name="screen_roomlist_filter_people">"People"</string>
   <string name="screen_roomlist_filter_people_empty_state_title">"You don’t have any DMs yet"</string>
   <string name="screen_roomlist_filter_rooms">"Rooms"</string>
   <string name="screen_roomlist_filter_rooms_empty_state_title">"You’re not in any room yet"</string>
   <string name="screen_roomlist_filter_unreads">"Unreads"</string>
     <string name="screen_roomlist_filter_all">All</string>
-  <string name="screen_roomlist_filter_unreads_empty_state_title">"Congrats!
-You don’t have any unread messages!"</string>
+  <string name="screen_roomlist_filter_unreads_empty_state_title">"Well done! All your messages have been read!"</string>
   <string name="screen_roomlist_main_space_title">"Chats"</string>
   <string name="screen_roomlist_mark_as_read">"Mark as read"</string>
   <string name="screen_roomlist_mark_as_unread">"Mark as unread"</string>
