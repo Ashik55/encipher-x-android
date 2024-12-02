@@ -22,7 +22,7 @@
   <string name="screen_join_room_knock_sent_title">"Request to join sent"</string>
   <string name="screen_migration_message">"This is a one time process, thanks for waiting."</string>
   <string name="screen_migration_title">"Setting up your account."</string>
-  <string name="screen_roomlist_a11y_create_message">"Create a new conversation or room"</string>
+  <string name="screen_roomlist_a11y_create_message">"Create a new conversation or group"</string>
   <string name="screen_roomlist_empty_message">"Get started by messaging someone."</string>
   <string name="screen_roomlist_empty_title">"No chats yet."</string>
   <string name="screen_roomlist_filter_favourites">"Favourites"</string>
@@ -36,15 +36,15 @@ For now, you can deselect filters in order to see your other chats"</string>
   <string name="screen_roomlist_filter_mixed_empty_state_title">"There are no chats available for this selection"</string>
   <string name="screen_roomlist_filter_people">"People"</string>
   <string name="screen_roomlist_filter_people_empty_state_title">"You don’t have any DMs yet"</string>
-  <string name="screen_roomlist_filter_rooms">"Rooms"</string>
-  <string name="screen_roomlist_filter_rooms_empty_state_title">"You’re not in any room yet"</string>
+  <string name="screen_roomlist_filter_rooms">"Groups"</string>
+  <string name="screen_roomlist_filter_rooms_empty_state_title">"You’re not in any group yet"</string>
   <string name="screen_roomlist_filter_unreads">"Unreads"</string>
     <string name="screen_roomlist_filter_all">All</string>
   <string name="screen_roomlist_filter_unreads_empty_state_title">"Well done! All your messages have been read!"</string>
   <string name="screen_roomlist_main_space_title">"Chats"</string>
   <string name="screen_roomlist_mark_as_read">"Mark as read"</string>
   <string name="screen_roomlist_mark_as_unread">"Mark as unread"</string>
-  <string name="screen_roomlist_room_directory_button_title">"Browse all rooms"</string>
+  <string name="screen_roomlist_room_directory_button_title">"Browse all groups"</string>
   <string name="session_verification_banner_message">"Looks like you’re using a new device. Verify with another device to access your encrypted messages."</string>
   <string name="session_verification_banner_title">"Verify it’s you"</string>
 </resources>
