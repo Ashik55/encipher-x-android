@@ -114,6 +114,24 @@ fun RoomListFiltersView(
                 )
             }
         }
+
+        item("all_filter") {
+            if (!state.hasAnyFilterSelected)
+                RoomListFilterView(
+                    modifier = Modifier
+                        .animateItem(),
+                    //.zIndex(zIndex),
+                    staticLabel = "All",
+                    selected = true,
+                    roomListFilter = state.filterSelectionStates.first().filter,
+                    onClick = {
+                        print("All pressed")
+                    },
+                )
+
+        }
+
+
         state.filterSelectionStates.forEachIndexed { i, filterWithSelection ->
             item(filterWithSelection.filter) {
                 val zIndex = (if (previousFilters.value.contains(filterWithSelection.filter)) state.filterSelectionStates.size else 0) - i.toFloat()
@@ -168,7 +186,6 @@ private fun RoomListClearFiltersButton(
             contentDescription = stringResource(id = io.element.android.libraries.ui.strings.R.string.action_clear) // Accessibility text
         )
     }
-
 }
 
 @Composable
@@ -176,7 +193,8 @@ private fun RoomListFilterView(
     roomListFilter: RoomListFilter,
     selected: Boolean,
     onClick: (RoomListFilter) -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    staticLabel: String? = null, // Set default value to null
 ) {
     val background = animateColorAsState(
         targetValue = if (selected) ElementTheme.colors.bgActionPrimaryRest else ElementTheme.colors.bgCanvasDefault,
@@ -225,7 +243,7 @@ private fun RoomListFilterView(
             color = outlineColor
         ),
         label = {
-            Text(text = stringResource(id = roomListFilter.stringResource))
+            Text(text = staticLabel ?: stringResource(id = roomListFilter.stringResource))
         }
     )
 }

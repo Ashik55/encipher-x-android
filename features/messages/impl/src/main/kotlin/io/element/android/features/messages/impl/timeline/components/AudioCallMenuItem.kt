@@ -49,11 +49,7 @@ internal fun AudioCallMenuItem(
             )
         }
         is RoomCallState.OnGoing -> {
-            OnGoingCallMenuItem(
-                roomCallState = roomCallState,
-                onJoinCallClick = onJoinCallClick,
-                modifier = modifier,
-            )
+
         }
     }
 }
