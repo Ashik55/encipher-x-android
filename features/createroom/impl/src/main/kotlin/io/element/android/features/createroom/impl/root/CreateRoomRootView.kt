@@ -8,21 +8,19 @@
 package io.element.android.features.createroom.impl.root
 
 import androidx.annotation.DrawableRes
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.consumeWindowInsets
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
@@ -64,32 +62,41 @@ fun CreateRoomRootView(
             }
         }
     ) { paddingValues ->
-        Column(
-            modifier = Modifier
-                .padding(paddingValues)
-                .consumeWindowInsets(paddingValues),
-            verticalArrangement = Arrangement.spacedBy(8.dp),
-        ) {
-            UserListView(
-                modifier = Modifier.fillMaxWidth(),
-                // Do not render suggestions in this case, the suggestion will be rendered
-                // by CreateRoomActionButtonsList
-                state = state.userListState.copy(
-                    recentDirectRooms = persistentListOf(),
-                ),
-                onSelectUser = {
-                    state.eventSink(CreateRoomRootEvents.StartDM(it))
-                },
-                onDeselectUser = { },
+        Box {
+            Image(
+                painter = painterResource(id = R.drawable.bg),
+                contentDescription = null,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .fillMaxHeight(),
+                contentScale = ContentScale.Crop
             )
 
-            if (!state.userListState.isSearchActive) {
-                CreateRoomActionButtonsList(
-                    state = state,
-                    onNewRoomClick = onNewRoomClick,
-                    onInvitePeopleClick = onInviteFriendsClick,
-                    onDmClick = onOpenDM,
+            Column(
+                modifier = Modifier
+                    .padding(paddingValues)
+                    .consumeWindowInsets(paddingValues),
+                verticalArrangement = Arrangement.spacedBy(8.dp),
+            ) {
+                UserListView(
+                    modifier = Modifier.fillMaxWidth(),
+                    state = state.userListState.copy(
+                        recentDirectRooms = persistentListOf(),
+                    ),
+                    onSelectUser = {
+                        state.eventSink(CreateRoomRootEvents.StartDM(it))
+                    },
+                    onDeselectUser = { },
                 )
+
+                if (!state.userListState.isSearchActive) {
+                    CreateRoomActionButtonsList(
+                        state = state,
+                        onNewRoomClick = onNewRoomClick,
+                        onInvitePeopleClick = onInviteFriendsClick,
+                        onDmClick = onOpenDM,
+                    )
+                }
             }
         }
     }
@@ -106,7 +113,6 @@ fun CreateRoomRootView(
         onRetry = {
             state.userListState.selectedUsers.firstOrNull()
                 ?.let { state.eventSink(CreateRoomRootEvents.StartDM(it)) }
-            // Cancel start DM if there is no more selected user (should not happen)
                 ?: state.eventSink(CreateRoomRootEvents.CancelStartDM)
         },
         onErrorDismiss = { state.eventSink(CreateRoomRootEvents.CancelStartDM) },
@@ -130,7 +136,11 @@ private fun CreateRoomRootViewTopBar(
                 imageVector = CompoundIcons.Close(),
                 onClick = onCloseClick,
             )
-        }
+        },
+        // Topbar background to transparent
+        colors = TopAppBarDefaults.topAppBarColors(
+            containerColor = Color.Transparent
+        )
     )
 }
 
