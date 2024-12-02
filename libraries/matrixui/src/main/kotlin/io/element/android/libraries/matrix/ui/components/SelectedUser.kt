@@ -22,6 +22,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.clipToBounds
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
@@ -66,7 +67,8 @@ fun SelectedUser(
         }
         if (canRemove) {
             Surface(
-                color = ElementTheme.colors.textPrimary,
+                color = Color.White,
+//                color = ElementTheme.colors.textPrimary,
                 modifier = Modifier
                     .clip(CircleShape)
                     .size(20.dp)
@@ -80,7 +82,8 @@ fun SelectedUser(
                 Icon(
                     imageVector = CompoundIcons.Close(),
                     contentDescription = stringResource(id = CommonStrings.action_remove),
-                    tint = ElementTheme.colors.iconOnSolidPrimary,
+                    tint = Color(0xFFEB3E18),
+//                    tint = ElementTheme.colors.iconOnSolidPrimary,
                     modifier = Modifier.padding(2.dp)
                 )
             }

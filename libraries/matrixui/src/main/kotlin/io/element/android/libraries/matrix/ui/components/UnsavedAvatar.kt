@@ -20,6 +20,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.ColorPainter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
@@ -44,7 +45,7 @@ fun UnsavedAvatar(
     modifier: Modifier = Modifier,
 ) {
     val commonModifier = modifier
-        .size(70.dp)
+        .size(60.dp)
         .clip(CircleShape)
 
     if (avatarUri != null) {
@@ -60,13 +61,13 @@ fun UnsavedAvatar(
             contentDescription = null,
         )
     } else {
-        Box(modifier = commonModifier.background(ElementTheme.colors.temporaryColorBgSpecial)) {
+        Box(modifier = commonModifier.background(MaterialTheme.colorScheme.surface)) {
             Icon(
                 imageVector = Icons.Outlined.AddAPhoto,
                 contentDescription = null,
                 modifier = Modifier
                     .align(Alignment.Center)
-                    .size(40.dp),
+                    .size(30.dp),
                 tint = MaterialTheme.colorScheme.secondary,
             )
         }

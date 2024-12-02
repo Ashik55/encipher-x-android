@@ -137,7 +137,7 @@ private fun CreateRoomRootViewTopBar(
                 onClick = onCloseClick,
             )
         },
-        // Topbar background to transparent
+        // TopAppBar background transparent
         colors = TopAppBarDefaults.topAppBarColors(
             containerColor = Color.Transparent
         )

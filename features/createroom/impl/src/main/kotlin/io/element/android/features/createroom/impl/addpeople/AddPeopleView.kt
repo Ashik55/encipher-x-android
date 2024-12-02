@@ -7,12 +7,15 @@
 
 package io.element.android.features.createroom.impl.addpeople
 
-import androidx.compose.foundation.layout.consumeWindowInsets
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.layout.*
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import io.element.android.compound.theme.ElementTheme
@@ -53,16 +56,28 @@ fun AddPeopleView(
             )
         }
     ) { padding ->
-        UserListView(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(padding)
-                .consumeWindowInsets(padding),
-            state = state,
-            showBackButton = false,
-            onSelectUser = {},
-            onDeselectUser = {},
-        )
+        Box(modifier = Modifier.fillMaxSize()) {
+            // Background image
+            Image(
+                painter = painterResource(id = R.drawable.bg),
+                contentDescription = null,
+                modifier = Modifier
+                    .fillMaxSize(),
+                contentScale = ContentScale.Crop
+            )
+
+            // User list content
+            UserListView(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(padding)
+                    .consumeWindowInsets(padding),
+                state = state,
+                showBackButton = false,
+                onSelectUser = {},
+                onDeselectUser = {},
+            )
+        }
     }
 }
 
@@ -87,7 +102,11 @@ private fun AddPeopleViewTopBar(
                 text = stringResource(id = textActionResId),
                 onClick = onNextClick,
             )
-        }
+        },
+        // Transparent background for the TopAppBar
+        colors = TopAppBarDefaults.topAppBarColors(
+            containerColor = Color.Transparent
+        )
     )
 }
 

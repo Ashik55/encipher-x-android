@@ -111,7 +111,7 @@
   <string name="action_signout_anyway">"Sign out anyway"</string>
   <string name="action_skip">"Skip"</string>
   <string name="action_start">"Start"</string>
-  <string name="action_start_chat">"Start chat"</string>
+  <string name="action_start_chat">"Start new chat"</string>
   <string name="action_start_verification">"Start verification"</string>
   <string name="action_static_map_load">"Tap to load map"</string>
   <string name="action_take_photo">"Take photo"</string>
@@ -210,7 +210,7 @@ Reason: %1$s."</string>
   <string name="common_rich_text_editor">"Rich text editor"</string>
   <string name="common_room">"Group"</string>
   <string name="common_room_name">"Group name"</string>
-  <string name="common_room_name_placeholder">"e.g. your project name"</string>
+  <string name="common_room_name_placeholder">"Your group name"</string>
   <string name="common_saved_changes">"Saved changes"</string>
   <string name="common_saving">"Saving"</string>
   <string name="common_screen_lock">"Screen lock"</string>
@@ -238,7 +238,7 @@ Reason: %1$s."</string>
   <string name="common_third_party_notices">"Third-party notices"</string>
   <string name="common_thread">"Thread"</string>
   <string name="common_topic">"Topic"</string>
-  <string name="common_topic_placeholder">"What is this group about?"</string>
+  <string name="common_topic_placeholder">"What is this group about? (optional)"</string>
   <string name="common_unable_to_decrypt">"Unable to decrypt"</string>
   <string name="common_unable_to_decrypt_insecure_device">"Sent from an insecure device"</string>
   <string name="common_unable_to_decrypt_no_access">"You don\'t have access to this message"</string>
