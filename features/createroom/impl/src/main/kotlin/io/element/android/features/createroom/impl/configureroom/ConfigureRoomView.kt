@@ -58,6 +58,8 @@ import io.element.android.libraries.designsystem.modifiers.clearFocusOnTap
 import io.element.android.libraries.designsystem.preview.ElementPreview
 import io.element.android.libraries.designsystem.preview.PreviewsDayNight
 import io.element.android.libraries.designsystem.theme.aliasScreenTitle
+import io.element.android.libraries.designsystem.theme.components.Button
+import io.element.android.libraries.designsystem.theme.components.ButtonSize
 import io.element.android.libraries.designsystem.theme.components.ListItem
 import io.element.android.libraries.designsystem.theme.components.OutlinedTextField
 import io.element.android.libraries.designsystem.theme.components.Scaffold
@@ -114,6 +116,7 @@ fun ConfigureRoomView(
             Column(
                 modifier = Modifier
                     .padding(padding)
+                    .padding(top =8.dp)
                     .imePadding()
                     .verticalScroll(rememberScrollState())
                     .consumeWindowInsets(padding),
@@ -218,10 +221,12 @@ private fun ConfigureRoomToolbar(
             containerColor = Color.Transparent
         ),
         actions = {
-            TextButton(
+            Button(
                 text = stringResource(CommonStrings.action_create),
                 enabled = isNextActionEnabled,
                 onClick = onNextClick,
+                size = ButtonSize.Small,
+                modifier = Modifier.padding(end = 16.dp)
             )
         }
     )
@@ -249,7 +254,7 @@ private fun RoomNameWithAvatar(
             modifier = Modifier
                 .fillMaxWidth()
                 .background(
-                    color = MaterialTheme.colorScheme.surface, // Or any color you'd like
+                    color = MaterialTheme.colorScheme.surface,
                     shape = RoundedCornerShape(32.dp)
                 )
         ) {

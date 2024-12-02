@@ -20,6 +20,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.state.ToggleableState
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -59,7 +60,8 @@ fun Checkbox(
 @Composable
 private fun compoundCheckBoxColors(): CheckboxColors {
     return CheckboxDefaults.colors(
-        checkedColor = ElementTheme.colors.bgAccentRest,
+        checkedColor = Color(0xFF0A8741),
+//        checkedColor = ElementTheme.colors.bgAccentRest,
         uncheckedColor = ElementTheme.colors.borderInteractivePrimary,
         checkmarkColor = ElementTheme.materialColors.onPrimary,
         disabledUncheckedColor = ElementTheme.colors.borderDisabled,

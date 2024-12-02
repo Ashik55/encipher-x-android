@@ -9,6 +9,7 @@ package io.element.android.libraries.matrix.ui.components
 
 import android.net.Uri
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.size
@@ -47,6 +48,11 @@ fun UnsavedAvatar(
     val commonModifier = modifier
         .size(60.dp)
         .clip(CircleShape)
+        .border(
+            width = 1.dp,
+            color = ElementTheme.materialColors.outline,
+            shape = CircleShape
+        )
 
     if (avatarUri != null) {
         val context = LocalContext.current
@@ -61,7 +67,10 @@ fun UnsavedAvatar(
             contentDescription = null,
         )
     } else {
-        Box(modifier = commonModifier.background(MaterialTheme.colorScheme.surface)) {
+        Box(modifier = commonModifier
+            .background(MaterialTheme.colorScheme.surface)
+//            .border(width = 1.dp, color = ElementTheme.materialColors.outline)
+        ) {
             Icon(
                 imageVector = Icons.Outlined.AddAPhoto,
                 contentDescription = null,
