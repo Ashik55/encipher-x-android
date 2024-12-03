@@ -7,6 +7,7 @@
 
 package io.element.android.libraries.textcomposer.components
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
@@ -14,8 +15,10 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalHapticFeedback
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import io.element.android.compound.theme.ElementTheme
@@ -25,6 +28,7 @@ import io.element.android.libraries.designsystem.preview.PreviewsDayNight
 import io.element.android.libraries.designsystem.theme.components.Icon
 import io.element.android.libraries.designsystem.theme.components.IconButton
 import io.element.android.libraries.designsystem.utils.CommonDrawables
+import io.element.android.libraries.textcomposer.R
 import io.element.android.libraries.textcomposer.model.VoiceMessageRecorderEvent
 import io.element.android.libraries.ui.strings.CommonStrings
 
@@ -59,6 +63,7 @@ internal fun VoiceMessageRecorderButton(
     }
 }
 
+
 @Composable
 private fun StartButton(
     onClick: () -> Unit,
@@ -67,13 +72,30 @@ private fun StartButton(
     modifier = modifier.size(48.dp),
     onClick = onClick,
 ) {
-    Icon(
-        modifier = Modifier.size(24.dp),
-        imageVector = CompoundIcons.MicOn(),
-        contentDescription = stringResource(CommonStrings.a11y_voice_message_record),
-        tint = ElementTheme.colors.iconSecondary,
-    )
+    Box(
+        Modifier
+            .size(36.dp)
+            .background(
+                color = Color(0xFF0A8741), // Or use `ElementTheme.colors.bgActionPrimaryRest`
+                shape = CircleShape,
+            ),
+        contentAlignment = androidx.compose.ui.Alignment.Center // Ensure the image is centered
+    ) {
+        Image(
+            painter = painterResource(id = R.drawable.ic_mic),
+            contentDescription = stringResource(CommonStrings.a11y_voice_message_record),
+            modifier = Modifier.size(24.dp)
+        )
+    }
+//    Icon(
+//        modifier = Modifier.size(24.dp),
+//        imageVector = CompoundIcons.MicOn(),
+//        contentDescription = stringResource(CommonStrings.a11y_voice_message_record),
+//        tint = ElementTheme.colors.iconSecondary,
+//    )
 }
+
+
 
 @Composable
 private fun StopButton(
@@ -88,7 +110,8 @@ private fun StopButton(
         Modifier
             .size(36.dp)
             .background(
-                color = ElementTheme.colors.bgActionPrimaryRest,
+                color = Color(0xFF0A8741),
+//                color = ElementTheme.colors.bgActionPrimaryRest,
                 shape = CircleShape,
             )
     )
@@ -96,7 +119,8 @@ private fun StopButton(
         modifier = Modifier.size(24.dp),
         resourceId = CommonDrawables.ic_stop,
         contentDescription = stringResource(CommonStrings.a11y_voice_message_stop_recording),
-        tint = ElementTheme.colors.iconOnSolidPrimary,
+        tint = Color(0xFFFFFFFF),
+//        tint = ElementTheme.colors.iconOnSolidPrimary,
     )
 }
 

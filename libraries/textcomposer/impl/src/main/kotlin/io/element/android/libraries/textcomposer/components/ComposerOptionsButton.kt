@@ -12,6 +12,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import androidx.compose.foundation.Image
+import androidx.compose.ui.res.painterResource
 import io.element.android.compound.theme.ElementTheme
 import io.element.android.libraries.designsystem.preview.ElementPreview
 import io.element.android.libraries.designsystem.preview.PreviewsDayNight
@@ -30,11 +32,10 @@ internal fun ComposerOptionsButton(
             .size(48.dp),
         onClick = onClick
     ) {
-        Icon(
-            modifier = Modifier.size(30.dp),
-            resourceId = CommonDrawables.ic_plus_composer,
+        Image(
+            painter = painterResource(id = R.drawable.ic_plus_composer),
             contentDescription = stringResource(R.string.rich_text_editor_a11y_add_attachment),
-            tint = ElementTheme.colors.iconPrimary,
+            modifier = Modifier.size(30.dp)
         )
     }
 }
