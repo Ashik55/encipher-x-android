@@ -17,6 +17,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.SideEffect
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -119,6 +120,16 @@ private fun InitialsAvatar(
     modifier: Modifier = Modifier,
 ) {
     val avatarColors = AvatarColorsProvider.provide(avatarData.id)
+    val avatarSize = forcedAvatarSize ?: avatarData.size.dp
+
+    val paddingValue = remember(avatarSize) {
+        when {
+            avatarSize < 20.dp -> 2.dp
+            avatarSize < 35.dp -> 5.dp
+            else -> 10.dp
+        }
+    }
+
     Box(
         modifier.background(color = avatarColors.background)
     ) {
@@ -139,8 +150,8 @@ private fun InitialsAvatar(
             contentDescription = null,
             modifier = Modifier
                 .align(Alignment.Center)
-                .padding(10.dp) // Add padding around the image
-                .size(forcedAvatarSize ?: avatarData.size.dp)
+                .padding(paddingValue)
+                .size(avatarSize)
         )
     }
 }
