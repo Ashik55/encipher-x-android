@@ -60,7 +60,8 @@ internal fun SendButton(
             modifier = Modifier
                 .clip(CircleShape)
                 .size(36.dp)
-                .background(if (canSendMessage) ElementTheme.colors.iconAccentTertiary else Color.Transparent)
+                .background(if (canSendMessage) Color(0xFF0A8741) else Color.Transparent)
+//                .background(if (canSendMessage) ElementTheme.colors.iconAccentTertiary else Color.Transparent)
         ) {
             Icon(
                 modifier = Modifier
