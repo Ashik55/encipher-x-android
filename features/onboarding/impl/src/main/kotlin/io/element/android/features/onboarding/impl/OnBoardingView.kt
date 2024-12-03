@@ -114,22 +114,26 @@ private fun OnBoardingContent(state: OnBoardingState) {
         OnboardingPageContent(
             imageRes = io.element.android.libraries.designsystem.R.drawable.onboarding1,
             title = "Secure your voice & own your story",
-            description = "Confidential and private communication, as\nsecure as a personal conversation at home."
+            description = "Confidential and private communication, as\nsecure as a personal conversation at home.",
+            imageSize = Modifier.size(width = 250.dp, height = 220.dp)
         ),
         OnboardingPageContent(
             imageRes = io.element.android.libraries.designsystem.R.drawable.onboarding2,
             title = "Stay in charge",
-            description = "Decide where your conversations live, putting\nyou in charge of your privacy."
+            description = "Decide where your conversations live, putting\nyou in charge of your privacy.",
+            imageSize = Modifier.size(width = 300.dp, height = 290.dp)
         ),
         OnboardingPageContent(
             imageRes = io.element.android.libraries.designsystem.R.drawable.onboarding3,
             title = "Private and Safe Messaging",
-            description = "Fully encrypted, phone-free messaging with\nno ads or data collection."
+            description = "Fully encrypted, phone-free messaging with\nno ads or data collection.",
+            imageSize = Modifier.size(width = 275.dp, height = 265.dp)
         ),
         OnboardingPageContent(
             imageRes = io.element.android.libraries.designsystem.R.drawable.onboarding4,
             title = "Focused teamwork & redefined",
-            description = "Perfect for the workplace, Encipher is the\nchoice of trusted secure organizations."
+            description = "Perfect for the workplace, Encipher is the\nchoice of trusted secure organizations.",
+            imageSize = Modifier.size(width = 325.dp, height = 315.dp)
         )
     )
 
@@ -137,21 +141,27 @@ private fun OnBoardingContent(state: OnBoardingState) {
         OnboardingPage(
             imageRes = it.imageRes,
             title = it.title,
-            description = it.description
+            description = it.description,
+            imageSize = it.imageSize
         )
     }
 }
 
 @Composable
-private fun OnboardingPage(imageRes: Int, title: String, description: String) {
+private fun OnboardingPage(
+    imageRes: Int,
+    title: String,
+    description: String,
+    imageSize: Modifier = Modifier.size(width = 300.dp, height = 290.dp)
+) {
     Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
         Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Center) {
             Image(
                 painter = painterResource(id = imageRes),
                 contentDescription = null,
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 32.dp),
+                    .padding(horizontal = 32.dp)
+                    .then(imageSize),
                 contentScale = ContentScale.FillBounds
             )
             Spacer(modifier = Modifier.height(16.dp))
@@ -172,10 +182,12 @@ private fun OnboardingPage(imageRes: Int, title: String, description: String) {
     }
 }
 
+// Data class updated to include imageSize
 data class OnboardingPageContent(
     val imageRes: Int,
     val title: String,
-    val description: String
+    val description: String,
+    val imageSize: Modifier = Modifier.size(width = 300.dp, height = 290.dp)
 )
 
 @Composable
