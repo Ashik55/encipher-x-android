@@ -8,6 +8,7 @@
 package io.element.android.features.messages.impl.timeline.components
 
 import androidx.annotation.DrawableRes
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
@@ -30,6 +31,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
@@ -128,10 +130,9 @@ private fun TextContent(
 @Composable
 private fun IconContent(
     @DrawableRes resourceId: Int,
-) = Icon(
-    resourceId = resourceId,
-    contentDescription = stringResource(id = R.string.screen_room_timeline_add_reaction),
-    tint = ElementTheme.materialColors.secondary,
+) = Image(
+    painter = painterResource(id = R.drawable.ic_reaction),
+    contentDescription = stringResource(id = R.string.screen_room_timeline_add_reaction), // Description for accessibility
     modifier = Modifier
         .size(ADD_EMOJI_SIZE)
 )
