@@ -33,8 +33,9 @@ import io.element.android.libraries.designsystem.preview.PreviewsDayNight
 import io.element.android.libraries.designsystem.theme.components.Icon
 import io.element.android.libraries.designsystem.theme.components.Surface
 import io.element.android.libraries.designsystem.theme.components.Text
+import io.element.android.libraries.designsystem.theme.messageFromOtherBackground
 
-private val CORNER_RADIUS = 8.dp
+private val CORNER_RADIUS = 12.dp
 
 @Composable
 fun GroupHeaderView(
@@ -44,8 +45,13 @@ fun GroupHeaderView(
     onClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    // Ignore isHighlighted for now, we need a design decision on it.
-    val backgroundColor = Color.Companion.Transparent
+    val backgroundColor = if(ElementTheme.isLightTheme){
+        ElementTheme.colors.messageFromOtherBackground
+    } else{
+        Color(0xFF0A8741)
+    }
+
+//    val backgroundColor = Color.Companion.Transparent
     val shape = RoundedCornerShape(CORNER_RADIUS)
 
     Box(
@@ -67,7 +73,12 @@ fun GroupHeaderView(
             ) {
                 Text(
                     text = text,
-                    color = MaterialTheme.colorScheme.secondary,
+                    color = if(ElementTheme.isLightTheme){
+                        Color(0xFF11181C)
+                    } else{
+                        Color(0xFFFFFFFF)
+                    },
+//                    color = MaterialTheme.colorScheme.secondary,
                     style = ElementTheme.typography.fontBodyMdRegular,
                 )
                 val rotation: Float by animateFloatAsState(
@@ -82,7 +93,12 @@ fun GroupHeaderView(
                     modifier = Modifier.rotate(rotation),
                     imageVector = CompoundIcons.ChevronRight(),
                     contentDescription = null,
-                    tint = MaterialTheme.colorScheme.secondary
+                    tint = if(ElementTheme.isLightTheme){
+                        Color(0xFF11181C)
+                    } else{
+                        Color(0xFFFFFFFF)
+                    },
+//                    tint = MaterialTheme.colorScheme.secondary
                 )
             }
         }
