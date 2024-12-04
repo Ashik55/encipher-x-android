@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?><!--
+  ~ Copyright 2024 New Vector Ltd.
+  ~
+  ~ SPDX-License-Identifier: AGPL-3.0-only
+  ~ Please see LICENSE in the repository root for full details.
+  -->
+
+<resources>
+    <string name="room_info">Room Info</string>
+</resources>
