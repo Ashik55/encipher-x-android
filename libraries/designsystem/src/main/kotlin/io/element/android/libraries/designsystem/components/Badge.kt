@@ -20,6 +20,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.dp
 import io.element.android.compound.theme.ElementTheme
 import io.element.android.compound.tokens.generated.CompoundIcons
@@ -42,6 +43,7 @@ fun Badge(
     shape: Shape = RoundedCornerShape(50),
     borderStroke: BorderStroke? = null,
     tintIcon: Boolean = true,
+    style: TextStyle? = null
 ) {
     Surface(
         color = backgroundColor,
@@ -62,7 +64,7 @@ fun Badge(
             )
             Text(
                 text = text,
-                style = ElementTheme.typography.fontBodySmRegular,
+                style =style ?:ElementTheme.typography.fontBodySmRegular,
                 color = textColor,
             )
         }
@@ -79,6 +81,12 @@ internal fun BadgePreview() {
             backgroundColor = ElementTheme.colors.badgePositiveBackgroundColor,
             textColor = ElementTheme.colors.badgePositiveContentColor,
             iconColor = ElementTheme.colors.iconSuccessPrimary,
-        )
+            style = ElementTheme.typography.fontBodySmRegular,
+
+            )
     }
 }
+
+
+
+

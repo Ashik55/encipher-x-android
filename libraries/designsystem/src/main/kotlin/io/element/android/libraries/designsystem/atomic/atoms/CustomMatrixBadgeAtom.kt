@@ -10,6 +10,9 @@ package io.element.android.libraries.designsystem.atomic.atoms
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.sp
 import io.element.android.compound.theme.ElementTheme
 import io.element.android.compound.tokens.generated.CompoundIcons
 import io.element.android.libraries.designsystem.components.Badge
@@ -61,6 +64,7 @@ object CustomMatrixBadgeAtom {
             iconColor = Color.White,
 //            iconColor = iconColor,
             textColor = Color.White,
+            style =  TextStyle(fontSize = 15.sp, fontWeight = FontWeight.W400)
 //            textColor = textColor,
         )
     }
