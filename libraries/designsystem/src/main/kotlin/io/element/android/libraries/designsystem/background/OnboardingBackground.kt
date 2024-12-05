@@ -40,7 +40,7 @@ fun OnboardingBackground() {
         val backgroundImage = if (isLightTheme) {
             R.drawable.onboarding_background
         } else {
-            R.drawable.onboarding_background
+            R.drawable.onboarding_background_dark
         }
 
         Box(
