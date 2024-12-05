@@ -21,7 +21,10 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.LinearGradientShader
 import androidx.compose.ui.graphics.ShaderBrush
 import androidx.compose.ui.unit.dp
+import androidx.compose.foundation.Image
+import androidx.compose.ui.res.painterResource
 import io.element.android.compound.theme.ElementTheme
+import io.element.android.libraries.designsystem.R
 import io.element.android.libraries.designsystem.components.drawWithLayer
 import io.element.android.libraries.designsystem.preview.ElementPreview
 import io.element.android.libraries.designsystem.preview.PreviewsDayNight
@@ -34,37 +37,21 @@ import io.element.android.libraries.designsystem.preview.PreviewsDayNight
 fun OnboardingBackground() {
     Box(modifier = Modifier.fillMaxSize()) {
         val isLightTheme = ElementTheme.isLightTheme
-        Canvas(
-            modifier = Modifier
-            .fillMaxWidth()
-            .height(220.dp)
-            .align(Alignment.BottomCenter)
+        val backgroundImage = if (isLightTheme) {
+            R.drawable.onboarding_background
+        } else {
+            R.drawable.onboarding_background
+        }
+
+        Box(
+            modifier = Modifier.fillMaxSize(),
+            contentAlignment = Alignment.Center
         ) {
-            val gradientBrush = ShaderBrush(
-                LinearGradientShader(
-                    from = Offset(0f, size.height / 2f),
-                    to = Offset(size.width, size.height / 2f),
-                    colors = listOf(
-                        Color(0xFF0DBDA8),
-                        if (isLightTheme) Color(0xC90D5CBD) else Color(0xFF0D5CBD),
-                    )
-                )
+            Image(
+                painter = painterResource(id = backgroundImage),
+                contentDescription = null,
+                modifier = Modifier.fillMaxSize()
             )
-            val eraseBrush = ShaderBrush(
-                LinearGradientShader(
-                    from = Offset(size.width / 2f, 0f),
-                    to = Offset(size.width / 2f, size.height * 2f),
-                    colors = listOf(
-                        Color(0xFF000000),
-                        Color(0x00000000),
-                    )
-                )
-            )
-            drawWithLayer {
-                drawRect(brush = gradientBrush, size = size)
-                drawRect(brush = gradientBrush, size = size, blendMode = BlendMode.Overlay)
-                drawRect(brush = eraseBrush, size = size, blendMode = BlendMode.DstOut)
-            }
         }
     }
 }

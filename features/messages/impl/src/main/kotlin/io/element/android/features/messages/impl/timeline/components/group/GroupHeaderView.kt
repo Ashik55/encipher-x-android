@@ -61,6 +61,7 @@ fun GroupHeaderView(
     ) {
         Surface(
             modifier = Modifier
+                .padding(top = 8.dp)
                 .clip(shape)
                 .clickable(onClick = onClick),
             color = backgroundColor,
