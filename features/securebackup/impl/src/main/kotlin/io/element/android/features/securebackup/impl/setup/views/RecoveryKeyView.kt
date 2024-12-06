@@ -40,6 +40,7 @@ import io.element.android.libraries.designsystem.modifiers.clickableIfNotNull
 import io.element.android.libraries.designsystem.preview.ElementPreview
 import io.element.android.libraries.designsystem.preview.PreviewsDayNight
 import io.element.android.libraries.designsystem.theme.components.CircularProgressIndicator
+import io.element.android.libraries.designsystem.theme.components.CustomProgressIndicator
 import io.element.android.libraries.designsystem.theme.components.Icon
 import io.element.android.libraries.designsystem.theme.components.OutlinedTextField
 import io.element.android.libraries.designsystem.theme.components.Text
@@ -120,13 +121,11 @@ private fun RecoveryKeyStaticContent(
                         .padding(vertical = 11.dp)
             ) {
                 if (state.inProgress) {
-                    CircularProgressIndicator(
+                    CustomProgressIndicator(
                         modifier = Modifier
                                 .progressSemantics()
                                 .padding(end = 8.dp)
                                 .size(16.dp),
-                        color = ElementTheme.colors.textPrimary,
-                        strokeWidth = 1.5.dp,
                     )
                 }
                 Text(

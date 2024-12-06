@@ -202,6 +202,7 @@ private fun OnBoardingButtons(state: OnBoardingState, onSignIn: () -> Unit) {
         onClick = onSignIn,
         modifier = Modifier
             .fillMaxWidth()
+            .padding(bottom = 24.dp)
             .testTag(TestTags.onBoardingSignIn)
     )
 }

@@ -97,7 +97,7 @@ fun ElementLogoAtom(
 //                    shape = RoundedCornerShape(100.dp), // Changed to RoundedCornerShape
 //                    ambientColor = Color(0x80000000),
 //                ),
-            painter = painterResource(id = R.drawable.ic_lock_dark),
+            painter = painterResource(id = R.drawable.ic_lock),
             contentDescription = null,
             colorFilter = if (isSystemInDarkTheme()) {
                 ColorFilter.tint(Color.White)

@@ -31,6 +31,7 @@ import io.element.android.libraries.designsystem.preview.ElementThemedPreview
 import io.element.android.libraries.designsystem.preview.PreviewGroup
 import io.element.android.libraries.designsystem.preview.PreviewsDayNight
 import io.element.android.libraries.designsystem.theme.components.CircularProgressIndicator
+import io.element.android.libraries.designsystem.theme.components.CustomProgressIndicator
 import io.element.android.libraries.designsystem.theme.components.DialogPreview
 import io.element.android.libraries.designsystem.theme.components.Text
 import io.element.android.libraries.designsystem.theme.components.TextButton
@@ -63,14 +64,11 @@ fun ProgressDialog(
             progressIndicator = {
                 when (type) {
                     is ProgressDialogType.Indeterminate -> {
-                        CircularProgressIndicator(
-                            color = MaterialTheme.colorScheme.primary
-                        )
+                        CustomProgressIndicator()
                     }
                     is ProgressDialogType.Determinate -> {
-                        CircularProgressIndicator(
-                            progress = { type.progress },
-                            color = MaterialTheme.colorScheme.primary
+                        CustomProgressIndicator(
+                            progress = { type.progress }
                         )
                     }
                 }
@@ -92,9 +90,7 @@ private fun ProgressDialogContent(
     showCancelButton: Boolean = false,
     onCancelClick: () -> Unit = {},
     progressIndicator: @Composable () -> Unit = {
-        CircularProgressIndicator(
-            color = MaterialTheme.colorScheme.primary
-        )
+        CustomProgressIndicator()
     }
 ) {
     Box(
