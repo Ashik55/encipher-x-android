@@ -25,6 +25,7 @@ import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.autofill.AutofillType
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
@@ -61,11 +62,11 @@ internal fun RecoveryKeyView(
         modifier = modifier.fillMaxWidth(),
         verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
-        Text(
-            text = stringResource(id = CommonStrings.common_recovery_key),
-            modifier = Modifier.padding(start = 16.dp),
-            style = ElementTheme.typography.fontBodyMdRegular,
-        )
+//        Text(
+//            text = stringResource(id = CommonStrings.common_recovery_key),
+//            modifier = Modifier.padding(start = 16.dp),
+//            style = ElementTheme.typography.fontBodyMdRegular,
+//        )
         RecoveryKeyContent(state, onClick, onChange, onSubmit)
         RecoveryKeyFooter(state)
     }
@@ -178,7 +179,7 @@ private fun RecoveryKeyFormContent(
         keyboardActions = KeyboardActions(
             onDone = { onSubmit() }
         ),
-        label = { Text(text = stringResource(id = R.string.screen_recovery_key_confirm_key_placeholder)) }
+        placeholder = { Text(text = stringResource(id = R.string.screen_recovery_key_confirm_key_placeholder)) }
     )
 }
 
@@ -210,12 +211,17 @@ private fun RecoveryKeyFooter(state: RecoveryKeyViewState) {
             }
         }
         RecoveryKeyUserStory.Enter -> {
-            Text(
-                text = stringResource(id = R.string.screen_recovery_key_confirm_key_description),
-                color = ElementTheme.colors.textSecondary,
-                modifier = Modifier.padding(start = 16.dp),
-                style = ElementTheme.typography.fontBodySmRegular,
-            )
+            Column(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Text(
+                    text = stringResource(id = R.string.screen_recovery_key_confirm_key_description),
+                    color = Color(0xFF0A8741),
+                    textAlign = TextAlign.Center,
+                    style = ElementTheme.typography.fontBodySmRegular,
+                )
+            }
         }
     }
 }

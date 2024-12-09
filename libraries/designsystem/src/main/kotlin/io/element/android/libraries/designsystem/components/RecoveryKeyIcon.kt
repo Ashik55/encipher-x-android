@@ -47,9 +47,9 @@ import io.element.android.libraries.ui.strings.CommonStrings
  * Compound component that display a big icon centered in a rounded square.
  * Figma: https://www.figma.com/design/G1xy0HDZKJf5TCRFmKb5d5/Compound-Android-Components?node-id=1960-553&node-type=frame&m=dev
  */
-object NewBigIcon {
+object RecoveryKeyIcon {
     /**
-     * The style of the [NewBigIcon].
+     * The style of the [RecoveryKeyIcon].
      */
     @Immutable
     sealed interface Style {
@@ -83,7 +83,7 @@ object NewBigIcon {
     }
 
     /**
-     * Display a [NewBigIcon].
+     * Display a [RecoveryKeyIcon].
      *
      * @param style the style of the icon
      * @param modifier the modifier to apply to this layout
@@ -103,7 +103,7 @@ object NewBigIcon {
             Style.SuccessSolid -> ElementTheme.colors.bgSuccessSubtle
         }
         val icon = when (style) {
-            is Style.Default -> painterResource(id = R.drawable.ic_defult)
+            is Style.Default -> painterResource(id = R.drawable.ic_recovery_key)
             Style.Alert, Style.AlertSolid -> painterResource(id = R.drawable.ic_error)
             Style.Success, Style.SuccessSolid -> painterResource(id = R.drawable.ic_check_circle)
         }
@@ -150,62 +150,26 @@ object NewBigIcon {
     }
 }
 
-sealed class NewElementLogoAtomSize(
-    val outerSize: Dp,
-    val logoSize: Dp,
-    val cornerRadius: Dp,
-    val borderWidth: Dp,
-    val logoShadowColorDark: Color,
-    val logoShadowColorLight: Color,
-    val shadowColorDark: Color,
-    val shadowColorLight: Color,
-    val shadowRadius: Dp,
-) {
-    data object Medium : NewElementLogoAtomSize(
-        outerSize = 110.dp,
-        logoSize = 60.dp,
-        cornerRadius = 33.dp,
-        borderWidth = 1.dp,
-        logoShadowColorDark = Color(0x4D000000),
-        logoShadowColorLight = Color(0x66000000),
-        shadowColorDark = Color.Black.copy(alpha = 0.4f),
-        shadowColorLight = Color(0x401B1D22),
-        shadowRadius = 32.dp,
-    )
-
-    data object Large : NewElementLogoAtomSize(
-        outerSize = 158.dp,
-        logoSize = 110.dp,
-        cornerRadius = 44.dp,
-        borderWidth = 1.dp,
-        logoShadowColorDark = Color(0x4D000000),
-        logoShadowColorLight = Color(0x66000000),
-        shadowColorDark = Color.Black,
-        shadowColorLight = Color(0x801B1D22),
-        shadowRadius = 60.dp,
-    )
-}
-
 @PreviewsDayNight
 @Composable
-internal fun NewBigIconPreview() {
+internal fun RecoveryKeyIconPreview() {
     ElementPreview {
         Row(horizontalArrangement = Arrangement.spacedBy(10.dp), modifier = Modifier.padding(10.dp)) {
-            val provider = NewBigIconStyleProvider()
+            val provider = RecoveryKeyIconStyleProvider()
             for (style in provider.values) {
-                NewBigIcon(style = style, size = NewElementLogoAtomSize.Medium)
+                RecoveryKeyIcon(style = style, size = NewElementLogoAtomSize.Medium)
             }
         }
     }
 }
 
-internal class NewBigIconStyleProvider : PreviewParameterProvider<NewBigIcon.Style> {
-    override val values: Sequence<NewBigIcon.Style>
+internal class RecoveryKeyIconStyleProvider : PreviewParameterProvider<RecoveryKeyIcon.Style> {
+    override val values: Sequence<RecoveryKeyIcon.Style>
         get() = sequenceOf(
-            NewBigIcon.Style.Default(Icons.Filled.CatchingPokemon),
-            NewBigIcon.Style.Alert,
-            NewBigIcon.Style.AlertSolid,
-            NewBigIcon.Style.Success,
-            NewBigIcon.Style.SuccessSolid
+            RecoveryKeyIcon.Style.Default(Icons.Filled.CatchingPokemon),
+            RecoveryKeyIcon.Style.Alert,
+            RecoveryKeyIcon.Style.AlertSolid,
+            RecoveryKeyIcon.Style.Success,
+            RecoveryKeyIcon.Style.SuccessSolid
         )
 }

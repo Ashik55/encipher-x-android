@@ -19,7 +19,10 @@ import io.element.android.compound.tokens.generated.CompoundIcons
 import io.element.android.features.securebackup.impl.R
 import io.element.android.features.securebackup.impl.setup.views.RecoveryKeyView
 import io.element.android.libraries.designsystem.atomic.pages.FlowStepPage
+import io.element.android.libraries.designsystem.atomic.pages.NewFlowStepPage
 import io.element.android.libraries.designsystem.components.BigIcon
+import io.element.android.libraries.designsystem.components.NewBigIcon
+import io.element.android.libraries.designsystem.components.RecoveryKeyIcon
 import io.element.android.libraries.designsystem.components.async.AsyncActionView
 import io.element.android.libraries.designsystem.preview.ElementPreview
 import io.element.android.libraries.designsystem.preview.PreviewsDayNight
@@ -42,11 +45,11 @@ fun SecureBackupEnterRecoveryKeyView(
         onErrorDismiss = { state.eventSink(SecureBackupEnterRecoveryKeyEvents.ClearDialog) },
     )
 
-    FlowStepPage(
+    NewFlowStepPage(
         modifier = modifier,
         isScrollable = true,
         onBackClick = onBackClick,
-        iconStyle = BigIcon.Style.Default(CompoundIcons.KeySolid()),
+        iconStyle = RecoveryKeyIcon.Style.Default(CompoundIcons.KeySolid()),
         title = stringResource(id = R.string.screen_recovery_key_confirm_title),
         subTitle = stringResource(id = R.string.screen_recovery_key_confirm_description),
         buttons = { Buttons(state = state) }
@@ -60,7 +63,7 @@ private fun Content(
     state: SecureBackupEnterRecoveryKeyState,
 ) {
     RecoveryKeyView(
-        modifier = Modifier.padding(top = 52.dp, bottom = 32.dp),
+        modifier = Modifier.padding(top = 32.dp, bottom = 32.dp),
         state = state.recoveryKeyViewState,
         onClick = null,
         onChange = {

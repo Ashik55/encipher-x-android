@@ -29,26 +29,26 @@ import io.element.android.libraries.designsystem.theme.components.TextButton
  * Compound component that displays a big icon, a title, an optional subtitle and an optional call to action component.
  *
  * @param title the title to display
- * @param iconStyle the style of the [BigIcon] to display
+ * @param iconStyle the style of the [RecoveryKeyIcon] to display
  * @param modifier the modifier to apply to this layout
  * @param subtitle the optional subtitle to display. It defaults to `null`
  * @param callToAction the optional call to action component to display. It defaults to `null`
  */
 @Composable
-fun PageTitle(
+fun CustomPageTitle(
     title: AnnotatedString,
-    iconStyle: BigIcon.Style?,
+    iconStyle: RecoveryKeyIcon.Style,
     modifier: Modifier = Modifier,
     subtitle: AnnotatedString? = null,
     callToAction: @Composable (() -> Unit)? = null,
 ) {
     Column(
-        modifier = modifier.fillMaxWidth(),
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(top = 8.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
-        iconStyle?.let { BigIcon(style = it) }
         Column(
-            modifier = Modifier.padding(vertical = 16.dp),
             verticalArrangement = Arrangement.spacedBy(8.dp),
         ) {
             Text(
@@ -69,6 +69,12 @@ fun PageTitle(
                 )
             }
         }
+
+        RecoveryKeyIcon(
+            modifier = Modifier.padding(top = 32.dp),
+            style = iconStyle, size = NewElementLogoAtomSize.Medium
+        )
+
         callToAction?.invoke()
     }
 }
@@ -77,19 +83,19 @@ fun PageTitle(
  * Compound component that displays a big icon, a title, an optional subtitle and an optional call to action component.
  *
  * @param title the title to display
- * @param iconStyle the style of the [BigIcon] to display
+ * @param iconStyle the style of the [RecoveryKeyIcon] to display
  * @param modifier the modifier to apply to this layout
  * @param subtitle the optional subtitle to display. It defaults to `null`
  * @param callToAction the optional call to action component to display. It defaults to `null`
  */
 @Composable
-fun PageTitle(
+fun CustomPageTitle(
     title: String,
-    iconStyle: BigIcon.Style?,
+    iconStyle: RecoveryKeyIcon.Style,
     modifier: Modifier = Modifier,
     subtitle: String? = null,
     callToAction: @Composable (() -> Unit)? = null,
-) = PageTitle(
+) = CustomPageTitle(
     title = AnnotatedString(title),
     iconStyle = iconStyle,
     modifier = modifier,
@@ -97,11 +103,12 @@ fun PageTitle(
     callToAction = callToAction
 )
 
+
 @PreviewsDayNight
 @Composable
-internal fun PageTitleWithIconFullPreview(@PreviewParameter(BigIconStyleProvider::class) style: BigIcon.Style) {
+internal fun CustomPageTitleWithIconFullPreview(@PreviewParameter(RecoveryKeyIconStyleProvider::class) style: RecoveryKeyIcon.Style) {
     ElementPreview {
-        PageTitle(
+        CustomPageTitle(
             modifier = Modifier.padding(top = 24.dp),
             title = AnnotatedString("Headline"),
             subtitle = AnnotatedString("Description goes here"),
@@ -115,12 +122,12 @@ internal fun PageTitleWithIconFullPreview(@PreviewParameter(BigIconStyleProvider
 
 @PreviewsDayNight
 @Composable
-internal fun PageTitleWithIconMinimalPreview() {
+internal fun CustomPageTitleWithIconMinimalPreview() {
     ElementPreview {
-        PageTitle(
+        CustomPageTitle(
             modifier = Modifier.padding(top = 24.dp),
             title = "Headline",
-            iconStyle = BigIcon.Style.Default(CompoundIcons.CheckCircleSolid()),
+            iconStyle = RecoveryKeyIcon.Style.Default(CompoundIcons.CheckCircleSolid()),
         )
     }
 }
