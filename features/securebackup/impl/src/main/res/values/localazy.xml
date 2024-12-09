@@ -25,7 +25,8 @@
   <string name="screen_encryption_reset_bullet_2">"Message history that is stored solely on the server will be lost."</string>
   <string name="screen_encryption_reset_bullet_3">"Verification of all your devices and contacts will be required again."</string>
   <string name="screen_encryption_reset_footer">"Reset your identity only if you're unable to access another signed-in device and have lost your recovery key."</string>
-  <string name="screen_encryption_reset_title">"Can\'t verify? A reset of your identity is required."</string>
+  <string name="screen_encryption_reset_title">"Can\'t Verify?"</string>
+    <string name="screen_encryption_reset_subtitle">"A reset of your identity is required"</string>
   <string name="screen_key_backup_disable_confirmation_action_turn_off">"Turn off"</string>
   <string name="screen_key_backup_disable_confirmation_description">"You will lose your encrypted messages if you are signed out of all devices."</string>
   <string name="screen_key_backup_disable_confirmation_title">"Are you sure you want to turn off backup?"</string>
@@ -66,5 +67,5 @@
   <string name="screen_reset_encryption_password_error">"An unknown error happened. Please check your account password is correct and try again."</string>
   <string name="screen_reset_encryption_password_placeholder">"Enter…"</string>
   <string name="screen_reset_encryption_password_subtitle">"Verify that you want to reset your identity."</string>
-  <string name="screen_reset_encryption_password_title">"Enter your account password to continue"</string>
+  <string name="screen_reset_encryption_password_title">"Enter Your Account Password to Continue"</string>
 </resources>

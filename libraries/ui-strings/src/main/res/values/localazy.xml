@@ -185,6 +185,7 @@ Reason: %1$s."</string>
   <string name="common_open_source_licenses">"Open source licenses"</string>
   <string name="common_or">"or"</string>
   <string name="common_password">"Password"</string>
+    <string name="common_chng_password">"Enter Your Password"</string>
   <string name="common_people">"People"</string>
   <string name="common_permalink">"Permalink"</string>
   <string name="common_permission">"Permission"</string>

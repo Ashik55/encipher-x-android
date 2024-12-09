@@ -24,7 +24,9 @@ import io.element.android.features.securebackup.impl.R
 import io.element.android.libraries.designsystem.atomic.organisms.InfoListItem
 import io.element.android.libraries.designsystem.atomic.organisms.InfoListOrganism
 import io.element.android.libraries.designsystem.atomic.pages.FlowStepPage
+import io.element.android.libraries.designsystem.atomic.pages.NewFlowStepPage
 import io.element.android.libraries.designsystem.components.BigIcon
+import io.element.android.libraries.designsystem.components.RecoveryKeyIcon
 import io.element.android.libraries.designsystem.components.dialogs.ConfirmationDialog
 import io.element.android.libraries.designsystem.preview.ElementPreview
 import io.element.android.libraries.designsystem.preview.PreviewsDayNight
@@ -40,10 +42,11 @@ fun ResetIdentityRootView(
     onBack: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    FlowStepPage(
+    NewFlowStepPage(
         modifier = modifier,
-        iconStyle = BigIcon.Style.AlertSolid,
+        iconStyle = RecoveryKeyIcon.Style.AlertSolid,
         title = stringResource(R.string.screen_encryption_reset_title),
+        subTitle = stringResource(R.string.screen_encryption_reset_subtitle),
         isScrollable = true,
         content = { Content() },
         buttons = {
@@ -75,7 +78,7 @@ fun ResetIdentityRootView(
 @Composable
 private fun Content() {
     Column(
-        modifier = Modifier.padding(top = 8.dp, bottom = 40.dp),
+        modifier = Modifier.padding(top = 32.dp, bottom = 40.dp),
         verticalArrangement = Arrangement.spacedBy(24.dp),
     ) {
         InfoListOrganism(

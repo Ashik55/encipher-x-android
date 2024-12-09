@@ -8,6 +8,7 @@
 package io.element.android.features.securebackup.impl.reset.password
 
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -19,11 +20,14 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.tooling.preview.PreviewParameter
+import androidx.compose.ui.unit.dp
 import io.element.android.compound.tokens.generated.CompoundIcons
 import io.element.android.features.securebackup.impl.R
 import io.element.android.libraries.designsystem.atomic.pages.FlowStepPage
+import io.element.android.libraries.designsystem.atomic.pages.NewFlowStepPage
 import io.element.android.libraries.designsystem.components.BigIcon
 import io.element.android.libraries.designsystem.components.ProgressDialog
+import io.element.android.libraries.designsystem.components.RecoveryKeyIcon
 import io.element.android.libraries.designsystem.components.form.textFieldState
 import io.element.android.libraries.designsystem.preview.ElementPreview
 import io.element.android.libraries.designsystem.preview.PreviewsDayNight
@@ -42,9 +46,9 @@ fun ResetIdentityPasswordView(
     modifier: Modifier = Modifier,
 ) {
     val passwordState = textFieldState(stateValue = "")
-    FlowStepPage(
+    NewFlowStepPage(
         modifier = modifier,
-        iconStyle = BigIcon.Style.Default(CompoundIcons.LockSolid()),
+        iconStyle = RecoveryKeyIcon.Style.AlertSolid,
         title = stringResource(R.string.screen_reset_encryption_password_title),
         subTitle = stringResource(R.string.screen_reset_encryption_password_subtitle),
         onBackClick = onBack,
@@ -82,12 +86,13 @@ private fun Content(text: String, onTextChange: (String) -> Unit, hasError: Bool
     var showPassword by remember { mutableStateOf(false) }
     OutlinedTextField(
         modifier = Modifier
+            .padding(top = 32.dp)
             .fillMaxWidth()
             .onTabOrEnterKeyFocusNext(LocalFocusManager.current),
         value = text,
         onValueChange = onTextChange,
-        label = { Text(stringResource(CommonStrings.common_password)) },
-        placeholder = { Text(stringResource(R.string.screen_reset_encryption_password_placeholder)) },
+        placeholder = { Text(stringResource(CommonStrings.common_chng_password)) },
+//        placeholder = { Text(stringResource(R.string.screen_reset_encryption_password_placeholder)) },
         singleLine = true,
         visualTransformation = if (showPassword) VisualTransformation.None else PasswordVisualTransformation(),
         trailingIcon = {
