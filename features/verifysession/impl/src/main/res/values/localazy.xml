@@ -41,5 +41,5 @@
   <string name="screen_session_verification_waiting_another_device_title">"Begin the Verification Process on the Other Device"</string>
   <string name="screen_session_verification_waiting_to_accept_subtitle">"Accept the request to start the verification process in your other session to continue."</string>
   <string name="screen_session_verification_waiting_to_accept_title">"Waiting to accept request"</string>
-  <string name="screen_signout_in_progress_dialog_content">"Signing out…"</string>
+  <string name="screen_signout_in_progress_dialog_content">"Signing Out…"</string>
 </resources>

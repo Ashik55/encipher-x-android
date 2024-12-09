@@ -20,7 +20,7 @@
   <string name="screen_create_new_recovery_key_list_item_4">"Follow the instructions to create a new recovery key"</string>
   <string name="screen_create_new_recovery_key_list_item_5">"Save your new recovery key in a password manager or encrypted note"</string>
   <string name="screen_create_new_recovery_key_title">"Reset the encryption for your account using another device"</string>
-  <string name="screen_encryption_reset_action_continue_reset">"Continue reset"</string>
+  <string name="screen_encryption_reset_action_continue_reset">"Continue Reset"</string>
   <string name="screen_encryption_reset_bullet_1">"Your account information, contacts, preferences, and chat list will be preserved."</string>
   <string name="screen_encryption_reset_bullet_2">"Message history that is stored solely on the server will be lost."</string>
   <string name="screen_encryption_reset_bullet_3">"Verification of all your devices and contacts will be required again."</string>
@@ -61,7 +61,7 @@
   <string name="screen_recovery_key_setup_generate_key_description">"Keep this private!"</string>
   <string name="screen_recovery_key_setup_success">"Recovery setup successful"</string>
   <string name="screen_recovery_key_setup_title">"Set up recovery"</string>
-  <string name="screen_reset_encryption_confirmation_alert_action">"Yes, reset now"</string>
+  <string name="screen_reset_encryption_confirmation_alert_action">"Yes, Reset Now"</string>
   <string name="screen_reset_encryption_confirmation_alert_subtitle">"This action cannot be undone."</string>
   <string name="screen_reset_encryption_confirmation_alert_title">"Are you sure about resetting your identity?"</string>
   <string name="screen_reset_encryption_password_error">"An unknown error happened. Please check your account password is correct and try again."</string>
