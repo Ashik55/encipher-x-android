@@ -136,8 +136,8 @@ object RecoveryKeyIcon {
                     width = size.borderWidth,
                     color = borderColor,
                     shape = RoundedCornerShape(size.cornerRadius)
-                )
-                .blurCompat(blur),
+                ),
+//                .blurCompat(blur),
             contentAlignment = Alignment.Center
         ) {
             Image(

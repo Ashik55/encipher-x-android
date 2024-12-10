@@ -23,21 +23,15 @@ import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.runtime.Immutable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.PreviewParameterProvider
-import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import io.element.android.compound.theme.ElementTheme
-import io.element.android.compound.tokens.generated.CompoundIcons
 import io.element.android.libraries.designsystem.R
-import io.element.android.libraries.designsystem.modifiers.blurCompat
-import io.element.android.libraries.designsystem.modifiers.blurredShapeShadow
 import io.element.android.libraries.designsystem.modifiers.canUseBlurMaskFilter
 import io.element.android.libraries.designsystem.preview.ElementPreview
 import io.element.android.libraries.designsystem.preview.PreviewsDayNight
@@ -47,9 +41,9 @@ import io.element.android.libraries.ui.strings.CommonStrings
  * Compound component that display a big icon centered in a rounded square.
  * Figma: https://www.figma.com/design/G1xy0HDZKJf5TCRFmKb5d5/Compound-Android-Components?node-id=1960-553&node-type=frame&m=dev
  */
-object NewBigIcon {
+object WelcomeIcon {
     /**
-     * The style of the [NewBigIcon].
+     * The style of the [WelcomeIcon].
      */
     @Immutable
     sealed interface Style {
@@ -83,7 +77,7 @@ object NewBigIcon {
     }
 
     /**
-     * Display a [NewBigIcon].
+     * Display a [WelcomeIcon].
      *
      * @param style the style of the icon
      * @param modifier the modifier to apply to this layout
@@ -103,7 +97,7 @@ object NewBigIcon {
             Style.SuccessSolid -> ElementTheme.colors.bgSuccessSubtle
         }
         val icon = when (style) {
-            is Style.Default -> painterResource(id = R.drawable.ic_defult)
+            is Style.Default -> painterResource(id = R.drawable.ic_improve)
             Style.Alert, Style.AlertSolid -> painterResource(id = R.drawable.ic_error)
             Style.Success, Style.SuccessSolid -> painterResource(id = R.drawable.ic_check_circle)
         }
@@ -150,62 +144,26 @@ object NewBigIcon {
     }
 }
 
-sealed class NewElementLogoAtomSize(
-    val outerSize: Dp,
-    val logoSize: Dp,
-    val cornerRadius: Dp,
-    val borderWidth: Dp,
-    val logoShadowColorDark: Color,
-    val logoShadowColorLight: Color,
-    val shadowColorDark: Color,
-    val shadowColorLight: Color,
-    val shadowRadius: Dp,
-) {
-    data object Medium : NewElementLogoAtomSize(
-        outerSize = 110.dp,
-        logoSize = 60.dp,
-        cornerRadius = 33.dp,
-        borderWidth = 1.dp,
-        logoShadowColorDark = Color(0x4D000000),
-        logoShadowColorLight = Color(0x66000000),
-        shadowColorDark = Color.Black.copy(alpha = 0.4f),
-        shadowColorLight = Color(0x401B1D22),
-        shadowRadius = 32.dp,
-    )
-
-    data object Large : NewElementLogoAtomSize(
-        outerSize = 158.dp,
-        logoSize = 110.dp,
-        cornerRadius = 44.dp,
-        borderWidth = 1.dp,
-        logoShadowColorDark = Color(0x4D000000),
-        logoShadowColorLight = Color(0x66000000),
-        shadowColorDark = Color.Black,
-        shadowColorLight = Color(0x801B1D22),
-        shadowRadius = 60.dp,
-    )
-}
-
 @PreviewsDayNight
 @Composable
-internal fun NewBigIconPreview() {
+internal fun WelcomeIconPreview() {
     ElementPreview {
         Row(horizontalArrangement = Arrangement.spacedBy(10.dp), modifier = Modifier.padding(10.dp)) {
-            val provider = NewBigIconStyleProvider()
+            val provider = WelcomeIconStyleProvider()
             for (style in provider.values) {
-                NewBigIcon(style = style, size = NewElementLogoAtomSize.Medium)
+                WelcomeIcon(style = style, size = NewElementLogoAtomSize.Medium)
             }
         }
     }
 }
 
-internal class NewBigIconStyleProvider : PreviewParameterProvider<NewBigIcon.Style> {
-    override val values: Sequence<NewBigIcon.Style>
+internal class WelcomeIconStyleProvider : PreviewParameterProvider<WelcomeIcon.Style> {
+    override val values: Sequence<WelcomeIcon.Style>
         get() = sequenceOf(
-            NewBigIcon.Style.Default(Icons.Filled.CatchingPokemon),
-            NewBigIcon.Style.Alert,
-            NewBigIcon.Style.AlertSolid,
-            NewBigIcon.Style.Success,
-            NewBigIcon.Style.SuccessSolid
+            WelcomeIcon.Style.Default(Icons.Filled.CatchingPokemon),
+            WelcomeIcon.Style.Alert,
+            WelcomeIcon.Style.AlertSolid,
+            WelcomeIcon.Style.Success,
+            WelcomeIcon.Style.SuccessSolid
         )
 }

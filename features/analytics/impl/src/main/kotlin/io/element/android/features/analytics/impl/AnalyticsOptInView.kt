@@ -8,18 +8,21 @@
 package io.element.android.features.analytics.impl
 
 import androidx.activity.compose.BackHandler
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.BiasAlignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
@@ -32,7 +35,11 @@ import io.element.android.libraries.designsystem.atomic.organisms.InfoListOrgani
 import io.element.android.libraries.designsystem.atomic.pages.HeaderFooterPage
 import io.element.android.libraries.designsystem.background.OnboardingBackground
 import io.element.android.libraries.designsystem.components.BigIcon
+import io.element.android.libraries.designsystem.components.CustomPageTitle
 import io.element.android.libraries.designsystem.components.PageTitle
+import io.element.android.libraries.designsystem.components.RecoveryKeyIcon
+import io.element.android.libraries.designsystem.components.WelcomeIcon
+import io.element.android.libraries.designsystem.components.WelcomePageTitle
 import io.element.android.libraries.designsystem.preview.ElementPreview
 import io.element.android.libraries.designsystem.preview.PreviewsDayNight
 import io.element.android.libraries.designsystem.theme.components.Button
@@ -60,10 +67,24 @@ fun AnalyticsOptInView(
     BackHandler(onBack = ::onDeclineTerms)
     HeaderFooterPage(
         modifier = modifier
-            .fillMaxSize()
-            .systemBarsPadding()
-            .imePadding(),
+            .statusBarsPadding()
+            .fillMaxSize(),
         background = { OnboardingBackground() },
+//        background = {
+//            Box(modifier = Modifier.fillMaxSize()) {
+//                val backgroundImage = io.element.android.libraries.designsystem.R.drawable.blur_bg
+//                Box(
+//                    modifier = Modifier.fillMaxSize(),
+//                    contentAlignment = Alignment.Center
+//                ) {
+//                    Image(
+//                        painter = painterResource(id = backgroundImage),
+//                        contentDescription = null,
+//                        modifier = Modifier.fillMaxSize()
+//                    )
+//                }
+//            }
+//        },
         header = { AnalyticsOptInHeader(state, onClickTerms) },
         content = { AnalyticsOptInContent() },
         footer = {
@@ -85,11 +106,11 @@ private fun AnalyticsOptInHeader(
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
-        PageTitle(
+        WelcomePageTitle(
             modifier = Modifier.padding(top = 60.dp, bottom = 12.dp),
             title = stringResource(id = R.string.screen_analytics_prompt_title, state.applicationName),
             subtitle = stringResource(id = R.string.screen_analytics_prompt_help_us_improve),
-            iconStyle = BigIcon.Style.Default(CompoundIcons.Chart())
+            iconStyle = WelcomeIcon.Style.Default(CompoundIcons.Chart())
         )
 //        val text = buildAnnotatedStringWithStyledPart(
 //            R.string.screen_analytics_prompt_read_terms,
@@ -116,11 +137,11 @@ private fun AnalyticsOptInHeader(
 @Composable
 private fun AnalyticsOptInContent() {
     Box(
-        modifier = Modifier.fillMaxSize(),
-        contentAlignment = BiasAlignment(
-            horizontalBias = 0f,
-            verticalBias = -0.4f
-        )
+        modifier = Modifier.fillMaxSize().padding(top = 32.dp),
+//        contentAlignment = BiasAlignment(
+//            horizontalBias = 0f,
+//            verticalBias = -0.4f
+//        )
     ) {
         InfoListOrganism(
             items = persistentListOf(

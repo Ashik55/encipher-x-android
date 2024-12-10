@@ -16,6 +16,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -104,7 +105,9 @@ fun VerifySelfSessionView(
         }
     } else {
         HeaderFooterPage(
-            modifier = modifier,
+            modifier = modifier
+                .statusBarsPadding()
+                .fillMaxSize(),
             topBar = {
                 TopAppBar(
                     title = {},
@@ -126,21 +129,7 @@ fun VerifySelfSessionView(
                     }
                 )
             },
-            background = {
-                Box(modifier = Modifier.fillMaxSize()) {
-                    val backgroundImage = io.element.android.libraries.designsystem.R.drawable.blur_bg
-                    Box(
-                        modifier = Modifier.fillMaxSize(),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Image(
-                            painter = painterResource(id = backgroundImage),
-                            contentDescription = null,
-                            modifier = Modifier.fillMaxSize()
-                        )
-                    }
-                }
-            },
+            background = { OnboardingBackground() },
             header = {
                 VerifySelfSessionHeader(step = step)
             },

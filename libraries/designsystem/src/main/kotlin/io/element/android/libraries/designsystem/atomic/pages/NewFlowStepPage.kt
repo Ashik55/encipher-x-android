@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -22,6 +23,7 @@ import androidx.compose.ui.unit.dp
 import io.element.android.compound.theme.ElementTheme
 import io.element.android.compound.tokens.generated.CompoundIcons
 import io.element.android.libraries.designsystem.atomic.molecules.ButtonColumnMolecule
+import io.element.android.libraries.designsystem.background.OnboardingBackground
 import io.element.android.libraries.designsystem.components.BigIcon
 import io.element.android.libraries.designsystem.components.CustomPageTitle
 import io.element.android.libraries.designsystem.components.RecoveryKeyIcon
@@ -57,7 +59,9 @@ fun NewFlowStepPage(
         onBackClick?.invoke()
     }
     HeaderFooterPage(
-        modifier = modifier,
+        modifier = modifier
+            .statusBarsPadding()
+            .fillMaxSize(),
         isScrollable = isScrollable,
         topBar = {
             TopAppBar(
@@ -76,21 +80,22 @@ fun NewFlowStepPage(
                 iconStyle = iconStyle,
             )
         },
-        background = {
-            Box(modifier = Modifier.fillMaxSize()) {
-                val backgroundImage = io.element.android.libraries.designsystem.R.drawable.blur_bg
-                Box(
-                    modifier = Modifier.fillMaxSize(),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Image(
-                        painter = painterResource(id = backgroundImage),
-                        contentDescription = null,
-                        modifier = Modifier.fillMaxSize()
-                    )
-                }
-            }
-        },
+        background = { OnboardingBackground() },
+//        background = {
+//            Box(modifier = Modifier.fillMaxSize()) {
+//                val backgroundImage = io.element.android.libraries.designsystem.R.drawable.blur_bg
+//                Box(
+//                    modifier = Modifier.fillMaxSize(),
+//                    contentAlignment = Alignment.Center
+//                ) {
+//                    Image(
+//                        painter = painterResource(id = backgroundImage),
+//                        contentDescription = null,
+//                        modifier = Modifier.fillMaxSize()
+//                    )
+//                }
+//            }
+//        },
         content = content,
         footer = {
             ButtonColumnMolecule(
