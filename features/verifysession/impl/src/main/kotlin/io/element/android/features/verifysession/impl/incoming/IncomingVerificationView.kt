@@ -10,8 +10,10 @@ package io.element.android.features.verifysession.impl.incoming
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -28,7 +30,10 @@ import io.element.android.features.verifysession.impl.incoming.ui.SessionDetails
 import io.element.android.features.verifysession.impl.ui.VerificationBottomMenu
 import io.element.android.features.verifysession.impl.ui.VerificationContentVerifying
 import io.element.android.libraries.designsystem.atomic.pages.HeaderFooterPage
-import io.element.android.libraries.designsystem.components.BigIcon
+import io.element.android.libraries.designsystem.background.OnboardingBackground
+import io.element.android.libraries.designsystem.components.IncomingVerificationPageTitle
+import io.element.android.libraries.designsystem.components.NewBigIcon
+import io.element.android.libraries.designsystem.components.NewPageTitle
 import io.element.android.libraries.designsystem.components.PageTitle
 import io.element.android.libraries.designsystem.preview.ElementPreview
 import io.element.android.libraries.designsystem.preview.PreviewsDayNight
@@ -55,7 +60,10 @@ fun IncomingVerificationView(
         state.eventSink(IncomingVerificationViewEvents.GoBack)
     }
     HeaderFooterPage(
-        modifier = modifier,
+        modifier = modifier
+            .statusBarsPadding()
+            .fillMaxSize(),
+        background = { OnboardingBackground() },
         topBar = {
             TopAppBar(
                 title = {},
@@ -79,11 +87,11 @@ fun IncomingVerificationView(
 @Composable
 private fun IncomingVerificationHeader(step: Step) {
     val iconStyle = when (step) {
-        Step.Canceled -> BigIcon.Style.AlertSolid
-        is Step.Initial -> BigIcon.Style.Default(CompoundIcons.LockSolid())
-        is Step.Verifying -> BigIcon.Style.Default(CompoundIcons.Reaction())
-        Step.Completed -> BigIcon.Style.SuccessSolid
-        Step.Failure -> BigIcon.Style.AlertSolid
+        Step.Canceled -> NewBigIcon.Style.AlertSolid
+        is Step.Initial -> NewBigIcon.Style.Default(CompoundIcons.LockSolid())
+        is Step.Verifying -> NewBigIcon.Style.Default(CompoundIcons.Reaction())
+        Step.Completed -> NewBigIcon.Style.SuccessSolid
+        Step.Failure -> NewBigIcon.Style.AlertSolid
     }
     val titleTextId = when (step) {
         Step.Canceled -> R.string.screen_session_verification_request_failure_title
@@ -105,7 +113,7 @@ private fun IncomingVerificationHeader(step: Step) {
         Step.Completed -> R.string.screen_session_verification_request_success_subtitle
         Step.Failure -> R.string.screen_session_verification_request_failure_subtitle
     }
-    PageTitle(
+    IncomingVerificationPageTitle(
         iconStyle = iconStyle,
         title = stringResource(id = titleTextId),
         subtitle = stringResource(id = subtitleTextId)
@@ -128,7 +136,7 @@ private fun ContentInitial(
     initialIncoming: Step.Initial,
 ) {
     Column(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = Modifier.fillMaxWidth().padding(top = 32.dp),
         verticalArrangement = Arrangement.spacedBy(24.dp),
     ) {
         SessionDetailsView(
