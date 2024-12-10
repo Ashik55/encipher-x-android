@@ -1,17 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-  <string name="screen_chat_backup_key_backup_action_disable">"Delete key storage"</string>
+  <string name="screen_chat_backup_key_backup_action_disable">"Delete Key Storage"</string>
   <string name="screen_chat_backup_key_backup_action_enable">"Turn on backup"</string>
   <string name="screen_chat_backup_key_backup_description">"Securely save your cryptographic identity and message keys on the server for viewing message history on other devices."</string>
-  <string name="screen_chat_backup_key_backup_title">"Key storage"</string>
+  <string name="screen_chat_backup_key_backup_title">"Key Storage"</string>
   <string name="screen_chat_backup_key_storage_disabled_error">"Key storage must be turned on to set up recovery."</string>
   <string name="screen_chat_backup_key_storage_toggle_description">"Upload keys from this device"</string>
-  <string name="screen_chat_backup_key_storage_toggle_title">"Allow key storage"</string>
-  <string name="screen_chat_backup_recovery_action_change">"Change recovery key"</string>
+  <string name="screen_chat_backup_key_storage_toggle_title">"Allow Key Storage"</string>
+  <string name="screen_chat_backup_recovery_action_change">"Change Recovery Key"</string>
   <string name="screen_chat_backup_recovery_action_change_description">"Use a recovery key to restore your cryptographic identity and message history if you no longer have access to your devices."</string>
-  <string name="screen_chat_backup_recovery_action_confirm">"Enter recovery key"</string>
+  <string name="screen_chat_backup_recovery_action_confirm">"Enter Recovery Key"</string>
   <string name="screen_chat_backup_recovery_action_confirm_description">"Your key storage is currently out of sync."</string>
-  <string name="screen_chat_backup_recovery_action_setup">"Set up recovery"</string>
+  <string name="screen_chat_backup_recovery_action_setup">"Set Up Recovery"</string>
   <string name="screen_chat_backup_recovery_action_setup_description">"Get access to your encrypted messages if you lose all your devices or are signed out of %1$s everywhere."</string>
   <string name="screen_create_new_recovery_key_list_item_1">"Open %1$s in a desktop device"</string>
   <string name="screen_create_new_recovery_key_list_item_2">"Sign into your account again"</string>
@@ -60,7 +60,7 @@
   <string name="screen_recovery_key_setup_generate_key">"Create a recovery key"</string>
   <string name="screen_recovery_key_setup_generate_key_description">"Keep this private!"</string>
   <string name="screen_recovery_key_setup_success">"Recovery setup successful"</string>
-  <string name="screen_recovery_key_setup_title">"Set up recovery"</string>
+  <string name="screen_recovery_key_setup_title">"Set Up Recovery"</string>
   <string name="screen_reset_encryption_confirmation_alert_action">"Yes, Reset Now"</string>
   <string name="screen_reset_encryption_confirmation_alert_subtitle">"This action cannot be undone."</string>
   <string name="screen_reset_encryption_confirmation_alert_title">"Are you sure about resetting your identity?"</string>

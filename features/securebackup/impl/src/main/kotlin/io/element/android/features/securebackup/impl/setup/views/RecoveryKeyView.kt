@@ -197,14 +197,26 @@ private fun RecoveryKeyFooter(state: RecoveryKeyViewState) {
                             R.string.screen_recovery_key_setup_generate_key_description
                         }
                     ),
-                    color = ElementTheme.colors.textSecondary,
+                    color = if(ElementTheme.isLightTheme){
+                        Color(0xFF0A8741)
+                    }
+                    else {
+                        Color(0xFFFFFFFF)
+                         },
+//                    color = ElementTheme.colors.textSecondary,
                     modifier = Modifier.padding(start = 16.dp),
                     style = ElementTheme.typography.fontBodySmRegular,
                 )
             } else {
                 Text(
                     text = stringResource(id = R.string.screen_recovery_key_save_key_description),
-                    color = ElementTheme.colors.textSecondary,
+//                    color = ElementTheme.colors.textSecondary,
+                    color = if(ElementTheme.isLightTheme){
+                        Color(0xFF0A8741)
+                    }
+                    else {
+                        Color(0xFFFFFFFF)
+                    },
                     modifier = Modifier.padding(start = 16.dp),
                     style = ElementTheme.typography.fontBodySmRegular,
                 )
@@ -217,7 +229,12 @@ private fun RecoveryKeyFooter(state: RecoveryKeyViewState) {
             ) {
                 Text(
                     text = stringResource(id = R.string.screen_recovery_key_confirm_key_description),
-                    color = Color(0xFF0A8741),
+                    color = if(ElementTheme.isLightTheme){
+                        Color(0xFF0A8741)
+                    }
+                    else {
+                        Color(0xFFFFFFFF)
+                    },
                     textAlign = TextAlign.Center,
                     style = ElementTheme.typography.fontBodySmRegular,
                 )
