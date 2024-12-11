@@ -215,51 +215,63 @@ fun RoomDetailsView(
 
                     if (state.displayRolesAndPermissionsSettings) {
                         ListItem(
-                            headlineContent = { Text(stringResource(R.string.screen_room_details_roles_and_permissions)) },
-                            leadingContent = ListItemContent.Icon(IconSource.Vector(CompoundIcons.Admin())),
+                            headlineContent = { Text(stringResource(R.string.screen_room_details_roles_and_permissions), color = Color(0xFF11181C)) },
+                            leadingContent = ListItemContent.Custom {
+                                Icon(
+                                    imageVector = CompoundIcons.Admin(),
+                                    contentDescription = null,
+                                    tint = Color(0xFF11181C)
+                                )
+                            },
                             onClick = openAdminSettings,
                             modifier = Modifier
                                 .padding(horizontal = 10.dp, vertical = 5.dp)
                                 .background(
                                     color = Color(0xffEFEFEF),
-                                    shape = RoundedCornerShape(18.dp) // Apply rounded corners
+                                    shape = RoundedCornerShape(18.dp)
                                 ),
-                            trailingContent = ListItemContent.Icon(IconSource.Vector(CompoundIcons.ChevronRight())),
-
-
-
+                            trailingContent = ListItemContent.Custom {
+                                Row(verticalAlignment = Alignment.CenterVertically) {
+                                    Icon(
+                                        imageVector = CompoundIcons.ChevronRight(),
+                                        contentDescription = "Icon description",
+                                        modifier = Modifier.padding(start = 8.dp),
+                                        tint = Color(0xFF11181C)
+                                    )
+                                }
+                            }
                         )
                     }
                 }
 
-//                val displayMemberListItem = state.roomType is RoomDetailsType.Room
-//                if (displayMemberListItem) {
-//                    PreferenceCategory {
-//                        MembersItem(
-//                            memberCount = state.memberCount,
-//                            openRoomMemberList = openRoomMemberList,
-//                        )
-//                    }
-//                }
+                val displayMemberListItem = state.roomType is RoomDetailsType.Room
+                if (displayMemberListItem) {
+                    PreferenceCategory {
+                        MembersItem(
+                            memberCount = state.memberCount,
+                            openRoomMemberList = openRoomMemberList,
+                        )
+                    }
+                }
 
-//                PollsSection(
-//                    openPollHistory = openPollHistory
-//                )
+                PollsSection(
+                    openPollHistory = openPollHistory
+                )
 
-//                if (state.isEncrypted) {
-//                    SecuritySection()
-//                }
+                if (state.isEncrypted) {
+                    SecuritySection()
+                }
 
-//                if (state.roomType is RoomDetailsType.Dm && state.roomMemberDetailsState != null) {
-//                    val roomMemberState = state.roomMemberDetailsState
-//                    BlockUserSection(roomMemberState)
-//                    BlockUserDialogs(roomMemberState)
-//                }
-//
-//                OtherActionsSection(
-//                    isDm = state.roomType is RoomDetailsType.Dm,
-//                    onLeaveRoom = { state.eventSink(RoomDetailsEvent.LeaveRoom) }
-//                )
+                if (state.roomType is RoomDetailsType.Dm && state.roomMemberDetailsState != null) {
+                    val roomMemberState = state.roomMemberDetailsState
+                    BlockUserSection(roomMemberState)
+                    BlockUserDialogs(roomMemberState)
+                }
+
+                OtherActionsSection(
+                    isDm = state.roomType is RoomDetailsType.Dm,
+                    onLeaveRoom = { state.eventSink(RoomDetailsEvent.LeaveRoom) }
+                )
             }
         }
     }
@@ -388,6 +400,7 @@ private fun CustomMainActionsSection(
             if (roomNotificationSettings.mode == RoomNotificationMode.MUTE) {
                 CustomMainActionButton(
                     title = stringResource(CommonStrings.common_unmute),
+                    tintColor = Color(0xFF0A8741),
                     imageVector = CompoundIcons.NotificationsOff(),
                     onClick = {
                         state.eventSink(RoomDetailsEvent.UnmuteNotification)
@@ -620,12 +633,13 @@ private fun TopicSection(
             PreferenceText(
                 title = stringResource(R.string.screen_room_details_add_topic_title),
                 icon = Icons.Outlined.Add,
+                tintColor = Color(0xFF11181C),
                 onClick = { onActionClick(RoomDetailsAction.AddTopic) },
                 modifier = Modifier
                     .padding(horizontal = 10.dp, vertical = 5.dp)
                     .background(
                         color = Color(0xffEFEFEF),
-                        shape = RoundedCornerShape(18.dp) // Apply rounded corners
+                        shape = RoundedCornerShape(18.dp)
                     )
             )
         } else if (roomTopic is RoomTopicState.ExistingTopic) {
@@ -652,9 +666,15 @@ private fun NotificationItem(
         stringResource(R.string.screen_room_details_notification_mode_custom)
     }
     ListItem(
-        headlineContent = { Text(text = stringResource(R.string.screen_room_details_notification_title)) },
+        headlineContent = { Text(text = stringResource(R.string.screen_room_details_notification_title), color = Color(0xFF11181C)) },
 //        supportingContent = { Text(text = subtitle) },
-        leadingContent = ListItemContent.Icon(IconSource.Vector(CompoundIcons.Notifications())),
+        leadingContent = ListItemContent.Custom {
+            Icon(
+                imageVector = CompoundIcons.Notifications(),
+                contentDescription = null,
+                tint = Color(0xFF11181C)
+            )
+        },
         onClick = openRoomNotificationSettings,
         modifier = Modifier
             .padding(horizontal = 10.dp, vertical = 5.dp)
@@ -663,13 +683,13 @@ private fun NotificationItem(
                 shape = RoundedCornerShape(18.dp),
             ),
         trailingContent = ListItemContent.Custom {
-
-                        Row(verticalAlignment = Alignment.CenterVertically) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
                 Text(text = subtitle)
                 Icon(
                     imageVector = CompoundIcons.ChevronRight(),
                     contentDescription = "Icon description",
-                    modifier = Modifier.padding(start = 8.dp)
+                    modifier = Modifier.padding(start = 8.dp),
+                    tint = Color(0xFF11181C)
                 )
             }
         }
@@ -684,14 +704,16 @@ private fun FavoriteItem(
 ) {
     PreferenceSwitch(
         icon = CompoundIcons.Favourite(),
+        tintColor = Color(0xFF11181C),
         title = stringResource(id = CommonStrings.common_favourite),
+        headlineColor = Color(0xFF11181C),
         isChecked = isFavorite,
         onCheckedChange = onFavoriteChanges,
         modifier = Modifier
             .padding(horizontal = 10.dp, vertical = 5.dp)
             .background(
                 color = Color(0xffEFEFEF),
-                shape = RoundedCornerShape(18.dp) // Apply rounded corners
+                shape = RoundedCornerShape(18.dp)
             )
     )
 }
@@ -702,15 +724,21 @@ private fun MembersItem(
     openRoomMemberList: () -> Unit,
 ) {
     ListItem(
-        headlineContent = { Text(stringResource(CommonStrings.common_people)) },
-        leadingContent = ListItemContent.Icon(IconSource.Vector(CompoundIcons.User())),
+        headlineContent = { Text(stringResource(CommonStrings.common_people), color = Color(0xFF11181C)) },
+        leadingContent = ListItemContent.Custom {
+            Icon(
+                imageVector = CompoundIcons.User(),
+                contentDescription = null,
+                tint = Color(0xFF11181C)
+            )
+        },
         trailingContent = ListItemContent.Text(memberCount.toString()),
         onClick = openRoomMemberList,
         modifier = Modifier
             .padding(horizontal = 10.dp, vertical = 5.dp)
             .background(
                 color = Color(0xffEFEFEF),
-                shape = RoundedCornerShape(18.dp) // Apply rounded corners
+                shape = RoundedCornerShape(18.dp)
             )
     )
 }
@@ -722,8 +750,14 @@ private fun PinnedMessagesItem(
 ) {
     val analyticsService = LocalAnalyticsService.current
     ListItem(
-        headlineContent = { Text(stringResource(CommonStrings.screen_room_details_pinned_events_row_title)) },
-        leadingContent = ListItemContent.Icon(IconSource.Vector(CompoundIcons.Pin())),
+        headlineContent = { Text(stringResource(CommonStrings.screen_room_details_pinned_events_row_title), color = Color(0xFF11181C)) },
+        leadingContent = ListItemContent.Custom {
+            Icon(
+                imageVector = CompoundIcons.Pin(),
+                contentDescription = null,
+                tint = Color(0xFF11181C)
+            )
+        },
         trailingContent =
         if (pinnedMessagesCount == null) {
             ListItemContent.Custom {
@@ -737,7 +771,8 @@ private fun PinnedMessagesItem(
                     Icon(
                         imageVector = CompoundIcons.ChevronRight(),
                         contentDescription = "Icon description",
-                        modifier = Modifier.padding(start = 8.dp)
+                        modifier = Modifier.padding(start = 8.dp),
+                        tint = Color(0xFF11181C)
                     )
 
                 }
@@ -751,7 +786,7 @@ private fun PinnedMessagesItem(
             .padding(horizontal = 10.dp, vertical = 5.dp)
             .background(
                 color = Color(0xffEFEFEF),
-                shape = RoundedCornerShape(18.dp) // Apply rounded corners
+                shape = RoundedCornerShape(18.dp)
             )
     )
 }
@@ -762,14 +797,20 @@ private fun PollsSection(
 ) {
     PreferenceCategory {
         ListItem(
-            headlineContent = { Text(stringResource(R.string.screen_polls_history_title)) },
-            leadingContent = ListItemContent.Icon(IconSource.Vector(CompoundIcons.Polls())),
+            headlineContent = { Text(stringResource(R.string.screen_polls_history_title), color = Color(0xFF11181C)) },
+            leadingContent = ListItemContent.Custom {
+                Icon(
+                    imageVector = CompoundIcons.Polls(),
+                    contentDescription = null,
+                    tint = Color(0xFF11181C)
+                )
+            },
             onClick = openPollHistory,
             modifier = Modifier
                 .padding(horizontal = 10.dp, vertical = 5.dp)
                 .background(
                     color = Color(0xffEFEFEF),
-                    shape = RoundedCornerShape(18.dp) // Apply rounded corners
+                    shape = RoundedCornerShape(18.dp)
                 )
         )
     }
@@ -779,13 +820,22 @@ private fun PollsSection(
 private fun SecuritySection() {
     PreferenceCategory(title = stringResource(R.string.screen_room_details_security_title)) {
         ListItem(
-            headlineContent = { Text(stringResource(R.string.screen_room_details_encryption_enabled_title)) },
+            headlineContent = { Text(
+                text = stringResource(R.string.screen_room_details_encryption_enabled_title),
+                color = Color(0xFF0A8741)
+            )  },
             supportingContent = { Text(stringResource(R.string.screen_room_details_encryption_enabled_subtitle)) },
-            leadingContent = ListItemContent.Icon(IconSource.Resource(CommonDrawables.ic_encryption_enabled)),
-//            modifier = Modifier.padding(horizontal =10.dp, vertical = 5.dp).background(
-//                color = Color(0xffEFEFEF),
-//                shape = RoundedCornerShape(18.dp) // Apply rounded corners
-//            ),
+            leadingContent = ListItemContent.Custom {
+                Icon(
+                    painter = painterResource(id = CommonDrawables.ic_encryption_enabled),
+                    contentDescription = null,
+                    tint = Color(0xFF0A8741)
+                )
+            },
+            modifier = Modifier.padding(horizontal =10.dp, vertical = 5.dp).background(
+                color = Color(0xffEFEFEF),
+                shape = RoundedCornerShape(18.dp)
+            ),
             )
     }
 }
@@ -807,6 +857,10 @@ private fun OtherActionsSection(isDm: Boolean, onLeaveRoom: () -> Unit) {
             leadingContent = ListItemContent.Icon(IconSource.Vector(CompoundIcons.Leave())),
             style = ListItemStyle.Destructive,
             onClick = onLeaveRoom,
+            modifier = Modifier.padding(horizontal =10.dp, vertical = 5.dp).background(
+                color = Color(0xffEFEFEF),
+                shape = RoundedCornerShape(18.dp)
+            ),
         )
     }
 }

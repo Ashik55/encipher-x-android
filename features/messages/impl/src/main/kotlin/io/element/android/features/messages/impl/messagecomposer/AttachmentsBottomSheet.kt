@@ -11,6 +11,7 @@ import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -23,12 +24,15 @@ import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material.ripple.rememberRipple
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.rememberModalBottomSheetState
+import androidx.compose.material3.ripple
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -109,6 +113,10 @@ private fun AttachmentSourcePickerMenu(
     onCreatePollClick: () -> Unit,
     enableTextFormatting: Boolean,
 ) {
+    val ripple = ripple(
+        bounded = false,
+        radius = 50.dp,)
+
     Column(
         modifier = Modifier
             .navigationBarsPadding()
@@ -121,7 +129,12 @@ private fun AttachmentSourcePickerMenu(
             ListItem(
                 modifier = Modifier
                     .weight(1f)
-                    .clickable { state.eventSink(MessageComposerEvents.PickAttachmentSource.PhotoFromCamera) },
+                    .clickable(
+                        interactionSource = remember { MutableInteractionSource() },
+                        indication = ripple
+                    ) {
+                        state.eventSink(MessageComposerEvents.PickAttachmentSource.PhotoFromCamera)
+                    },
                 headlineContent = {
                     Column(
                         modifier = Modifier.fillMaxWidth(),
@@ -140,7 +153,6 @@ private fun AttachmentSourcePickerMenu(
                         ) {
                             Image(
                                 painter = painterResource(id = R.drawable.ic_camera),
-//                                imageVector = CompoundIcons.TakePhoto(),
                                 contentDescription = null,
                             )
                         }
@@ -156,7 +168,12 @@ private fun AttachmentSourcePickerMenu(
             ListItem(
                 modifier = Modifier
                     .weight(1f)
-                    .clickable { state.eventSink(MessageComposerEvents.PickAttachmentSource.VideoFromCamera) },
+                    .clickable(
+                        interactionSource = remember { MutableInteractionSource() },
+                        indication = ripple
+                    ) {
+                        state.eventSink(MessageComposerEvents.PickAttachmentSource.VideoFromCamera)
+                    },
                 headlineContent = {
                     Column(
                         modifier = Modifier.fillMaxWidth(),
@@ -190,7 +207,12 @@ private fun AttachmentSourcePickerMenu(
             ListItem(
                 modifier = Modifier
                     .weight(1f)
-                    .clickable { state.eventSink(MessageComposerEvents.PickAttachmentSource.FromGallery) },
+                    .clickable(
+                        interactionSource = remember { MutableInteractionSource() },
+                        indication = ripple
+                    ) {
+                        state.eventSink(MessageComposerEvents.PickAttachmentSource.FromGallery)
+                    },
                 headlineContent = {
                     Column(
                         modifier = Modifier.fillMaxWidth(),
@@ -209,7 +231,6 @@ private fun AttachmentSourcePickerMenu(
                         ) {
                             Image(
                                 painter = painterResource(id = R.drawable.ic_gallery),
-//                                imageVector = CompoundIcons.Image(),
                                 contentDescription = null,
                             )
                         }
@@ -231,7 +252,12 @@ private fun AttachmentSourcePickerMenu(
             ListItem(
                 modifier = Modifier
                     .weight(1f)
-                    .clickable { state.eventSink(MessageComposerEvents.PickAttachmentSource.FromFiles) },
+                    .clickable(
+                        interactionSource = remember { MutableInteractionSource() },
+                        indication = ripple
+                    ) {
+                        state.eventSink(MessageComposerEvents.PickAttachmentSource.FromFiles)
+                    },
                 headlineContent = {
                     Column(
                         modifier = Modifier.fillMaxWidth(),
@@ -250,7 +276,6 @@ private fun AttachmentSourcePickerMenu(
                         ) {
                             Image(
                                 painter = painterResource(id = R.drawable.ic_document),
-//                                imageVector = CompoundIcons.Attachment(),
                                 contentDescription = null,
                             )
                         }
@@ -267,7 +292,10 @@ private fun AttachmentSourcePickerMenu(
                 ListItem(
                     modifier = Modifier
                         .weight(1f)
-                        .clickable {
+                        .clickable(
+                            interactionSource = remember { MutableInteractionSource() },
+                            indication = ripple
+                        ) {
                             state.eventSink(MessageComposerEvents.PickAttachmentSource.Location)
                             onSendLocationClick()
                         },
@@ -289,7 +317,6 @@ private fun AttachmentSourcePickerMenu(
                             ) {
                                 Image(
                                     painter = painterResource(id = R.drawable.ic_location),
-//                                    imageVector = CompoundIcons.LocationPin(),
                                     contentDescription = null,
                                 )
                             }
@@ -307,7 +334,10 @@ private fun AttachmentSourcePickerMenu(
                 ListItem(
                     modifier = Modifier
                         .weight(1f)
-                        .clickable {
+                        .clickable(
+                            interactionSource = remember { MutableInteractionSource() },
+                            indication = ripple
+                        ) {
                             state.eventSink(MessageComposerEvents.PickAttachmentSource.Poll)
                             onCreatePollClick()
                         },
@@ -329,7 +359,6 @@ private fun AttachmentSourcePickerMenu(
                             ) {
                                 Image(
                                     painter = painterResource(id = R.drawable.ic_poll),
-//                                    imageVector = CompoundIcons.Polls(),
                                     contentDescription = null,
                                 )
                             }
@@ -351,9 +380,14 @@ private fun AttachmentSourcePickerMenu(
                 horizontalArrangement = Arrangement.Start
             ) {
                 ListItem(
-                    modifier = Modifier.clickable {
-                        state.eventSink(MessageComposerEvents.ToggleTextFormatting(enabled = true))
-                    },
+                    modifier = Modifier
+                        .padding(bottom = 8.dp)
+                        .clickable(
+                            interactionSource = remember { MutableInteractionSource() },
+                            indication = ripple
+                        ) {
+                            state.eventSink(MessageComposerEvents.ToggleTextFormatting(enabled = true))
+                        },
                     headlineContent = {
                         Column(
                             modifier = Modifier.fillMaxWidth(),
@@ -388,7 +422,6 @@ private fun AttachmentSourcePickerMenu(
         }
     }
 }
-
 @PreviewsDayNight
 @Composable
 internal fun AttachmentSourcePickerMenuPreview() = ElementPreview {

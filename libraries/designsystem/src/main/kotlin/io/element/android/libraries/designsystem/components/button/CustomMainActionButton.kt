@@ -47,14 +47,15 @@ fun CustomMainActionButton(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
     enabled: Boolean = true,
+    tintColor: Color? = null,
     contentDescription: String = title,
 ) {
-    val ripple = ripple(bounded = false)
+    val ripple = ripple(bounded = true)
     val interactionSource = remember { MutableInteractionSource() }
     Row(
         modifier
             .background(color= Color(0xffEFEFEF),
-                shape = RoundedCornerShape(15.dp) // Apply rounded corners
+                shape = RoundedCornerShape(15.dp)
             )   .padding(horizontal = 15.dp, vertical = 8.dp) .clickable(
                 enabled = enabled,
                 interactionSource = interactionSource,
@@ -64,17 +65,18 @@ fun CustomMainActionButton(
             .widthIn(min = 76.dp, max = 96.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        val tintColor = if (enabled) LocalContentColor.current else MaterialTheme.colorScheme.secondary
+//        val tintColor = if (enabled) LocalContentColor.current else MaterialTheme.colorScheme.secondary
+        val appliedTintColor = tintColor ?: if (enabled) Color(0xFF11181C) else Color(0xFF0A8741)
         Icon(
             imageVector = imageVector,
             contentDescription = contentDescription,
-            tint = tintColor,
+            tint = appliedTintColor,
         )
         Spacer(modifier = Modifier.width(10.dp))
         Text(
             title,
             style = ElementTheme.typography.fontBodyMdMedium.copy(hyphens = Hyphens.Auto),
-            color = tintColor,
+            color = appliedTintColor,
             overflow = TextOverflow.Visible,
             textAlign = TextAlign.Center,
         )

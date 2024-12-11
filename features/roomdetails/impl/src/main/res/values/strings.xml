@@ -6,5 +6,5 @@
   -->
 
 <resources>
-    <string name="room_info">Room Info</string>
+    <string name="room_info">Group Info</string>
 </resources>

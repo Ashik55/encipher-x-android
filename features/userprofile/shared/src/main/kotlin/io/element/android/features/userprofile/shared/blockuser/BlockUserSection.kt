@@ -7,10 +7,14 @@
 
 package io.element.android.features.userprofile.shared.blockuser
 
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.progressSemantics
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import io.element.android.compound.tokens.generated.CompoundIcons
@@ -23,6 +27,7 @@ import io.element.android.libraries.designsystem.components.dialogs.RetryDialog
 import io.element.android.libraries.designsystem.components.list.ListItemContent
 import io.element.android.libraries.designsystem.components.preferences.PreferenceCategory
 import io.element.android.libraries.designsystem.theme.components.CircularProgressIndicator
+import io.element.android.libraries.designsystem.theme.components.Icon
 import io.element.android.libraries.designsystem.theme.components.IconSource
 import io.element.android.libraries.designsystem.theme.components.ListItem
 import io.element.android.libraries.designsystem.theme.components.ListItemStyle
@@ -79,11 +84,23 @@ private fun PreferenceBlockUser(
     }
     if (isBlocked.orFalse()) {
         ListItem(
-            headlineContent = { Text(stringResource(R.string.screen_dm_details_unblock_user)) },
-            leadingContent = ListItemContent.Icon(IconSource.Vector(CompoundIcons.Block())),
+            headlineContent = { Text(stringResource(R.string.screen_dm_details_unblock_user), color = Color(0xFF0A8741)) },
+            leadingContent = ListItemContent.Custom {
+                Icon(
+                    imageVector = CompoundIcons.Block(),
+                    contentDescription = null,
+                    tint = Color(0xFF0A8741)
+                )
+            },
             onClick = { if (!isLoading) eventSink(UserProfileEvents.UnblockUser(needsConfirmation = true)) },
             trailingContent = if (isLoading) ListItemContent.Custom(loadingCurrentValue) else null,
             style = ListItemStyle.Primary,
+            modifier = Modifier
+                .padding(horizontal = 10.dp, vertical = 5.dp)
+                .background(
+                    color = Color(0xffEFEFEF),
+                    shape = RoundedCornerShape(18.dp)
+                ),
         )
     } else {
         ListItem(
@@ -92,6 +109,12 @@ private fun PreferenceBlockUser(
             style = ListItemStyle.Destructive,
             onClick = { if (!isLoading) eventSink(UserProfileEvents.BlockUser(needsConfirmation = true)) },
             trailingContent = if (isLoading) ListItemContent.Custom(loadingCurrentValue) else null,
+            modifier = Modifier
+                .padding(horizontal = 10.dp, vertical = 5.dp)
+                .background(
+                    color = Color(0xffEFEFEF),
+                    shape = RoundedCornerShape(18.dp)
+                ),
         )
     }
 }

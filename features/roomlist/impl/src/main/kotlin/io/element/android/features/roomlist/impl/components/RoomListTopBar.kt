@@ -324,7 +324,7 @@ private fun DefaultRoomListTopBar(
                 Text(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(horizontal = 16.dp,), // Adjust padding as needed
+                        .padding(horizontal = 16.dp,),
                     text = "My Chats",
                     maxLines = 1,
                     style = ElementTheme.typography.fontHeadingLgBold,

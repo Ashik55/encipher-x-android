@@ -11,6 +11,7 @@ import androidx.annotation.DrawableRes
 import androidx.compose.foundation.layout.Column
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.tooling.preview.Preview
 import io.element.android.compound.theme.ElementTheme
@@ -31,8 +32,10 @@ fun PreferenceSwitch(
     subtitle: String? = null,
     enabled: Boolean = true,
     icon: ImageVector? = null,
+    tintColor: Color? = null,
     @DrawableRes iconResourceId: Int? = null,
     showIconAreaIfNoIcon: Boolean = false,
+    headlineColor: Color = if (ElementTheme.isLightTheme) Color(0xFF11181C) else Color(0xFFFFFFFF),
 ) {
     ListItem(
         modifier = modifier,
@@ -40,6 +43,7 @@ fun PreferenceSwitch(
         onClick = onCheckedChange.takeIf { enabled }?.let { { onCheckedChange(!isChecked) } },
         leadingContent = preferenceIcon(
             icon = icon,
+            tintColor = tintColor,
             iconResourceId = iconResourceId,
             enabled = enabled,
             showIconAreaIfNoIcon = showIconAreaIfNoIcon,
@@ -48,6 +52,7 @@ fun PreferenceSwitch(
             Text(
                 style = ElementTheme.typography.fontBodyLgRegular,
                 text = title,
+                color = headlineColor
             )
         },
         supportingContent = subtitle?.let {

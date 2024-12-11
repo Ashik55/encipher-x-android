@@ -97,6 +97,7 @@ import io.element.android.libraries.designsystem.theme.components.BottomSheetDra
 import io.element.android.libraries.designsystem.theme.components.Scaffold
 import io.element.android.libraries.designsystem.theme.components.Text
 import io.element.android.libraries.designsystem.theme.components.TopAppBar
+import io.element.android.libraries.designsystem.theme.components.TopAppBarWithBackground
 import io.element.android.libraries.designsystem.utils.KeepScreenOn
 import io.element.android.libraries.designsystem.utils.OnLifecycleEvent
 import io.element.android.libraries.designsystem.utils.snackbar.SnackbarHost
@@ -181,7 +182,7 @@ fun MessagesView(
 
     Scaffold(
         modifier = modifier,
-        contentWindowInsets = WindowInsets.statusBars,
+        contentWindowInsets = WindowInsets(0),
         topBar = {
             Column {
                 ConnectivityIndicatorView(isOnline = state.hasNetworkConnection)
@@ -483,11 +484,12 @@ private fun MessagesViewTopBar(
     onJoinCallClick: () -> Unit,
     onBackClick: () -> Unit,
 ) {
-    TopAppBar(
+    TopAppBarWithBackground(
         navigationIcon = {
             BackButton(onClick = onBackClick)
         },
-        title = {
+        backgroundImage = io.element.android.libraries.designsystem.R.drawable.home_top_bg,
+            title = {
             val roundedCornerShape = RoundedCornerShape(8.dp)
             val titleModifier = Modifier
                 .clip(roundedCornerShape)
