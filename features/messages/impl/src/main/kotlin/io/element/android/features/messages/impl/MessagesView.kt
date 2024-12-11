@@ -45,6 +45,7 @@ import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
 import androidx.compose.ui.input.nestedscroll.NestedScrollSource
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalView
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.style.TextAlign
@@ -394,6 +395,7 @@ private fun MessagesViewContent(
                         forceJumpToBottomVisibility = forceJumpToBottomVisibility,
                         onJoinCallClick = onJoinCallClick,
                         nestedScrollConnection = scrollBehavior.nestedScrollConnection,
+                        backgroundImage = painterResource(id = R.drawable.bg)
                     )
                     AnimatedVisibility(
                         visible = state.pinnedMessagesBannerState is PinnedMessagesBannerState.Visible && scrollBehavior.isVisible,

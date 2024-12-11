@@ -8,11 +8,14 @@
 package io.element.android.features.messages.impl.timeline
 
 import android.view.accessibility.AccessibilityManager
+import androidx.compose.foundation.background
+import androidx.compose.ui.res.painterResource
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.scaleIn
 import androidx.compose.animation.scaleOut
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.PaddingValues
@@ -37,16 +40,29 @@ import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.draw.blur
 import androidx.compose.ui.draw.rotate
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.SolidColor
+import androidx.compose.ui.graphics.asImageBitmap
+import androidx.compose.ui.graphics.painter.BitmapPainter
+import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
 import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.rememberNestedScrollInteropConnection
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
+import androidx.core.graphics.drawable.toBitmap
+import coil.ImageLoader
+import coil.request.ImageRequest
+import coil.request.SuccessResult
 import io.element.android.compound.theme.ElementTheme
 import io.element.android.compound.tokens.generated.CompoundIcons
+import io.element.android.features.messages.impl.R
 import io.element.android.features.messages.impl.crypto.sendfailure.resolve.ResolveVerifiedUserSendFailureView
 import io.element.android.features.messages.impl.timeline.components.TimelineItemRow
 import io.element.android.features.messages.impl.timeline.components.toText
@@ -85,6 +101,7 @@ fun TimelineView(
     onReadReceiptClick: (TimelineItem.Event) -> Unit,
     onJoinCallClick: () -> Unit,
     modifier: Modifier = Modifier,
+    backgroundImage: Painter? = null,
     lazyListState: LazyListState = rememberLazyListState(),
     forceJumpToBottomVisibility: Boolean = false,
     nestedScrollConnection: NestedScrollConnection = rememberNestedScrollInteropConnection(),
@@ -118,7 +135,28 @@ fun TimelineView(
 
     // Animate alpha when timeline is first displayed, to avoid flashes or glitching when viewing rooms
     AnimatedVisibility(visible = true, enter = fadeIn()) {
-        Box(modifier) {
+        Box(
+            modifier
+                .fillMaxSize()
+                .then(
+                    backgroundImage?.let {
+                        Modifier.background(
+                            brush = SolidColor(Color(0xFFFFFFFF)),
+                            alpha = 1f
+                        )
+                    } ?: Modifier
+                )
+        ){
+            backgroundImage?.let {
+                Image(
+                    painter = it,
+                    contentDescription = null,
+                    contentScale = ContentScale.Crop,
+                    modifier = Modifier
+                        .fillMaxSize()
+                )
+            }
+
             LazyColumn(
                 modifier = Modifier
                     .fillMaxSize()
@@ -177,6 +215,34 @@ fun TimelineView(
     ResolveVerifiedUserSendFailureView(state = state.resolveVerifiedUserSendFailureState)
 
     MessageShieldDialog(state)
+}
+
+// Utility function to load background image asynchronously
+@Composable
+fun loadImagePainter(imageResId: Int): Painter? {
+    val context = LocalContext.current
+    var imagePainter by remember { mutableStateOf<Painter?>(null) }
+
+    LaunchedEffect(imageResId) {
+        val loader = ImageLoader(context)
+        val request = ImageRequest.Builder(context)
+            .data(imageResId)
+            .allowHardware(false)
+            .build()
+
+        try {
+            val result = loader.execute(request)
+            if (result is SuccessResult) {
+                val bitmap = result.drawable.toBitmap()
+                imagePainter = BitmapPainter(bitmap.asImageBitmap())
+            }
+        } catch (e: Exception) {
+            // Handle error loading image
+            e.printStackTrace()
+        }
+    }
+
+    return imagePainter
 }
 
 @Composable
@@ -304,6 +370,8 @@ private fun JumpToBottomButton(
 internal fun TimelineViewPreview(
     @PreviewParameter(TimelineItemEventContentProvider::class) content: TimelineItemEventContent
 ) = ElementPreview {
+
+    val backgroundImage = painterResource(id = R.drawable.bg)
     val timelineItems = aTimelineItemList(content)
     val timelineEvents = timelineItems.filterIsInstance<TimelineItem.Event>()
     val lastEventIdFromMe = timelineEvents.firstOrNull { it.isMine }?.eventId
@@ -319,6 +387,7 @@ internal fun TimelineViewPreview(
                 ),
                 focusedEventIndex = 0,
             ),
+            backgroundImage = backgroundImage,
             timelineProtectionState = aTimelineProtectionState(),
             onUserDataClick = {},
             onLinkClick = {},

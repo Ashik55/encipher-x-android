@@ -8,6 +8,7 @@
 package io.element.android.features.messages.impl.pinned.banner
 
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement.spacedBy
@@ -15,6 +16,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
@@ -35,6 +37,8 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
 import androidx.compose.ui.input.nestedscroll.NestedScrollSource
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.style.TextOverflow
@@ -43,6 +47,7 @@ import androidx.compose.ui.unit.dp
 import im.vector.app.features.analytics.plan.Interaction
 import io.element.android.compound.theme.ElementTheme
 import io.element.android.compound.tokens.generated.CompoundIcons
+import io.element.android.features.messages.impl.R
 import io.element.android.libraries.designsystem.preview.ElementPreview
 import io.element.android.libraries.designsystem.preview.PreviewsDayNight
 import io.element.android.libraries.designsystem.theme.components.Icon
@@ -70,7 +75,9 @@ fun PinnedMessagesBannerView(
                 state = state,
                 onClick = onClick,
                 onViewAllClick = onViewAllClick,
-                modifier = modifier,
+                modifier = modifier.fillMaxWidth()
+                    .height(64.dp),
+                backgroundImage = io.element.android.libraries.designsystem.R.drawable.home_top_bg
             )
         }
     }
@@ -81,51 +88,66 @@ private fun PinnedMessagesBannerRow(
     state: PinnedMessagesBannerState,
     onClick: (EventId) -> Unit,
     onViewAllClick: () -> Unit,
+    backgroundImage: Int,
     modifier: Modifier = Modifier,
 ) {
     val analyticsService = LocalAnalyticsService.current
     val borderColor = ElementTheme.colors.pinnedMessageBannerBorder
-    Row(
+
+    Box(
         modifier = modifier
-            .background(color = ElementTheme.colors.bgCanvasDefault)
             .fillMaxWidth()
-            .drawBorder(borderColor)
             .heightIn(min = 64.dp)
+            .background(color = Color.Transparent)
+            .drawBorder(borderColor)
             .clickable {
                 if (state is PinnedMessagesBannerState.Loaded) {
                     analyticsService.captureInteraction(Interaction.Name.PinnedMessageBannerClick)
                     onClick(state.currentPinnedMessage.eventId)
                     state.eventSink(PinnedMessagesBannerEvents.MoveToNextPinned)
                 }
-            },
-        verticalAlignment = Alignment.CenterVertically,
+            }
     ) {
-        Spacer(modifier = Modifier.width(26.dp))
-        PinIndicators(
-            pinIndex = state.currentPinnedMessageIndex(),
-            pinsCount = state.pinnedMessagesCount(),
-        )
-        Icon(
-            imageVector = CompoundIcons.PinSolid(),
+        Image(
+            painter = painterResource(id = backgroundImage),
             contentDescription = null,
-            tint = ElementTheme.materialColors.secondary,
+            contentScale = ContentScale.Crop,
+            modifier = Modifier.fillMaxSize()
+        )
+
+        Row(
             modifier = Modifier
-                .padding(horizontal = 10.dp)
-                .size(20.dp)
-        )
-        PinnedMessageItem(
-            index = state.currentPinnedMessageIndex(),
-            totalCount = state.pinnedMessagesCount(),
-            message = state.formattedMessage(),
-            modifier = Modifier.weight(1f)
-        )
-        ViewAllButton(
-            state = state,
-            onViewAllClick = {
-                onViewAllClick()
-                analyticsService.captureInteraction(Interaction.Name.PinnedMessageBannerViewAllButton)
-            },
-        )
+                .fillMaxSize()
+                .padding(8.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Spacer(modifier = Modifier.width(26.dp))
+            PinIndicators(
+                pinIndex = state.currentPinnedMessageIndex(),
+                pinsCount = state.pinnedMessagesCount(),
+            )
+            Icon(
+                imageVector = CompoundIcons.PinSolid(),
+                contentDescription = null,
+                tint = ElementTheme.materialColors.secondary,
+                modifier = Modifier
+                    .padding(horizontal = 10.dp)
+                    .size(20.dp)
+            )
+            PinnedMessageItem(
+                index = state.currentPinnedMessageIndex(),
+                totalCount = state.pinnedMessagesCount(),
+                message = state.formattedMessage(),
+                modifier = Modifier.weight(1f)
+            )
+            ViewAllButton(
+                state = state,
+                onViewAllClick = {
+                    onViewAllClick()
+                    analyticsService.captureInteraction(Interaction.Name.PinnedMessageBannerViewAllButton)
+                },
+            )
+        }
     }
 }
 

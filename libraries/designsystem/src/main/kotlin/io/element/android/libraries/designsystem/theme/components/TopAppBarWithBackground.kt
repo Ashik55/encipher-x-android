@@ -45,7 +45,7 @@ fun TopAppBarWithBackground(
     windowInsets: WindowInsets = TopAppBarDefaults.windowInsets,
     colors: TopAppBarColors = TopAppBarDefaults.topAppBarColors(),
     scrollBehavior: TopAppBarScrollBehavior? = null,
-    backgroundImage: Int // Pass the background image resource
+    backgroundImage: Int
 ) {
     Box(modifier = modifier
         .fillMaxWidth()
