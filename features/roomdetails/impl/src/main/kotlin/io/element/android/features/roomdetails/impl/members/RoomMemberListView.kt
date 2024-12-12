@@ -13,12 +13,14 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.consumeWindowInsets
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
@@ -28,6 +30,7 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SingleChoiceSegmentedButtonRow
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.getValue
@@ -36,6 +39,9 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
@@ -50,6 +56,8 @@ import io.element.android.libraries.designsystem.components.button.BackButton
 import io.element.android.libraries.designsystem.preview.ElementPreview
 import io.element.android.libraries.designsystem.preview.PreviewsDayNight
 import io.element.android.libraries.designsystem.theme.aliasScreenTitle
+import io.element.android.libraries.designsystem.theme.components.Button
+import io.element.android.libraries.designsystem.theme.components.ButtonSize
 import io.element.android.libraries.designsystem.theme.components.LinearProgressIndicator
 import io.element.android.libraries.designsystem.theme.components.Scaffold
 import io.element.android.libraries.designsystem.theme.components.SearchBar
@@ -93,40 +101,52 @@ fun RoomMemberListView(
             }
         }
     ) { padding ->
-        var selectedSection by remember { mutableStateOf(SelectedSection.entries[initialSelectedSectionIndex]) }
-        if (!state.moderationState.canDisplayBannedUsers && selectedSection == SelectedSection.BANNED) {
-            SideEffect {
-                selectedSection = SelectedSection.MEMBERS
-            }
-        }
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(padding)
-                .consumeWindowInsets(padding),
-            verticalArrangement = Arrangement.spacedBy(16.dp),
-        ) {
-            RoomMemberSearchBar(
-                query = state.searchQuery,
-                state = state.searchResults,
-                active = state.isSearchActive,
-                placeHolderTitle = stringResource(CommonStrings.common_search_for_someone),
-                onActiveChange = { state.eventSink(RoomMemberListEvents.OnSearchActiveChanged(it)) },
-                onTextChange = { state.eventSink(RoomMemberListEvents.UpdateSearchQuery(it)) },
-                onSelectUser = ::onSelectUser,
-                selectedSection = selectedSection,
-                modifier = Modifier.fillMaxWidth(),
+
+        Box {
+            Image(
+                painter = painterResource(id = R.drawable.bg),
+                contentDescription = null,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .fillMaxHeight(),
+                contentScale = ContentScale.Crop
             )
 
-            if (!state.isSearchActive) {
-                RoomMemberList(
-                    roomMembers = state.roomMembers,
-                    showMembersCount = true,
-                    canDisplayBannedUsersControls = state.moderationState.canDisplayBannedUsers,
-                    selectedSection = selectedSection,
-                    onSelectedSectionChange = { selectedSection = it },
+            var selectedSection by remember { mutableStateOf(SelectedSection.entries[initialSelectedSectionIndex]) }
+            if (!state.moderationState.canDisplayBannedUsers && selectedSection == SelectedSection.BANNED) {
+                SideEffect {
+                    selectedSection = SelectedSection.MEMBERS
+                }
+            }
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(padding)
+                    .consumeWindowInsets(padding),
+                verticalArrangement = Arrangement.spacedBy(16.dp),
+            ) {
+                RoomMemberSearchBar(
+                    query = state.searchQuery,
+                    state = state.searchResults,
+                    active = state.isSearchActive,
+                    placeHolderTitle = stringResource(CommonStrings.common_search_for_someone),
+                    onActiveChange = { state.eventSink(RoomMemberListEvents.OnSearchActiveChanged(it)) },
+                    onTextChange = { state.eventSink(RoomMemberListEvents.UpdateSearchQuery(it)) },
                     onSelectUser = ::onSelectUser,
+                    selectedSection = selectedSection,
+                    modifier = Modifier.fillMaxWidth(),
                 )
+
+                if (!state.isSearchActive) {
+                    RoomMemberList(
+                        roomMembers = state.roomMembers,
+                        showMembersCount = true,
+                        canDisplayBannedUsersControls = state.moderationState.canDisplayBannedUsers,
+                        selectedSection = selectedSection,
+                        onSelectedSectionChange = { selectedSection = it },
+                        onSelectUser = ::onSelectUser,
+                    )
+                }
             }
         }
     }
@@ -335,12 +355,18 @@ private fun RoomMemberListTopBar(
         navigationIcon = { BackButton(onClick = onBackClick) },
         actions = {
             if (canInvite) {
-                TextButton(
+                Button(
                     text = stringResource(CommonStrings.action_invite),
+                    size = ButtonSize.Small,
+                    modifier = Modifier.padding(end = 16.dp),
                     onClick = onInviteClick,
                 )
             }
-        }
+        },
+        // TopAppBar background transparent
+        colors = TopAppBarDefaults.topAppBarColors(
+            containerColor = Color.Transparent
+        )
     )
 }
 

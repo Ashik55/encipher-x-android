@@ -94,4 +94,5 @@ dependencies {
     testImplementation(libs.androidx.compose.ui.test.junit)
     testImplementation(projects.libraries.eventformatter.test)
     testReleaseImplementation(libs.androidx.compose.ui.test.manifest)
+    implementation ("com.google.accompanist:accompanist-systemuicontroller:0.36.0")
 }

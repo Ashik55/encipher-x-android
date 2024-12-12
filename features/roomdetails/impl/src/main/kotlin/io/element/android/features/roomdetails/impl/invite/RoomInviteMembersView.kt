@@ -7,17 +7,24 @@
 
 package io.element.android.features.roomdetails.impl.invite
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.consumeWindowInsets
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
@@ -29,6 +36,8 @@ import io.element.android.libraries.designsystem.components.button.BackButton
 import io.element.android.libraries.designsystem.preview.ElementPreview
 import io.element.android.libraries.designsystem.preview.PreviewsDayNight
 import io.element.android.libraries.designsystem.theme.aliasScreenTitle
+import io.element.android.libraries.designsystem.theme.components.Button
+import io.element.android.libraries.designsystem.theme.components.ButtonSize
 import io.element.android.libraries.designsystem.theme.components.HorizontalDivider
 import io.element.android.libraries.designsystem.theme.components.Scaffold
 import io.element.android.libraries.designsystem.theme.components.SearchBar
@@ -68,33 +77,45 @@ fun RoomInviteMembersView(
             )
         }
     ) { padding ->
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(padding)
-                .consumeWindowInsets(padding),
-            verticalArrangement = Arrangement.spacedBy(16.dp),
-        ) {
-            RoomInviteMembersSearchBar(
-                modifier = Modifier.fillMaxWidth(),
-                query = state.searchQuery,
-                showLoader = state.showSearchLoader,
-                selectedUsers = state.selectedUsers,
-                state = state.searchResults,
-                active = state.isSearchActive,
-                onActiveChange = { state.eventSink(RoomInviteMembersEvents.OnSearchActiveChanged(it)) },
-                onTextChange = { state.eventSink(RoomInviteMembersEvents.UpdateSearchQuery(it)) },
-                onToggleUser = { state.eventSink(RoomInviteMembersEvents.ToggleUser(it)) },
+
+        Box {
+            Image(
+                painter = painterResource(id = R.drawable.bg),
+                contentDescription = null,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .fillMaxHeight(),
+                contentScale = ContentScale.Crop
             )
 
-            if (!state.isSearchActive) {
-                SelectedUsersRowList(
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(padding)
+                    .consumeWindowInsets(padding),
+                verticalArrangement = Arrangement.spacedBy(16.dp),
+            ) {
+                RoomInviteMembersSearchBar(
                     modifier = Modifier.fillMaxWidth(),
+                    query = state.searchQuery,
+                    showLoader = state.showSearchLoader,
                     selectedUsers = state.selectedUsers,
-                    autoScroll = true,
-                    onUserRemove = { state.eventSink(RoomInviteMembersEvents.ToggleUser(it)) },
-                    contentPadding = PaddingValues(16.dp),
+                    state = state.searchResults,
+                    active = state.isSearchActive,
+                    onActiveChange = { state.eventSink(RoomInviteMembersEvents.OnSearchActiveChanged(it)) },
+                    onTextChange = { state.eventSink(RoomInviteMembersEvents.UpdateSearchQuery(it)) },
+                    onToggleUser = { state.eventSink(RoomInviteMembersEvents.ToggleUser(it)) },
                 )
+
+                if (!state.isSearchActive) {
+                    SelectedUsersRowList(
+                        modifier = Modifier.fillMaxWidth(),
+                        selectedUsers = state.selectedUsers,
+                        autoScroll = true,
+                        onUserRemove = { state.eventSink(RoomInviteMembersEvents.ToggleUser(it)) },
+                        contentPadding = PaddingValues(16.dp),
+                    )
+                }
             }
         }
     }
@@ -116,12 +137,18 @@ private fun RoomInviteMembersTopBar(
         },
         navigationIcon = { BackButton(onClick = onBackClick) },
         actions = {
-            TextButton(
+            Button(
                 text = stringResource(CommonStrings.action_invite),
                 onClick = onSubmitClick,
+                size = ButtonSize.Small,
+                modifier = Modifier.padding(end = 16.dp),
                 enabled = canSend,
             )
-        }
+        },
+        // TopAppBar background transparent
+        colors = TopAppBarDefaults.topAppBarColors(
+            containerColor = Color.Transparent
+        )
     )
 }
 

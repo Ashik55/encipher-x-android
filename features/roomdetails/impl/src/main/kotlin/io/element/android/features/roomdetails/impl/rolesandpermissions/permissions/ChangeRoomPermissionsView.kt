@@ -16,6 +16,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.PreviewParameter
+import androidx.compose.ui.unit.dp
 import io.element.android.compound.theme.ElementTheme
 import io.element.android.compound.tokens.generated.CompoundIcons
 import io.element.android.features.roomdetails.impl.R
@@ -27,6 +28,8 @@ import io.element.android.libraries.designsystem.components.list.ListItemContent
 import io.element.android.libraries.designsystem.preview.ElementPreview
 import io.element.android.libraries.designsystem.preview.PreviewsDayNight
 import io.element.android.libraries.designsystem.theme.aliasScreenTitle
+import io.element.android.libraries.designsystem.theme.components.Button
+import io.element.android.libraries.designsystem.theme.components.ButtonSize
 import io.element.android.libraries.designsystem.theme.components.IconSource
 import io.element.android.libraries.designsystem.theme.components.ListItem
 import io.element.android.libraries.designsystem.theme.components.ListItemStyle
@@ -63,9 +66,11 @@ fun ChangeRoomPermissionsView(
                     BackButton(onClick = { state.eventSink(ChangeRoomPermissionsEvent.Exit) })
                 },
                 actions = {
-                    TextButton(
+                    Button(
                         text = stringResource(CommonStrings.action_save),
                         onClick = { state.eventSink(ChangeRoomPermissionsEvent.Save) },
+                        size = ButtonSize.Small,
+                        modifier = Modifier.padding(end = 16.dp),
                         enabled = state.hasChanges,
                     )
                 }
