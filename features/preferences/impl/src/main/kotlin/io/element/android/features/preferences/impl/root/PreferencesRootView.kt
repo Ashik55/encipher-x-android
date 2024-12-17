@@ -171,7 +171,7 @@ private fun ColumnScope.ManageAccountSection(
     state.devicesManagementUrl?.let { url ->
         ListItem(
             headlineContent = { Text(stringResource(id = CommonStrings.action_manage_devices)) },
-            leadingContent = ListItemContent.Icon(IconSource.Vector(CompoundIcons.Devices())),
+            leadingContent = ListItemContent.Icon(IconSource.Vector( ImageVector.vectorResource(id = R.drawable.ic_device))),
             trailingContent = ListItemContent.Icon(IconSource.Vector(CompoundIcons.PopOut())),
             onClick = { onManageAccountClick(url) },
         )

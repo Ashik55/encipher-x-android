@@ -76,8 +76,8 @@
   <string name="action_leave_conversation">"Leave Conversation"</string>
   <string name="action_leave_room">"Leave Group"</string>
   <string name="action_load_more">"Load more"</string>
-  <string name="action_manage_account">"Manage account"</string>
-  <string name="action_manage_devices">"Manage devices"</string>
+  <string name="action_manage_account">"Manage Account"</string>
+  <string name="action_manage_devices">"Manage Devices"</string>
   <string name="action_message">"Message"</string>
   <string name="action_next">"Next"</string>
   <string name="action_no">"No"</string>
