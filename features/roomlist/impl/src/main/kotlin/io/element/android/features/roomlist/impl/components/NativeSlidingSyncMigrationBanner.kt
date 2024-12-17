@@ -9,6 +9,7 @@ package io.element.android.features.roomlist.impl.components
 
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import io.element.android.features.roomlist.impl.R
 import io.element.android.libraries.designsystem.atomic.molecules.DialogLikeBannerMolecule
@@ -24,6 +25,7 @@ internal fun NativeSlidingSyncMigrationBanner(
     DialogLikeBannerMolecule(
         modifier = modifier,
         title = stringResource(R.string.banner_migrate_to_native_sliding_sync_title),
+        titleColor = Color(0xFF0A8741),
         content = stringResource(R.string.banner_migrate_to_native_sliding_sync_description),
         actionText = stringResource(R.string.banner_migrate_to_native_sliding_sync_action),
         onSubmitClick = onContinueClick,
