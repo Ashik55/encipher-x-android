@@ -9,6 +9,7 @@ package io.element.android.features.roomlist.impl.components
 
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import io.element.android.features.roomlist.impl.R
 import io.element.android.libraries.designsystem.atomic.molecules.DialogLikeBannerMolecule
@@ -24,6 +25,7 @@ internal fun SetUpRecoveryKeyBanner(
     DialogLikeBannerMolecule(
         modifier = modifier,
         title = stringResource(R.string.banner_set_up_recovery_title),
+        titleColor = Color(0xFFEB3E18),
         content = stringResource(R.string.banner_set_up_recovery_content),
         actionText = stringResource(R.string.banner_set_up_recovery_submit),
         onSubmitClick = onContinueClick,

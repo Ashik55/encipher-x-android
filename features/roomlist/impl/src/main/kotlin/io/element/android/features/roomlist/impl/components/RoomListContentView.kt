@@ -28,7 +28,9 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
@@ -119,7 +121,7 @@ private fun EmptyView(
         action = {
             Button(
                 text = stringResource(CommonStrings.action_start_chat),
-                leadingIcon = IconSource.Vector(CompoundIcons.Compose()),
+                leadingIcon = IconSource.Vector(ImageVector.vectorResource(id = R.drawable.ic_edit)),
                 onClick = onCreateRoomClick,
             )
         },
