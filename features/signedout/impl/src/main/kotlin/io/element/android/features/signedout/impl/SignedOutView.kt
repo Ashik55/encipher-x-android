@@ -19,17 +19,20 @@ import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.BiasAlignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
 import io.element.android.compound.theme.ElementTheme
 import io.element.android.compound.tokens.generated.CompoundIcons
 import io.element.android.libraries.designsystem.atomic.molecules.ButtonColumnMolecule
 import io.element.android.libraries.designsystem.atomic.molecules.IconTitleSubtitleMolecule
+import io.element.android.libraries.designsystem.atomic.molecules.NewSignOutIconTitleSubtitleMolecule
 import io.element.android.libraries.designsystem.atomic.organisms.InfoListItem
 import io.element.android.libraries.designsystem.atomic.organisms.InfoListOrganism
 import io.element.android.libraries.designsystem.atomic.pages.HeaderFooterPage
-import io.element.android.libraries.designsystem.components.BigIcon
+import io.element.android.libraries.designsystem.components.ProfileIcon
 import io.element.android.libraries.designsystem.preview.ElementPreview
 import io.element.android.libraries.designsystem.preview.PreviewsDayNight
 import io.element.android.libraries.designsystem.theme.components.Button
@@ -60,11 +63,11 @@ fun SignedOutView(
 
 @Composable
 private fun SignedOutHeader(state: SignedOutState) {
-    IconTitleSubtitleMolecule(
+    NewSignOutIconTitleSubtitleMolecule(
         modifier = Modifier.padding(top = 60.dp, bottom = 12.dp),
         title = stringResource(id = R.string.screen_signed_out_title),
         subTitle = stringResource(id = R.string.screen_signed_out_subtitle, state.appName),
-        iconStyle = BigIcon.Style.Default(Icons.Filled.AccountCircle),
+        iconStyle = ProfileIcon.Style.Default(Icons.Filled.AccountCircle),
     )
 }
 
@@ -81,11 +84,11 @@ private fun SignedOutContent() {
             items = persistentListOf(
                 InfoListItem(
                     message = stringResource(id = R.string.screen_signed_out_reason_1),
-                    iconVector = CompoundIcons.Lock(),
+                    iconVector = ImageVector.vectorResource(id = io.element.android.libraries.designsystem.R.drawable.ic_lock_settings),
                 ),
                 InfoListItem(
                     message = stringResource(id = R.string.screen_signed_out_reason_2),
-                    iconVector = CompoundIcons.Devices(),
+                    iconVector = ImageVector.vectorResource(id = io.element.android.libraries.designsystem.R.drawable.ic_device)
                 ),
                 InfoListItem(
                     message = stringResource(id = R.string.screen_signed_out_reason_3),
