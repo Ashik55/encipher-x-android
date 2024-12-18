@@ -67,7 +67,7 @@
   <string name="action_ignore">"Ignore"</string>
   <string name="action_invite">"Invite"</string>
   <string name="action_invite_friends">"Invite people"</string>
-  <string name="action_invite_friends_to_app">"Invite people to %1$s"</string>
+  <string name="action_invite_friends_to_app">"Invite Your Friends"</string>
   <string name="action_invite_people_to_app">"Invite people to %1$s"</string>
   <string name="action_invites_list">"Invites"</string>
   <string name="action_join">"Join"</string>
@@ -111,7 +111,7 @@
   <string name="action_signout_anyway">"Sign out anyway"</string>
   <string name="action_skip">"Skip"</string>
   <string name="action_start">"Start"</string>
-  <string name="action_start_chat">"Start new chat"</string>
+  <string name="action_start_chat">"Start New Chat"</string>
   <string name="action_start_verification">"Start Verification"</string>
   <string name="action_static_map_load">"Tap to load map"</string>
   <string name="action_take_photo">"Take photo"</string>

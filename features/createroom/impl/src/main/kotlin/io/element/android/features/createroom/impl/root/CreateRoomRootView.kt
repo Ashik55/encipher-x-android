@@ -154,15 +154,15 @@ private fun CreateRoomActionButtonsList(
     LazyColumn {
         item {
             CreateRoomActionButton(
-                iconRes = CompoundDrawables.ic_compound_plus,
+                iconRes = R.drawable.ic_create_grp,
                 text = stringResource(id = R.string.screen_create_room_action_create_room),
                 onClick = onNewRoomClick,
             )
         }
         item {
             CreateRoomActionButton(
-                iconRes = CompoundDrawables.ic_compound_share_android,
-                text = stringResource(id = CommonStrings.action_invite_friends_to_app, state.applicationName),
+                iconRes = R.drawable.ic_share,
+                text = stringResource(id = CommonStrings.action_invite_friends_to_app),
                 onClick = onInvitePeopleClick,
             )
         }

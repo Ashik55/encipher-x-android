@@ -190,8 +190,8 @@ private fun AttachmentSourcePickerMenu(
                                 .padding(8.dp),
                             contentAlignment = Alignment.Center
                         ) {
-                            Icon(
-                                imageVector = CompoundIcons.VideoCall(),
+                            Image(
+                                painter = painterResource(id = R.drawable.ic_video),
                                 contentDescription = null,
                             )
                         }
