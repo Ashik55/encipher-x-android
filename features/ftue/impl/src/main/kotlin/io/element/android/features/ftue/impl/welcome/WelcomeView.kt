@@ -19,7 +19,9 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import io.element.android.compound.theme.ElementTheme
@@ -92,7 +94,7 @@ fun WelcomeView(
 private fun listItems() = persistentListOf(
     InfoListItem(
         message = stringResource(R.string.screen_welcome_bullet_2),
-        iconVector = CompoundIcons.Lock(),
+        iconVector = ImageVector.vectorResource(id = R.drawable.ic_secure)
     ),
     InfoListItem(
         message = stringResource(R.string.screen_welcome_bullet_3),
