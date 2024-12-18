@@ -33,6 +33,7 @@ import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
 import io.element.android.compound.theme.ElementTheme
 import io.element.android.features.roomdetails.impl.R
+import io.element.android.libraries.designsystem.components.LabelledOutlinedTextField
 import io.element.android.libraries.designsystem.components.LabelledTextField
 import io.element.android.libraries.designsystem.components.async.AsyncActionView
 import io.element.android.libraries.designsystem.components.async.AsyncActionViewDefaults
@@ -42,6 +43,8 @@ import io.element.android.libraries.designsystem.modifiers.clearFocusOnTap
 import io.element.android.libraries.designsystem.preview.ElementPreview
 import io.element.android.libraries.designsystem.preview.PreviewsDayNight
 import io.element.android.libraries.designsystem.theme.aliasScreenTitle
+import io.element.android.libraries.designsystem.theme.components.Button
+import io.element.android.libraries.designsystem.theme.components.ButtonSize
 import io.element.android.libraries.designsystem.theme.components.Scaffold
 import io.element.android.libraries.designsystem.theme.components.Text
 import io.element.android.libraries.designsystem.theme.components.TextButton
@@ -78,9 +81,11 @@ fun RoomDetailsEditView(
                 },
                 navigationIcon = { BackButton(onClick = onBackClick) },
                 actions = {
-                    TextButton(
+                    Button(
                         text = stringResource(CommonStrings.action_save),
                         enabled = state.saveButtonEnabled,
+                        size = ButtonSize.Small,
+                        modifier = Modifier.padding(end = 16.dp),
                         onClick = {
                             focusManager.clearFocus()
                             state.eventSink(RoomDetailsEditEvents.Save)
@@ -111,7 +116,7 @@ fun RoomDetailsEditView(
             Spacer(modifier = Modifier.height(60.dp))
 
             if (state.canChangeName) {
-                LabelledTextField(
+                LabelledOutlinedTextField(
                     label = stringResource(id = R.string.screen_room_details_room_name_label),
                     value = state.roomRawName,
                     placeholder = stringResource(CommonStrings.common_room_name_placeholder),
@@ -128,7 +133,7 @@ fun RoomDetailsEditView(
             Spacer(modifier = Modifier.height(28.dp))
 
             if (state.canChangeTopic) {
-                LabelledTextField(
+                LabelledOutlinedTextField(
                     label = stringResource(CommonStrings.common_topic),
                     value = state.roomTopic,
                     placeholder = stringResource(CommonStrings.common_topic_placeholder),

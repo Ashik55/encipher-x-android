@@ -15,8 +15,10 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import io.element.android.compound.theme.ElementTheme
 import io.element.android.compound.tokens.generated.CompoundIcons
 import io.element.android.features.userprofile.api.UserProfileEvents
 import io.element.android.features.userprofile.api.UserProfileState
@@ -105,7 +107,13 @@ private fun PreferenceBlockUser(
     } else {
         ListItem(
             headlineContent = { Text(stringResource(R.string.screen_dm_details_block_user)) },
-            leadingContent = ListItemContent.Icon(IconSource.Vector(CompoundIcons.Block())),
+            leadingContent = ListItemContent.Custom {
+                Icon(
+                    painter = painterResource(id = R.drawable.ic_block),
+                    contentDescription = null,
+                    tint = ElementTheme.colors.iconCriticalPrimary
+                )
+            },
             style = ListItemStyle.Destructive,
             onClick = { if (!isLoading) eventSink(UserProfileEvents.BlockUser(needsConfirmation = true)) },
             trailingContent = if (isLoading) ListItemContent.Custom(loadingCurrentValue) else null,

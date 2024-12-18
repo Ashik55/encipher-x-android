@@ -138,6 +138,7 @@ fun MessagesView(
 
     DisposableEffect(Unit) {
         systemUiController.setSystemBarsColor(color = backgroundColor)
+        systemUiController.setNavigationBarColor(color = Color.Transparent)
 
         onDispose {
             systemUiController.setSystemBarsColor(color = Color.Transparent)

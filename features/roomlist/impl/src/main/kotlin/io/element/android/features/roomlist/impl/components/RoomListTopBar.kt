@@ -173,7 +173,7 @@ private fun DefaultRoomListTopBar(
                 modifier = Modifier
                     .fillMaxWidth()
 //                    .aspectRatio(2.2f)
-                    .height(230.dp) // Increase the height here
+                    .height(232.dp)
                     .paint(
                         painter = painterResource(id = R.drawable.home_top_bg),
                         contentScale = ContentScale.FillBounds
@@ -342,13 +342,13 @@ private fun DefaultRoomListTopBar(
             }
         }
 
-        HorizontalDivider(
-            modifier = Modifier
-                .fillMaxWidth()
-//                .alpha(collapsedFraction)
-                .align(Alignment.BottomCenter),
-            color = ElementTheme.materialColors.outlineVariant,
-        )
+//        HorizontalDivider(
+//            modifier = Modifier
+//                .fillMaxWidth()
+////                .alpha(collapsedFraction)
+//                .align(Alignment.BottomCenter),
+//            color = ElementTheme.materialColors.outlineVariant,
+//        )
     }
 }
 

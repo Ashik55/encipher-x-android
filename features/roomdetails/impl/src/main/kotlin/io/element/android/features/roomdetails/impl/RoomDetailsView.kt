@@ -40,9 +40,11 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.PreviewParameter
@@ -218,7 +220,7 @@ fun RoomDetailsView(
                             headlineContent = { Text(stringResource(R.string.screen_room_details_roles_and_permissions), color = Color(0xFF11181C)) },
                             leadingContent = ListItemContent.Custom {
                                 Icon(
-                                    imageVector = CompoundIcons.Admin(),
+                                    imageVector = ImageVector.vectorResource(id =  R.drawable.ic_roles),
                                     contentDescription = null,
                                     tint = Color(0xFF11181C)
                                 )
@@ -401,7 +403,7 @@ private fun CustomMainActionsSection(
                 CustomMainActionButton(
                     title = stringResource(CommonStrings.common_unmute),
                     tintColor = Color(0xFF0A8741),
-                    imageVector = CompoundIcons.NotificationsOff(),
+                    imageVector = ImageVector.vectorResource(id =  R.drawable.ic_notifications_off),
                     onClick = {
                         state.eventSink(RoomDetailsEvent.UnmuteNotification)
                     },
@@ -409,7 +411,7 @@ private fun CustomMainActionsSection(
             } else {
                 CustomMainActionButton(
                     title = stringResource(CommonStrings.common_mute),
-                    imageVector = CompoundIcons.Notifications(),
+                    imageVector = ImageVector.vectorResource(id =  R.drawable.ic_unmute),
                     onClick = {
                         state.eventSink(RoomDetailsEvent.MuteNotification)
                     },
@@ -420,7 +422,7 @@ private fun CustomMainActionsSection(
             // TODO Improve the view depending on all the cases here?
             CustomMainActionButton(
                 title = stringResource(CommonStrings.action_call),
-                imageVector = CompoundIcons.VideoCall(),
+                imageVector = ImageVector.vectorResource(id =  R.drawable.ic_video_call),
                 onClick = onCall,
             )
         }
@@ -428,7 +430,7 @@ private fun CustomMainActionsSection(
             if (state.canInvite) {
                 CustomMainActionButton(
                     title = stringResource(CommonStrings.action_invite),
-                    imageVector = CompoundIcons.UserAdd(),
+                    imageVector = ImageVector.vectorResource(id =  R.drawable.ic_user_add),
                     onClick = onInvitePeople,
                 )
             }
@@ -569,7 +571,7 @@ private fun RoomBadge.toMatrixBadgeData(): MatrixBadgeAtom.MatrixBadgeData {
         RoomBadge.ENCRYPTED -> {
   MatrixBadgeAtom.MatrixBadgeData(
                 text = stringResource(R.string.screen_room_details_badge_encrypted),
-                icon = CompoundIcons.LockSolid(),
+                icon = ImageVector.vectorResource(id =  R.drawable.ic_encrypted_white),
                 type = MatrixBadgeAtom.Type.Positive,
 
                 )
@@ -577,7 +579,7 @@ private fun RoomBadge.toMatrixBadgeData(): MatrixBadgeAtom.MatrixBadgeData {
         RoomBadge.NOT_ENCRYPTED -> {
             MatrixBadgeAtom.MatrixBadgeData(
                 text = stringResource(R.string.screen_room_details_badge_not_encrypted),
-                icon = CompoundIcons.LockOff(),
+                icon = ImageVector.vectorResource(id =  R.drawable.ic_not_encrypted_white),
                 type = MatrixBadgeAtom.Type.Neutral,
             )
         }
@@ -597,7 +599,7 @@ private fun RoomBadge.toCustomMatrixBadgeData(): CustomMatrixBadgeAtom.CustomMat
         RoomBadge.ENCRYPTED -> {
             CustomMatrixBadgeAtom.CustomMatrixBadgeData(
                 text = stringResource(R.string.screen_room_details_badge_encrypted),
-                icon = CompoundIcons.LockSolid(),
+                icon = ImageVector.vectorResource(id =  R.drawable.ic_encrypted_white),
                 type = CustomMatrixBadgeAtom.Type.Positive,
 
                 )
@@ -632,7 +634,7 @@ private fun TopicSection(
         if (roomTopic is RoomTopicState.CanAddTopic) {
             PreferenceText(
                 title = stringResource(R.string.screen_room_details_add_topic_title),
-                icon = Icons.Outlined.Add,
+                icon = ImageVector.vectorResource(id =  R.drawable.ic_add_topic),
                 tintColor = Color(0xFF11181C),
                 onClick = { onActionClick(RoomDetailsAction.AddTopic) },
                 modifier = Modifier
@@ -670,7 +672,7 @@ private fun NotificationItem(
 //        supportingContent = { Text(text = subtitle) },
         leadingContent = ListItemContent.Custom {
             Icon(
-                imageVector = CompoundIcons.Notifications(),
+                imageVector = ImageVector.vectorResource(id =  R.drawable.ic_notifications),
                 contentDescription = null,
                 tint = Color(0xFF11181C)
             )
@@ -703,7 +705,7 @@ private fun FavoriteItem(
     onFavoriteChanges: (Boolean) -> Unit,
 ) {
     PreferenceSwitch(
-        icon = CompoundIcons.Favourite(),
+        icon = ImageVector.vectorResource(id =  R.drawable.ic_favourite),
         tintColor = Color(0xFF11181C),
         title = stringResource(id = CommonStrings.common_favourite),
         headlineColor = Color(0xFF11181C),
@@ -727,7 +729,7 @@ private fun MembersItem(
         headlineContent = { Text(stringResource(CommonStrings.common_people), color = Color(0xFF11181C)) },
         leadingContent = ListItemContent.Custom {
             Icon(
-                imageVector = CompoundIcons.User(),
+                imageVector = ImageVector.vectorResource(id =  R.drawable.ic_people),
                 contentDescription = null,
                 tint = Color(0xFF11181C)
             )
@@ -753,7 +755,7 @@ private fun PinnedMessagesItem(
         headlineContent = { Text(stringResource(CommonStrings.screen_room_details_pinned_events_row_title), color = Color(0xFF11181C)) },
         leadingContent = ListItemContent.Custom {
             Icon(
-                imageVector = CompoundIcons.Pin(),
+                imageVector = ImageVector.vectorResource(id =  R.drawable.ic_pin),
                 contentDescription = null,
                 tint = Color(0xFF11181C)
             )
@@ -800,7 +802,7 @@ private fun PollsSection(
             headlineContent = { Text(stringResource(R.string.screen_polls_history_title), color = Color(0xFF11181C)) },
             leadingContent = ListItemContent.Custom {
                 Icon(
-                    imageVector = CompoundIcons.Polls(),
+                    imageVector = ImageVector.vectorResource(id =  R.drawable.ic_polls),
                     contentDescription = null,
                     tint = Color(0xFF11181C)
                 )
@@ -854,7 +856,13 @@ private fun OtherActionsSection(isDm: Boolean, onLeaveRoom: () -> Unit) {
                 )
                 Text(leaveText)
             },
-            leadingContent = ListItemContent.Icon(IconSource.Vector(CompoundIcons.Leave())),
+            leadingContent = ListItemContent.Custom {
+                Icon(
+                    painter = painterResource(id = R.drawable.ic_leave),
+                    contentDescription = null,
+                    tint = ElementTheme.colors.iconCriticalPrimary
+                )
+            },
             style = ListItemStyle.Destructive,
             onClick = onLeaveRoom,
             modifier = Modifier.padding(horizontal =10.dp, vertical = 5.dp).background(
