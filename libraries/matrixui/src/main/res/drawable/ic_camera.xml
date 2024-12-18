@@ -1,0 +1,39 @@
+<!--
+  ~ Copyright 2024 New Vector Ltd.
+  ~
+  ~ SPDX-License-Identifier: AGPL-3.0-only
+  ~ Please see LICENSE in the repository root for full details.
+  -->
+
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp"
+    android:height="24dp"
+    android:viewportWidth="24"
+    android:viewportHeight="24">
+  <path
+      android:pathData="M8.5,14.5H15.5M12,18V11"
+      android:strokeWidth="1"
+      android:fillColor="#00000000"
+      android:strokeColor="#11181C"
+      android:strokeLineCap="round"/>
+  <path
+      android:pathData="M7,6C5.779,6.004 5.104,6.033 4.549,6.266C3.771,6.592 3.138,7.195 2.768,7.961C2.466,8.586 2.417,9.387 2.318,10.99L2.163,13.5C1.917,17.485 1.795,19.477 2.964,20.738C4.133,22 6.103,22 10.042,22H13.958C17.897,22 19.867,22 21.036,20.738C22.205,19.477 22.083,17.485 21.837,13.5L21.682,10.99C21.583,9.387 21.534,8.586 21.232,7.961C20.862,7.195 20.229,6.592 19.451,6.266C18.896,6.033 18.221,6.004 17,6"
+      android:strokeWidth="1"
+      android:fillColor="#00000000"
+      android:strokeColor="#11181C"
+      android:strokeLineCap="round"/>
+  <path
+      android:pathData="M17,7L16.114,4.785C15.732,3.83 15.399,2.746 14.417,2.26C13.892,2 13.262,2 12,2C10.738,2 10.108,2 9.583,2.26C8.601,2.746 8.268,3.83 7.886,4.785L7,7"
+      android:strokeLineJoin="round"
+      android:strokeWidth="1"
+      android:fillColor="#00000000"
+      android:strokeColor="#11181C"
+      android:strokeLineCap="round"/>
+  <path
+      android:pathData="M12,6H12.009"
+      android:strokeLineJoin="round"
+      android:strokeWidth="1"
+      android:fillColor="#00000000"
+      android:strokeColor="#11181C"
+      android:strokeLineCap="round"/>
+</vector>

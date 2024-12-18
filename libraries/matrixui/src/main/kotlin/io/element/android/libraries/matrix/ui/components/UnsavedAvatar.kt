@@ -8,6 +8,7 @@
 package io.element.android.libraries.matrix.ui.components
 
 import android.net.Uri
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Box
@@ -23,8 +24,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.ColorPainter
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
@@ -34,6 +38,7 @@ import io.element.android.libraries.designsystem.preview.PreviewsDayNight
 import io.element.android.libraries.designsystem.preview.debugPlaceholderBackground
 import io.element.android.libraries.designsystem.theme.components.Icon
 import io.element.android.libraries.designsystem.theme.temporaryColorBgSpecial
+import io.element.android.libraries.matrix.ui.R
 
 /**
  * An avatar that the user has selected, but which has not yet been uploaded to Matrix.
@@ -72,7 +77,7 @@ fun UnsavedAvatar(
 //            .border(width = 1.dp, color = ElementTheme.materialColors.outline)
         ) {
             Icon(
-                imageVector = Icons.Outlined.AddAPhoto,
+                imageVector = ImageVector.vectorResource(id =  R.drawable.ic_camera),
                 contentDescription = null,
                 modifier = Modifier
                     .align(Alignment.Center)

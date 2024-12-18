@@ -344,7 +344,7 @@ private fun RoomVisibilityOptions(
                     RoundedIconAtom(
                         size = RoundedIconAtomSize.Big,
                         resourceId = item.icon,
-                        tint = if (isSelected) ElementTheme.colors.iconPrimary else ElementTheme.colors.iconSecondary,
+                        tint = if (isSelected) Color(0xFF0A8741) else ElementTheme.colors.iconSecondary,
                     )
                 },
                 headlineContent = { Text(text = stringResource(item.title)) },
