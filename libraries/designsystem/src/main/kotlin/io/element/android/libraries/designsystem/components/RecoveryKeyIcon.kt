@@ -104,7 +104,7 @@ object RecoveryKeyIcon {
         }
         val icon = when (style) {
             is Style.Default -> painterResource(id = R.drawable.ic_recovery_key)
-            Style.Alert, Style.AlertSolid -> painterResource(id = R.drawable.ic_error)
+            Style.Alert, Style.AlertSolid -> painterResource(id = R.drawable.ic_recovery_key_red)
             Style.Success, Style.SuccessSolid -> painterResource(id = R.drawable.ic_check_circle)
         }
         val contentDescription = when (style) {

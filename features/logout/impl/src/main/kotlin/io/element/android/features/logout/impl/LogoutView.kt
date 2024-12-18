@@ -56,7 +56,7 @@ fun LogoutView(
         onBackClick = onBackClick,
         title = title(state),
         subTitle = subtitle(state),
-        iconStyle = RecoveryKeyIcon.Style.Default(CompoundIcons.KeySolid()),
+        iconStyle = RecoveryKeyIcon.Style.AlertSolid,
         modifier = modifier,
         buttons = {
             Buttons(

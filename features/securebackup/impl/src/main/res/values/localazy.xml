@@ -38,7 +38,7 @@
   <string name="screen_recovery_key_change_generate_key">"Generate a new recovery key"</string>
   <string name="screen_recovery_key_change_generate_key_description">"Keep this private!"</string>
   <string name="screen_recovery_key_change_success">"Recovery key changed"</string>
-  <string name="screen_recovery_key_change_title">"Update recovery key?"</string>
+  <string name="screen_recovery_key_change_title">"Update Recovery Key?"</string>
   <string name="screen_recovery_key_confirm_create_new_recovery_key">"Create new recovery key"</string>
   <string name="screen_recovery_key_confirm_description">"Make sure nobody can see this screen!"</string>
   <string name="screen_recovery_key_confirm_error_content">"Please try again to confirm access to your key storage."</string>
