@@ -78,11 +78,11 @@ private fun EmojiItemView(emoji: VerificationEmoji, modifier: Modifier = Modifie
     val emojiResource = emoji.number.toEmojiResource()
     Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = modifier) {
         Image(
-            modifier = Modifier.size(48.dp),
+            modifier = Modifier.size(32.dp),
             painter = painterResource(id = emojiResource.drawableRes),
             contentDescription = null,
         )
-        Spacer(modifier = Modifier.height(16.dp))
+        Spacer(modifier = Modifier.height(8.dp))
         Text(
             text = stringResource(id = emojiResource.nameRes),
             style = ElementTheme.typography.fontBodyMdRegular,

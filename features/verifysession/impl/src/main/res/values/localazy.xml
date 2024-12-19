@@ -12,9 +12,9 @@
   <string name="screen_identity_waiting_on_other_device">"Waiting on Other Device…"</string>
   <string name="screen_session_verification_cancelled_subtitle">"Something doesn’t seem right. Either the request timed out or the request was denied."</string>
   <string name="screen_session_verification_compare_emojis_subtitle">"Ensure the emojis below are identical to the ones shown in your other session."</string>
-  <string name="screen_session_verification_compare_emojis_title">"Compare emojis"</string>
+  <string name="screen_session_verification_compare_emojis_title">"Compare Emojis"</string>
   <string name="screen_session_verification_compare_numbers_subtitle">"Confirm that the numbers below match those shown on your other session."</string>
-  <string name="screen_session_verification_compare_numbers_title">"Compare numbers"</string>
+  <string name="screen_session_verification_compare_numbers_title">"Compare Numbers"</string>
   <string name="screen_session_verification_complete_subtitle">"Your new session is now verified. It has access to your encrypted messages, and other users will see it as trusted."</string>
   <string name="screen_session_verification_enter_recovery_key">"Enter Recovery Key"</string>
   <string name="screen_session_verification_failed_subtitle">"The request either timed out, was denied, or encountered a verification mismatch."</string>
