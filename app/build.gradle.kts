@@ -50,8 +50,7 @@ android {
         }
         targetSdk = Versions.TARGET_SDK
         versionCode = Versions.VERSION_CODE
-        versionName = "0.7.5"
-//        versionName = Versions.VERSION_NAME
+        versionName = Versions.VERSION_NAME
 
         // Keep abiFilter for the universalApk
         ndk {
