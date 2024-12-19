@@ -21,6 +21,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.semantics.clearAndSetSemantics
@@ -131,7 +132,7 @@ private fun InitialsAvatar(
     }
 
     Box(
-        modifier.background(color = avatarColors.background)
+        modifier.background(color = Color(0xFFBBBBBB))
     ) {
 //        val fontSize = (forcedAvatarSize ?: avatarData.size.dp).toSp() / 2
 //        val originalFont = ElementTheme.typography.fontHeadingMdBold
