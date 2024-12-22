@@ -22,7 +22,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
 import io.element.android.compound.tokens.generated.CompoundIcons
@@ -32,6 +34,7 @@ import io.element.android.libraries.designsystem.preview.ElementPreview
 import io.element.android.libraries.designsystem.preview.PreviewsDayNight
 import io.element.android.libraries.designsystem.theme.components.Icon
 import io.element.android.libraries.matrix.api.media.MediaSource
+import io.element.android.libraries.matrix.ui.R
 import io.element.android.libraries.matrix.ui.media.MediaRequestData
 import kotlinx.parcelize.Parcelize
 
@@ -70,13 +73,13 @@ fun AttachmentThumbnail(
             when (info.type) {
                 AttachmentThumbnailType.Image -> {
                     Icon(
-                        imageVector = CompoundIcons.Image(),
+                        imageVector = ImageVector.vectorResource(id = R.drawable.ic_image),
                         contentDescription = info.textContent,
                     )
                 }
                 AttachmentThumbnailType.Video -> {
                     Icon(
-                        imageVector = CompoundIcons.VideoCall(),
+                        imageVector = ImageVector.vectorResource(id = R.drawable.ic_video),
                         contentDescription = info.textContent,
                     )
                 }
@@ -88,21 +91,25 @@ fun AttachmentThumbnail(
                 }
                 AttachmentThumbnailType.Voice -> {
                     Icon(
-                        imageVector = CompoundIcons.MicOnSolid(),
+                        imageVector = ImageVector.vectorResource(id = R.drawable.ic_mic),
                         contentDescription = info.textContent,
                     )
                 }
                 AttachmentThumbnailType.File -> {
                     Icon(
-                        imageVector = CompoundIcons.Attachment(),
+                        imageVector = ImageVector.vectorResource(id = R.drawable.ic_attachment),
                         contentDescription = info.textContent,
-                        modifier = Modifier.rotate(-45f)
+//                        modifier = Modifier.rotate(-45f)
                     )
                 }
                 AttachmentThumbnailType.Location -> {
-                    PinIcon(
-                        modifier = Modifier.fillMaxSize()
+                    Icon(
+                        imageVector = ImageVector.vectorResource(id = R.drawable.ic_location),
+                        contentDescription = info.textContent,
                     )
+//                    PinIcon(
+//                        modifier = Modifier.fillMaxSize()
+//                    )
                     /*
                     // For coherency across the app, we should us this instead. Waiting for design decision.
                     Icon(
@@ -113,7 +120,7 @@ fun AttachmentThumbnail(
                 }
                 AttachmentThumbnailType.Poll -> {
                     Icon(
-                        imageVector = CompoundIcons.Polls(),
+                        imageVector = ImageVector.vectorResource(id = R.drawable.ic_polls),
                         contentDescription = info.textContent,
                     )
                 }
