@@ -28,7 +28,7 @@ sealed class TimelineItemAction(
     data object Redact : TimelineItemAction(CommonStrings.action_remove, R.drawable.ic_remove, destructive = true)
     data object Reply : TimelineItemAction(CommonStrings.action_reply, R.drawable.ic_reply)
     data object ReplyInThread : TimelineItemAction(CommonStrings.action_reply_in_thread, R.drawable.ic_reply)
-    data object Edit : TimelineItemAction(CommonStrings.action_edit, R.drawable.ic_edit)
+    data object Edit : TimelineItemAction(CommonStrings.action_edit, R.drawable.ic_edit_reaction)
 //    data object ViewSource : TimelineItemAction(CommonStrings.action_view_source, CommonDrawables.ic_developer_options)
     data object ReportContent : TimelineItemAction(CommonStrings.action_report_content, R.drawable.ic_report_chat, destructive = true)
     data object EndPoll : TimelineItemAction(CommonStrings.action_end_poll, R.drawable.ic_end_polls, destructive = true)
