@@ -29,7 +29,9 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.tooling.preview.PreviewParameter
@@ -43,6 +45,8 @@ import io.element.android.libraries.designsystem.components.list.ListItemContent
 import io.element.android.libraries.designsystem.preview.ElementPreview
 import io.element.android.libraries.designsystem.preview.PreviewsDayNight
 import io.element.android.libraries.designsystem.theme.aliasScreenTitle
+import io.element.android.libraries.designsystem.theme.components.Button
+import io.element.android.libraries.designsystem.theme.components.ButtonSize
 import io.element.android.libraries.designsystem.theme.components.HorizontalDivider
 import io.element.android.libraries.designsystem.theme.components.Icon
 import io.element.android.libraries.designsystem.theme.components.IconSource
@@ -153,7 +157,7 @@ fun CreatePollView(
                     },
                     trailingContent = ListItemContent.Custom {
                         Icon(
-                            imageVector = CompoundIcons.Delete(),
+                            imageVector = ImageVector.vectorResource(id = R.drawable.ic_remove),
                             contentDescription = null,
                             modifier = Modifier.clickable(answer.canDelete) {
                                 state.eventSink(CreatePollEvents.RemoveAnswer(index))
@@ -227,11 +231,13 @@ private fun CreatePollTopAppBar(
             BackButton(onClick = onBackClick)
         },
         actions = {
-            TextButton(
+            Button(
                 text = when (mode) {
                     CreatePollState.Mode.New -> stringResource(id = CommonStrings.action_create)
                     CreatePollState.Mode.Edit -> stringResource(id = CommonStrings.action_done)
                 },
+                size = ButtonSize.Small,
+                modifier = Modifier.padding(end = 16.dp),
                 onClick = onSaveClick,
                 enabled = saveEnabled,
             )
