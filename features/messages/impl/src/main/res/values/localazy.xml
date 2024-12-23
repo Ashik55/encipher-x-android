@@ -46,8 +46,8 @@
     <item quantity="other">"%1$s, %2$s and %3$d others"</item>
   </plurals>
   <plurals name="screen_room_typing_notification">
-    <item quantity="one">"%1$s is typing"</item>
-    <item quantity="other">"%1$s are typing"</item>
+    <item quantity="one">"%1$s is typing…"</item>
+    <item quantity="other">"%1$s are typing…"</item>
   </plurals>
   <string name="screen_room_typing_two_members">"%1$s and %2$s"</string>
 </resources>
