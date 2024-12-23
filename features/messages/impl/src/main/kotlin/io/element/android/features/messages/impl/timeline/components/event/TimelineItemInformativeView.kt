@@ -55,7 +55,7 @@ fun TimelineItemInformativeView(
         )
         Spacer(modifier = Modifier.width(4.dp))
         Text(
-            fontStyle = FontStyle.Italic,
+//            fontStyle = FontStyle.Italic,
             color = MaterialTheme.colorScheme.secondary,
             style = ElementTheme.typography.fontBodyMdRegular,
             text = text
