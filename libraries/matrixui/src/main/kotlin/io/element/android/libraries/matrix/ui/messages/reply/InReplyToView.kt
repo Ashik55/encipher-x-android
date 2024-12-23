@@ -40,6 +40,7 @@ import io.element.android.libraries.designsystem.theme.components.Text
 import io.element.android.libraries.matrix.api.core.UserId
 import io.element.android.libraries.matrix.api.timeline.item.event.ProfileTimelineDetails
 import io.element.android.libraries.matrix.api.timeline.item.event.getDisambiguatedDisplayName
+import io.element.android.libraries.matrix.ui.R
 import io.element.android.libraries.matrix.ui.components.AttachmentThumbnail
 import io.element.android.libraries.matrix.ui.messages.sender.SenderName
 import io.element.android.libraries.matrix.ui.messages.sender.SenderNameMode
@@ -157,7 +158,7 @@ private fun ReplyToContentText(metadata: InReplyToMetadata?) {
         null -> ""
     }
     val iconResourceId = when (metadata) {
-        InReplyToMetadata.Redacted -> CompoundDrawables.ic_compound_delete
+        InReplyToMetadata.Redacted -> io.element.android.libraries.designsystem.R.drawable.ic_remove
         InReplyToMetadata.UnableToDecrypt -> CompoundDrawables.ic_compound_time
         else -> null
     }

@@ -20,6 +20,7 @@ import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.unit.dp
 import io.element.android.compound.theme.ElementTheme
+import io.element.android.features.messages.impl.R
 import io.element.android.features.messages.impl.timeline.components.layout.ContentAvoidingLayoutData
 import io.element.android.libraries.designsystem.icons.CompoundDrawables
 import io.element.android.libraries.designsystem.preview.ElementPreview
@@ -68,7 +69,7 @@ internal fun TimelineItemInformativeViewPreview() = ElementPreview {
     TimelineItemInformativeView(
         text = "Info",
         iconDescription = "",
-        iconResourceId = CompoundDrawables.ic_compound_delete,
+        iconResourceId = R.drawable.ic_remove,
         onContentLayoutChange = {},
     )
 }
