@@ -139,7 +139,11 @@ private fun InitialsAvatar(
                 color = if (ElementTheme.isLightTheme) Color(0xFFF3F3F3) else Color(0xFF11181C),
                 shape = RoundedCornerShape(50))
             .border(
-                width = 2.dp,
+                width = when {
+                    avatarSize < 20.dp -> 0.5.dp
+                    avatarSize < 35.dp -> 1.5.dp
+                    else -> 2.dp
+                },
                 color = if (ElementTheme.isLightTheme) Color(0xFF11181C) else Color(0xFFFFFFFF),
                 shape = RoundedCornerShape(50)
 
