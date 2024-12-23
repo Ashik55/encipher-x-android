@@ -176,7 +176,7 @@ Reason: %1$s."</string>
   <string name="common_message">"Message"</string>
   <string name="common_message_actions">"Message actions"</string>
   <string name="common_message_layout">"Message layout"</string>
-  <string name="common_message_removed">"Message Removed"</string>
+  <string name="common_message_removed">"Message removed"</string>
   <string name="common_modern">"Modern"</string>
   <string name="common_mute">"Mute"</string>
   <string name="common_no_results">"No results"</string>
