@@ -7,7 +7,7 @@
   <string name="screen_identity_confirmation_use_another_device">"Use another device"</string>
   <string name="screen_identity_confirmation_use_recovery_key">"Use recovery key"</string>
   <string name="screen_identity_confirmed_subtitle">"Now you can read or send messages securely, and anyone you chat with can also trust this device."</string>
-  <string name="screen_identity_confirmed_title">"Device verified"</string>
+  <string name="screen_identity_confirmed_title">"Device Verified"</string>
   <string name="screen_identity_use_another_device">"Try Another Device"</string>
   <string name="screen_identity_waiting_on_other_device">"Waiting on Other Device…"</string>
   <string name="screen_session_verification_cancelled_subtitle">"Something doesn’t seem right. Either the request timed out or the request was denied."</string>
