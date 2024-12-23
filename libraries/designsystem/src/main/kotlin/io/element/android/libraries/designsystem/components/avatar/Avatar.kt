@@ -9,12 +9,14 @@ package io.element.android.libraries.designsystem.components.avatar
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.remember
@@ -132,7 +134,16 @@ private fun InitialsAvatar(
     }
 
     Box(
-        modifier.background(color = Color(0xFFBBBBBB))
+        modifier
+            .background(
+                color = if (ElementTheme.isLightTheme) Color(0xFFF3F3F3) else Color(0xFF11181C),
+                shape = RoundedCornerShape(50))
+            .border(
+                width = 2.dp,
+                color = if (ElementTheme.isLightTheme) Color(0xFF11181C) else Color(0xFFFFFFFF),
+                shape = RoundedCornerShape(50)
+
+            )
     ) {
 //        val fontSize = (forcedAvatarSize ?: avatarData.size.dp).toSp() / 2
 //        val originalFont = ElementTheme.typography.fontHeadingMdBold
@@ -147,7 +158,7 @@ private fun InitialsAvatar(
 //            color = avatarColors.foreground,
 //        )
         Image(
-            painter = painterResource(id = io.element.android.libraries.designsystem.R.drawable.ic_avatar_placeholder),
+            painter = painterResource(id = if (ElementTheme.isLightTheme) io.element.android.libraries.designsystem.R.drawable.ic_avatar_placeholder else io.element.android.libraries.designsystem.R.drawable.ic_avatar_placeholder_dark),
             contentDescription = null,
             modifier = Modifier
                 .align(Alignment.Center)

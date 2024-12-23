@@ -24,6 +24,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
 import io.element.android.compound.theme.ElementTheme
+import io.element.android.features.messages.impl.R
 import io.element.android.features.messages.impl.timeline.components.layout.ContentAvoidingLayout
 import io.element.android.features.messages.impl.timeline.components.layout.ContentAvoidingLayoutData
 import io.element.android.features.messages.impl.timeline.model.event.TimelineItemFileContent
@@ -53,12 +54,12 @@ fun TimelineItemFileView(
             contentAlignment = Alignment.Center,
         ) {
             Icon(
-                resourceId = CompoundDrawables.ic_compound_attachment,
+                resourceId = io.element.android.libraries.matrix.ui.R.drawable.ic_attachment,
                 contentDescription = null,
                 tint = ElementTheme.materialColors.primary,
                 modifier = Modifier
                     .size(16.dp)
-                    .rotate(-45f),
+//                    .rotate(-45f),
             )
         }
         Spacer(Modifier.width(spacing))
