@@ -8,13 +8,16 @@
 package io.element.android.libraries.roomselect.impl
 
 import androidx.activity.compose.BackHandler
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.consumeWindowInsets
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
@@ -23,9 +26,13 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.style.TextOverflow
@@ -38,6 +45,8 @@ import io.element.android.libraries.designsystem.components.button.BackButton
 import io.element.android.libraries.designsystem.preview.ElementPreview
 import io.element.android.libraries.designsystem.preview.PreviewsDayNight
 import io.element.android.libraries.designsystem.theme.aliasScreenTitle
+import io.element.android.libraries.designsystem.theme.components.Button
+import io.element.android.libraries.designsystem.theme.components.ButtonSize
 import io.element.android.libraries.designsystem.theme.components.HorizontalDivider
 import io.element.android.libraries.designsystem.theme.components.RadioButton
 import io.element.android.libraries.designsystem.theme.components.Scaffold
@@ -107,64 +116,54 @@ fun RoomSelectView(
                     BackButton(onClick = { onBackButton(state) })
                 },
                 actions = {
-                    TextButton(
+                    Button(
                         text = stringResource(CommonStrings.action_send),
+                        size = ButtonSize.Small,
+                        modifier = Modifier.padding(end = 16.dp),
                         enabled = state.selectedRooms.isNotEmpty(),
                         onClick = { onSubmit(state.selectedRooms.map { it.roomId }) }
                     )
-                }
+                },
+                // TopAppBar background transparent
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = Color.Transparent
+                )
             )
         }
     ) { paddingValues ->
-        Column(
-            Modifier
-                .padding(paddingValues)
-                .consumeWindowInsets(paddingValues)
-        ) {
-            SearchBar(
-                modifier = Modifier.fillMaxWidth(),
-                placeHolderTitle = stringResource(CommonStrings.action_search),
-                query = state.query,
-                onQueryChange = { state.eventSink(RoomSelectEvents.UpdateQuery(it)) },
-                active = state.isSearchActive,
-                onActiveChange = { state.eventSink(RoomSelectEvents.ToggleSearchActive) },
-                resultState = state.resultState,
-                showBackButton = false,
-            ) { summaries ->
-                LazyColumn {
-                    item {
-                        SelectedRoomsHelper(
-                            // TODO state.isForwarding
-                            isForwarding = false,
-                            selectedRooms = state.selectedRooms
-                        )
-                    }
-                    items(summaries, key = { it.roomId.value }) { roomSummary ->
-                        Column {
-                            RoomSummaryView(
-                                roomSummary,
-                                isSelected = state.selectedRooms.any { it.roomId == roomSummary.roomId },
-                                onSelection = { roomSummary ->
-                                    state.eventSink(RoomSelectEvents.SetSelectedRoom(roomSummary))
-                                }
-                            )
-                            HorizontalDivider(modifier = Modifier.fillMaxWidth())
-                        }
-                    }
-                }
-            }
-
-            if (!state.isSearchActive) {
-                // TODO restore for multi-selection
-//                SelectedRoomsHelper(
-//                    isForwarding = state.isForwarding,
-//                    selectedRooms = state.selectedRooms
-//                )
-                Spacer(modifier = Modifier.height(20.dp))
-
-                if (state.resultState is SearchBarResultState.Results) {
+        Box {
+            Image(
+                painter = painterResource(id = io.element.android.libraries.designsystem.R.drawable.bg),
+                contentDescription = null,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .fillMaxHeight(),
+                contentScale = ContentScale.Crop
+            )
+            Column(
+                Modifier
+                    .padding(paddingValues)
+                    .consumeWindowInsets(paddingValues)
+            ) {
+                SearchBar(
+                    modifier = Modifier.fillMaxWidth(),
+                    placeHolderTitle = stringResource(CommonStrings.action_search),
+                    query = state.query,
+                    onQueryChange = { state.eventSink(RoomSelectEvents.UpdateQuery(it)) },
+                    active = state.isSearchActive,
+                    onActiveChange = { state.eventSink(RoomSelectEvents.ToggleSearchActive) },
+                    resultState = state.resultState,
+                    showBackButton = false,
+                ) { summaries ->
                     LazyColumn {
-                        items(state.resultState.results, key = { it.roomId.value }) { roomSummary ->
+                        item {
+                            SelectedRoomsHelper(
+                                // TODO state.isForwarding
+                                isForwarding = false,
+                                selectedRooms = state.selectedRooms
+                            )
+                        }
+                        items(summaries, key = { it.roomId.value }) { roomSummary ->
                             Column {
                                 RoomSummaryView(
                                     roomSummary,
@@ -174,6 +173,32 @@ fun RoomSelectView(
                                     }
                                 )
                                 HorizontalDivider(modifier = Modifier.fillMaxWidth())
+                            }
+                        }
+                    }
+                }
+
+                if (!state.isSearchActive) {
+                    // TODO restore for multi-selection
+//                SelectedRoomsHelper(
+//                    isForwarding = state.isForwarding,
+//                    selectedRooms = state.selectedRooms
+//                )
+                    Spacer(modifier = Modifier.height(20.dp))
+
+                    if (state.resultState is SearchBarResultState.Results) {
+                        LazyColumn {
+                            items(state.resultState.results, key = { it.roomId.value }) { roomSummary ->
+                                Column {
+                                    RoomSummaryView(
+                                        roomSummary,
+                                        isSelected = state.selectedRooms.any { it.roomId == roomSummary.roomId },
+                                        onSelection = { roomSummary ->
+                                            state.eventSink(RoomSelectEvents.SetSelectedRoom(roomSummary))
+                                        }
+                                    )
+                                    HorizontalDivider(modifier = Modifier.fillMaxWidth())
+                                }
                             }
                         }
                     }
