@@ -140,7 +140,11 @@ class DefaultActionListPresenter @AssistedInject constructor(
         isPinnedEventsEnabled: Boolean,
         isEventPinned: Boolean,
     ): List<TimelineItemAction> {
-        val canRedact = timelineItem.isMine && usersEventPermissions.canRedactOwn || !timelineItem.isMine && usersEventPermissions.canRedactOther
+//        val canRedact = timelineItem.isMine && usersEventPermissions.canRedactOwn || !timelineItem.isMine && usersEventPermissions.canRedactOther
+
+        val canRedact = (timelineItem.isMine && usersEventPermissions.canRedactOwn) &&
+            (timelineItem.content.canReact())
+
         return buildList {
             if (timelineItem.canBeRepliedTo && usersEventPermissions.canSendMessage) {
                 if (timelineItem.isThreaded) {
