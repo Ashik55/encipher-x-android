@@ -37,11 +37,13 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.rotate
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -292,12 +294,12 @@ private fun MediaFileView(
                 contentAlignment = Alignment.Center,
             ) {
                 Icon(
-                    imageVector = if (isAudio) Icons.Outlined.GraphicEq else CompoundIcons.Attachment(),
+                    imageVector = if (isAudio) Icons.Outlined.GraphicEq else ImageVector.vectorResource(id = io.element.android.libraries.matrix.ui.R.drawable.ic_attachment),
                     contentDescription = null,
                     tint = MaterialTheme.colorScheme.background,
                     modifier = Modifier
                         .size(32.dp)
-                        .rotate(if (isAudio) 0f else -45f),
+//                        .rotate(if (isAudio) 0f else -45f),
                 )
             }
             if (info != null) {
