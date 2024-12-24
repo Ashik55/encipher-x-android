@@ -273,13 +273,28 @@ private fun MessageSummary(event: TimelineItem.Event, modifier: Modifier = Modif
             content = { ContentForBody(stringResource(CommonStrings.common_shared_location)) }
         }
         is TimelineItemImageContent -> {
-            content = { ContentForBody(event.content.bestDescription) }
+            content = {
+                ContentForBody(
+//                    event.content.bestDescription
+                    "Image"
+                )
+            }
         }
         is TimelineItemStickerContent -> {
-            content = { ContentForBody(event.content.bestDescription) }
+            content = {
+                ContentForBody(
+//                    event.content.bestDescription
+                    "Sticker"
+                )
+            }
         }
         is TimelineItemVideoContent -> {
-            content = { ContentForBody(event.content.bestDescription) }
+            content = {
+                ContentForBody(
+//                    event.content.bestDescription
+                    "Video"
+                )
+            }
         }
         is TimelineItemFileContent -> {
             content = { ContentForBody(event.content.bestDescription) }

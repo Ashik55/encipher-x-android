@@ -110,13 +110,16 @@ class DefaultRoomLastMessageFormatter @Inject constructor(
                 messageType.toPlainText(permalinkParser)
             }
             is VideoMessageType -> {
-                messageType.bestDescription.prefixWith(sp.getString(CommonStrings.common_video))
+                sp.getString(CommonStrings.common_shared_video)
+//                messageType.bestDescription.prefixWith(sp.getString(CommonStrings.common_video))
             }
             is ImageMessageType -> {
-                messageType.bestDescription.prefixWith(sp.getString(CommonStrings.common_image))
+                sp.getString(CommonStrings.common_shared_image)
+//                messageType.bestDescription.prefixWith(sp.getString(CommonStrings.common_image))
             }
             is StickerMessageType -> {
-                messageType.bestDescription.prefixWith(sp.getString(CommonStrings.common_sticker))
+                sp.getString(CommonStrings.common_shared_sticker)
+//                messageType.bestDescription.prefixWith(sp.getString(CommonStrings.common_sticker))
             }
             is LocationMessageType -> {
                 sp.getString(CommonStrings.common_shared_location)

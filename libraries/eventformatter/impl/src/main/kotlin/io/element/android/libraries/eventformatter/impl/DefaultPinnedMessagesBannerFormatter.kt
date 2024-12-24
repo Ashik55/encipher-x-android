@@ -77,22 +77,28 @@ class DefaultPinnedMessagesBannerFormatter @Inject constructor(
                 messageType.toPlainText(permalinkParser)
             }
             is VideoMessageType -> {
-                messageType.bestDescription.prefixWith(CommonStrings.common_video)
+//                messageType.bestDescription.prefixWith(CommonStrings.common_video)
+                sp.getString(CommonStrings.common_video)
             }
             is ImageMessageType -> {
-                messageType.bestDescription.prefixWith(CommonStrings.common_image)
+//                messageType.bestDescription.prefixWith(CommonStrings.common_image)
+                sp.getString(CommonStrings.common_image)
             }
             is StickerMessageType -> {
-                messageType.bestDescription.prefixWith(CommonStrings.common_sticker)
+//                messageType.bestDescription.prefixWith(CommonStrings.common_sticker)
+                sp.getString(CommonStrings.common_sticker)
             }
             is LocationMessageType -> {
                 messageType.body.prefixWith(CommonStrings.common_shared_location)
+//                sp.getString(CommonStrings.common_shared_location)
             }
             is FileMessageType -> {
                 messageType.bestDescription.prefixWith(CommonStrings.common_file)
+//                sp.getString(CommonStrings.common_file)
             }
             is AudioMessageType -> {
                 messageType.bestDescription.prefixWith(CommonStrings.common_audio)
+//                sp.getString(CommonStrings.common_audio)
             }
             is VoiceMessageType -> {
                 // In this case, do not use bestDescription, because the filename is useless, only use the caption if available.
