@@ -9,7 +9,10 @@ package io.element.android.libraries.designsystem.components.avatar
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -22,11 +25,13 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.CompositingStrategy
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
 import io.element.android.libraries.designsystem.preview.ElementThemedPreview
 import io.element.android.libraries.designsystem.preview.PreviewGroup
 import io.element.android.libraries.designsystem.text.toPx
 import io.element.android.libraries.testtags.TestTags
 import io.element.android.libraries.testtags.testTag
+
 
 /** Ratio between the box size (120 on Figma) and the avatar size (75 on Figma). */
 private const val SIZE_RATIO = 1.6f
@@ -46,13 +51,15 @@ fun DmAvatars(
     val boxSizePx = boxSize.toPx()
     val otherAvatarRadius = otherUserAvatarData.size.dp.toPx() / 2
     Box(
-        modifier = modifier.size(boxSize),
+        modifier = modifier
+            .height(80.dp)
+            .width(boxSize)
     ) {
         // Draw user avatar and cut top right corner
         Avatar(
             avatarData = userAvatarData,
             modifier = Modifier
-                .align(Alignment.BottomStart)
+                .align(Alignment.CenterStart)
                 .graphicsLayer {
                     compositingStrategy = CompositingStrategy.Offscreen
                 }
@@ -61,10 +68,10 @@ fun DmAvatars(
                     drawCircle(
                         color = Color.Black,
                         center = Offset(
-                            x = boxSizePx - otherAvatarRadius,
-                            y = size.height - (boxSizePx - otherAvatarRadius),
+                            x = (boxSizePx - otherAvatarRadius) - 4f,
+                            y = 103F,
                         ),
-                        radius = otherAvatarRadius / 0.9f,
+                        radius = otherAvatarRadius / 0.99f,
                         blendMode = BlendMode.Clear,
                     )
                 }
@@ -77,7 +84,7 @@ fun DmAvatars(
         Avatar(
             avatarData = otherUserAvatarData,
             modifier = Modifier
-                .align(Alignment.TopEnd)
+                .align(Alignment.CenterEnd)
                 .clip(CircleShape)
                 .clickable(enabled = otherUserAvatarData.url != null) {
                     otherUserAvatarData.url?.let { openOtherAvatarPreview(it) }
