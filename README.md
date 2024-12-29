@@ -20,14 +20,14 @@ Learn more about why we are building Element X in our blog post: [https://elemen
 
 <!--- TOC -->
 
-* [Screenshots](#screenshots)
-* [Translations](#translations)
-* [Rust SDK](#rust-sdk)
-* [Status](#status)
-* [Contributing](#contributing)
-* [Build instructions](#build-instructions)
-* [Support](#support)
-* [Copyright and License](#copyright-and-license)
+-   [Screenshots](#screenshots)
+-   [Translations](#translations)
+-   [Rust SDK](#rust-sdk)
+-   [Status](#status)
+-   [Contributing](#contributing)
+-   [Build instructions](#build-instructions)
+-   [Support](#support)
+-   [Copyright and License](#copyright-and-license)
 
 <!--- END -->
 
@@ -49,9 +49,9 @@ And to exit demo mode:
 adb shell am broadcast -a com.android.systemui.demo -e command exit
 -->
 
-|<img src="./docs/images-lfs/screen_1_light.png" width="280" />|<img src="./docs/images-lfs/screen_2_light.png" width="280" />|<img src="./docs/images-lfs/screen_3_light.png" width="280" />|<img src="./docs/images-lfs/screen_4_light.png" width="280" />|
-|-|-|-|-|
-|<img src="./docs/images-lfs/screen_1_dark.png" width="280" />|<img src="./docs/images-lfs/screen_2_dark.png" width="280" />|<img src="./docs/images-lfs/screen_3_dark.png" width="280" />|<img src="./docs/images-lfs/screen_4_dark.png" width="280" />|
+| <img src="./docs/images-lfs/screen_1_light.png" width="280" /> | <img src="./docs/images-lfs/screen_2_light.png" width="280" /> | <img src="./docs/images-lfs/screen_3_light.png" width="280" /> | <img src="./docs/images-lfs/screen_4_light.png" width="280" /> |
+| -------------------------------------------------------------- | -------------------------------------------------------------- | -------------------------------------------------------------- | -------------------------------------------------------------- |
+| <img src="./docs/images-lfs/screen_1_dark.png" width="280" />  | <img src="./docs/images-lfs/screen_2_dark.png" width="280" />  | <img src="./docs/images-lfs/screen_3_dark.png" width="280" />  | <img src="./docs/images-lfs/screen_4_dark.png" width="280" />  |
 
 ## Translations
 
@@ -59,7 +59,7 @@ Element X Android supports many languages. You can help us to translate the app 
 
 Note that for now, we keep control on the French and German translations.
 
-Translations can be checked screen per screen using our tool Element X Android Gallery, available at https://element-hq.github.io/element-x-android/. Note that this page is updated every Tuesday. 
+Translations can be checked screen per screen using our tool Element X Android Gallery, available at https://element-hq.github.io/element-x-android/. Note that this page is updated every Tuesday.
 
 More instructions about translating the application can be found at [CONTRIBUTING.md](CONTRIBUTING.md#strings).
 
@@ -102,8 +102,9 @@ Licensed under the AGPL-3.0-only (the "License"); you may not use this work exce
 
 Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the specific language governing permissions and limitations under the License.
 
-
 ## FETCH UPDATES
+
+git remote add upstream https://github.com/element-hq/element-x-android.git
 git fetch upstream
 git checkout develop
-git merge upstream/develop 
+git merge upstream/develop
