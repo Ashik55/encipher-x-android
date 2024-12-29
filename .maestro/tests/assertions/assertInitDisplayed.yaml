@@ -1,5 +1,5 @@
 appId: ${MAESTRO_APP_ID}
 ---
 - extendedWaitUntil:
-    visible: "Be in your element"
+    visible: "Be in your encipher"
     timeout: 10000

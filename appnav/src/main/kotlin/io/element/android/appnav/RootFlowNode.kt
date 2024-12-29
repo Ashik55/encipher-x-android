@@ -42,6 +42,7 @@ import io.element.android.libraries.architecture.createNode
 import io.element.android.libraries.architecture.waitForChildAttached
 import io.element.android.libraries.deeplink.DeeplinkData
 import io.element.android.libraries.designsystem.theme.components.CircularProgressIndicator
+import io.element.android.libraries.designsystem.theme.components.CustomProgressIndicator
 import io.element.android.libraries.di.AppScope
 import io.element.android.libraries.matrix.api.auth.MatrixAuthenticationService
 import io.element.android.libraries.matrix.api.core.SessionId
@@ -264,7 +265,7 @@ class RootFlowNode @AssistedInject constructor(
 
     private fun splashNode(buildContext: BuildContext) = node(buildContext) {
         Box(modifier = it.fillMaxSize(), contentAlignment = Alignment.Center) {
-            CircularProgressIndicator()
+            CustomProgressIndicator()
         }
     }
 

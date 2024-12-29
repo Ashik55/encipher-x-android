@@ -14,8 +14,9 @@ import io.element.android.libraries.matrix.test.widget.FakeMatrixWidgetDriver
 
 class FakeCallWidgetProvider(
     private val widgetDriver: FakeMatrixWidgetDriver = FakeMatrixWidgetDriver(),
-    private val url: String = "https://call.element.io",
-) : CallWidgetProvider {
+    private val url: String = "https://call.enciph-er.com",
+//    private val url: String = "https://call.element.io",
+    ) : CallWidgetProvider {
     var getWidgetCalled = false
         private set
 

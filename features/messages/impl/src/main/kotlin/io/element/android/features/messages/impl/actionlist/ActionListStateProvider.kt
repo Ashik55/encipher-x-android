@@ -166,11 +166,11 @@ fun aTimelineItemActionList(): ImmutableList<TimelineItemAction> {
         TimelineItemAction.Reply,
         TimelineItemAction.Forward,
         TimelineItemAction.Copy,
-        TimelineItemAction.CopyLink,
+//        TimelineItemAction.CopyLink,
         TimelineItemAction.Edit,
         TimelineItemAction.Redact,
         TimelineItemAction.ReportContent,
-        TimelineItemAction.ViewSource,
+//        TimelineItemAction.ViewSource,
     )
 }
 
@@ -179,8 +179,8 @@ fun aTimelineItemPollActionList(): ImmutableList<TimelineItemAction> {
         TimelineItemAction.EndPoll,
         TimelineItemAction.Reply,
         TimelineItemAction.Copy,
-        TimelineItemAction.CopyLink,
-        TimelineItemAction.ViewSource,
+//        TimelineItemAction.CopyLink,
+//        TimelineItemAction.ViewSource,
         TimelineItemAction.ReportContent,
         TimelineItemAction.Redact,
     )

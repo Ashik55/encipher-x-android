@@ -22,24 +22,43 @@ class InviteFriendsUseCase @Inject constructor(
     private val stringProvider: StringProvider,
     private val matrixClient: MatrixClient,
     private val buildMeta: BuildMeta,
-    private val permalinkBuilder: PermalinkBuilder,
 ) {
     fun execute(activity: Activity) {
-        val permalinkResult = permalinkBuilder.permalinkForUser(matrixClient.sessionId)
-        permalinkResult.fold(
-            onSuccess = { permalink ->
-                val appName = buildMeta.applicationName
-                activity.startSharePlainTextIntent(
-                    activityResultLauncher = null,
-                    chooserTitle = stringProvider.getString(CommonStrings.action_invite_friends),
-                    text = stringProvider.getString(CommonStrings.invite_friends_text, appName, permalink),
-                    extraTitle = stringProvider.getString(CommonStrings.invite_friends_rich_title, appName),
-                    noActivityFoundMessage = stringProvider.getString(AndroidUtilsR.string.error_no_compatible_app_found)
-                )
-            },
-            onFailure = {
-                Timber.e(it)
-            }
+        val userId = matrixClient.sessionId.value
+        val appName = buildMeta.applicationName
+        activity.startSharePlainTextIntent(
+            activityResultLauncher = null,
+            chooserTitle = stringProvider.getString(CommonStrings.action_invite_friends),
+            text = stringProvider.getString(CommonStrings.invite_friends_text, appName, userId),
+            extraTitle = stringProvider.getString(CommonStrings.invite_friends_rich_title, appName),
+            noActivityFoundMessage = stringProvider.getString(AndroidUtilsR.string.error_no_compatible_app_found)
         )
     }
 }
+
+//class InviteFriendsUseCase @Inject constructor(
+//    private val stringProvider: StringProvider,
+//    private val matrixClient: MatrixClient,
+//    private val buildMeta: BuildMeta,
+//    private val permalinkBuilder: PermalinkBuilder,
+//) {
+//    fun execute(activity: Activity) {
+//        val permalinkResult = permalinkBuilder.permalinkForUser(matrixClient.sessionId)
+//        val userId = matrixClient.sessionId.value
+//        permalinkResult.fold(
+//            onSuccess = { permalink ->
+//                val appName = buildMeta.applicationName
+//                activity.startSharePlainTextIntent(
+//                    activityResultLauncher = null,
+//                    chooserTitle = stringProvider.getString(CommonStrings.action_invite_friends),
+//                    text = stringProvider.getString(CommonStrings.invite_friends_text, appName, permalink),
+//                    extraTitle = stringProvider.getString(CommonStrings.invite_friends_rich_title, appName),
+//                    noActivityFoundMessage = stringProvider.getString(AndroidUtilsR.string.error_no_compatible_app_found)
+//                )
+//            },
+//            onFailure = {
+//                Timber.e(it)
+//            }
+//        )
+//    }
+//}

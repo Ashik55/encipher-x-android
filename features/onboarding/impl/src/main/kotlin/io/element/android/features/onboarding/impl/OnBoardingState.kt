@@ -12,4 +12,5 @@ data class OnBoardingState(
     val productionApplicationName: String,
     val canLoginWithQrCode: Boolean,
     val canCreateAccount: Boolean,
+    val currentPage: Int = 0,
 )

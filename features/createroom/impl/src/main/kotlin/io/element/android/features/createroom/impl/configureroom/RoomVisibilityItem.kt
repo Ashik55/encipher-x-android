@@ -18,12 +18,12 @@ enum class RoomVisibilityItem(
     @StringRes val description: Int
 ) {
     Private(
-        icon = CompoundDrawables.ic_compound_lock,
+        icon = R.drawable.ic_private_grp,
         title = R.string.screen_create_room_private_option_title,
         description = R.string.screen_create_room_private_option_description,
     ),
     Public(
-        icon = CompoundDrawables.ic_compound_public,
+        icon = R.drawable.ic_public_grp,
         title = R.string.screen_create_room_public_option_title,
         description = R.string.screen_create_room_public_option_description,
     )

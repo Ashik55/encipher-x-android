@@ -35,6 +35,7 @@ dependencies {
     implementation(projects.libraries.testtags)
     implementation(projects.libraries.uiStrings)
     api(projects.features.onboarding.api)
+    implementation(project(":features:login:impl"))
 
     testImplementation(libs.test.junit)
     testImplementation(libs.androidx.compose.ui.test.junit)

@@ -58,7 +58,7 @@ dependencyResolutionManagement {
 
 enableFeaturePreview("TYPESAFE_PROJECT_ACCESSORS")
 
-rootProject.name = "ElementX"
+rootProject.name = "EncipherX"
 include(":app")
 include(":appnav")
 include(":appconfig")

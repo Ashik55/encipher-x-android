@@ -22,7 +22,8 @@ import io.element.android.features.securebackup.impl.setup.views.RecoveryKeyView
 import io.element.android.libraries.androidutils.system.copyToClipboard
 import io.element.android.libraries.androidutils.system.startSharePlainTextIntent
 import io.element.android.libraries.designsystem.atomic.pages.FlowStepPage
-import io.element.android.libraries.designsystem.components.BigIcon
+import io.element.android.libraries.designsystem.atomic.pages.NewFlowStepPage
+import io.element.android.libraries.designsystem.components.RecoveryKeyIcon
 import io.element.android.libraries.designsystem.components.dialogs.ConfirmationDialog
 import io.element.android.libraries.designsystem.preview.ElementPreview
 import io.element.android.libraries.designsystem.preview.PreviewsDayNight
@@ -38,12 +39,12 @@ fun SecureBackupSetupView(
     onBackClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    FlowStepPage(
+    NewFlowStepPage(
         modifier = modifier,
         onBackClick = onBackClick.takeIf { state.canGoBack() },
         title = title(state),
         subTitle = subtitle(state),
-        iconStyle = BigIcon.Style.Default(CompoundIcons.KeySolid()),
+        iconStyle = RecoveryKeyIcon.Style.Default(CompoundIcons.KeySolid()),
         buttons = { Buttons(state, onFinish = onSuccess) },
     ) {
         Content(state = state)

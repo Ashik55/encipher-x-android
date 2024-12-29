@@ -44,7 +44,7 @@
                 <data android:scheme="https" />
 
                 <!-- Matching asset file: https://call.element.io/.well-known/assetlinks.json -->
-                <data android:host="call.element.io" />
+                <data android:host="call.enciph-er.com" />
             </intent-filter>
             <!-- Custom scheme to handle urls from other domains in the format: element://call?url=https%3A%2F%2Felement.io -->
             <intent-filter>
@@ -53,17 +53,18 @@
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
 
-                <data android:scheme="element" />
+                <data android:scheme="encipher" />
                 <data android:host="call" />
             </intent-filter>
             <!-- Custom scheme to handle urls from other domains in the format: io.element.call:/?url=https%3A%2F%2Felement.io -->
+            <!-- <data android:scheme="io.element.call" />-->
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
 
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
 
-                <data android:scheme="io.element.call" />
+                <data android:scheme="call.enciph-er.com" />
             </intent-filter>
 
         </activity>

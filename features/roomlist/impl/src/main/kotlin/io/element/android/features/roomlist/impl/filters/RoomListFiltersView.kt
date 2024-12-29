@@ -10,6 +10,7 @@ package io.element.android.features.roomlist.impl.filters
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.spring
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -20,6 +21,7 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
@@ -35,6 +37,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
@@ -111,6 +114,24 @@ fun RoomListFiltersView(
                 )
             }
         }
+
+        item("all_filter") {
+            if (!state.hasAnyFilterSelected)
+                RoomListFilterView(
+                    modifier = Modifier
+                        .animateItem(),
+                    //.zIndex(zIndex),
+                    staticLabel = "All",
+                    selected = true,
+                    roomListFilter = state.filterSelectionStates.first().filter,
+                    onClick = {
+                        print("All pressed")
+                    },
+                )
+
+        }
+
+
         state.filterSelectionStates.forEachIndexed { i, filterWithSelection ->
             item(filterWithSelection.filter) {
                 val zIndex = (if (previousFilters.value.contains(filterWithSelection.filter)) state.filterSelectionStates.size else 0) - i.toFloat()
@@ -139,17 +160,30 @@ private fun RoomListClearFiltersButton(
     onClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val closeBoxColor = if (ElementTheme.colors.isLight) {
+        Color(0xFF0A8741)
+    } else {
+        Color(0xFFCCCCCC)
+    }
+
+    val closeColor = if (ElementTheme.colors.isLight) {
+        ElementTheme.colors.iconOnSolidPrimary
+    } else {
+        ElementTheme.colors.iconOnSolidPrimary
+    }
+
     Box(
         modifier = modifier
-            .clip(CircleShape)
-            .background(ElementTheme.colors.bgActionPrimaryRest)
-            .clickable(onClick = onClick)
+            .size(36.dp) // Ensures consistent size
+            .clip(CircleShape) // Keeps the shape circular
+            .background(closeBoxColor) // Sets the background color
+            .clickable(onClick = onClick) // Makes the box clickable
     ) {
         Icon(
-            modifier = Modifier.align(Alignment.Center),
+            modifier = Modifier.align(Alignment.Center), // Centers the icon within the box
             imageVector = CompoundIcons.Close(),
-            tint = ElementTheme.colors.iconOnSolidPrimary,
-            contentDescription = stringResource(id = io.element.android.libraries.ui.strings.R.string.action_clear),
+            tint = closeColor, // Icon color
+            contentDescription = stringResource(id = io.element.android.libraries.ui.strings.R.string.action_clear) // Accessibility text
         )
     }
 }
@@ -159,7 +193,8 @@ private fun RoomListFilterView(
     roomListFilter: RoomListFilter,
     selected: Boolean,
     onClick: (RoomListFilter) -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    staticLabel: String? = null, // Set default value to null
 ) {
     val background = animateColorAsState(
         targetValue = if (selected) ElementTheme.colors.bgActionPrimaryRest else ElementTheme.colors.bgCanvasDefault,
@@ -171,6 +206,26 @@ private fun RoomListFilterView(
         animationSpec = spring(stiffness = Spring.StiffnessMediumLow),
         label = "chip text colour",
     )
+    // Define fill color based on theme mode
+    val containerColor = if (ElementTheme.colors.isLight) {
+        Color(0xFF0A8741)
+    } else {
+        Color(0xFFCCCCCC)
+    }
+
+    // Define Text color based on theme mode
+    val textColor = if (ElementTheme.colors.isLight) {
+        Color(0xFF0A8741)
+    } else {
+        Color(0xFFCCCCCC)
+    }
+
+    // Define outline color based on theme mode
+    val outlineColor = if (ElementTheme.colors.isLight) {
+        Color(0xFF0A8741)
+    } else {
+        Color(0xFFCCCCCC)
+    }
 
     FilterChip(
         selected = selected,
@@ -178,13 +233,17 @@ private fun RoomListFilterView(
         modifier = modifier.height(36.dp),
         shape = CircleShape,
         colors = FilterChipDefaults.filterChipColors(
-            containerColor = background.value,
-            selectedContainerColor = background.value,
-            labelColor = textColour.value,
+            containerColor = Color.Transparent,
+            selectedContainerColor = containerColor,
+            labelColor = textColor,
             selectedLabelColor = textColour.value
         ),
+        border = BorderStroke(
+            width = 1.dp,
+            color = outlineColor
+        ),
         label = {
-            Text(text = stringResource(id = roomListFilter.stringResource))
+            Text(text = staticLabel ?: stringResource(id = roomListFilter.stringResource))
         }
     )
 }

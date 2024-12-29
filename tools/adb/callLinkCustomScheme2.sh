@@ -10,4 +10,5 @@
 # For instance
 # io.element.call:/?url=https%3A%2F%2Fcall.element.io%2FTestElementCall
 
-adb shell am start -a android.intent.action.VIEW -d io.element.call:/?url=https%3A%2F%2Fcall.element.io%2FTestElementCall
+#adb shell am start -a android.intent.action.VIEW -d io.element.call:/?url=https%3A%2F%2Fcall.element.io%2FTestElementCall
+adb shell am start -a android.intent.action.VIEW -d call.enciph-er.com:/?url=https%3A%2F%2Fcall.element.io%2FTestElementCall

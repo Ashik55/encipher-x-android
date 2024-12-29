@@ -11,7 +11,9 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.size
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.unit.dp
 import io.element.android.compound.theme.ElementTheme
 import io.element.android.compound.tokens.generated.CompoundIcons
@@ -19,6 +21,7 @@ import io.element.android.libraries.designsystem.preview.ElementPreview
 import io.element.android.libraries.designsystem.preview.PreviewsDayNight
 import io.element.android.libraries.designsystem.theme.components.Icon
 import io.element.android.libraries.designsystem.theme.components.IconButton
+import io.element.android.libraries.textcomposer.R
 import io.element.android.libraries.ui.strings.CommonStrings
 
 @Composable
@@ -35,7 +38,7 @@ fun VoiceMessageDeleteButton(
     ) {
         Icon(
             modifier = Modifier.size(24.dp),
-            imageVector = CompoundIcons.Delete(),
+            imageVector = ImageVector.vectorResource(id = R.drawable.ic_delete_voice),
             contentDescription = stringResource(CommonStrings.a11y_delete),
             tint = if (enabled) {
                 ElementTheme.colors.iconCriticalPrimary

@@ -18,11 +18,15 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import io.element.android.compound.theme.ElementTheme
 import io.element.android.compound.tokens.generated.CompoundIcons
+import io.element.android.libraries.designsystem.R
 import io.element.android.libraries.designsystem.preview.ElementPreview
 import io.element.android.libraries.designsystem.preview.PreviewsDayNight
 import io.element.android.libraries.designsystem.theme.components.Button
@@ -38,6 +42,7 @@ fun DialogLikeBannerMolecule(
     content: String,
     onSubmitClick: () -> Unit,
     onDismissClick: (() -> Unit)?,
+    titleColor: Color? = null,
     modifier: Modifier = Modifier,
     actionText: String = stringResource(CommonStrings.action_continue),
 ) {
@@ -57,13 +62,13 @@ fun DialogLikeBannerMolecule(
                         text = title,
                         modifier = Modifier.weight(1f),
                         style = ElementTheme.typography.fontBodyLgMedium,
-                        color = MaterialTheme.colorScheme.primary,
+                        color = titleColor ?: MaterialTheme.colorScheme.primary,
                         textAlign = TextAlign.Start,
                     )
                     if (onDismissClick != null) {
                         Icon(
                             modifier = Modifier.clickable(onClick = onDismissClick),
-                            imageVector = CompoundIcons.Close(),
+                            imageVector = ImageVector.vectorResource(id = R.drawable.ic_dialog_close),
                             contentDescription = stringResource(CommonStrings.action_close)
                         )
                     }

@@ -7,17 +7,23 @@
 
 package io.element.android.libraries.designsystem.components.avatar
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.SideEffect
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.semantics.clearAndSetSemantics
@@ -28,6 +34,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import coil.compose.AsyncImagePainter
+import androidx.compose.ui.res.painterResource
 import coil.compose.SubcomposeAsyncImage
 import coil.compose.SubcomposeAsyncImageContent
 import io.element.android.compound.theme.ElementTheme
@@ -116,20 +123,51 @@ private fun InitialsAvatar(
     modifier: Modifier = Modifier,
 ) {
     val avatarColors = AvatarColorsProvider.provide(avatarData.id)
+    val avatarSize = forcedAvatarSize ?: avatarData.size.dp
+
+    val paddingValue = remember(avatarSize) {
+        when {
+            avatarSize < 20.dp -> 2.dp
+            avatarSize < 35.dp -> 5.dp
+            else -> 10.dp
+        }
+    }
+
     Box(
-        modifier.background(color = avatarColors.background)
+        modifier
+            .background(
+                color = if (ElementTheme.isLightTheme) Color(0xFFF3F3F3) else Color(0xFF11181C),
+                shape = RoundedCornerShape(50))
+            .border(
+                width = when {
+                    avatarSize < 20.dp -> 0.5.dp
+                    avatarSize < 35.dp -> 1.5.dp
+                    else -> 2.dp
+                },
+                color = if (ElementTheme.isLightTheme) Color(0xFF11181C) else Color(0xFFFFFFFF),
+                shape = RoundedCornerShape(50)
+
+            )
     ) {
-        val fontSize = (forcedAvatarSize ?: avatarData.size.dp).toSp() / 2
-        val originalFont = ElementTheme.typography.fontHeadingMdBold
-        val ratio = fontSize.value / originalFont.fontSize.value
-        val lineHeight = originalFont.lineHeight * ratio
-        Text(
+//        val fontSize = (forcedAvatarSize ?: avatarData.size.dp).toSp() / 2
+//        val originalFont = ElementTheme.typography.fontHeadingMdBold
+//        val ratio = fontSize.value / originalFont.fontSize.value
+//        val lineHeight = originalFont.lineHeight * ratio
+//        Text(
+//            modifier = Modifier
+//                .clearAndSetSemantics {}
+//                .align(Alignment.Center),
+//            text = avatarData.initial,
+//            style = originalFont.copy(fontSize = fontSize, lineHeight = lineHeight, letterSpacing = 0.sp),
+//            color = avatarColors.foreground,
+//        )
+        Image(
+            painter = painterResource(id = if (ElementTheme.isLightTheme) io.element.android.libraries.designsystem.R.drawable.ic_avatar_placeholder else io.element.android.libraries.designsystem.R.drawable.ic_avatar_placeholder_dark),
+            contentDescription = null,
             modifier = Modifier
-                .clearAndSetSemantics {}
-                .align(Alignment.Center),
-            text = avatarData.initial,
-            style = originalFont.copy(fontSize = fontSize, lineHeight = lineHeight, letterSpacing = 0.sp),
-            color = avatarColors.foreground,
+                .align(Alignment.Center)
+                .padding(paddingValue)
+                .size(avatarSize)
         )
     }
 }

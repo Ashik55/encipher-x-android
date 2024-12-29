@@ -33,6 +33,7 @@ import io.element.android.libraries.designsystem.components.preferences.Preferen
 import io.element.android.libraries.designsystem.preview.ElementPreview
 import io.element.android.libraries.designsystem.preview.PreviewsDayNight
 import io.element.android.libraries.designsystem.theme.components.CircularProgressIndicator
+import io.element.android.libraries.designsystem.theme.components.CustomProgressIndicator
 import io.element.android.libraries.designsystem.theme.components.ListItem
 import io.element.android.libraries.designsystem.theme.components.Text
 import io.element.android.libraries.designsystem.utils.OnLifecycleEvent
@@ -193,11 +194,10 @@ private fun NotificationSettingsContentView(
                     trailingContent = when (state.currentPushDistributor) {
                         AsyncData.Uninitialized,
                         is AsyncData.Loading -> ListItemContent.Custom {
-                            CircularProgressIndicator(
+                            CustomProgressIndicator(
                                 modifier = Modifier
                                     .progressSemantics()
-                                    .size(20.dp),
-                                strokeWidth = 2.dp
+                                    .size(20.dp)
                             )
                         }
                         is AsyncData.Failure -> ListItemContent.Text(

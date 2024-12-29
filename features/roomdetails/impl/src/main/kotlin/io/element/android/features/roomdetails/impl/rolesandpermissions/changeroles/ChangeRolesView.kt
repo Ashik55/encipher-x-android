@@ -12,12 +12,14 @@ import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
@@ -30,12 +32,16 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.style.TextOverflow
@@ -58,6 +64,8 @@ import io.element.android.libraries.designsystem.components.dialogs.ErrorDialog
 import io.element.android.libraries.designsystem.preview.ElementPreview
 import io.element.android.libraries.designsystem.preview.PreviewsDayNight
 import io.element.android.libraries.designsystem.theme.aliasScreenTitle
+import io.element.android.libraries.designsystem.theme.components.Button
+import io.element.android.libraries.designsystem.theme.components.ButtonSize
 import io.element.android.libraries.designsystem.theme.components.Checkbox
 import io.element.android.libraries.designsystem.theme.components.Scaffold
 import io.element.android.libraries.designsystem.theme.components.SearchBar
@@ -111,65 +119,83 @@ fun ChangeRolesView(
                             BackButton(onClick = { state.eventSink(ChangeRolesEvent.Exit) })
                         },
                         actions = {
-                            TextButton(
+                            Button(
                                 text = stringResource(CommonStrings.action_save),
                                 enabled = state.hasPendingChanges,
+                                size = ButtonSize.Small,
+                                modifier = Modifier.padding(end = 16.dp),
                                 onClick = { state.eventSink(ChangeRolesEvent.Save) }
                             )
-                        }
+                        },
+                        // TopAppBar background transparent
+                        colors = TopAppBarDefaults.topAppBarColors(
+                            containerColor = Color.Transparent
+                        )
                     )
                 }
             }
         ) { paddingValues ->
-            Column(
-                modifier = Modifier.padding(paddingValues),
-            ) {
-                val lazyListState = rememberLazyListState()
-                SearchBar(
+
+            Box {
+                Image(
+                    painter = painterResource(id = R.drawable.bg),
+                    contentDescription = null,
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(bottom = 16.dp),
-                    placeHolderTitle = stringResource(CommonStrings.common_search_for_someone),
-                    query = state.query.orEmpty(),
-                    onQueryChange = { state.eventSink(ChangeRolesEvent.QueryChanged(it)) },
-                    active = state.isSearchActive,
-                    onActiveChange = { state.eventSink(ChangeRolesEvent.ToggleSearchActive) },
-                    resultState = state.searchResults,
-                ) { members ->
-                    SearchResultsList(
-                        currentRole = state.role,
-                        lazyListState = lazyListState,
-                        searchResults = members,
-                        selectedUsers = state.selectedUsers,
-                        canRemoveMember = state.canChangeMemberRole,
-                        onToggleSelection = { state.eventSink(ChangeRolesEvent.UserSelectionToggled(it.toMatrixUser())) },
-                        selectedUsersList = {},
-                    )
-                }
-                AnimatedVisibility(
-                    visible = !state.isSearchActive,
-                    enter = fadeIn(),
-                    exit = fadeOut()
+                        .fillMaxHeight(),
+                    contentScale = ContentScale.Crop
+                )
+
+                Column(
+                    modifier = Modifier.padding(paddingValues),
                 ) {
-                    Column {
+                    val lazyListState = rememberLazyListState()
+                    SearchBar(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(bottom = 16.dp),
+                        placeHolderTitle = stringResource(CommonStrings.common_search_for_someone),
+                        query = state.query.orEmpty(),
+                        onQueryChange = { state.eventSink(ChangeRolesEvent.QueryChanged(it)) },
+                        active = state.isSearchActive,
+                        onActiveChange = { state.eventSink(ChangeRolesEvent.ToggleSearchActive) },
+                        resultState = state.searchResults,
+                    ) { members ->
                         SearchResultsList(
                             currentRole = state.role,
                             lazyListState = lazyListState,
-                            searchResults = (state.searchResults as? SearchBarResultState.Results)?.results ?: MembersByRole(emptyList()),
+                            searchResults = members,
                             selectedUsers = state.selectedUsers,
                             canRemoveMember = state.canChangeMemberRole,
                             onToggleSelection = { state.eventSink(ChangeRolesEvent.UserSelectionToggled(it.toMatrixUser())) },
-                            selectedUsersList = { users ->
-                                SelectedUsersRowList(
-                                    contentPadding = PaddingValues(start = 16.dp, end = 16.dp, bottom = 16.dp),
-                                    selectedUsers = users,
-                                    onUserRemove = {
-                                        state.eventSink(ChangeRolesEvent.UserSelectionToggled(it))
-                                    },
-                                    canDeselect = { state.canChangeMemberRole(it.userId) },
-                                )
-                            }
+                            selectedUsersList = {},
                         )
+                    }
+                    AnimatedVisibility(
+                        visible = !state.isSearchActive,
+                        enter = fadeIn(),
+                        exit = fadeOut()
+                    ) {
+                        Column {
+                            SearchResultsList(
+                                currentRole = state.role,
+                                lazyListState = lazyListState,
+                                searchResults = (state.searchResults as? SearchBarResultState.Results)?.results ?: MembersByRole(emptyList()),
+                                selectedUsers = state.selectedUsers,
+                                canRemoveMember = state.canChangeMemberRole,
+                                onToggleSelection = { state.eventSink(ChangeRolesEvent.UserSelectionToggled(it.toMatrixUser())) },
+                                selectedUsersList = { users ->
+                                    SelectedUsersRowList(
+                                        contentPadding = PaddingValues(start = 16.dp, end = 16.dp, bottom = 16.dp),
+                                        selectedUsers = users,
+                                        onUserRemove = {
+                                            state.eventSink(ChangeRolesEvent.UserSelectionToggled(it))
+                                        },
+                                        canDeselect = { state.canChangeMemberRole(it.userId) },
+                                    )
+                                }
+                            )
+                        }
                     }
                 }
             }

@@ -1,0 +1,26 @@
+<!--
+  ~ Copyright 2024 New Vector Ltd.
+  ~
+  ~ SPDX-License-Identifier: AGPL-3.0-only
+  ~ Please see LICENSE in the repository root for full details.
+  -->
+
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp"
+    android:height="24dp"
+    android:viewportWidth="24"
+    android:viewportHeight="24">
+  <path
+      android:pathData="M12,21C10.659,21 9.886,20.428 8.34,19.283C0.222,13.275 1.018,6.153 4.537,3.994C7.219,2.349 9.56,3.012 10.966,4.068C11.542,4.501 11.83,4.717 12,4.717C12.17,4.717 12.458,4.501 13.034,4.068C14.44,3.012 16.781,2.349 19.463,3.994C21.181,5.048 22.25,7.286 21.949,10"
+      android:strokeWidth="1.5"
+      android:fillColor="#00000000"
+      android:strokeColor="#878B8D"
+      android:strokeLineCap="round"/>
+  <path
+      android:pathData="M14,17H22M18,13V21"
+      android:strokeLineJoin="round"
+      android:strokeWidth="1.5"
+      android:fillColor="#00000000"
+      android:strokeColor="#878B8D"
+      android:strokeLineCap="round"/>
+</vector>

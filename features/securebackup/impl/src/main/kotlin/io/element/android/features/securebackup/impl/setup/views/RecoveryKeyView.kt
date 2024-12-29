@@ -25,6 +25,7 @@ import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.autofill.AutofillType
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
@@ -40,6 +41,7 @@ import io.element.android.libraries.designsystem.modifiers.clickableIfNotNull
 import io.element.android.libraries.designsystem.preview.ElementPreview
 import io.element.android.libraries.designsystem.preview.PreviewsDayNight
 import io.element.android.libraries.designsystem.theme.components.CircularProgressIndicator
+import io.element.android.libraries.designsystem.theme.components.CustomProgressIndicator
 import io.element.android.libraries.designsystem.theme.components.Icon
 import io.element.android.libraries.designsystem.theme.components.OutlinedTextField
 import io.element.android.libraries.designsystem.theme.components.Text
@@ -60,11 +62,11 @@ internal fun RecoveryKeyView(
         modifier = modifier.fillMaxWidth(),
         verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
-        Text(
-            text = stringResource(id = CommonStrings.common_recovery_key),
-            modifier = Modifier.padding(start = 16.dp),
-            style = ElementTheme.typography.fontBodyMdRegular,
-        )
+//        Text(
+//            text = stringResource(id = CommonStrings.common_recovery_key),
+//            modifier = Modifier.padding(start = 16.dp),
+//            style = ElementTheme.typography.fontBodyMdRegular,
+//        )
         RecoveryKeyContent(state, onClick, onChange, onSubmit)
         RecoveryKeyFooter(state)
     }
@@ -120,13 +122,11 @@ private fun RecoveryKeyStaticContent(
                         .padding(vertical = 11.dp)
             ) {
                 if (state.inProgress) {
-                    CircularProgressIndicator(
+                    CustomProgressIndicator(
                         modifier = Modifier
                                 .progressSemantics()
                                 .padding(end = 8.dp)
                                 .size(16.dp),
-                        color = ElementTheme.colors.textPrimary,
-                        strokeWidth = 1.5.dp,
                     )
                 }
                 Text(
@@ -179,7 +179,7 @@ private fun RecoveryKeyFormContent(
         keyboardActions = KeyboardActions(
             onDone = { onSubmit() }
         ),
-        label = { Text(text = stringResource(id = R.string.screen_recovery_key_confirm_key_placeholder)) }
+        placeholder = { Text(text = stringResource(id = R.string.screen_recovery_key_confirm_key_placeholder)) }
     )
 }
 
@@ -197,26 +197,48 @@ private fun RecoveryKeyFooter(state: RecoveryKeyViewState) {
                             R.string.screen_recovery_key_setup_generate_key_description
                         }
                     ),
-                    color = ElementTheme.colors.textSecondary,
+                    color = if(ElementTheme.isLightTheme){
+                        Color(0xFF0A8741)
+                    }
+                    else {
+                        Color(0xFFFFFFFF)
+                         },
+//                    color = ElementTheme.colors.textSecondary,
                     modifier = Modifier.padding(start = 16.dp),
                     style = ElementTheme.typography.fontBodySmRegular,
                 )
             } else {
                 Text(
                     text = stringResource(id = R.string.screen_recovery_key_save_key_description),
-                    color = ElementTheme.colors.textSecondary,
+//                    color = ElementTheme.colors.textSecondary,
+                    color = if(ElementTheme.isLightTheme){
+                        Color(0xFF0A8741)
+                    }
+                    else {
+                        Color(0xFFFFFFFF)
+                    },
                     modifier = Modifier.padding(start = 16.dp),
                     style = ElementTheme.typography.fontBodySmRegular,
                 )
             }
         }
         RecoveryKeyUserStory.Enter -> {
-            Text(
-                text = stringResource(id = R.string.screen_recovery_key_confirm_key_description),
-                color = ElementTheme.colors.textSecondary,
-                modifier = Modifier.padding(start = 16.dp),
-                style = ElementTheme.typography.fontBodySmRegular,
-            )
+            Column(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Text(
+                    text = stringResource(id = R.string.screen_recovery_key_confirm_key_description),
+                    color = if(ElementTheme.isLightTheme){
+                        Color(0xFF0A8741)
+                    }
+                    else {
+                        Color(0xFFFFFFFF)
+                    },
+                    textAlign = TextAlign.Center,
+                    style = ElementTheme.typography.fontBodySmRegular,
+                )
+            }
         }
     }
 }

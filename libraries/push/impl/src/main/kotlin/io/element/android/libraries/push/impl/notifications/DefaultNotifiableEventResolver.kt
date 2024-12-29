@@ -270,11 +270,14 @@ class DefaultNotifiableEventResolver @Inject constructor(
             is VoiceMessageType -> stringProvider.getString(CommonStrings.common_voice_message)
             is EmoteMessageType -> "* $senderDisambiguatedDisplayName ${messageType.body}"
             is FileMessageType -> messageType.bestDescription
-            is ImageMessageType -> messageType.bestDescription
-            is StickerMessageType -> messageType.bestDescription
+//            is ImageMessageType -> messageType.bestDescription
+            is ImageMessageType -> "Image"
+//            is StickerMessageType -> messageType.bestDescription
+            is StickerMessageType -> "Sticker"
             is NoticeMessageType -> messageType.body
             is TextMessageType -> messageType.toPlainText(permalinkParser = permalinkParser)
-            is VideoMessageType -> messageType.bestDescription
+//            is VideoMessageType -> messageType.bestDescription
+            is VideoMessageType -> "Video"
             is LocationMessageType -> messageType.body
             is OtherMessageType -> messageType.body
         }

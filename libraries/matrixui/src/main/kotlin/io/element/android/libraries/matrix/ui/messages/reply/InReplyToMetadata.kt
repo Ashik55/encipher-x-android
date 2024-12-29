@@ -62,7 +62,8 @@ internal fun InReplyToDetails.Ready.metadata(hideImage: Boolean): InReplyToMetad
         is ImageMessageType -> InReplyToMetadata.Thumbnail(
             AttachmentThumbnailInfo(
                 thumbnailSource = (type.info?.thumbnailSource ?: type.source).takeUnless { hideImage },
-                textContent = eventContent.body,
+//                textContent = eventContent.body,
+                textContent = "Image",
                 type = AttachmentThumbnailType.Image,
                 blurHash = type.info?.blurhash,
             )
@@ -70,7 +71,8 @@ internal fun InReplyToDetails.Ready.metadata(hideImage: Boolean): InReplyToMetad
         is VideoMessageType -> InReplyToMetadata.Thumbnail(
             AttachmentThumbnailInfo(
                 thumbnailSource = type.info?.thumbnailSource?.takeUnless { hideImage },
-                textContent = eventContent.body,
+//                textContent = eventContent.body,
+                textContent = "Video",
                 type = AttachmentThumbnailType.Video,
                 blurHash = type.info?.blurhash,
             )
@@ -105,7 +107,8 @@ internal fun InReplyToDetails.Ready.metadata(hideImage: Boolean): InReplyToMetad
     is StickerContent -> InReplyToMetadata.Thumbnail(
         AttachmentThumbnailInfo(
             thumbnailSource = eventContent.source.takeUnless { hideImage },
-            textContent = eventContent.body,
+//            textContent = eventContent.body,
+            textContent = "Sticker",
             type = AttachmentThumbnailType.Image,
             blurHash = eventContent.info.blurhash,
         )

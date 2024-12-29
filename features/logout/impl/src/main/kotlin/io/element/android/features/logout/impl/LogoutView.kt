@@ -23,8 +23,10 @@ import io.element.android.compound.tokens.generated.CompoundIcons
 import io.element.android.features.logout.impl.tools.isBackingUp
 import io.element.android.features.logout.impl.ui.LogoutActionDialog
 import io.element.android.libraries.architecture.AsyncAction
+import io.element.android.libraries.designsystem.atomic.pages.CustomNewFlowStepPage
 import io.element.android.libraries.designsystem.atomic.pages.FlowStepPage
-import io.element.android.libraries.designsystem.components.BigIcon
+import io.element.android.libraries.designsystem.atomic.pages.NewFlowStepPage
+import io.element.android.libraries.designsystem.components.RecoveryKeyIcon
 import io.element.android.libraries.designsystem.preview.ElementPreview
 import io.element.android.libraries.designsystem.preview.PreviewsDayNight
 import io.element.android.libraries.designsystem.theme.components.Button
@@ -50,11 +52,11 @@ fun LogoutView(
 ) {
     val eventSink = state.eventSink
 
-    FlowStepPage(
+    CustomNewFlowStepPage(
         onBackClick = onBackClick,
         title = title(state),
         subTitle = subtitle(state),
-        iconStyle = BigIcon.Style.Default(CompoundIcons.KeySolid()),
+        iconStyle = RecoveryKeyIcon.Style.AlertSolid,
         modifier = modifier,
         buttons = {
             Buttons(
@@ -152,7 +154,7 @@ private fun Content(
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(top = 60.dp, start = 20.dp, end = 20.dp),
+                .padding(top = 150.dp, start = 20.dp, end = 20.dp),
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             LinearProgressIndicator(

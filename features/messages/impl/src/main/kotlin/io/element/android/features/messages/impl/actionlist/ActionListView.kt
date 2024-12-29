@@ -25,6 +25,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.MaterialTheme
@@ -36,7 +37,9 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.contentDescription
@@ -46,6 +49,7 @@ import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
 import io.element.android.compound.theme.ElementTheme
 import io.element.android.compound.tokens.generated.CompoundIcons
+import io.element.android.features.messages.impl.R
 import io.element.android.features.messages.impl.actionlist.model.TimelineItemAction
 import io.element.android.features.messages.impl.crypto.sendfailure.VerifiedUserSendFailure
 import io.element.android.features.messages.impl.crypto.sendfailure.VerifiedUserSendFailure.ChangedIdentity
@@ -197,7 +201,7 @@ private fun ActionListViewContent(
                         } else {
                             Spacer(modifier = Modifier.height(14.dp))
                         }
-                        HorizontalDivider()
+//                        HorizontalDivider()
                     }
                 }
                 if (target.verifiedUserSendFailure != None) {
@@ -207,7 +211,7 @@ private fun ActionListViewContent(
                             modifier = Modifier.fillMaxWidth(),
                             onClick = onVerifiedUserSendFailureClick
                         )
-                        HorizontalDivider()
+//                        HorizontalDivider()
                     }
                 }
                 if (target.displayEmojiReactions) {
@@ -218,7 +222,7 @@ private fun ActionListViewContent(
                             onCustomReactionClick = onCustomReactionClick,
                             modifier = Modifier.fillMaxWidth(),
                         )
-                        HorizontalDivider()
+//                        HorizontalDivider()
                     }
                 }
                 items(
@@ -269,13 +273,28 @@ private fun MessageSummary(event: TimelineItem.Event, modifier: Modifier = Modif
             content = { ContentForBody(stringResource(CommonStrings.common_shared_location)) }
         }
         is TimelineItemImageContent -> {
-            content = { ContentForBody(event.content.bestDescription) }
+            content = {
+                ContentForBody(
+//                    event.content.bestDescription
+                    "Image"
+                )
+            }
         }
         is TimelineItemStickerContent -> {
-            content = { ContentForBody(event.content.bestDescription) }
+            content = {
+                ContentForBody(
+//                    event.content.bestDescription
+                    "Sticker"
+                )
+            }
         }
         is TimelineItemVideoContent -> {
-            content = { ContentForBody(event.content.bestDescription) }
+            content = {
+                ContentForBody(
+//                    event.content.bestDescription
+                    "Video"
+                )
+            }
         }
         is TimelineItemFileContent -> {
             content = { ContentForBody(event.content.bestDescription) }
@@ -328,7 +347,12 @@ private fun EmojiReactionsRow(
 ) {
     Row(
         horizontalArrangement = Arrangement.SpaceBetween,
-        modifier = modifier.padding(horizontal = 24.dp, vertical = 16.dp)
+        modifier = modifier
+            .padding(horizontal = 24.dp, vertical = 16.dp)
+            .background(
+                color = Color(0xffEFEFEF),
+                shape = RoundedCornerShape(32.dp),
+            ),
     ) {
         // TODO use most recently used emojis here when available from the Rust SDK
         val defaultEmojis = sequenceOf(
@@ -348,7 +372,7 @@ private fun EmojiReactionsRow(
             contentAlignment = Alignment.Center
         ) {
             Icon(
-                imageVector = CompoundIcons.ReactionAdd(),
+                painter = painterResource(id = R.drawable.ic_dots),
                 contentDescription = stringResource(id = CommonStrings.a11y_react_with_other_emojis),
                 tint = MaterialTheme.colorScheme.secondary,
                 modifier = Modifier
@@ -408,7 +432,7 @@ private fun EmojiButton(
     onClick: (String) -> Unit,
 ) {
     val backgroundColor = if (isHighlighted) {
-        ElementTheme.colors.bgActionPrimaryRest
+        MaterialTheme.colorScheme.secondary
     } else {
         Color.Transparent
     }

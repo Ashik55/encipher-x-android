@@ -52,18 +52,18 @@ fun AdvancedSettingsView(
                 state.eventSink(AdvancedSettingsEvents.ChangeTheme)
             }
         )
-        ListItem(
-            headlineContent = {
-                Text(text = stringResource(id = CommonStrings.action_view_source))
-            },
-            supportingContent = {
-                Text(text = stringResource(id = R.string.screen_advanced_settings_view_source_description))
-            },
-            trailingContent = ListItemContent.Switch(
-                checked = state.isDeveloperModeEnabled,
-            ),
-            onClick = { state.eventSink(AdvancedSettingsEvents.SetDeveloperModeEnabled(!state.isDeveloperModeEnabled)) }
-        )
+//        ListItem(
+//            headlineContent = {
+//                Text(text = stringResource(id = CommonStrings.action_view_source))
+//            },
+//            supportingContent = {
+//                Text(text = stringResource(id = R.string.screen_advanced_settings_view_source_description))
+//            },
+//            trailingContent = ListItemContent.Switch(
+//                checked = state.isDeveloperModeEnabled,
+//            ),
+//            onClick = { state.eventSink(AdvancedSettingsEvents.SetDeveloperModeEnabled(!state.isDeveloperModeEnabled)) }
+//        )
         ListItem(
             headlineContent = {
                 Text(text = stringResource(id = R.string.screen_advanced_settings_share_presence))

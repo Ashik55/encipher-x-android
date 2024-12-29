@@ -7,14 +7,18 @@
 
 package io.element.android.features.createroom.impl.addpeople
 
-import androidx.compose.foundation.layout.consumeWindowInsets
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.layout.*
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.PreviewParameter
+import androidx.compose.ui.unit.dp
 import io.element.android.compound.theme.ElementTheme
 import io.element.android.features.createroom.impl.R
 import io.element.android.features.createroom.impl.components.UserListView
@@ -24,6 +28,8 @@ import io.element.android.libraries.designsystem.components.button.BackButton
 import io.element.android.libraries.designsystem.preview.ElementPreview
 import io.element.android.libraries.designsystem.preview.PreviewsDayNight
 import io.element.android.libraries.designsystem.theme.aliasScreenTitle
+import io.element.android.libraries.designsystem.theme.components.Button
+import io.element.android.libraries.designsystem.theme.components.ButtonSize
 import io.element.android.libraries.designsystem.theme.components.Scaffold
 import io.element.android.libraries.designsystem.theme.components.Text
 import io.element.android.libraries.designsystem.theme.components.TextButton
@@ -53,16 +59,28 @@ fun AddPeopleView(
             )
         }
     ) { padding ->
-        UserListView(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(padding)
-                .consumeWindowInsets(padding),
-            state = state,
-            showBackButton = false,
-            onSelectUser = {},
-            onDeselectUser = {},
-        )
+        Box(modifier = Modifier.fillMaxSize()) {
+            // Background image
+            Image(
+                painter = painterResource(id = R.drawable.bg),
+                contentDescription = null,
+                modifier = Modifier
+                    .fillMaxSize(),
+                contentScale = ContentScale.Crop
+            )
+
+            // User list content
+            UserListView(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(padding)
+                    .consumeWindowInsets(padding),
+                state = state,
+                showBackButton = false,
+                onSelectUser = {},
+                onDeselectUser = {},
+            )
+        }
     }
 }
 
@@ -83,11 +101,17 @@ private fun AddPeopleViewTopBar(
         navigationIcon = { BackButton(onClick = onBackClick) },
         actions = {
             val textActionResId = if (hasSelectedUsers) CommonStrings.action_next else CommonStrings.action_skip
-            TextButton(
+            Button(
                 text = stringResource(id = textActionResId),
                 onClick = onNextClick,
+                size = ButtonSize.Small,
+                modifier = Modifier.padding(end = 16.dp)
             )
-        }
+        },
+        // Transparent background for the TopAppBar
+        colors = TopAppBarDefaults.topAppBarColors(
+            containerColor = Color.Transparent
+        )
     )
 }
 

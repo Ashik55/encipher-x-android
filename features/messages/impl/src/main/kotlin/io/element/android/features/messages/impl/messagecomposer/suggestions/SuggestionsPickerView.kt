@@ -57,7 +57,7 @@ fun SuggestionsPickerView(
             suggestions,
             key = { suggestion ->
                 when (suggestion) {
-                    is ResolvedSuggestion.AtRoom -> "@room"
+                    is ResolvedSuggestion.AtRoom -> "@group"
                     is ResolvedSuggestion.Member -> suggestion.roomMember.userId.value
                     is ResolvedSuggestion.Alias -> suggestion.roomId.value
                 }
@@ -103,7 +103,7 @@ private fun SuggestionItemView(
             is ResolvedSuggestion.Alias -> suggestion.roomName
         }
         val subtitle = when (suggestion) {
-            is ResolvedSuggestion.AtRoom -> "@room"
+            is ResolvedSuggestion.AtRoom -> "@group"
             is ResolvedSuggestion.Member -> suggestion.roomMember.userId.value
             is ResolvedSuggestion.Alias -> suggestion.roomAlias.value
         }
@@ -153,7 +153,7 @@ internal fun SuggestionsPickerViewPreview() {
         val anAlias = remember { RoomAlias("#room:domain.org") }
         SuggestionsPickerView(
             roomId = RoomId("!room:matrix.org"),
-            roomName = "Room",
+            roomName = "Group",
             roomAvatarData = null,
             suggestions = persistentListOf(
                 ResolvedSuggestion.AtRoom,
@@ -162,7 +162,7 @@ internal fun SuggestionsPickerViewPreview() {
                 ResolvedSuggestion.Alias(
                     roomAlias = anAlias,
                     roomId = RoomId("!room:matrix.org"),
-                    roomName = "My room",
+                    roomName = "My group",
                     roomAvatarUrl = null,
                 )
             ),

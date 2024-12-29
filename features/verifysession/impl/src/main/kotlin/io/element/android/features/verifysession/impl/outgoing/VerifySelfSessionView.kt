@@ -8,6 +8,7 @@
 package io.element.android.features.verifysession.impl.outgoing
 
 import androidx.activity.compose.BackHandler
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -15,6 +16,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -23,6 +25,7 @@ import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalInspectionMode
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
@@ -35,13 +38,17 @@ import io.element.android.features.verifysession.impl.ui.VerificationContentVeri
 import io.element.android.libraries.architecture.AsyncAction
 import io.element.android.libraries.architecture.AsyncData
 import io.element.android.libraries.designsystem.atomic.pages.HeaderFooterPage
+import io.element.android.libraries.designsystem.background.OnboardingBackground
 import io.element.android.libraries.designsystem.components.BigIcon
+import io.element.android.libraries.designsystem.components.NewBigIcon
+import io.element.android.libraries.designsystem.components.NewPageTitle
 import io.element.android.libraries.designsystem.components.PageTitle
 import io.element.android.libraries.designsystem.components.ProgressDialog
 import io.element.android.libraries.designsystem.preview.ElementPreview
 import io.element.android.libraries.designsystem.preview.PreviewsDayNight
 import io.element.android.libraries.designsystem.theme.components.Button
 import io.element.android.libraries.designsystem.theme.components.CircularProgressIndicator
+import io.element.android.libraries.designsystem.theme.components.CustomProgressIndicator
 import io.element.android.libraries.designsystem.theme.components.InvisibleButton
 import io.element.android.libraries.designsystem.theme.components.OutlinedButton
 import io.element.android.libraries.designsystem.theme.components.Text
@@ -94,23 +101,25 @@ fun VerifySelfSessionView(
             modifier = Modifier.fillMaxSize(),
             contentAlignment = Alignment.Center,
         ) {
-            CircularProgressIndicator()
+            CustomProgressIndicator()
         }
     } else {
         HeaderFooterPage(
-            modifier = modifier,
+            modifier = modifier
+                .statusBarsPadding()
+                .fillMaxSize(),
             topBar = {
                 TopAppBar(
                     title = {},
                     actions = {
-                        if (step !is Step.Completed &&
-                            state.displaySkipButton &&
-                            LocalInspectionMode.current.not()) {
-                            TextButton(
-                                text = stringResource(CommonStrings.action_skip),
-                                onClick = { state.eventSink(VerifySelfSessionViewEvents.SkipVerification) }
-                            )
-                        }
+//                        if (step !is Step.Completed &&
+//                            state.displaySkipButton &&
+//                            LocalInspectionMode.current.not()) {
+//                            TextButton(
+//                                text = stringResource(CommonStrings.action_skip),
+//                                onClick = { state.eventSink(VerifySelfSessionViewEvents.SkipVerification) }
+//                            )
+//                        }
                         if (step is Step.Initial) {
                             TextButton(
                                 text = stringResource(CommonStrings.action_signout),
@@ -120,6 +129,7 @@ fun VerifySelfSessionView(
                     }
                 )
             },
+            background = { OnboardingBackground() },
             header = {
                 VerifySelfSessionHeader(step = step)
             },
@@ -160,47 +170,47 @@ fun VerifySelfSessionView(
 private fun VerifySelfSessionHeader(step: Step) {
     val iconStyle = when (step) {
         Step.Loading -> error("Should not happen")
-        is Step.Initial -> BigIcon.Style.Default(CompoundIcons.LockSolid())
-        Step.UseAnotherDevice -> BigIcon.Style.Default(CompoundIcons.Devices())
-        Step.AwaitingOtherDeviceResponse -> BigIcon.Style.Default(CompoundIcons.Devices())
-        Step.Canceled -> BigIcon.Style.AlertSolid
-        Step.Ready, is Step.Verifying -> BigIcon.Style.Default(CompoundIcons.Reaction())
-        Step.Completed -> BigIcon.Style.SuccessSolid
+        is Step.Initial -> NewBigIcon.Style.Default(CompoundIcons.LockSolid())
+        Step.UseAnotherDevice -> NewBigIcon.Style.Default(CompoundIcons.Devices())
+        Step.AwaitingOtherDeviceResponse -> NewBigIcon.Style.Default(CompoundIcons.Devices())
+        Step.Canceled -> NewBigIcon.Style.AlertSolid
+        Step.Ready, is Step.Verifying -> NewBigIcon.Style.Default(CompoundIcons.Reaction())
+        Step.Completed -> NewBigIcon.Style.SuccessSolid
         is Step.Skipped -> return
     }
-    val titleTextId = when (step) {
+    val titleText = when (step) {
         Step.Loading -> error("Should not happen")
-        is Step.Initial -> R.string.screen_identity_confirmation_title
-        Step.UseAnotherDevice -> R.string.screen_session_verification_use_another_device_title
-        Step.AwaitingOtherDeviceResponse -> R.string.screen_session_verification_waiting_another_device_title
-        Step.Canceled -> CommonStrings.common_verification_failed
-        Step.Ready -> R.string.screen_session_verification_compare_emojis_title
-        Step.Completed -> R.string.screen_identity_confirmed_title
+        is Step.Initial -> stringResource(id = R.string.screen_identity_confirmation_title)
+        Step.UseAnotherDevice -> stringResource(id = R.string.screen_session_verification_use_another_device_title)
+        Step.AwaitingOtherDeviceResponse -> stringResource(id = R.string.screen_session_verification_waiting_another_device_title)
+        Step.Canceled -> stringResource(id = CommonStrings.common_verification_failed)
+        Step.Ready -> stringResource(id = R.string.screen_session_verification_compare_emojis_title)
+        Step.Completed -> stringResource(id = R.string.screen_identity_confirmed_title)
         is Step.Verifying -> when (step.data) {
-            is SessionVerificationData.Decimals -> R.string.screen_session_verification_compare_numbers_title
-            is SessionVerificationData.Emojis -> R.string.screen_session_verification_compare_emojis_title
+            is SessionVerificationData.Decimals -> stringResource(id = R.string.screen_session_verification_compare_numbers_title)
+            is SessionVerificationData.Emojis -> stringResource(id = R.string.screen_session_verification_compare_emojis_title)
         }
         is Step.Skipped -> return
     }
-    val subtitleTextId = when (step) {
+    val subtitleText = when (step) {
         Step.Loading -> error("Should not happen")
-        is Step.Initial -> R.string.screen_identity_confirmation_subtitle
-        Step.UseAnotherDevice -> R.string.screen_session_verification_use_another_device_subtitle
-        Step.AwaitingOtherDeviceResponse -> R.string.screen_session_verification_waiting_another_device_subtitle
-        Step.Canceled -> R.string.screen_session_verification_failed_subtitle
-        Step.Ready -> R.string.screen_session_verification_ready_subtitle
-        Step.Completed -> R.string.screen_identity_confirmed_subtitle
+        is Step.Initial -> stringResource(id = R.string.screen_identity_confirmation_subtitle)
+        Step.UseAnotherDevice -> stringResource(id = R.string.screen_session_verification_use_another_device_subtitle)
+        Step.AwaitingOtherDeviceResponse -> stringResource(id = R.string.screen_session_verification_waiting_another_device_subtitle)
+        Step.Canceled -> stringResource(id = R.string.screen_session_verification_failed_subtitle)
+        Step.Ready -> stringResource(id = R.string.screen_session_verification_ready_subtitle)
+        Step.Completed -> stringResource(id = R.string.screen_identity_confirmed_subtitle)
         is Step.Verifying -> when (step.data) {
-            is SessionVerificationData.Decimals -> R.string.screen_session_verification_compare_numbers_subtitle
-            is SessionVerificationData.Emojis -> R.string.screen_session_verification_compare_emojis_subtitle
+            is SessionVerificationData.Decimals -> stringResource(id = R.string.screen_session_verification_compare_numbers_subtitle)
+            is SessionVerificationData.Emojis -> stringResource(id = R.string.screen_session_verification_compare_emojis_subtitle)
         }
         is Step.Skipped -> return
     }
 
-    PageTitle(
+    NewPageTitle(
         iconStyle = iconStyle,
-        title = stringResource(id = titleTextId),
-        subtitle = stringResource(id = subtitleTextId)
+        title = titleText,
+        subtitle = subtitleText
     )
 }
 

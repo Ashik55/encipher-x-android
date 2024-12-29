@@ -12,10 +12,13 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.size
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.unit.dp
 import io.element.android.compound.theme.ElementTheme
 import io.element.android.compound.tokens.generated.CompoundIcons
+import io.element.android.features.poll.api.R
 import io.element.android.libraries.designsystem.preview.ElementPreview
 import io.element.android.libraries.designsystem.preview.PreviewsDayNight
 import io.element.android.libraries.designsystem.theme.components.Icon
@@ -34,13 +37,13 @@ fun PollTitleView(
     ) {
         if (isPollEnded) {
             Icon(
-                imageVector = CompoundIcons.PollsEnd(),
+                imageVector = ImageVector.vectorResource(id = io.element.android.libraries.designsystem.R.drawable.ic_polls_end),
                 contentDescription = stringResource(id = CommonStrings.a11y_poll_end),
                 modifier = Modifier.size(22.dp)
             )
         } else {
             Icon(
-                imageVector = CompoundIcons.Polls(),
+                imageVector = ImageVector.vectorResource(id = io.element.android.libraries.designsystem.R.drawable.ic_polls_msg),
                 contentDescription = stringResource(id = CommonStrings.a11y_poll),
                 modifier = Modifier.size(22.dp)
             )

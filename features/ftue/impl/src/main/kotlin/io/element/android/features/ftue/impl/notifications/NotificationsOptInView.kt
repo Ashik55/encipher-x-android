@@ -34,6 +34,8 @@ import io.element.android.libraries.designsystem.atomic.molecules.ButtonColumnMo
 import io.element.android.libraries.designsystem.atomic.pages.HeaderFooterPage
 import io.element.android.libraries.designsystem.background.OnboardingBackground
 import io.element.android.libraries.designsystem.components.BigIcon
+import io.element.android.libraries.designsystem.components.NotificationIcon
+import io.element.android.libraries.designsystem.components.NotificationPageTitle
 import io.element.android.libraries.designsystem.components.PageTitle
 import io.element.android.libraries.designsystem.components.avatar.Avatar
 import io.element.android.libraries.designsystem.components.avatar.AvatarData
@@ -69,11 +71,11 @@ fun NotificationsOptInView(
 private fun NotificationsOptInHeader(
     modifier: Modifier = Modifier,
 ) {
-    PageTitle(
+    NotificationPageTitle(
         modifier = modifier,
         title = stringResource(R.string.screen_notification_optin_title),
         subtitle = stringResource(R.string.screen_notification_optin_subtitle),
-        iconStyle = BigIcon.Style.Default(CompoundIcons.NotificationsSolid()),
+        iconStyle = NotificationIcon.Style.Default(CompoundIcons.NotificationsSolid()),
     )
 }
 
@@ -99,7 +101,7 @@ private fun NotificationsOptInFooter(state: NotificationsOptInState) {
 
 @Composable
 private fun NotificationsOptInContent() {
-    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+    Box(modifier = Modifier.fillMaxSize().padding(top = 32.dp)) {
         Column(
             verticalArrangement = Arrangement.spacedBy(
                 16.dp,

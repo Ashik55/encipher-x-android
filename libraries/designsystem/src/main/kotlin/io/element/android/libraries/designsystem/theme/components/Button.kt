@@ -196,7 +196,9 @@ private fun ButtonInternal(
                     alpha = if (enabled) 1f else 0.5f
                 )
             } else {
-                ElementTheme.colors.borderInteractiveSecondary
+                if(ElementTheme.isLightTheme && !destructive) Color(0xFF0A8741).copy(
+                    alpha = if (enabled) 1f else 0.5f
+                ) else ElementTheme.colors.borderInteractiveSecondary
             }
         )
         ButtonStyle.Text -> null
@@ -256,11 +258,11 @@ private fun ButtonInternal(
 }
 
 private fun ButtonSize.toMinHeight() = when (this) {
-    ButtonSize.Small -> 32.dp
+    ButtonSize.Small -> 36.dp
     ButtonSize.Medium,
-    ButtonSize.MediumLowPadding -> 40.dp
-    ButtonSize.Large,
-    ButtonSize.LargeLowPadding -> 48.dp
+    ButtonSize.MediumLowPadding -> 44.dp
+    ButtonSize.Large -> 52.dp
+    ButtonSize.LargeLowPadding -> 56.dp
 }
 
 @Immutable
@@ -304,7 +306,7 @@ internal enum class ButtonStyle {
     fun getColors(destructive: Boolean): ButtonColors = when (this) {
         Filled -> ButtonDefaults.buttonColors(
             containerColor = getPrimaryColor(destructive),
-            contentColor = ElementTheme.materialColors.onPrimary,
+            contentColor = if(!(ElementTheme.isLightTheme) && !destructive) Color(0xFF0A8741) else ElementTheme.materialColors.onPrimary,
             disabledContainerColor = if (destructive) {
                 ElementTheme.colors.bgCriticalPrimary.copy(alpha = 0.5f)
             } else {
@@ -314,7 +316,7 @@ internal enum class ButtonStyle {
         )
         Outlined -> ButtonDefaults.buttonColors(
             containerColor = Color.Transparent,
-            contentColor = getPrimaryColor(destructive),
+            contentColor = if(ElementTheme.isLightTheme && !destructive) Color(0xFF0A8741) else getPrimaryColor(destructive),
             disabledContainerColor = Color.Transparent,
             disabledContentColor = getDisabledContentColor(destructive),
         )
@@ -335,7 +337,11 @@ internal enum class ButtonStyle {
         return if (destructive) {
             ElementTheme.colors.bgCriticalPrimary
         } else {
-            ElementTheme.materialColors.primary
+            if(ElementTheme.isLightTheme){
+                Color(0xFF0A8741)
+            } else{
+                ElementTheme.materialColors.primary
+            }
         }
     }
 

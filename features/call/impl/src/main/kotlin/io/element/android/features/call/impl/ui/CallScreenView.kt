@@ -74,7 +74,7 @@ internal fun CallScreenView(
         topBar = {
             if (!pipState.isInPictureInPicture) {
                 TopAppBar(
-                    title = { Text(stringResource(R.string.element_call)) },
+                    title = { Text("") },
                     navigationIcon = {
                         BackButton(
                             imageVector = if (pipState.supportPip) CompoundIcons.ArrowLeft() else CompoundIcons.Close(),

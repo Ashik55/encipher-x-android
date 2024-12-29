@@ -16,7 +16,7 @@ class PinnedMessagesListTimelineActionPostProcessor : TimelineItemActionPostProc
             add(TimelineItemAction.ViewInTimeline)
             actions.firstOrNull { it is TimelineItemAction.Unpin }?.let(::add)
             actions.firstOrNull { it is TimelineItemAction.Forward }?.let(::add)
-            actions.firstOrNull { it is TimelineItemAction.ViewSource }?.let(::add)
+/*            actions.firstOrNull { it is TimelineItemAction.ViewSource }?.let(::add)*/
         }
     }
 }

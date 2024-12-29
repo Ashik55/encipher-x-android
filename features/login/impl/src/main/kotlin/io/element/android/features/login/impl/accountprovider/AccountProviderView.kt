@@ -61,7 +61,7 @@ fun AccountProviderView(
                 if (item.isMatrixOrg) {
                     RoundedIconAtom(
                         size = RoundedIconAtomSize.Medium,
-                        resourceId = R.drawable.ic_matrix,
+                        resourceId = R.drawable.ic_lock,
                         tint = Color.Unspecified,
                     )
                 } else {

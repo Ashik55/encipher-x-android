@@ -140,7 +140,11 @@ class DefaultActionListPresenter @AssistedInject constructor(
         isPinnedEventsEnabled: Boolean,
         isEventPinned: Boolean,
     ): List<TimelineItemAction> {
-        val canRedact = timelineItem.isMine && usersEventPermissions.canRedactOwn || !timelineItem.isMine && usersEventPermissions.canRedactOther
+//        val canRedact = timelineItem.isMine && usersEventPermissions.canRedactOwn || !timelineItem.isMine && usersEventPermissions.canRedactOther
+
+        val canRedact = (timelineItem.isMine && usersEventPermissions.canRedactOwn) &&
+            (timelineItem.content.canReact())
+
         return buildList {
             if (timelineItem.canBeRepliedTo && usersEventPermissions.canSendMessage) {
                 if (timelineItem.isThreaded) {
@@ -169,12 +173,12 @@ class DefaultActionListPresenter @AssistedInject constructor(
             if (timelineItem.content.canBeCopied()) {
                 add(TimelineItemAction.Copy)
             }
-            if (timelineItem.isRemote) {
-                add(TimelineItemAction.CopyLink)
-            }
-            if (isDeveloperModeEnabled) {
-                add(TimelineItemAction.ViewSource)
-            }
+//            if (timelineItem.isRemote) {
+//                add(TimelineItemAction.CopyLink)
+//            }
+//            if (isDeveloperModeEnabled) {
+//                add(TimelineItemAction.ViewSource)
+//            }
             if (!timelineItem.isMine) {
                 add(TimelineItemAction.ReportContent)
             }
@@ -190,15 +194,26 @@ class DefaultActionListPresenter @AssistedInject constructor(
 /**
  * Post filter the actions based on the content of the event.
  */
+//private fun List<TimelineItemAction>.postFilter(content: TimelineItemEventContent): List<TimelineItemAction> {
+//    return filter { action ->
+//        when (content) {
+//            is TimelineItemCallNotifyContent,
+//            is TimelineItemLegacyCallInviteContent,
+//            is TimelineItemStateContent -> action == TimelineItemAction.ViewSource
+//            is TimelineItemRedactedContent -> {
+//                action == TimelineItemAction.ViewSource || action == TimelineItemAction.Unpin
+//            }
+//            }
+//            else -> true
+//        }
+//    }
+//}
+
 private fun List<TimelineItemAction>.postFilter(content: TimelineItemEventContent): List<TimelineItemAction> {
-    return filter { action ->
+    return filter {
         when (content) {
             is TimelineItemCallNotifyContent,
-            is TimelineItemLegacyCallInviteContent,
-            is TimelineItemStateContent -> action == TimelineItemAction.ViewSource
-            is TimelineItemRedactedContent -> {
-                action == TimelineItemAction.ViewSource || action == TimelineItemAction.Unpin
-            }
+            is TimelineItemLegacyCallInviteContent -> true
             else -> true
         }
     }

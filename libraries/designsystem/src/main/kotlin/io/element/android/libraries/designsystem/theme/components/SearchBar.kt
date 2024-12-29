@@ -8,6 +8,7 @@
 package io.element.android.libraries.designsystem.theme.components
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Spacer
@@ -57,6 +58,8 @@ fun <T> SearchBar(
     tonalElevation: Dp = SearchBarDefaults.TonalElevation,
     windowInsets: WindowInsets = SearchBarDefaults.windowInsets,
     interactionSource: MutableInteractionSource = remember { MutableInteractionSource() },
+    borderWidth: Dp = 1.dp,
+    borderColor: Color = ElementTheme.materialColors.outline,
     inactiveBarColors: SearchBarColors = ElementSearchBarDefaults.inactiveColors(),
     activeBarColors: SearchBarColors = ElementSearchBarDefaults.activeColors(),
     inactiveTextInputColors: TextFieldColors = ElementSearchBarDefaults.inactiveInputFieldColors(),
@@ -115,6 +118,11 @@ fun <T> SearchBar(
                 },
                 interactionSource = interactionSource,
                 colors = if (active) activeTextInputColors else inactiveTextInputColors,
+                modifier = if (!active) {
+                    Modifier.border(width = borderWidth, color = borderColor, shape = shape)
+                } else {
+                    Modifier
+                }
             )
         },
         expanded = active,

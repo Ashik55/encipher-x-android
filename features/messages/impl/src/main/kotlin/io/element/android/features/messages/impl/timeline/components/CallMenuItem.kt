@@ -7,6 +7,7 @@
 
 package io.element.android.features.messages.impl.timeline.components
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
@@ -17,6 +18,7 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
@@ -66,10 +68,14 @@ private fun StandByCallMenuItem(
         onClick = onJoinCallClick,
         enabled = roomCallState.canStartCall,
     ) {
-        Icon(
-            imageVector = CompoundIcons.VideoCallSolid(),
-            contentDescription = stringResource(CommonStrings.a11y_start_call),
+        Image(
+            painter = painterResource(id = io.element.android.features.messages.impl.R.drawable.ic_video),
+            contentDescription = null
         )
+//        Icon(
+//            imageVector = CompoundIcons.VideoCallSolid(),
+//            contentDescription = stringResource(CommonStrings.a11y_start_call),
+//        )
     }
 }
 

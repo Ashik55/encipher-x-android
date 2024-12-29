@@ -13,7 +13,6 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -21,6 +20,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
@@ -42,7 +42,7 @@ fun ElementLogoAtom(
 ) {
     val blur = if (darkTheme) 160.dp else 24.dp
     val shadowColor = if (darkTheme) size.shadowColorDark else size.shadowColorLight
-    val logoShadowColor = if (darkTheme) size.logoShadowColorDark else size.logoShadowColorLight
+//    val logoShadowColor = if (darkTheme) size.logoShadowColorDark else size.logoShadowColorLight
     val backgroundColor = if (darkTheme) Color.White.copy(alpha = 0.2f) else Color.White.copy(alpha = 0.4f)
     val borderColor = if (darkTheme) Color.White.copy(alpha = 0.89f) else Color.White
     Box(
@@ -83,22 +83,27 @@ fun ElementLogoAtom(
         )
         Image(
             modifier = Modifier
-                .size(size.logoSize)
+                .size(size.logoSize),
                 // Do the same double shadow than on Figma...
-                .shadow(
-                    elevation = 35.dp,
-                    clip = false,
-                    shape = CircleShape,
-                    ambientColor = logoShadowColor,
-                )
-                .shadow(
-                    elevation = 35.dp,
-                    clip = false,
-                    shape = CircleShape,
-                    ambientColor = Color(0x80000000),
-                ),
-            painter = painterResource(id = R.drawable.element_logo),
-            contentDescription = null
+//                .shadow(
+//                    elevation = 35.dp,
+//                    clip = false,
+//                    shape = RoundedCornerShape(100.dp), // Changed to RoundedCornerShape
+//                    ambientColor = logoShadowColor,
+//                )
+//                .shadow(
+//                    elevation = 35.dp,
+//                    clip = false,
+//                    shape = RoundedCornerShape(100.dp), // Changed to RoundedCornerShape
+//                    ambientColor = Color(0x80000000),
+//                ),
+            painter = painterResource(id = R.drawable.ic_lock),
+            contentDescription = null,
+            colorFilter = if (isSystemInDarkTheme()) {
+                ColorFilter.tint(Color.White)
+            } else {
+                null
+            }
         )
     }
 }

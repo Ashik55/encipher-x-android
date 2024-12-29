@@ -14,7 +14,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
@@ -70,7 +72,9 @@ fun PreferencesRootView(
         snackbarHost = { SnackbarHost(snackbarHostState) }
     ) {
         UserPreferences(
-            modifier = Modifier.clickable {
+            modifier = Modifier
+                .padding(bottom = 8.dp)
+                .clickable {
                 onOpenUserProfile(state.myUser)
             },
             user = state.myUser,
@@ -125,28 +129,28 @@ private fun ColumnScope.ManageAppSection(
     if (state.showNotificationSettings) {
         ListItem(
             headlineContent = { Text(stringResource(id = R.string.screen_notification_settings_title)) },
-            leadingContent = ListItemContent.Icon(IconSource.Vector(CompoundIcons.Notifications())),
+            leadingContent = ListItemContent.Icon(IconSource.Vector( ImageVector.vectorResource(id = R.drawable.ic_notification))),
             onClick = onOpenNotificationSettings,
         )
     }
     if (state.showLockScreenSettings) {
         ListItem(
             headlineContent = { Text(stringResource(id = CommonStrings.common_screen_lock)) },
-            leadingContent = ListItemContent.Icon(IconSource.Vector(CompoundIcons.Lock())),
+            leadingContent = ListItemContent.Icon(IconSource.Vector( ImageVector.vectorResource(id = R.drawable.ic_lock_settings))),
             onClick = onOpenLockScreenSettings,
         )
     }
     if (state.showSecureBackup) {
         ListItem(
             headlineContent = { Text(stringResource(id = CommonStrings.common_encryption)) },
-            leadingContent = ListItemContent.Icon(IconSource.Vector(CompoundIcons.Key())),
+            leadingContent = ListItemContent.Icon(IconSource.Vector( ImageVector.vectorResource(id = R.drawable.ic_key_settings))),
             trailingContent = ListItemContent.Badge.takeIf { state.showSecureBackupBadge },
             onClick = onSecureBackupClick,
         )
     }
-    if (state.showNotificationSettings || state.showLockScreenSettings || state.showSecureBackup) {
-        HorizontalDivider()
-    }
+//    if (state.showNotificationSettings || state.showLockScreenSettings || state.showSecureBackup) {
+//        HorizontalDivider()
+//    }
 }
 
 @Composable
@@ -167,7 +171,7 @@ private fun ColumnScope.ManageAccountSection(
     state.devicesManagementUrl?.let { url ->
         ListItem(
             headlineContent = { Text(stringResource(id = CommonStrings.action_manage_devices)) },
-            leadingContent = ListItemContent.Icon(IconSource.Vector(CompoundIcons.Devices())),
+            leadingContent = ListItemContent.Icon(IconSource.Vector( ImageVector.vectorResource(id = R.drawable.ic_device))),
             trailingContent = ListItemContent.Icon(IconSource.Vector(CompoundIcons.PopOut())),
             onClick = { onManageAccountClick(url) },
         )
@@ -181,9 +185,9 @@ private fun ColumnScope.ManageAccountSection(
         )
     }
 
-    if (state.accountManagementUrl != null || state.devicesManagementUrl != null || state.showBlockedUsersItem) {
-        HorizontalDivider()
-    }
+//    if (state.accountManagementUrl != null || state.devicesManagementUrl != null || state.showBlockedUsersItem) {
+//        HorizontalDivider()
+//    }
 }
 
 @Composable
@@ -197,41 +201,41 @@ private fun ColumnScope.GeneralSection(
     onSignOutClick: () -> Unit,
     onDeactivateClick: () -> Unit,
 ) {
-    ListItem(
-        headlineContent = { Text(stringResource(id = CommonStrings.common_about)) },
-        leadingContent = ListItemContent.Icon(IconSource.Vector(CompoundIcons.Info())),
-        onClick = onOpenAbout,
-    )
-    ListItem(
-        headlineContent = { Text(stringResource(id = CommonStrings.common_report_a_problem)) },
-        leadingContent = ListItemContent.Icon(IconSource.Vector(CompoundIcons.ChatProblem())),
-        onClick = onOpenRageShake
-    )
-    if (state.showAnalyticsSettings) {
-        ListItem(
-            headlineContent = { Text(stringResource(id = CommonStrings.common_analytics)) },
-            leadingContent = ListItemContent.Icon(IconSource.Vector(CompoundIcons.Chart())),
-            onClick = onOpenAnalytics,
-        )
-    }
+//    ListItem(
+//        headlineContent = { Text(stringResource(id = CommonStrings.common_about)) },
+//        leadingContent = ListItemContent.Icon(IconSource.Vector(CompoundIcons.Info())),
+//        onClick = onOpenAbout,
+//    )
+//    ListItem(
+//        headlineContent = { Text(stringResource(id = CommonStrings.common_report_a_problem)) },
+//        leadingContent = ListItemContent.Icon(IconSource.Vector(CompoundIcons.ChatProblem())),
+//        onClick = onOpenRageShake
+//    )
+//    if (state.showAnalyticsSettings) {
+//        ListItem(
+//            headlineContent = { Text(stringResource(id = CommonStrings.common_analytics)) },
+//            leadingContent = ListItemContent.Icon(IconSource.Vector(CompoundIcons.Chart())),
+//            onClick = onOpenAnalytics,
+//        )
+//    }
     ListItem(
         headlineContent = { Text(stringResource(id = CommonStrings.common_advanced_settings)) },
-        leadingContent = ListItemContent.Icon(IconSource.Vector(CompoundIcons.Settings())),
+        leadingContent = ListItemContent.Icon(IconSource.Vector( ImageVector.vectorResource(id = R.drawable.ic_adv_settings))),
         onClick = onOpenAdvancedSettings,
     )
-    if (state.showDeveloperSettings) {
-        DeveloperPreferencesView(onOpenDeveloperSettings)
-    }
+//    if (state.showDeveloperSettings) {
+//        DeveloperPreferencesView(onOpenDeveloperSettings)
+//    }
     ListItem(
         headlineContent = { Text(stringResource(id = CommonStrings.action_signout)) },
-        leadingContent = ListItemContent.Icon(IconSource.Vector(CompoundIcons.SignOut())),
+        leadingContent = ListItemContent.Icon(IconSource.Vector( ImageVector.vectorResource(id = R.drawable.ic_sign_out))),
         style = ListItemStyle.Destructive,
         onClick = onSignOutClick,
     )
     if (state.canDeactivateAccount) {
         ListItem(
             headlineContent = { Text(stringResource(id = CommonStrings.action_deactivate_account)) },
-            leadingContent = ListItemContent.Icon(IconSource.Vector(CompoundIcons.Warning())),
+            leadingContent = ListItemContent.Icon(IconSource.Vector( ImageVector.vectorResource(id = R.drawable.ic_warning))),
             style = ListItemStyle.Destructive,
             onClick = onDeactivateClick,
         )
@@ -266,14 +270,14 @@ private fun ColumnScope.Footer(
     )
 }
 
-@Composable
-private fun DeveloperPreferencesView(onOpenDeveloperSettings: () -> Unit) {
-    ListItem(
-        headlineContent = { Text(stringResource(id = CommonStrings.common_developer_options)) },
-        leadingContent = ListItemContent.Icon(IconSource.Resource(CommonDrawables.ic_developer_options)),
-        onClick = onOpenDeveloperSettings
-    )
-}
+//@Composable
+//private fun DeveloperPreferencesView(onOpenDeveloperSettings: () -> Unit) {
+//    ListItem(
+//        headlineContent = { Text(stringResource(id = CommonStrings.common_developer_options)) },
+//        leadingContent = ListItemContent.Icon(IconSource.Resource(CommonDrawables.ic_developer_options)),
+//        onClick = onOpenDeveloperSettings
+//    )
+//}
 
 @PreviewWithLargeHeight
 @Composable

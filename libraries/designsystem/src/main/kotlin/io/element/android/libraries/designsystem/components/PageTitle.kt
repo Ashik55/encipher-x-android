@@ -37,7 +37,7 @@ import io.element.android.libraries.designsystem.theme.components.TextButton
 @Composable
 fun PageTitle(
     title: AnnotatedString,
-    iconStyle: BigIcon.Style,
+    iconStyle: BigIcon.Style?,
     modifier: Modifier = Modifier,
     subtitle: AnnotatedString? = null,
     callToAction: @Composable (() -> Unit)? = null,
@@ -46,7 +46,7 @@ fun PageTitle(
         modifier = modifier.fillMaxWidth(),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
-        BigIcon(style = iconStyle)
+        iconStyle?.let { BigIcon(style = it) }
         Column(
             modifier = Modifier.padding(vertical = 16.dp),
             verticalArrangement = Arrangement.spacedBy(8.dp),
@@ -85,7 +85,7 @@ fun PageTitle(
 @Composable
 fun PageTitle(
     title: String,
-    iconStyle: BigIcon.Style,
+    iconStyle: BigIcon.Style?,
     modifier: Modifier = Modifier,
     subtitle: String? = null,
     callToAction: @Composable (() -> Unit)? = null,

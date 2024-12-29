@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?><!--
+  ~ Copyright 2024 New Vector Ltd.
+  ~
+  ~ SPDX-License-Identifier: AGPL-3.0-only
+  ~ Please see LICENSE in the repository root for full details.
+  -->
+
+<resources>
+    <string name="where_your_conversations_live">Where your conversations live</string>
+    <string name="welcome_back">Welcome Back!</string>
+</resources>

@@ -9,7 +9,10 @@ package io.element.android.features.onboarding.impl
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.produceState
+import androidx.compose.runtime.setValue
 import io.element.android.appconfig.OnBoardingConfig
 import io.element.android.libraries.architecture.Presenter
 import io.element.android.libraries.core.meta.BuildMeta
@@ -26,16 +29,24 @@ class OnBoardingPresenter @Inject constructor(
     private val buildMeta: BuildMeta,
     private val featureFlagService: FeatureFlagService,
 ) : Presenter<OnBoardingState> {
+    private var _currentPage by mutableIntStateOf(0)
+
     @Composable
     override fun present(): OnBoardingState {
         val canLoginWithQrCode by produceState(initialValue = false) {
             value = featureFlagService.isFeatureEnabled(FeatureFlags.QrCodeLogin)
         }
-         return OnBoardingState(
+
+        return OnBoardingState(
             isDebugBuild = buildMeta.buildType != BuildType.RELEASE,
             productionApplicationName = buildMeta.productionApplicationName,
             canLoginWithQrCode = canLoginWithQrCode,
             canCreateAccount = OnBoardingConfig.CAN_CREATE_ACCOUNT,
+            currentPage = _currentPage
         )
+    }
+
+    fun setPage(page: Int) {
+        _currentPage = page.coerceIn(0, 3) // Ensure page is between 0 and 3
     }
 }

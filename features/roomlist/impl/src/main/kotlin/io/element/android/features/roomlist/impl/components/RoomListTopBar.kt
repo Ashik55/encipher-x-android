@@ -7,13 +7,21 @@
 
 package io.element.android.features.roomlist.impl.components
 
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.TopAppBarDefaults
@@ -29,11 +37,17 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.draw.paint
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalInspectionMode
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
@@ -56,6 +70,7 @@ import io.element.android.libraries.designsystem.text.roundToPx
 import io.element.android.libraries.designsystem.text.toDp
 import io.element.android.libraries.designsystem.text.toSp
 import io.element.android.libraries.designsystem.theme.aliasScreenTitle
+import io.element.android.libraries.designsystem.theme.components.CustomHomeTopAppBar
 import io.element.android.libraries.designsystem.theme.components.DropdownMenu
 import io.element.android.libraries.designsystem.theme.components.DropdownMenuItem
 import io.element.android.libraries.designsystem.theme.components.HorizontalDivider
@@ -63,9 +78,11 @@ import io.element.android.libraries.designsystem.theme.components.Icon
 import io.element.android.libraries.designsystem.theme.components.IconButton
 import io.element.android.libraries.designsystem.theme.components.MediumTopAppBar
 import io.element.android.libraries.designsystem.theme.components.Text
+import io.element.android.libraries.designsystem.theme.components.TopAppBar
 import io.element.android.libraries.matrix.api.core.UserId
 import io.element.android.libraries.matrix.api.user.MatrixUser
 import io.element.android.libraries.matrix.ui.model.getAvatarData
+import io.element.android.libraries.matrix.ui.model.getBestName
 import io.element.android.libraries.testtags.TestTags
 import io.element.android.libraries.testtags.testTag
 import io.element.android.libraries.ui.strings.CommonStrings
@@ -146,6 +163,7 @@ private fun DefaultRoomListTopBar(
         MaterialTheme(
             colorScheme = ElementTheme.materialColors,
             shapes = MaterialTheme.shapes,
+//            typography = ElementTheme.materialTypography
             typography = ElementTheme.materialTypography.copy(
                 headlineSmall = expandedTitleTextStyle,
                 titleLarge = collapsedTitleTextStyle
@@ -153,131 +171,184 @@ private fun DefaultRoomListTopBar(
         ) {
             Column(
                 modifier = Modifier
-                    .onSizeChanged {
-                        appBarHeight = it.height
-                    }
-                    .avatarBloom(
-                        avatarData = avatarData,
-                        background = if (ElementTheme.isLightTheme) {
-                            // Workaround to display a very subtle bloom for avatars with very soft colors
-                            Color(0xFFF9F9F9)
-                        } else {
-                            ElementTheme.materialColors.background
-                        },
-                        blurSize = DpSize(avatarBloomSize, avatarBloomSize),
-                        offset = DpOffset(24.dp, 24.dp + statusBarPadding),
-                        clipToSize = if (appBarHeight > 0) {
-                            DpSize(
-                                avatarBloomSize,
-                                appBarHeight.toDp()
-                            )
-                        } else {
-                            DpSize.Unspecified
-                        },
-                        bottomSoftEdgeColor = ElementTheme.materialColors.background,
-                        bottomSoftEdgeAlpha = if (displayFilters) {
-                            1f
-                        } else {
-                            1f - collapsedFraction
-                        },
-                        alpha = if (areSearchResultsDisplayed) 0f else 1f,
+                    .fillMaxWidth()
+//                    .aspectRatio(2.2f)
+                    .height(232.dp)
+                    .paint(
+                        painter = painterResource(id = R.drawable.home_top_bg),
+                        contentScale = ContentScale.FillBounds
                     )
+//                    .onSizeChanged {
+//                        appBarHeight = it.height
+//                    }
+//                    .avatarBloom(
+//                        avatarData = avatarData,
+//                        background = if (ElementTheme.isLightTheme) {
+//                            // Workaround to display a very subtle bloom for avatars with very soft colors
+//                            Color(0xFFF9F9F9)
+//                        } else {
+//                            ElementTheme.materialColors.background
+//                        },
+//                        blurSize = DpSize(avatarBloomSize, avatarBloomSize),
+//                        offset = DpOffset(24.dp, 24.dp + statusBarPadding),
+////                        clipToSize = DpSize.Unspecified,
+//                        clipToSize = if (appBarHeight > 0) {
+//                            DpSize(
+//                                avatarBloomSize,
+//                                appBarHeight.toDp()
+//                            )
+//                        } else {
+//                            DpSize.Unspecified
+//                        },
+//                        bottomSoftEdgeColor = ElementTheme.materialColors.background,
+//                        bottomSoftEdgeAlpha = if (displayFilters) {
+//                            1f
+//                        } else {
+//                            1f - collapsedFraction
+//                        },
+//                        alpha = if (areSearchResultsDisplayed) 0f else 1f,
+//                    )
                     .statusBarsPadding(),
             ) {
-                MediumTopAppBar(
-                    colors = TopAppBarDefaults.mediumTopAppBarColors(
-                        containerColor = Color.Transparent,
-                        scrolledContainerColor = Color.Transparent,
-                    ),
-                    title = {
-                        Text(text = stringResource(id = R.string.screen_roomlist_main_space_title))
-                    },
-                    navigationIcon = {
-                        NavigationIcon(
-                            avatarData = avatarData,
-                            showAvatarIndicator = showAvatarIndicator,
-                            onClick = onOpenSettings,
-                        )
-                    },
-                    actions = {
-                        if (displayMenuItems) {
-                            IconButton(
-                                onClick = onSearchClick,
+                Box(
+                    modifier = Modifier
+                        .padding(start = 16.dp, top = 16.dp, bottom = 16.dp, end = 8.dp)
+                        .height(56.dp)
+                ) {
+                    TopAppBar(
+                        colors = TopAppBarDefaults.mediumTopAppBarColors(
+                            containerColor = Color.Transparent,
+                            scrolledContainerColor = Color.Transparent,
+                        ),
+                        title = {
+                            Column(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(start = 8.dp)
                             ) {
-                                Icon(
-                                    imageVector = CompoundIcons.Search(),
-                                    contentDescription = stringResource(CommonStrings.action_search),
+                                // Name
+                                Text(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    text = matrixUser.getBestName(),
+                                    maxLines = 1,
+                                    style = ElementTheme.typography.fontHeadingSmMedium,
+                                    overflow = TextOverflow.Ellipsis,
+                                    color = ElementTheme.materialColors.primary,
                                 )
-                            }
-                            if (RoomListConfig.HAS_DROP_DOWN_MENU) {
-                                var showMenu by remember { mutableStateOf(false) }
-                                IconButton(
-                                    onClick = { showMenu = !showMenu }
-                                ) {
-                                    Icon(
-                                        imageVector = CompoundIcons.OverflowVertical(),
-                                        contentDescription = null,
+                                // ID
+                                if (!matrixUser.displayName.isNullOrEmpty()) {
+                                    Text(
+                                        modifier = Modifier.fillMaxWidth(),
+                                        text = matrixUser.userId.value,
+                                        style = ElementTheme.typography.fontBodyMdRegular,
+                                        color = ElementTheme.materialColors.secondary,
+                                        maxLines = 1,
+                                        overflow = TextOverflow.Ellipsis
                                     )
                                 }
-                                DropdownMenu(
-                                    expanded = showMenu,
-                                    onDismissRequest = { showMenu = false }
+                            }
+                        },
+                        navigationIcon = {
+                            NavigationIcon(
+                                avatarData = avatarData,
+                                showAvatarIndicator = showAvatarIndicator,
+                                onClick = onOpenSettings,
+                            )
+                        },
+                        actions = {
+                            if (displayMenuItems) {
+                                IconButton(
+                                    onClick = onSearchClick,
                                 ) {
-                                    if (RoomListConfig.SHOW_INVITE_MENU_ITEM) {
-                                        DropdownMenuItem(
-                                            onClick = {
-                                                showMenu = false
-                                                onMenuActionClick(RoomListMenuAction.InviteFriends)
-                                            },
-                                            text = { Text(stringResource(id = CommonStrings.action_invite)) },
-                                            leadingIcon = {
-                                                Icon(
-                                                    imageVector = CompoundIcons.ShareAndroid(),
-                                                    tint = ElementTheme.materialColors.secondary,
-                                                    contentDescription = null,
-                                                )
-                                            }
+                                    Icon(
+                                        imageVector = CompoundIcons.Search(),
+                                        contentDescription = stringResource(CommonStrings.action_search),
+                                        tint = Color(0xFF0A8741),
+                                        modifier = Modifier.size(32.dp)
+                                    )
+                                }
+                                if (RoomListConfig.HAS_DROP_DOWN_MENU) {
+                                    var showMenu by remember { mutableStateOf(false) }
+                                    IconButton(
+                                        onClick = { showMenu = !showMenu }
+                                    ) {
+                                        Icon(
+                                            imageVector = CompoundIcons.OverflowVertical(),
+                                            contentDescription = null,
                                         )
                                     }
-                                    if (RoomListConfig.SHOW_REPORT_PROBLEM_MENU_ITEM) {
-                                        DropdownMenuItem(
-                                            onClick = {
-                                                showMenu = false
-                                                onMenuActionClick(RoomListMenuAction.ReportBug)
-                                            },
-                                            text = { Text(stringResource(id = CommonStrings.common_report_a_problem)) },
-                                            leadingIcon = {
-                                                Icon(
-                                                    imageVector = CompoundIcons.ChatProblem(),
-                                                    tint = ElementTheme.materialColors.secondary,
-                                                    contentDescription = null,
-                                                )
-                                            }
-                                        )
+                                    DropdownMenu(
+                                        expanded = showMenu,
+                                        onDismissRequest = { showMenu = false }
+                                    ) {
+                                        if (RoomListConfig.SHOW_INVITE_MENU_ITEM) {
+                                            DropdownMenuItem(
+                                                onClick = {
+                                                    showMenu = false
+                                                    onMenuActionClick(RoomListMenuAction.InviteFriends)
+                                                },
+                                                text = { Text(stringResource(id = CommonStrings.action_invite)) },
+                                                leadingIcon = {
+                                                    Icon(
+                                                        imageVector = CompoundIcons.ShareAndroid(),
+                                                        tint = ElementTheme.materialColors.secondary,
+                                                        contentDescription = null,
+                                                    )
+                                                }
+                                            )
+                                        }
+                                        if (RoomListConfig.SHOW_REPORT_PROBLEM_MENU_ITEM) {
+                                            DropdownMenuItem(
+                                                onClick = {
+                                                    showMenu = false
+                                                    onMenuActionClick(RoomListMenuAction.ReportBug)
+                                                },
+                                                text = { Text(stringResource(id = CommonStrings.common_report_a_problem)) },
+                                                leadingIcon = {
+                                                    Icon(
+                                                        imageVector = CompoundIcons.ChatProblem(),
+                                                        tint = ElementTheme.materialColors.secondary,
+                                                        contentDescription = null,
+                                                    )
+                                                }
+                                            )
+                                        }
                                     }
                                 }
                             }
-                        }
-                    },
-                    scrollBehavior = scrollBehavior,
-                    windowInsets = WindowInsets(0.dp),
-                )
+                        },
+                        scrollBehavior = scrollBehavior,
+                        windowInsets = WindowInsets(0.dp),
+                    )
+                }
+                Text(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp,),
+                    text = "My Chats",
+                    maxLines = 1,
+                    style = ElementTheme.typography.fontHeadingLgBold,
+                    overflow = TextOverflow.Ellipsis,
+                    color = ElementTheme.materialColors.primary,
+
+                    )
+
                 if (displayFilters) {
                     RoomListFiltersView(
                         state = filtersState,
-                        modifier = Modifier.padding(bottom = 16.dp)
+                        modifier = Modifier.padding(vertical = 16.dp)
                     )
                 }
             }
         }
 
-        HorizontalDivider(
-            modifier = Modifier
-                .fillMaxWidth()
-                .alpha(collapsedFraction)
-                .align(Alignment.BottomCenter),
-            color = ElementTheme.materialColors.outlineVariant,
-        )
+//        HorizontalDivider(
+//            modifier = Modifier
+//                .fillMaxWidth()
+////                .alpha(collapsedFraction)
+//                .align(Alignment.BottomCenter),
+//            color = ElementTheme.materialColors.outlineVariant,
+//        )
     }
 }
 
@@ -288,17 +359,30 @@ private fun NavigationIcon(
     onClick: () -> Unit,
 ) {
     IconButton(
-        modifier = Modifier.testTag(TestTags.homeScreenSettings),
+        modifier = Modifier
+            .testTag(TestTags.homeScreenSettings)
+            .size(52.dp)
+            .clip(CircleShape)
+            .background(color = Color.White)
+            .border(
+                width = 4.dp,
+                color = Color(0xFF0A8741),
+                shape = CircleShape
+            ),
         onClick = onClick,
     ) {
         Box {
             Avatar(
+                modifier = Modifier
+                    .size(40.dp),
                 avatarData = avatarData,
                 contentDescription = stringResource(CommonStrings.common_settings),
             )
             if (showAvatarIndicator) {
                 RedIndicatorAtom(
-                    modifier = Modifier.align(Alignment.TopEnd)
+                    modifier = Modifier
+                        .align(Alignment.TopEnd)
+                        .offset(x = (-2.3).dp, y = 4.dp)
                 )
             }
         }
