@@ -12,6 +12,7 @@ import io.element.android.libraries.matrix.api.core.EventId
 import io.element.android.libraries.matrix.api.core.ProgressCallback
 import io.element.android.libraries.matrix.api.core.RoomAlias
 import io.element.android.libraries.matrix.api.core.RoomId
+import io.element.android.libraries.matrix.api.core.SendHandle
 import io.element.android.libraries.matrix.api.core.SessionId
 import io.element.android.libraries.matrix.api.core.TransactionId
 import io.element.android.libraries.matrix.api.core.UserId
@@ -32,6 +33,7 @@ import io.element.android.libraries.matrix.api.room.MessageEventType
 import io.element.android.libraries.matrix.api.room.RoomMember
 import io.element.android.libraries.matrix.api.room.StateEventType
 import io.element.android.libraries.matrix.api.room.draft.ComposerDraft
+import io.element.android.libraries.matrix.api.room.knock.KnockRequest
 import io.element.android.libraries.matrix.api.room.location.AssetType
 import io.element.android.libraries.matrix.api.room.powerlevels.MatrixRoomPowerLevels
 import io.element.android.libraries.matrix.api.room.powerlevels.UserRoleChange
@@ -47,12 +49,14 @@ import io.element.android.libraries.matrix.test.notificationsettings.FakeNotific
 import io.element.android.libraries.matrix.test.timeline.FakeTimeline
 import io.element.android.tests.testutils.lambda.lambdaError
 import io.element.android.tests.testutils.simulateLongTask
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.test.TestScope
 import java.io.File
 
 class FakeMatrixRoom(
@@ -71,6 +75,7 @@ class FakeMatrixRoom(
     override val activeMemberCount: Long = 234L,
     val notificationSettingsService: NotificationSettingsService = FakeNotificationSettingsService(),
     override val liveTimeline: Timeline = FakeTimeline(),
+    override val roomCoroutineScope: CoroutineScope = TestScope(),
     private var roomPermalinkResult: () -> Result<String> = { lambdaError() },
     private var eventPermalinkResult: (EventId) -> Result<String> = { lambdaError() },
     private val sendCallNotificationIfNeededResult: () -> Result<Unit> = { lambdaError() },
@@ -91,10 +96,10 @@ class FakeMatrixRoom(
         { _, _, _, _, _, _ -> lambdaError() },
     private val sendVideoResult: (File, File?, VideoInfo, String?, String?, ProgressCallback?) -> Result<FakeMediaUploadHandler> =
         { _, _, _, _, _, _ -> lambdaError() },
-    private val sendFileResult: (File, FileInfo, ProgressCallback?) -> Result<FakeMediaUploadHandler> =
-        { _, _, _ -> lambdaError() },
-    private val sendAudioResult: (File, AudioInfo, ProgressCallback?) -> Result<FakeMediaUploadHandler> =
-        { _, _, _ -> lambdaError() },
+    private val sendFileResult: (File, FileInfo, String?, String?, ProgressCallback?) -> Result<FakeMediaUploadHandler> =
+        { _, _, _, _, _ -> lambdaError() },
+    private val sendAudioResult: (File, AudioInfo, String?, String?, ProgressCallback?) -> Result<FakeMediaUploadHandler> =
+        { _, _, _, _, _ -> lambdaError() },
     private val sendVoiceMessageResult: (File, AudioInfo, List<Float>, ProgressCallback?) -> Result<FakeMediaUploadHandler> =
         { _, _, _, _ -> lambdaError() },
     private val setNameResult: (String) -> Result<Unit> = { lambdaError() },
@@ -105,7 +110,6 @@ class FakeMatrixRoom(
     private val sendMessageResult: (String, String?, List<IntentionalMention>) -> Result<Unit> = { _, _, _ -> lambdaError() },
     private val updateUserRoleResult: () -> Result<Unit> = { lambdaError() },
     private val toggleReactionResult: (String, EventOrTransactionId) -> Result<Unit> = { _, _ -> lambdaError() },
-    private val retrySendMessageResult: (TransactionId) -> Result<Unit> = { lambdaError() },
     private val cancelSendResult: (TransactionId) -> Result<Unit> = { lambdaError() },
     private val forwardEventResult: (EventId, List<RoomId>) -> Result<Unit> = { _, _ -> lambdaError() },
     private val reportContentResult: (EventId, String, UserId?) -> Result<Unit> = { _, _, _ -> lambdaError() },
@@ -133,13 +137,14 @@ class FakeMatrixRoom(
     private val getMembersResult: (Int) -> Result<List<RoomMember>> = { lambdaError() },
     private val timelineFocusedOnEventResult: (EventId) -> Result<Timeline> = { lambdaError() },
     private val pinnedEventsTimelineResult: () -> Result<Timeline> = { lambdaError() },
+    private val mediaTimelineResult: () -> Result<Timeline> = { lambdaError() },
     private val setSendQueueEnabledLambda: (Boolean) -> Unit = { _: Boolean -> },
     private val saveComposerDraftLambda: (ComposerDraft) -> Result<Unit> = { _: ComposerDraft -> Result.success(Unit) },
     private val loadComposerDraftLambda: () -> Result<ComposerDraft?> = { Result.success<ComposerDraft?>(null) },
     private val clearComposerDraftLambda: () -> Result<Unit> = { Result.success(Unit) },
     private val subscribeToSyncLambda: () -> Unit = { lambdaError() },
-    private val ignoreDeviceTrustAndResendResult: (Map<UserId, List<DeviceId>>, TransactionId) -> Result<Unit> = { _, _ -> lambdaError() },
-    private val withdrawVerificationAndResendResult: (List<UserId>, TransactionId) -> Result<Unit> = { _, _ -> lambdaError() },
+    private val ignoreDeviceTrustAndResendResult: (Map<UserId, List<DeviceId>>, SendHandle) -> Result<Unit> = { _, _ -> lambdaError() },
+    private val withdrawVerificationAndResendResult: (List<UserId>, SendHandle) -> Result<Unit> = { _, _ -> lambdaError() },
 ) : MatrixRoom {
     private val _roomInfoFlow: MutableSharedFlow<MatrixRoomInfo> = MutableSharedFlow(replay = 1)
     override val roomInfoFlow: Flow<MatrixRoomInfo> = _roomInfoFlow
@@ -160,6 +165,13 @@ class FakeMatrixRoom(
 
     fun emitIdentityStateChanges(identityStateChanges: List<IdentityStateChange>) {
         _identityStateChangesFlow.tryEmit(identityStateChanges)
+    }
+
+    private val _knockRequestsFlow: MutableSharedFlow<List<KnockRequest>> = MutableSharedFlow(replay = 1)
+    override val knockRequestsFlow: Flow<List<KnockRequest>> = _knockRequestsFlow
+
+    fun emitKnockRequests(knockRequests: List<KnockRequest>) {
+        _knockRequestsFlow.tryEmit(knockRequests)
     }
 
     override val membersStateFlow: MutableStateFlow<MatrixRoomMembersState> = MutableStateFlow(MatrixRoomMembersState.Unknown)
@@ -201,6 +213,10 @@ class FakeMatrixRoom(
 
     override suspend fun pinnedEventsTimeline(): Result<Timeline> = simulateLongTask {
         pinnedEventsTimelineResult()
+    }
+
+    override suspend fun mediaTimeline(): Result<Timeline> = simulateLongTask {
+        mediaTimelineResult()
     }
 
     override suspend fun subscribeToSync() {
@@ -247,10 +263,6 @@ class FakeMatrixRoom(
 
     override suspend fun toggleReaction(emoji: String, eventOrTransactionId: EventOrTransactionId): Result<Unit> {
         return toggleReactionResult(emoji, eventOrTransactionId)
-    }
-
-    override suspend fun retrySendMessage(transactionId: TransactionId): Result<Unit> = simulateLongTask {
-        return retrySendMessageResult(transactionId)
     }
 
     override suspend fun cancelSend(transactionId: TransactionId): Result<Unit> {
@@ -358,12 +370,16 @@ class FakeMatrixRoom(
     override suspend fun sendAudio(
         file: File,
         audioInfo: AudioInfo,
+        caption: String?,
+        formattedCaption: String?,
         progressCallback: ProgressCallback?
     ): Result<MediaUploadHandler> = simulateLongTask {
         simulateSendMediaProgress(progressCallback)
         sendAudioResult(
             file,
             audioInfo,
+            caption,
+            formattedCaption,
             progressCallback,
         )
     }
@@ -371,12 +387,16 @@ class FakeMatrixRoom(
     override suspend fun sendFile(
         file: File,
         fileInfo: FileInfo,
+        caption: String?,
+        formattedCaption: String?,
         progressCallback: ProgressCallback?
     ): Result<MediaUploadHandler> = simulateLongTask {
         simulateSendMediaProgress(progressCallback)
         sendFileResult(
             file,
             fileInfo,
+            caption,
+            formattedCaption,
             progressCallback,
         )
     }
@@ -554,16 +574,20 @@ class FakeMatrixRoom(
         return getWidgetDriverResult(widgetSettings)
     }
 
-    override suspend fun ignoreDeviceTrustAndResend(devices: Map<UserId, List<DeviceId>>, transactionId: TransactionId): Result<Unit> = simulateLongTask {
-        return ignoreDeviceTrustAndResendResult(devices, transactionId)
+    override suspend fun ignoreDeviceTrustAndResend(devices: Map<UserId, List<DeviceId>>, sendHandle: SendHandle): Result<Unit> = simulateLongTask {
+        return ignoreDeviceTrustAndResendResult(devices, sendHandle)
     }
 
-    override suspend fun withdrawVerificationAndResend(userIds: List<UserId>, transactionId: TransactionId): Result<Unit> = simulateLongTask {
-        return withdrawVerificationAndResendResult(userIds, transactionId)
+    override suspend fun withdrawVerificationAndResend(userIds: List<UserId>, sendHandle: SendHandle): Result<Unit> = simulateLongTask {
+        return withdrawVerificationAndResendResult(userIds, sendHandle)
     }
 
     fun givenRoomMembersState(state: MatrixRoomMembersState) {
         membersStateFlow.value = state
+    }
+
+    override suspend fun clearEventCacheStorage(): Result<Unit> {
+        return Result.success(Unit)
     }
 }
 

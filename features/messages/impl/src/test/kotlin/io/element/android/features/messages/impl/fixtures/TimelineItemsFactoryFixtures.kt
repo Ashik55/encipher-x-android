@@ -28,14 +28,13 @@ import io.element.android.features.messages.impl.utils.FakeTextPillificationHelp
 import io.element.android.features.messages.test.timeline.FakeHtmlConverterProvider
 import io.element.android.features.poll.test.pollcontent.FakePollContentStateFactory
 import io.element.android.libraries.androidutils.filesize.FakeFileSizeFormatter
-import io.element.android.libraries.dateformatter.test.FakeDaySeparatorFormatter
-import io.element.android.libraries.dateformatter.test.FakeLastMessageTimestampFormatter
+import io.element.android.libraries.dateformatter.test.FakeDateFormatter
 import io.element.android.libraries.eventformatter.api.TimelineEventFormatter
 import io.element.android.libraries.featureflag.test.FakeFeatureFlagService
 import io.element.android.libraries.matrix.api.timeline.item.event.EventTimelineItem
 import io.element.android.libraries.matrix.test.FakeMatrixClient
 import io.element.android.libraries.matrix.test.permalink.FakePermalinkParser
-import io.element.android.libraries.mediaviewer.api.util.FileExtensionExtractorWithoutValidation
+import io.element.android.libraries.mediaviewer.test.util.FileExtensionExtractorWithoutValidation
 import io.element.android.tests.testutils.testCoroutineDispatchers
 import kotlinx.coroutines.test.TestScope
 
@@ -80,7 +79,7 @@ internal fun TestScope.aTimelineItemsFactory(
                         failedToParseStateFactory = TimelineItemContentFailedToParseStateFactory(),
                     ),
                     matrixClient = matrixClient,
-                    lastMessageTimestampFormatter = FakeLastMessageTimestampFormatter(),
+                    dateFormatter = FakeDateFormatter(),
                     permalinkParser = FakePermalinkParser(),
                     config = config
                 )
@@ -88,7 +87,7 @@ internal fun TestScope.aTimelineItemsFactory(
         },
         virtualItemFactory = TimelineItemVirtualFactory(
             daySeparatorFactory = TimelineItemDaySeparatorFactory(
-                FakeDaySeparatorFormatter()
+                FakeDateFormatter()
             ),
         ),
         timelineItemGrouper = TimelineItemGrouper(),

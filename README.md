@@ -83,8 +83,11 @@ You can also come chat with the community in the Matrix [room](https://matrix.to
 
 ## Build instructions
 
-Just clone the project and open it in Android Studio.
-Makes sure to select the `app` configuration when building (as we also have sample apps in the project).
+Just clone the project and open it in Android Studio. Make sure to select the
+`app` configuration when building (as we also have sample apps in the project).
+
+To build against a local copy of the Rust SDK, see the [Developer
+onboarding](docs/_developer_onboarding.md#build-the-sdk-locally) instructions.
 
 ## Support
 

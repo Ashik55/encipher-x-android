@@ -17,6 +17,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
@@ -47,21 +48,21 @@ import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
 import io.element.android.compound.theme.ElementTheme
 import io.element.android.features.createroom.impl.R
+import io.element.android.libraries.architecture.coverage.ExcludeFromCoverage
 import io.element.android.libraries.designsystem.atomic.atoms.RoundedIconAtom
 import io.element.android.libraries.designsystem.atomic.atoms.RoundedIconAtomSize
-import io.element.android.libraries.designsystem.components.LabelledTextField
 import io.element.android.libraries.designsystem.components.async.AsyncActionView
 import io.element.android.libraries.designsystem.components.async.AsyncActionViewDefaults
 import io.element.android.libraries.designsystem.components.button.BackButton
 import io.element.android.libraries.designsystem.components.list.ListItemContent
 import io.element.android.libraries.designsystem.modifiers.clearFocusOnTap
-import io.element.android.libraries.designsystem.preview.ElementPreview
-import io.element.android.libraries.designsystem.preview.PreviewsDayNight
+import io.element.android.libraries.designsystem.preview.ElementPreviewDark
+import io.element.android.libraries.designsystem.preview.ElementPreviewLight
+import io.element.android.libraries.designsystem.preview.PreviewWithLargeHeight
 import io.element.android.libraries.designsystem.theme.aliasScreenTitle
 import io.element.android.libraries.designsystem.theme.components.Button
 import io.element.android.libraries.designsystem.theme.components.ButtonSize
 import io.element.android.libraries.designsystem.theme.components.ListItem
-import io.element.android.libraries.designsystem.theme.components.OutlinedTextField
 import io.element.android.libraries.designsystem.theme.components.Scaffold
 import io.element.android.libraries.designsystem.theme.components.Text
 import io.element.android.libraries.designsystem.theme.components.TextButton
@@ -93,7 +94,7 @@ fun ConfigureRoomView(
         modifier = modifier.clearFocusOnTap(focusManager),
         topBar = {
             ConfigureRoomToolbar(
-                isNextActionEnabled = state.config.isValid,
+                isNextActionEnabled = state.isValid,
                 onBackClick = onBackClick,
                 onNextClick = {
                     focusManager.clearFocus()
@@ -102,78 +103,68 @@ fun ConfigureRoomView(
             )
         }
     ) { padding ->
-
-        Box(modifier = Modifier.fillMaxSize()) {
-            Image(
-                painter = painterResource(id = R.drawable.bg),
-                contentDescription = null,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .fillMaxHeight(),
-                contentScale = ContentScale.Crop
+        Column(
+            modifier = Modifier
+                .padding(padding)
+                .imePadding()
+                .verticalScroll(rememberScrollState())
+                .consumeWindowInsets(padding),
+            verticalArrangement = Arrangement.spacedBy(24.dp),
+        ) {
+            RoomNameWithAvatar(
+                modifier = Modifier.padding(horizontal = 16.dp),
+                avatarUri = state.config.avatarUri,
+                roomName = state.config.roomName.orEmpty(),
+                onAvatarClick = ::onAvatarClick,
+                onChangeRoomName = { state.eventSink(ConfigureRoomEvents.RoomNameChanged(it)) },
             )
-
-            Column(
-                modifier = Modifier
-                    .padding(padding)
-                    .padding(top =8.dp)
-                    .imePadding()
-                    .verticalScroll(rememberScrollState())
-                    .consumeWindowInsets(padding),
-                verticalArrangement = Arrangement.spacedBy(24.dp),
-            ) {
-                RoomNameWithAvatar(
-                    modifier = Modifier.padding(horizontal = 16.dp),
-                    avatarUri = state.config.avatarUri,
-                    roomName = state.config.roomName.orEmpty(),
-                    onAvatarClick = ::onAvatarClick,
-                    onChangeRoomName = { state.eventSink(ConfigureRoomEvents.RoomNameChanged(it)) },
+            RoomTopic(
+                modifier = Modifier.padding(horizontal = 16.dp),
+                topic = state.config.topic.orEmpty(),
+                onTopicChange = { state.eventSink(ConfigureRoomEvents.TopicChanged(it)) },
+            )
+            if (state.config.invites.isNotEmpty()) {
+                SelectedUsersRowList(
+                    contentPadding = PaddingValues(horizontal = 24.dp),
+                    selectedUsers = state.config.invites,
+                    onUserRemove = {
+                        focusManager.clearFocus()
+                        state.eventSink(ConfigureRoomEvents.RemoveUserFromSelection(it))
+                    },
                 )
-                RoomTopic(
-                    modifier = Modifier.padding(horizontal = 16.dp),
-                    topic = state.config.topic.orEmpty(),
-                    onTopicChange = { state.eventSink(ConfigureRoomEvents.TopicChanged(it)) },
-                )
-                if (state.config.invites.isNotEmpty()) {
-                    SelectedUsersRowList(
-                        contentPadding = PaddingValues(horizontal = 24.dp),
-                        selectedUsers = state.config.invites,
-                        onUserRemove = {
-                            focusManager.clearFocus()
-                            state.eventSink(ConfigureRoomEvents.RemoveUserFromSelection(it))
-                        },
-                    )
-                }
-                RoomVisibilityOptions(
-                    selected = when (state.config.roomVisibility) {
-                        is RoomVisibilityState.Private -> RoomVisibilityItem.Private
-                        is RoomVisibilityState.Public -> RoomVisibilityItem.Public
+            }
+            RoomVisibilityOptions(
+                selected = when (state.config.roomVisibility) {
+                    is RoomVisibilityState.Private -> RoomVisibilityItem.Private
+                    is RoomVisibilityState.Public -> RoomVisibilityItem.Public
+                },
+                onOptionClick = {
+                    focusManager.clearFocus()
+                    state.eventSink(ConfigureRoomEvents.RoomVisibilityChanged(it))
+                },
+            )
+            if (state.config.roomVisibility is RoomVisibilityState.Public && state.isKnockFeatureEnabled) {
+                RoomAccessOptions(
+                    selected = when (state.config.roomVisibility.roomAccess) {
+                        RoomAccess.Anyone -> RoomAccessItem.Anyone
+                        RoomAccess.Knocking -> RoomAccessItem.AskToJoin
                     },
                     onOptionClick = {
                         focusManager.clearFocus()
-                        state.eventSink(ConfigureRoomEvents.RoomVisibilityChanged(it))
+                        state.eventSink(ConfigureRoomEvents.RoomAccessChanged(it))
                     },
                 )
-                if (state.config.roomVisibility is RoomVisibilityState.Public && state.isKnockFeatureEnabled) {
-                    RoomAccessOptions(
-                        selected = when (state.config.roomVisibility.roomAccess) {
-                            RoomAccess.Anyone -> RoomAccessItem.Anyone
-                            RoomAccess.Knocking -> RoomAccessItem.AskToJoin
-                        },
-                        onOptionClick = {
-                            focusManager.clearFocus()
-                            state.eventSink(ConfigureRoomEvents.RoomAccessChanged(it))
-                        },
-                    )
-                    RoomAddressField(
-                        modifier = Modifier.padding(horizontal = 16.dp),
-                        address = state.config.roomVisibility.roomAddress,
-                        homeserverName = state.homeserverName,
-                        onAddressChange = { state.eventSink(ConfigureRoomEvents.RoomAddressChanged(it)) },
-                    )
-                }
+                RoomAddressField(
+                    modifier = Modifier.padding(horizontal = 16.dp),
+                    address = state.config.roomVisibility.roomAddress,
+                    homeserverName = state.homeserverName,
+                    addressValidity = state.roomAddressValidity,
+                    onAddressChange = { state.eventSink(ConfigureRoomEvents.RoomAddressChanged(it)) },
+                )
+                Spacer(Modifier)
             }
         }
+    }
 
         AvatarActionBottomSheet(
             actions = state.avatarActions,
@@ -199,7 +190,6 @@ fun ConfigureRoomView(
             state = state.cameraPermissionState,
         )
     }
-}
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -250,31 +240,13 @@ private fun RoomNameWithAvatar(
             modifier = Modifier.clickable(onClick = onAvatarClick),
         )
 
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .background(
-                    color = MaterialTheme.colorScheme.surface,
-                    shape = RoundedCornerShape(32.dp)
-                )
-        ) {
-            OutlinedTextField(
-                value = roomName,
-                onValueChange = onChangeRoomName,
-                placeholder = { Text(stringResource(CommonStrings.common_room_name_placeholder)) },
-                singleLine = true,
-                shape = RoundedCornerShape(32.dp),
-                modifier = Modifier.fillMaxWidth(),
-                keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next),
-            )
-        }
-//        LabelledTextField(
-//            label = stringResource(R.string.screen_create_room_room_name_label),
-//            value = roomName,
-//            placeholder = stringResource(CommonStrings.common_room_name_placeholder),
-//            singleLine = true,
-//            onValueChange = onChangeRoomName,
-//        )
+        TextField(
+            label = stringResource(R.string.screen_create_room_room_name_label),
+            value = roomName,
+            placeholder = stringResource(CommonStrings.common_room_name_placeholder),
+            singleLine = true,
+            onValueChange = onChangeRoomName,
+        )
     }
 }
 
@@ -284,29 +256,18 @@ private fun RoomTopic(
     onTopicChange: (String) -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    Box(
-        modifier = modifier
-            .fillMaxWidth()
-            .background(
-                color = MaterialTheme.colorScheme.surface,
-                shape = RoundedCornerShape(32.dp)
-            )
-    ) {
-        OutlinedTextField(
-            value = topic,
-            onValueChange = onTopicChange,
-            placeholder = { Text(stringResource(CommonStrings.common_topic_placeholder)) },
-            modifier = Modifier.fillMaxWidth(),
-            maxLines = 3,
-            keyboardOptions = KeyboardOptions(
-                capitalization = KeyboardCapitalization.Sentences,
-                imeAction = ImeAction.Done
-            ),
-            shape = RoundedCornerShape(32.dp),
-        )
-    }
+    TextField(
+        modifier = modifier,
+        label = stringResource(R.string.screen_create_room_topic_label),
+        value = topic,
+        onValueChange = onTopicChange,
+        maxLines = 3,
+        supportingText = stringResource(CommonStrings.common_topic_placeholder),
+        keyboardOptions = KeyboardOptions(
+            capitalization = KeyboardCapitalization.Sentences,
+        ),
+    )
 }
-
 
 @Composable
 private fun ConfigureRoomOptions(
@@ -381,54 +342,56 @@ private fun RoomAccessOptions(
 private fun RoomAddressField(
     address: RoomAddress,
     homeserverName: String,
+    addressValidity: RoomAddressValidity,
     onAddressChange: (String) -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    Column(
-        modifier = modifier,
-        verticalArrangement = Arrangement.spacedBy(8.dp),
-    ) {
-        Text(
-            modifier = Modifier.padding(horizontal = 16.dp),
-            style = ElementTheme.typography.fontBodyMdRegular,
-            color = MaterialTheme.colorScheme.primary,
-            text = stringResource(R.string.screen_create_room_room_address_section_title),
-        )
-
-        TextField(
-            modifier = Modifier.fillMaxWidth(),
-            value = address.value,
-            leadingIcon = {
-                Text(
-                    text = "#",
-                    style = ElementTheme.typography.fontBodyLgMedium,
-                    color = ElementTheme.colors.textSecondary,
-                )
-            },
-            trailingIcon = {
-                Text(
-                    text = homeserverName,
-                    style = ElementTheme.typography.fontBodyLgMedium,
-                    color = ElementTheme.colors.textSecondary,
-                    modifier = Modifier.padding(end = 16.dp)
-                )
-            },
-            supportingText = {
-                Text(
-                    text = stringResource(R.string.screen_create_room_room_address_section_footer),
-                    style = ElementTheme.typography.fontBodySmRegular,
-                    color = ElementTheme.colors.textSecondary,
-                )
-            },
-            onValueChange = onAddressChange,
-            singleLine = true,
-        )
-    }
+    TextField(
+        modifier = modifier.fillMaxWidth(),
+        value = address.value,
+        label = stringResource(R.string.screen_create_room_room_address_section_title),
+        leadingIcon = {
+            Text(
+                text = "#",
+                style = ElementTheme.typography.fontBodyLgMedium,
+                color = ElementTheme.colors.textSecondary,
+            )
+        },
+        trailingIcon = {
+            Text(
+                text = homeserverName,
+                style = ElementTheme.typography.fontBodyLgMedium,
+                color = ElementTheme.colors.textSecondary,
+            )
+        },
+        supportingText = when (addressValidity) {
+            RoomAddressValidity.InvalidSymbols -> {
+                stringResource(R.string.screen_create_room_room_address_invalid_symbols_error_description)
+            }
+            RoomAddressValidity.NotAvailable -> {
+                stringResource(R.string.screen_create_room_room_address_not_available_error_description)
+            }
+            else -> stringResource(R.string.screen_create_room_room_address_section_footer)
+        },
+        isError = addressValidity.isError(),
+        onValueChange = onAddressChange,
+        singleLine = true,
+    )
 }
 
-@PreviewsDayNight
+@PreviewWithLargeHeight
 @Composable
-internal fun ConfigureRoomViewPreview(@PreviewParameter(ConfigureRoomStateProvider::class) state: ConfigureRoomState) = ElementPreview {
+internal fun ConfigureRoomViewLightPreview(@PreviewParameter(ConfigureRoomStateProvider::class) state: ConfigureRoomState) =
+    ElementPreviewLight { ContentToPreview(state) }
+
+@PreviewWithLargeHeight
+@Composable
+internal fun ConfigureRoomViewDarkPreview(@PreviewParameter(ConfigureRoomStateProvider::class) state: ConfigureRoomState) =
+    ElementPreviewDark { ContentToPreview(state) }
+
+@ExcludeFromCoverage
+@Composable
+private fun ContentToPreview(state: ConfigureRoomState) {
     ConfigureRoomView(
         state = state,
         onBackClick = {},

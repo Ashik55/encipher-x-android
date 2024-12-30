@@ -9,6 +9,7 @@ package io.element.android.features.securebackup.impl.setup.views
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -24,9 +25,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.autofill.AutofillType
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.VisualTransformation
@@ -37,15 +40,15 @@ import io.element.android.compound.theme.ElementTheme
 import io.element.android.compound.tokens.generated.CompoundIcons
 import io.element.android.features.securebackup.impl.R
 import io.element.android.features.securebackup.impl.tools.RecoveryKeyVisualTransformation
+import io.element.android.libraries.designsystem.modifiers.autofill
 import io.element.android.libraries.designsystem.modifiers.clickableIfNotNull
 import io.element.android.libraries.designsystem.preview.ElementPreview
 import io.element.android.libraries.designsystem.preview.PreviewsDayNight
 import io.element.android.libraries.designsystem.theme.components.CircularProgressIndicator
 import io.element.android.libraries.designsystem.theme.components.CustomProgressIndicator
 import io.element.android.libraries.designsystem.theme.components.Icon
-import io.element.android.libraries.designsystem.theme.components.OutlinedTextField
 import io.element.android.libraries.designsystem.theme.components.Text
-import io.element.android.libraries.designsystem.theme.components.autofill
+import io.element.android.libraries.designsystem.theme.components.TextField
 import io.element.android.libraries.testtags.TestTags
 import io.element.android.libraries.testtags.testTag
 import io.element.android.libraries.ui.strings.CommonStrings
@@ -64,7 +67,6 @@ internal fun RecoveryKeyView(
     ) {
 //        Text(
 //            text = stringResource(id = CommonStrings.common_recovery_key),
-//            modifier = Modifier.padding(start = 16.dp),
 //            style = ElementTheme.typography.fontBodyMdRegular,
 //        )
         RecoveryKeyContent(state, onClick, onChange, onSubmit)
@@ -91,29 +93,30 @@ private fun RecoveryKeyStaticContent(
     state: RecoveryKeyViewState,
     onClick: (() -> Unit)?,
 ) {
-    Row(
+    Box(
         modifier = Modifier
-                .fillMaxWidth()
-                .clip(RoundedCornerShape(14.dp))
-                .background(
-                        color = ElementTheme.colors.bgSubtleSecondary,
-                        shape = RoundedCornerShape(14.dp)
-                )
-                .clickableIfNotNull(onClick)
-                .padding(horizontal = 16.dp, vertical = 16.dp),
-        horizontalArrangement = Arrangement.spacedBy(8.dp)
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(14.dp))
+            .background(
+                color = ElementTheme.colors.bgSubtleSecondary,
+                shape = RoundedCornerShape(14.dp)
+            )
+            .clickableIfNotNull(onClick)
+            .padding(horizontal = 16.dp, vertical = 11.dp),
+        contentAlignment = Alignment.Center,
     ) {
         if (state.formattedRecoveryKey != null) {
-            Text(
-                text = state.formattedRecoveryKey,
-                modifier = Modifier.weight(1f),
-            )
-            Icon(
-                imageVector = CompoundIcons.Copy(),
-                contentDescription = stringResource(id = CommonStrings.action_copy),
-                tint = ElementTheme.colors.iconSecondary,
+            RecoveryKeyWithCopy(
+                recoveryKey = state.formattedRecoveryKey,
+                alpha = 1f,
             )
         } else {
+            // Use an invisible recovery key to ensure that the Box size is correct.
+            val fakeFormattedRecoveryKey = List(12) { "XXXX" }.joinToString(" ")
+            RecoveryKeyWithCopy(
+                recoveryKey = fakeFormattedRecoveryKey,
+                alpha = 0f,
+            )
             Row(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.Center,
@@ -124,9 +127,11 @@ private fun RecoveryKeyStaticContent(
                 if (state.inProgress) {
                     CustomProgressIndicator(
                         modifier = Modifier
-                                .progressSemantics()
-                                .padding(end = 8.dp)
-                                .size(16.dp),
+                            .progressSemantics()
+                            .padding(end = 8.dp)
+                            .size(16.dp),
+//                        color = ElementTheme.colors.textPrimary,
+//                        strokeWidth = 1.5.dp,
                     )
                 }
                 Text(
@@ -145,6 +150,31 @@ private fun RecoveryKeyStaticContent(
     }
 }
 
+@Composable
+private fun RecoveryKeyWithCopy(
+    recoveryKey: String,
+    alpha: Float,
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .alpha(alpha),
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+    ) {
+        Text(
+            text = recoveryKey,
+            color = ElementTheme.colors.textSecondary,
+            style = ElementTheme.typography.fontBodyLgRegular.copy(fontFamily = FontFamily.Monospace),
+            modifier = Modifier.weight(1f),
+        )
+        Icon(
+            imageVector = CompoundIcons.Copy(),
+            contentDescription = stringResource(id = CommonStrings.action_copy),
+            tint = ElementTheme.colors.iconSecondary,
+        )
+    }
+}
+
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
 private fun RecoveryKeyFormContent(
@@ -159,14 +189,14 @@ private fun RecoveryKeyFormContent(
         // Do not apply a visual transformation if the key has spaces, to let user enter passphrase
         if (keyHasSpace) VisualTransformation.None else RecoveryKeyVisualTransformation()
     }
-    OutlinedTextField(
+    TextField(
         modifier = Modifier
-                .fillMaxWidth()
-                .testTag(TestTags.recoveryKey)
-                .autofill(
-                        autofillTypes = listOf(AutofillType.Password),
-                        onFill = { onChange(it) },
-                ),
+            .fillMaxWidth()
+            .testTag(TestTags.recoveryKey)
+            .autofill(
+                autofillTypes = listOf(AutofillType.Password),
+                onFill = { onChange(it) },
+            ),
         minLines = 2,
         value = state.formattedRecoveryKey.orEmpty(),
         onValueChange = onChange,
@@ -179,7 +209,7 @@ private fun RecoveryKeyFormContent(
         keyboardActions = KeyboardActions(
             onDone = { onSubmit() }
         ),
-        placeholder = { Text(text = stringResource(id = R.string.screen_recovery_key_confirm_key_placeholder)) }
+        placeholder = stringResource(id = R.string.screen_recovery_key_confirm_key_placeholder),
     )
 }
 

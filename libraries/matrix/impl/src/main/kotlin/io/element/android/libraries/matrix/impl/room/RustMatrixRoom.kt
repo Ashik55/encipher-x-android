@@ -16,6 +16,7 @@ import io.element.android.libraries.matrix.api.core.EventId
 import io.element.android.libraries.matrix.api.core.ProgressCallback
 import io.element.android.libraries.matrix.api.core.RoomAlias
 import io.element.android.libraries.matrix.api.core.RoomId
+import io.element.android.libraries.matrix.api.core.SendHandle
 import io.element.android.libraries.matrix.api.core.SessionId
 import io.element.android.libraries.matrix.api.core.TransactionId
 import io.element.android.libraries.matrix.api.core.UserId
@@ -34,8 +35,10 @@ import io.element.android.libraries.matrix.api.room.MatrixRoomMembersState
 import io.element.android.libraries.matrix.api.room.MatrixRoomNotificationSettingsState
 import io.element.android.libraries.matrix.api.room.MessageEventType
 import io.element.android.libraries.matrix.api.room.RoomMember
+import io.element.android.libraries.matrix.api.room.RoomMembershipObserver
 import io.element.android.libraries.matrix.api.room.StateEventType
 import io.element.android.libraries.matrix.api.room.draft.ComposerDraft
+import io.element.android.libraries.matrix.api.room.knock.KnockRequest
 import io.element.android.libraries.matrix.api.room.location.AssetType
 import io.element.android.libraries.matrix.api.room.powerlevels.MatrixRoomPowerLevels
 import io.element.android.libraries.matrix.api.room.powerlevels.UserRoleChange
@@ -45,8 +48,10 @@ import io.element.android.libraries.matrix.api.timeline.Timeline
 import io.element.android.libraries.matrix.api.timeline.item.event.EventOrTransactionId
 import io.element.android.libraries.matrix.api.widget.MatrixWidgetDriver
 import io.element.android.libraries.matrix.api.widget.MatrixWidgetSettings
+import io.element.android.libraries.matrix.impl.core.RustSendHandle
 import io.element.android.libraries.matrix.impl.mapper.map
 import io.element.android.libraries.matrix.impl.room.draft.into
+import io.element.android.libraries.matrix.impl.room.knock.RustKnockRequest
 import io.element.android.libraries.matrix.impl.room.member.RoomMemberListFetcher
 import io.element.android.libraries.matrix.impl.room.member.RoomMemberMapper
 import io.element.android.libraries.matrix.impl.room.powerlevels.RoomPowerLevelsMapper
@@ -58,7 +63,6 @@ import io.element.android.libraries.matrix.impl.widget.RustWidgetDriver
 import io.element.android.libraries.matrix.impl.widget.generateWidgetWebViewUrl
 import io.element.android.services.toolbox.api.systemclock.SystemClock
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -72,10 +76,13 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.withContext
+import org.matrix.rustcomponents.sdk.DateDividerMode
 import org.matrix.rustcomponents.sdk.IdentityStatusChangeListener
+import org.matrix.rustcomponents.sdk.KnockRequestsListener
 import org.matrix.rustcomponents.sdk.RoomInfo
 import org.matrix.rustcomponents.sdk.RoomInfoListener
 import org.matrix.rustcomponents.sdk.RoomListItem
+import org.matrix.rustcomponents.sdk.RoomMessageEventMessageType
 import org.matrix.rustcomponents.sdk.TypingNotificationsListener
 import org.matrix.rustcomponents.sdk.UserPowerLevelUpdate
 import org.matrix.rustcomponents.sdk.WidgetCapabilities
@@ -87,10 +94,10 @@ import uniffi.matrix_sdk.RoomPowerLevelChanges
 import java.io.File
 import kotlin.coroutines.cancellation.CancellationException
 import org.matrix.rustcomponents.sdk.IdentityStatusChange as RustIdentityStateChange
+import org.matrix.rustcomponents.sdk.KnockRequest as InnerKnockRequest
 import org.matrix.rustcomponents.sdk.Room as InnerRoom
 import org.matrix.rustcomponents.sdk.Timeline as InnerTimeline
 
-@OptIn(ExperimentalCoroutinesApi::class)
 class RustMatrixRoom(
     override val sessionId: SessionId,
     private val deviceId: DeviceId,
@@ -105,6 +112,7 @@ class RustMatrixRoom(
     private val roomSyncSubscriber: RoomSyncSubscriber,
     private val matrixRoomInfoMapper: MatrixRoomInfoMapper,
     private val featureFlagService: FeatureFlagService,
+    private val roomMembershipObserver: RoomMembershipObserver,
 ) : MatrixRoom {
     override val roomId = RoomId(innerRoom.id())
 
@@ -153,13 +161,22 @@ class RustMatrixRoom(
         })
     }
 
+    override val knockRequestsFlow: Flow<List<KnockRequest>> = mxCallbackFlow {
+        innerRoom.subscribeToKnockRequests(object : KnockRequestsListener {
+            override fun call(joinRequests: List<InnerKnockRequest>) {
+                val knockRequests = joinRequests.map { RustKnockRequest(it) }
+                channel.trySend(knockRequests)
+            }
+        })
+    }
+
     // Create a dispatcher for all room methods...
     private val roomDispatcher = coroutineDispatchers.io.limitedParallelism(32)
 
     // ...except getMember methods as it could quickly fill the roomDispatcher...
     private val roomMembersDispatcher = coroutineDispatchers.io.limitedParallelism(8)
 
-    private val roomCoroutineScope = sessionCoroutineScope.childScope(coroutineDispatchers.main, "RoomScope-$roomId")
+    override val roomCoroutineScope = sessionCoroutineScope.childScope(coroutineDispatchers.main, "RoomScope-$roomId")
     private val _syncUpdateFlow = MutableStateFlow(0L)
     private val roomMemberListFetcher = RoomMemberListFetcher(innerRoom, roomMembersDispatcher)
 
@@ -187,8 +204,8 @@ class RustMatrixRoom(
 
     override suspend fun subscribeToSync() = roomSyncSubscriber.subscribe(roomId)
 
-    override suspend fun timelineFocusedOnEvent(eventId: EventId): Result<Timeline> {
-        return runCatching {
+    override suspend fun timelineFocusedOnEvent(eventId: EventId): Result<Timeline> = withContext(roomDispatcher) {
+        runCatching {
             innerRoom.timelineFocusedOnEvent(
                 eventId = eventId.value,
                 numContextEvents = 50u,
@@ -205,14 +222,35 @@ class RustMatrixRoom(
         }
     }
 
-    override suspend fun pinnedEventsTimeline(): Result<Timeline> {
-        return runCatching {
+    override suspend fun pinnedEventsTimeline(): Result<Timeline> = withContext(roomDispatcher) {
+        runCatching {
             innerRoom.pinnedEventsTimeline(
                 internalIdPrefix = "pinned_events",
                 maxEventsToLoad = 100u,
                 maxConcurrentRequests = 10u,
             ).let { inner ->
                 createTimeline(inner, mode = Timeline.Mode.PINNED_EVENTS)
+            }
+        }.onFailure {
+            if (it is CancellationException) {
+                throw it
+            }
+        }
+    }
+
+    override suspend fun mediaTimeline(): Result<Timeline> = withContext(roomDispatcher) {
+        runCatching {
+            innerRoom.messageFilteredTimeline(
+                internalIdPrefix = "MediaGallery_",
+                allowedMessageTypes = listOf(
+                    RoomMessageEventMessageType.FILE,
+                    RoomMessageEventMessageType.IMAGE,
+                    RoomMessageEventMessageType.VIDEO,
+                    RoomMessageEventMessageType.AUDIO,
+                ),
+                dateDividerMode = DateDividerMode.MONTHLY,
+            ).let { inner ->
+                createTimeline(inner, mode = Timeline.Mode.MEDIA)
             }
         }.onFailure {
             if (it is CancellationException) {
@@ -374,6 +412,8 @@ class RustMatrixRoom(
     override suspend fun leave(): Result<Unit> = withContext(roomDispatcher) {
         runCatching {
             innerRoom.leave()
+        }.onSuccess {
+            roomMembershipObserver.notifyUserLeftRoom(roomId)
         }
     }
 
@@ -465,12 +505,36 @@ class RustMatrixRoom(
         return liveTimeline.sendVideo(file, thumbnailFile, videoInfo, caption, formattedCaption, progressCallback)
     }
 
-    override suspend fun sendAudio(file: File, audioInfo: AudioInfo, progressCallback: ProgressCallback?): Result<MediaUploadHandler> {
-        return liveTimeline.sendAudio(file, audioInfo, progressCallback)
+    override suspend fun sendAudio(
+        file: File,
+        audioInfo: AudioInfo,
+        caption: String?,
+        formattedCaption: String?,
+        progressCallback: ProgressCallback?,
+    ): Result<MediaUploadHandler> {
+        return liveTimeline.sendAudio(
+            file = file,
+            audioInfo = audioInfo,
+            caption = caption,
+            formattedCaption = formattedCaption,
+            progressCallback = progressCallback,
+        )
     }
 
-    override suspend fun sendFile(file: File, fileInfo: FileInfo, progressCallback: ProgressCallback?): Result<MediaUploadHandler> {
-        return liveTimeline.sendFile(file, fileInfo, progressCallback)
+    override suspend fun sendFile(
+        file: File,
+        fileInfo: FileInfo,
+        caption: String?,
+        formattedCaption: String?,
+        progressCallback: ProgressCallback?,
+    ): Result<MediaUploadHandler> {
+        return liveTimeline.sendFile(
+            file,
+            fileInfo,
+            caption,
+            formattedCaption,
+            progressCallback,
+        )
     }
 
     override suspend fun toggleReaction(emoji: String, eventOrTransactionId: EventOrTransactionId): Result<Unit> {
@@ -479,10 +543,6 @@ class RustMatrixRoom(
 
     override suspend fun forwardEvent(eventId: EventId, roomIds: List<RoomId>): Result<Unit> {
         return liveTimeline.forwardEvent(eventId, roomIds)
-    }
-
-    override suspend fun retrySendMessage(transactionId: TransactionId): Result<Unit> = runCatching {
-        innerRoom.tryResend(transactionId.value)
     }
 
     override suspend fun cancelSend(transactionId: TransactionId): Result<Unit> {
@@ -519,6 +579,12 @@ class RustMatrixRoom(
             if (blockUserId != null) {
                 innerRoom.ignoreUser(blockUserId.value)
             }
+        }
+    }
+
+    override suspend fun clearEventCacheStorage(): Result<Unit> = withContext(roomDispatcher) {
+        runCatching {
+            innerRoom.clearEventCacheStorage()
         }
     }
 
@@ -671,19 +737,19 @@ class RustMatrixRoom(
         innerRoom.clearComposerDraft()
     }
 
-    override suspend fun ignoreDeviceTrustAndResend(devices: Map<UserId, List<DeviceId>>, transactionId: TransactionId) = runCatching {
+    override suspend fun ignoreDeviceTrustAndResend(devices: Map<UserId, List<DeviceId>>, sendHandle: SendHandle) = runCatching {
         innerRoom.ignoreDeviceTrustAndResend(
             devices = devices.entries.associate { entry ->
                 entry.key.value to entry.value.map { it.value }
             },
-            transactionId = transactionId.value
+            sendHandle = (sendHandle as RustSendHandle).inner,
         )
     }
 
-    override suspend fun withdrawVerificationAndResend(userIds: List<UserId>, transactionId: TransactionId) = runCatching {
+    override suspend fun withdrawVerificationAndResend(userIds: List<UserId>, sendHandle: SendHandle) = runCatching {
         innerRoom.withdrawVerificationAndResend(
             userIds = userIds.map { it.value },
-            transactionId = transactionId.value
+            sendHandle = (sendHandle as RustSendHandle).inner,
         )
     }
 

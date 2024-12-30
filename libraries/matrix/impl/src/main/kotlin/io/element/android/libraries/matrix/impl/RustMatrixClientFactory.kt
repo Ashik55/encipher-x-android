@@ -77,12 +77,12 @@ class RustMatrixClientFactory @Inject constructor(
             .finish()
 
         return RustMatrixClient(
-            client = client,
+            innerClient = client,
             baseDirectory = baseDirectory,
             sessionStore = sessionStore,
             appCoroutineScope = appCoroutineScope,
             sessionDelegate = sessionDelegate,
-            syncService = syncService,
+            innerSyncService = syncService,
             dispatchers = coroutineDispatchers,
             baseCacheDirectory = cacheDirectory,
             clock = clock,
@@ -109,6 +109,7 @@ class RustMatrixClientFactory @Inject constructor(
             .addRootCertificates(userCertificatesProvider.provides())
             .autoEnableBackups(true)
             .autoEnableCrossSigning(true)
+            .useEventCachePersistentStorage(featureFlagService.isFeatureEnabled(FeatureFlags.EventCache))
             .roomKeyRecipientStrategy(
                 strategy = if (featureFlagService.isFeatureEnabled(FeatureFlags.OnlySignedDeviceIsolationMode)) {
                     CollectStrategy.IdentityBasedStrategy

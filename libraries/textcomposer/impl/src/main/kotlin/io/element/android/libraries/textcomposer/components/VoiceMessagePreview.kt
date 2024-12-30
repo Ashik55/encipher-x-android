@@ -19,6 +19,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
@@ -60,7 +61,7 @@ internal fun VoiceMessagePreview(
             .fillMaxWidth()
             .background(
                 color = ElementTheme.colors.bgSubtleSecondary,
-                shape = MaterialTheme.shapes.medium,
+                shape = RoundedCornerShape(32.dp),
             )
             .padding(start = 8.dp, end = 20.dp, top = 6.dp, bottom = 6.dp)
             .heightIn(26.dp),

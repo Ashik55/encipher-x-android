@@ -54,6 +54,7 @@ import io.element.android.libraries.designsystem.modifiers.applyIf
 import io.element.android.libraries.designsystem.preview.ElementPreview
 import io.element.android.libraries.designsystem.preview.PreviewsDayNight
 import io.element.android.libraries.designsystem.theme.components.ButtonSize
+import io.element.android.libraries.designsystem.theme.components.FilledTextField
 import io.element.android.libraries.designsystem.theme.components.Icon
 import io.element.android.libraries.designsystem.theme.components.IconButton
 import io.element.android.libraries.designsystem.theme.components.Scaffold
@@ -122,114 +123,88 @@ private fun RoomListSearchContent(
     }
     Scaffold(
         topBar = {
-            CreateRoomListTopBar(
-                state = state,
-                onBackButtonClick = ::onBackButtonClick
+            TopAppBar(
+                modifier = Modifier.drawBehind {
+                    drawLine(
+                        color = borderColor,
+                        start = Offset(0f, size.height),
+                        end = Offset(size.width, size.height),
+                        strokeWidth = strokeWidth.value
+                    )
+                },
+                navigationIcon = { BackButton(onClick = ::onBackButtonClick) },
+                title = {
+                    val filter = state.query
+                    val focusRequester = FocusRequester()
+                    FilledTextField(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .focusRequester(focusRequester),
+                        value = filter,
+                        singleLine = true,
+                        onValueChange = { state.eventSink(RoomListSearchEvents.QueryChanged(it)) },
+                        colors = TextFieldDefaults.colors(
+                            focusedContainerColor = Color.Transparent,
+                            unfocusedContainerColor = Color.Transparent,
+                            disabledContainerColor = Color.Transparent,
+                            focusedIndicatorColor = Color.Transparent,
+                            unfocusedIndicatorColor = Color.Transparent,
+                            disabledIndicatorColor = Color.Transparent,
+                            errorIndicatorColor = Color.Transparent,
+                        ),
+                        trailingIcon = {
+                            if (filter.isNotEmpty()) {
+                                IconButton(onClick = {
+                                    state.eventSink(RoomListSearchEvents.ClearQuery)
+                                }) {
+                                    Icon(
+                                        imageVector = CompoundIcons.Close(),
+                                        contentDescription = stringResource(CommonStrings.action_cancel)
+                                    )
+                                }
+                            }
+                        }
+                    )
+
+                    LaunchedEffect(state.isSearchActive) {
+                        if (state.isSearchActive) {
+                            focusRequester.requestFocus()
+                        }
+                    }
+                },
+                windowInsets = TopAppBarDefaults.windowInsets.copy(top = 0)
             )
         }
     ) { padding ->
-        Box {
-            Image(
-                painter = painterResource(id = R.drawable.bg),
-                contentDescription = null,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .fillMaxHeight(),
-                contentScale = ContentScale.Crop
-            )
-            Column(
-                modifier = Modifier
-                    .padding(padding)
-                    .consumeWindowInsets(padding)
+        Column(
+            modifier = Modifier
+                .padding(padding)
+                .consumeWindowInsets(padding)
+        ) {
+            if (state.displayRoomDirectorySearch) {
+                RoomDirectorySearchButton(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 24.dp, horizontal = 16.dp),
+                    onClick = onRoomDirectorySearchClick
+                )
+            }
+            LazyColumn(
+                modifier = Modifier.weight(1f),
             ) {
-                if (state.displayRoomDirectorySearch) {
-                    RoomDirectorySearchButton(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(vertical = 24.dp, horizontal = 16.dp),
-                        onClick = onRoomDirectorySearchClick
+                items(
+                    items = state.results,
+                    contentType = { room -> room.contentType() },
+                ) { room ->
+                    RoomSummaryRow(
+                        room = room,
+                        onClick = ::onRoomClick,
+                        eventSink = eventSink,
                     )
-                }
-                LazyColumn(
-                    modifier = Modifier.weight(1f),
-                ) {
-                    items(
-                        items = state.results,
-                        contentType = { room -> room.contentType() },
-                    ) { room ->
-                        RoomSummaryRow(
-                            room = room,
-                            onClick = ::onRoomClick,
-                            eventSink = eventSink,
-                        )
-                    }
                 }
             }
         }
     }
-}
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-private fun CreateRoomListTopBar(
-    state: RoomListSearchState,
-    onBackButtonClick: () -> Unit
-) {
-    val borderColor = MaterialTheme.colorScheme.tertiary
-    val strokeWidth = 1.dp
-
-    TopAppBar(
-        modifier = Modifier.drawBehind {
-            drawLine(
-                color = borderColor,
-                start = Offset(0f, size.height),
-                end = Offset(size.width, size.height),
-                strokeWidth = strokeWidth.value
-            )
-        },
-        navigationIcon = { BackButton(onClick = onBackButtonClick) },
-        title = {
-            val filter = state.query
-            val focusRequester = FocusRequester()
-            TextField(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .focusRequester(focusRequester),
-                value = filter,
-                singleLine = true,
-                onValueChange = { state.eventSink(RoomListSearchEvents.QueryChanged(it)) },
-                colors = TextFieldDefaults.colors(
-                    focusedContainerColor = Color.Transparent,
-                    unfocusedContainerColor = Color.Transparent,
-                    disabledContainerColor = Color.Transparent,
-                    focusedIndicatorColor = Color.Transparent,
-                    unfocusedIndicatorColor = Color.Transparent,
-                    disabledIndicatorColor = Color.Transparent,
-                    errorIndicatorColor = Color.Transparent,
-                ),
-                trailingIcon = {
-                    if (filter.isNotEmpty()) {
-                        IconButton(onClick = {
-                            state.eventSink(RoomListSearchEvents.ClearQuery)
-                        }) {
-                            Icon(
-                                imageVector = CompoundIcons.Close(),
-                                contentDescription = stringResource(CommonStrings.action_cancel)
-                            )
-                        }
-                    }
-                }
-            )
-
-            LaunchedEffect(state.isSearchActive) {
-                if (state.isSearchActive) {
-                    focusRequester.requestFocus()
-                }
-            }
-        },
-        windowInsets = TopAppBarDefaults.windowInsets.copy(top = 0),
-        colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.Transparent)
-    )
 }
 
 @Composable

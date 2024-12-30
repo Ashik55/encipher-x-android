@@ -140,4 +140,32 @@ enum class FeatureFlags(
         defaultValue = { buildMeta -> buildMeta.buildType != BuildType.RELEASE },
         isFinished = false,
     ),
+    MediaCaptionCreation(
+        key = "feature.media_caption_creation",
+        title = "Allow creation of media captions",
+        description = null,
+        defaultValue = { true },
+        isFinished = false,
+    ),
+    MediaCaptionWarning(
+        key = "feature.media_caption_creation_warning",
+        title = "Show a compatibility warning on media captions creation",
+        description = null,
+        defaultValue = { true },
+        isFinished = false,
+    ),
+    MediaGallery(
+        key = "feature.media_gallery",
+        title = "Allow user to open the media gallery",
+        description = null,
+        defaultValue = { true },
+        isFinished = false,
+    ),
+    EventCache(
+        key = "feature.event_cache",
+        title = "Use SDK Event cache",
+        description = "Warning: you must kill and restart the app for the change to take effect.",
+        defaultValue = { false },
+        isFinished = false,
+    ),
 }

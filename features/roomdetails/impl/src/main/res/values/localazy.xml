@@ -44,6 +44,7 @@
   <string name="screen_room_details_encryption_enabled_subtitle">"Messages are secured with locks. Only you and the recipients have the unique keys to unlock them."</string>
   <string name="screen_room_details_encryption_enabled_title">"Message encryption enabled"</string>
   <string name="screen_room_details_error_loading_notification_settings">"An error occurred when loading notification settings."</string>
+  <string name="screen_room_details_media_gallery_title">"Media and files"</string>
   <string name="screen_room_details_error_muting">"Failed muting this group, please try again."</string>
   <string name="screen_room_details_error_unmuting">"Failed unmuting this group, please try again."</string>
   <string name="screen_room_details_invite_people_title">"Add Friends"</string>
@@ -52,6 +53,9 @@
   <string name="screen_room_details_notification_mode_custom">"Custom"</string>
   <string name="screen_room_details_notification_mode_default">"Default"</string>
   <string name="screen_room_details_notification_title">"Notifications"</string>
+  <string name="screen_room_details_pinned_events_row_title">"Pinned messages"</string>
+  <string name="screen_room_details_requests_to_join_title">"Requests to join"</string>
+  <string name="screen_room_details_security_and_privacy_title">"Security &amp; privacy"</string>
   <string name="screen_room_details_roles_and_permissions">"Roles and Permissions"</string>
   <string name="screen_room_details_room_name_label">"Group Name"</string>
   <string name="screen_room_details_security_title">"Security"</string>

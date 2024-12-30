@@ -17,13 +17,13 @@ import io.element.android.libraries.matrix.api.core.SessionId
 import io.element.android.libraries.matrix.api.notificationsettings.NotificationSettingsService
 import io.element.android.libraries.matrix.api.room.MatrixRoom
 import io.element.android.libraries.matrix.api.room.PendingRoom
+import io.element.android.libraries.matrix.api.room.RoomMembershipObserver
 import io.element.android.libraries.matrix.api.roomlist.RoomListService
 import io.element.android.libraries.matrix.api.roomlist.awaitLoaded
 import io.element.android.libraries.matrix.impl.roomlist.fullRoomWithTimeline
 import io.element.android.libraries.matrix.impl.roomlist.roomOrNull
 import io.element.android.services.toolbox.api.systemclock.SystemClock
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
@@ -51,8 +51,8 @@ class RustRoomFactory(
     private val roomSyncSubscriber: RoomSyncSubscriber,
     private val timelineEventTypeFilterFactory: TimelineEventTypeFilterFactory,
     private val featureFlagService: FeatureFlagService,
+    private val roomMembershipObserver: RoomMembershipObserver,
 ) {
-    @OptIn(ExperimentalCoroutinesApi::class)
     private val dispatcher = dispatchers.io.limitedParallelism(1)
     private val mutex = Mutex()
     private var isDestroyed: Boolean = false
@@ -120,6 +120,7 @@ class RustRoomFactory(
                 roomSyncSubscriber = roomSyncSubscriber,
                 matrixRoomInfoMapper = matrixRoomInfoMapper,
                 featureFlagService = featureFlagService,
+                roomMembershipObserver = roomMembershipObserver,
             )
         }
     }
@@ -139,15 +140,16 @@ class RustRoomFactory(
             return@withContext null
         }
         val innerRoom = try {
-            // TODO use new method when available, for now it'll fail for knocked rooms
-            roomListItem.invitedRoom()
-        } catch (e: RoomListException) {
+            roomListItem.previewRoom(via = emptyList())
+        } catch (e: Exception) {
             Timber.e(e, "Failed to get pending room for $roomId")
             return@withContext null
         }
         RustPendingRoom(
             sessionId = sessionId,
+            roomId = roomId,
             inner = innerRoom,
+            roomMembershipObserver = roomMembershipObserver,
         )
     }
 

@@ -60,8 +60,8 @@ import io.element.android.libraries.designsystem.preview.PreviewsDayNight
 import io.element.android.libraries.designsystem.theme.components.Button
 import io.element.android.libraries.designsystem.theme.components.ButtonSize
 import io.element.android.libraries.designsystem.theme.components.OutlinedButton
-import io.element.android.libraries.designsystem.theme.components.OutlinedTextField
 import io.element.android.libraries.designsystem.theme.components.Text
+import io.element.android.libraries.designsystem.theme.components.TextField
 import io.element.android.libraries.designsystem.theme.components.TopAppBar
 import io.element.android.libraries.matrix.api.core.RoomIdOrAlias
 import io.element.android.libraries.matrix.api.room.RoomType
@@ -390,19 +390,18 @@ private fun DefaultLoadedContent(
                     )
                 } else if (contentState.joinAuthorisationStatus is JoinAuthorisationStatus.CanKnock) {
                     Spacer(modifier = Modifier.height(24.dp))
-                    OutlinedTextField(
+                    val supportingText = if (knockMessage.isNotEmpty()) {
+                        "${knockMessage.length}/$MAX_KNOCK_MESSAGE_LENGTH"
+                    } else {
+                        stringResource(R.string.screen_join_room_knock_message_description)
+                    }
+                    TextField(
                         value = knockMessage,
                         onValueChange = onKnockMessageUpdate,
                         maxLines = 3,
                         minLines = 3,
-                        modifier = Modifier.fillMaxWidth()
-                    )
-                    Text(
-                        text = stringResource(R.string.screen_join_room_knock_message_description),
-                        style = ElementTheme.typography.fontBodySmRegular,
-                        color = ElementTheme.colors.textPlaceholder,
-                        textAlign = TextAlign.Start,
-                        modifier = Modifier.fillMaxWidth()
+                        modifier = Modifier.fillMaxWidth(),
+                        supportingText = supportingText
                     )
                 }
             }

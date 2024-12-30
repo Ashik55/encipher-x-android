@@ -26,10 +26,11 @@ import io.element.android.libraries.matrix.api.room.MatrixRoom
 import io.element.android.libraries.matrix.api.room.PendingRoom
 import io.element.android.libraries.matrix.api.room.RoomMembershipObserver
 import io.element.android.libraries.matrix.api.room.alias.ResolvedRoomAlias
-import io.element.android.libraries.matrix.api.room.preview.RoomPreview
+import io.element.android.libraries.matrix.api.room.preview.RoomPreviewInfo
 import io.element.android.libraries.matrix.api.roomdirectory.RoomDirectoryService
 import io.element.android.libraries.matrix.api.roomlist.RoomListService
 import io.element.android.libraries.matrix.api.roomlist.RoomSummary
+import io.element.android.libraries.matrix.api.sync.SlidingSyncVersion
 import io.element.android.libraries.matrix.api.user.MatrixSearchUserResults
 import io.element.android.libraries.matrix.api.user.MatrixUser
 import io.element.android.libraries.matrix.api.verification.SessionVerificationService
@@ -78,15 +79,14 @@ class FakeMatrixClient(
         Optional.of(ResolvedRoomAlias(A_ROOM_ID, emptyList()))
     )
     },
-    private val getRoomPreviewResult: (RoomIdOrAlias, List<String>) -> Result<RoomPreview> = { _, _ -> Result.failure(AN_EXCEPTION) },
+    private val getRoomPreviewInfoResult: (RoomIdOrAlias, List<String>) -> Result<RoomPreviewInfo> = { _, _ -> Result.failure(AN_EXCEPTION) },
     private val clearCacheLambda: () -> Unit = { lambdaError() },
     private val userIdServerNameLambda: () -> String = { lambdaError() },
     private val getUrlLambda: (String) -> Result<String> = { lambdaError() },
     private val canDeactivateAccountResult: () -> Boolean = { lambdaError() },
     private val deactivateAccountResult: (String, Boolean) -> Result<Unit> = { _, _ -> lambdaError() },
-    var isNativeSlidingSyncSupportedLambda: suspend () -> Boolean = { true },
-    var isSlidingSyncProxySupportedLambda: suspend () -> Boolean = { true },
-    var isUsingNativeSlidingSyncLambda: () -> Boolean = { true },
+    private val currentSlidingSyncVersionLambda: () -> Result<SlidingSyncVersion> = { lambdaError() },
+    private val availableSlidingSyncVersionsLambda: () -> Result<List<SlidingSyncVersion>> = { lambdaError() }
 ) : MatrixClient {
     var setDisplayNameCalled: Boolean = false
         private set
@@ -313,8 +313,8 @@ class FakeMatrixClient(
         resolveRoomAliasResult(roomAlias)
     }
 
-    override suspend fun getRoomPreview(roomIdOrAlias: RoomIdOrAlias, serverNames: List<String>): Result<RoomPreview> = simulateLongTask {
-        getRoomPreviewResult(roomIdOrAlias, serverNames)
+    override suspend fun getRoomPreviewInfo(roomIdOrAlias: RoomIdOrAlias, serverNames: List<String>): Result<RoomPreviewInfo> = simulateLongTask {
+        getRoomPreviewInfoResult(roomIdOrAlias, serverNames)
     }
 
     override suspend fun getRecentlyVisitedRooms(): Result<List<RoomId>> {
@@ -340,15 +340,11 @@ class FakeMatrixClient(
         return getUrlLambda(url)
     }
 
-    override suspend fun isNativeSlidingSyncSupported(): Boolean {
-        return isNativeSlidingSyncSupportedLambda()
+    override suspend fun currentSlidingSyncVersion(): Result<SlidingSyncVersion> {
+        return currentSlidingSyncVersionLambda()
     }
 
-    override suspend fun isSlidingSyncProxySupported(): Boolean {
-        return isSlidingSyncProxySupportedLambda()
-    }
-
-    override fun isUsingNativeSlidingSync(): Boolean {
-        return isUsingNativeSlidingSyncLambda()
+    override suspend fun availableSlidingSyncVersions(): Result<List<SlidingSyncVersion>> {
+        return availableSlidingSyncVersionsLambda()
     }
 }

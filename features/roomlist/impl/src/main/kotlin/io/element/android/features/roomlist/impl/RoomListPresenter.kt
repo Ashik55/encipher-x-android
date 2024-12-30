@@ -39,7 +39,6 @@ import io.element.android.features.roomlist.impl.search.RoomListSearchEvents
 import io.element.android.features.roomlist.impl.search.RoomListSearchState
 import io.element.android.libraries.architecture.AsyncData
 import io.element.android.libraries.architecture.Presenter
-import io.element.android.libraries.core.bool.orFalse
 import io.element.android.libraries.designsystem.utils.snackbar.SnackbarDispatcher
 import io.element.android.libraries.designsystem.utils.snackbar.collectSnackbarMessageAsState
 import io.element.android.libraries.featureflag.api.FeatureFlagService
@@ -51,6 +50,7 @@ import io.element.android.libraries.matrix.api.core.RoomId
 import io.element.android.libraries.matrix.api.encryption.EncryptionService
 import io.element.android.libraries.matrix.api.encryption.RecoveryState
 import io.element.android.libraries.matrix.api.roomlist.RoomList
+import io.element.android.libraries.matrix.api.sync.SlidingSyncVersion
 import io.element.android.libraries.matrix.api.timeline.ReceiptType
 import io.element.android.libraries.preferences.api.store.SessionPreferencesStore
 import io.element.android.libraries.push.api.notifications.NotificationCleaner
@@ -146,6 +146,7 @@ class RoomListPresenter @Inject constructor(
                         AcceptDeclineInviteEvents.DeclineInvite(event.roomListRoomSummary.toInviteData())
                     )
                 }
+                is RoomListEvents.ClearCacheOfRoom -> coroutineScope.clearCacheOfRoom(event.roomId)
             }
         }
 
@@ -231,16 +232,13 @@ class RoomListPresenter @Inject constructor(
             }
         }
         val needsSlidingSyncMigration by produceState(false) {
-            value = runCatching {
-                // Note: this can fail when the session is destroyed from another client.
-                client.isNativeSlidingSyncSupported() && !client.isUsingNativeSlidingSync()
-            }.getOrNull().orFalse()
+            value = client.needsSlidingSyncMigration().getOrDefault(false)
         }
+        val securityBannerState by rememberSecurityBannerState(securityBannerDismissed, needsSlidingSyncMigration)
         return when {
-            showEmpty -> RoomListContentState.Empty
+            showEmpty -> RoomListContentState.Empty(securityBannerState = securityBannerState)
             showSkeleton -> RoomListContentState.Skeleton(count = 16)
             else -> {
-                val securityBannerState by rememberSecurityBannerState(securityBannerDismissed, needsSlidingSyncMigration)
                 RoomListContentState.Rooms(
                     securityBannerState = securityBannerState,
                     fullScreenIntentPermissionsState = fullScreenIntentPermissionsPresenter.present(),
@@ -258,7 +256,8 @@ class RoomListPresenter @Inject constructor(
             isDm = event.roomListRoomSummary.isDm,
             isFavorite = event.roomListRoomSummary.isFavorite,
             markAsUnreadFeatureFlagEnabled = featureFlagService.isFeatureEnabled(FeatureFlags.MarkAsUnread),
-            hasNewContent = event.roomListRoomSummary.hasNewContent
+            hasNewContent = event.roomListRoomSummary.hasNewContent,
+            eventCacheFeatureFlagEnabled = featureFlagService.isFeatureEnabled(FeatureFlags.EventCache),
         )
         contextMenuState.value = initialState
 
@@ -312,6 +311,25 @@ class RoomListPresenter @Inject constructor(
                 .onSuccess {
                     analyticsService.captureInteraction(name = Interaction.Name.MobileRoomListRoomContextMenuUnreadToggle)
                 }
+        }
+    }
+
+    private fun CoroutineScope.clearCacheOfRoom(roomId: RoomId) = launch {
+        client.getRoom(roomId)?.use { room ->
+            room.clearEventCacheStorage()
+        }
+    }
+
+    /**
+     * Checks if the user needs to migrate to a native sliding sync version.
+     */
+    private suspend fun MatrixClient.needsSlidingSyncMigration(): Result<Boolean> = runCatching {
+        val currentSlidingSyncVersion = currentSlidingSyncVersion().getOrThrow()
+        if (currentSlidingSyncVersion != SlidingSyncVersion.Native) {
+            val availableSlidingSyncVersions = availableSlidingSyncVersions().getOrThrow()
+            availableSlidingSyncVersions.contains(SlidingSyncVersion.Native)
+        } else {
+            false
         }
     }
 

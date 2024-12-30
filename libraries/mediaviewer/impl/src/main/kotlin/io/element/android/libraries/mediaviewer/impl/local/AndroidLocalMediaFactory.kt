@@ -18,11 +18,12 @@ import io.element.android.libraries.androidutils.filesize.FileSizeFormatter
 import io.element.android.libraries.core.mimetype.MimeTypes
 import io.element.android.libraries.di.AppScope
 import io.element.android.libraries.di.ApplicationContext
+import io.element.android.libraries.matrix.api.core.UserId
 import io.element.android.libraries.matrix.api.media.MediaFile
 import io.element.android.libraries.matrix.api.media.toFile
+import io.element.android.libraries.mediaviewer.api.MediaInfo
 import io.element.android.libraries.mediaviewer.api.local.LocalMedia
 import io.element.android.libraries.mediaviewer.api.local.LocalMediaFactory
-import io.element.android.libraries.mediaviewer.api.local.MediaInfo
 import io.element.android.libraries.mediaviewer.api.util.FileExtensionExtractor
 import javax.inject.Inject
 
@@ -41,6 +42,12 @@ class AndroidLocalMediaFactory @Inject constructor(
         name = mediaInfo.filename,
         caption = mediaInfo.caption,
         formattedFileSize = mediaInfo.formattedFileSize,
+        senderId = mediaInfo.senderId,
+        senderName = mediaInfo.senderName,
+        senderAvatar = mediaInfo.senderAvatar,
+        dateSent = mediaInfo.dateSent,
+        dateSentFull = mediaInfo.dateSentFull,
+        waveform = mediaInfo.waveform,
     )
 
     override fun createFromUri(
@@ -54,6 +61,12 @@ class AndroidLocalMediaFactory @Inject constructor(
         name = name,
         caption = null,
         formattedFileSize = formattedFileSize,
+        senderId = null,
+        senderName = null,
+        senderAvatar = null,
+        dateSent = null,
+        dateSentFull = null,
+        waveform = null,
     )
 
     private fun createFromUri(
@@ -61,7 +74,13 @@ class AndroidLocalMediaFactory @Inject constructor(
         mimeType: String?,
         name: String?,
         caption: String?,
-        formattedFileSize: String?
+        formattedFileSize: String?,
+        senderId: UserId?,
+        senderName: String?,
+        senderAvatar: String?,
+        dateSent: String?,
+        dateSentFull: String?,
+        waveform: List<Float>?,
     ): LocalMedia {
         val resolvedMimeType = mimeType ?: context.getMimeType(uri) ?: MimeTypes.OctetStream
         val fileName = name ?: context.getFileName(uri) ?: ""
@@ -74,7 +93,13 @@ class AndroidLocalMediaFactory @Inject constructor(
                 filename = fileName,
                 caption = caption,
                 formattedFileSize = fileSize,
-                fileExtension = fileExtension
+                fileExtension = fileExtension,
+                senderId = senderId,
+                senderName = senderName,
+                senderAvatar = senderAvatar,
+                dateSent = dateSent,
+                dateSentFull = dateSentFull,
+                waveform = waveform,
             )
         )
     }

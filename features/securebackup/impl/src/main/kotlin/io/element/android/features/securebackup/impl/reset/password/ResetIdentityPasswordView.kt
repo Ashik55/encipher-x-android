@@ -7,6 +7,8 @@
 
 package io.element.android.features.securebackup.impl.reset.password
 
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
@@ -29,14 +31,12 @@ import io.element.android.libraries.designsystem.components.BigIcon
 import io.element.android.libraries.designsystem.components.ProgressDialog
 import io.element.android.libraries.designsystem.components.RecoveryKeyIcon
 import io.element.android.libraries.designsystem.components.form.textFieldState
+import io.element.android.libraries.designsystem.modifiers.onTabOrEnterKeyFocusNext
 import io.element.android.libraries.designsystem.preview.ElementPreview
 import io.element.android.libraries.designsystem.preview.PreviewsDayNight
 import io.element.android.libraries.designsystem.theme.components.Button
 import io.element.android.libraries.designsystem.theme.components.Icon
-import io.element.android.libraries.designsystem.theme.components.IconButton
-import io.element.android.libraries.designsystem.theme.components.OutlinedTextField
-import io.element.android.libraries.designsystem.theme.components.Text
-import io.element.android.libraries.designsystem.theme.components.onTabOrEnterKeyFocusNext
+import io.element.android.libraries.designsystem.theme.components.TextField
 import io.element.android.libraries.ui.strings.CommonStrings
 
 @Composable
@@ -84,14 +84,14 @@ fun ResetIdentityPasswordView(
 @Composable
 private fun Content(text: String, onTextChange: (String) -> Unit, hasError: Boolean) {
     var showPassword by remember { mutableStateOf(false) }
-    OutlinedTextField(
+    TextField(
         modifier = Modifier
             .padding(top = 32.dp)
             .fillMaxWidth()
             .onTabOrEnterKeyFocusNext(LocalFocusManager.current),
         value = text,
         onValueChange = onTextChange,
-        placeholder = { Text(stringResource(CommonStrings.common_chng_password)) },
+        placeholder = stringResource(CommonStrings.common_chng_password),
 //        placeholder = { Text(stringResource(R.string.screen_reset_encryption_password_placeholder)) },
         singleLine = true,
         visualTransformation = if (showPassword) VisualTransformation.None else PasswordVisualTransformation(),
@@ -101,13 +101,13 @@ private fun Content(text: String, onTextChange: (String) -> Unit, hasError: Bool
             val description =
                 if (showPassword) stringResource(CommonStrings.a11y_hide_password) else stringResource(CommonStrings.a11y_show_password)
 
-            IconButton(onClick = { showPassword = !showPassword }) {
+            Box(Modifier.clickable { showPassword = !showPassword }) {
                 Icon(imageVector = image, description)
             }
         },
         isError = hasError,
         supportingText = if (hasError) {
-            { Text(stringResource(R.string.screen_reset_encryption_password_error)) }
+            stringResource(R.string.screen_reset_encryption_password_error)
         } else {
             null
         }

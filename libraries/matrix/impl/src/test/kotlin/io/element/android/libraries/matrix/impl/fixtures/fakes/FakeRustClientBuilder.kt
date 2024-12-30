@@ -29,7 +29,6 @@ class FakeRustClientBuilder : ClientBuilder(NoPointer) {
     override fun disableBuiltInRootCertificates() = this
     override fun roomDecryptionTrustRequirement(trustRequirement: TrustRequirement) = this
     override fun disableSslVerification() = this
-    override fun enableCrossProcessRefreshLock(processId: String, sessionDelegate: ClientSessionDelegate) = this
     override fun homeserverUrl(url: String) = this
     override fun passphrase(passphrase: String?) = this
     override fun proxy(url: String) = this
@@ -42,6 +41,7 @@ class FakeRustClientBuilder : ClientBuilder(NoPointer) {
     override fun slidingSyncVersionBuilder(versionBuilder: SlidingSyncVersionBuilder) = this
     override fun userAgent(userAgent: String) = this
     override fun username(username: String) = this
+    override fun useEventCachePersistentStorage(value: Boolean) = this
 
     override suspend fun buildWithQrCode(qrCodeData: QrCodeData, oidcConfiguration: OidcConfiguration, progressListener: QrLoginProgressListener): Client {
         return FakeRustClient()

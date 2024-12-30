@@ -116,9 +116,11 @@ fun RoomDetailsView(
     invitePeople: () -> Unit,
     openAvatarPreview: (name: String, url: String) -> Unit,
     openPollHistory: () -> Unit,
+    openMediaGallery: () -> Unit,
     openAdminSettings: () -> Unit,
     onJoinCallClick: () -> Unit,
     onPinnedMessagesClick: () -> Unit,
+    onKnockRequestsClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     Scaffold(
@@ -246,23 +248,33 @@ fun RoomDetailsView(
                     }
                 }
 
-                val displayMemberListItem = state.roomType is RoomDetailsType.Room
-                if (displayMemberListItem) {
-                    PreferenceCategory {
-                        MembersItem(
-                            memberCount = state.memberCount,
-                            openRoomMemberList = openRoomMemberList,
+            val displayMemberListItem = state.roomType is RoomDetailsType.Room
+            if (displayMemberListItem) {
+                PreferenceCategory {
+                    MembersItem(
+                        memberCount = state.memberCount,
+                        openRoomMemberList = openRoomMemberList,
+                    )
+                    if (state.canShowKnockRequests) {
+                        KnockRequestsItem(
+                            knockRequestsCount = state.knockRequestsCount,
+                            onKnockRequestsClick = onKnockRequestsClick
                         )
                     }
                 }
+            }
 
-                PollsSection(
-                    openPollHistory = openPollHistory
+            PollsSection(
+                openPollHistory = openPollHistory
+            )
+            if (state.canShowMediaGallery) {
+                MediaGallerySection(
+                    onClick = openMediaGallery
                 )
-
-                if (state.isEncrypted) {
-                    SecuritySection()
-                }
+            }
+            if (state.isEncrypted) {
+                SecuritySection()
+            }
 
                 if (state.roomType is RoomDetailsType.Dm && state.roomMemberDetailsState != null) {
                     val roomMemberState = state.roomMemberDetailsState
@@ -277,6 +289,20 @@ fun RoomDetailsView(
             }
         }
     }
+}
+
+@Composable
+private fun KnockRequestsItem(knockRequestsCount: Int?, onKnockRequestsClick: () -> Unit) {
+    ListItem(
+        headlineContent = { Text(stringResource(R.string.screen_room_details_requests_to_join_title)) },
+        leadingContent = ListItemContent.Icon(IconSource.Vector(CompoundIcons.AskToJoin())),
+        trailingContent = if (knockRequestsCount == null || knockRequestsCount == 0) {
+            null
+        } else {
+            ListItemContent.Text(knockRequestsCount.toString())
+        },
+        onClick = onKnockRequestsClick,
+    )
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -819,6 +845,19 @@ private fun PollsSection(
 }
 
 @Composable
+private fun MediaGallerySection(
+    onClick: () -> Unit,
+) {
+    PreferenceCategory {
+        ListItem(
+            headlineContent = { Text(stringResource(R.string.screen_room_details_media_gallery_title)) },
+            leadingContent = ListItemContent.Icon(IconSource.Vector(CompoundIcons.Image())),
+            onClick = onClick,
+        )
+    }
+}
+
+@Composable
 private fun SecuritySection() {
     PreferenceCategory(title = stringResource(R.string.screen_room_details_security_title)) {
         ListItem(
@@ -896,8 +935,10 @@ private fun ContentToPreview(state: RoomDetailsState) {
         invitePeople = {},
         openAvatarPreview = { _, _ -> },
         openPollHistory = {},
+        openMediaGallery = {},
         openAdminSettings = {},
         onJoinCallClick = {},
         onPinnedMessagesClick = {},
+        onKnockRequestsClick = {},
     )
 }

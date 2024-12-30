@@ -101,8 +101,10 @@ class KonsistPreviewTest {
                 "SasEmojisPreview",
                 "SecureBackupSetupViewChangePreview",
                 "SelectedUserCannotRemovePreview",
+                "TextComposerAddCaptionPreview",
                 "TextComposerCaptionPreview",
                 "TextComposerEditPreview",
+                "TextComposerEditCaptionPreview",
                 "TextComposerFormattingPreview",
                 "TextComposerLinkDialogCreateLinkPreview",
                 "TextComposerLinkDialogCreateLinkWithoutTextPreview",
@@ -126,6 +128,7 @@ class KonsistPreviewTest {
                 "TimelineVideoWithCaptionRowPreview",
                 "TimelineViewMessageShieldPreview",
                 "UserAvatarColorsPreview",
+                "VoiceItemViewPlayPreview",
             )
             .assertTrue(
                 additionalMessage = "Functions for Preview should be named like this: <ViewUnderPreview>Preview. " +

@@ -32,6 +32,7 @@
   <string name="a11y_voice_message_record">"Salvesta häälsõnum"</string>
   <string name="a11y_voice_message_stop_recording">"Lõpeta salvestamine"</string>
   <string name="action_accept">"Nõustu"</string>
+  <string name="action_add_caption">"Lisa selgitus"</string>
   <string name="action_add_to_timeline">"Lisa ajajoonele"</string>
   <string name="action_back">"Tagasi"</string>
   <string name="action_call">"Helista"</string>
@@ -45,8 +46,10 @@
   <string name="action_confirm_password">"Kinnita otsust oma salasõnaga"</string>
   <string name="action_continue">"Jätka"</string>
   <string name="action_copy">"Kopeeri"</string>
+  <string name="action_copy_caption">"Kopeeri selgitus"</string>
   <string name="action_copy_link">"Kopeeri link"</string>
   <string name="action_copy_link_to_message">"Kopeeri sõnumi link"</string>
+  <string name="action_copy_text">"Kopeeri tekst"</string>
   <string name="action_create">"Loo"</string>
   <string name="action_create_a_room">"Loo jututuba"</string>
   <string name="action_deactivate">"Eemalda konto"</string>
@@ -57,6 +60,7 @@
   <string name="action_discard">"Loobu"</string>
   <string name="action_done">"Valmis"</string>
   <string name="action_edit">"Muuda"</string>
+  <string name="action_edit_caption">"Muuda selgitust"</string>
   <string name="action_edit_poll">"Muuda küsitlust"</string>
   <string name="action_enable">"Võta kasutusele"</string>
   <string name="action_end_poll">"Lõpeta küsitlus"</string>
@@ -91,6 +95,8 @@
   <string name="action_react">"Reageeri"</string>
   <string name="action_reject">"Keeldu"</string>
   <string name="action_remove">"Eemalda"</string>
+  <string name="action_remove_caption">"Eemalda selgitus"</string>
+  <string name="action_remove_message">"Eemalda sõnum"</string>
   <string name="action_reply">"Vasta"</string>
   <string name="action_reply_in_thread">"Vasta jutulõngas"</string>
   <string name="action_report_bug">"Teata veast"</string>
@@ -123,13 +129,13 @@
   <string name="action_yes">"Jah"</string>
   <string name="common_about">"Rakenduse teave"</string>
   <string name="common_acceptable_use_policy">"Vastuvõetava kasutamise põhimõtted"</string>
+  <string name="common_adding_caption">"Lisame selgitust"</string>
   <string name="common_advanced_settings">"Täiendavad seadistused"</string>
   <string name="common_analytics">"Analüütika"</string>
   <string name="common_appearance">"Välimus"</string>
   <string name="common_audio">"Heli"</string>
   <string name="common_blocked_users">"Blokeeritud kasutajad"</string>
   <string name="common_bubbles">"Mullid"</string>
-  <string name="common_call_invite">"Kõne on pooleli (pole toetatud)"</string>
   <string name="common_call_started">"Kõne algas"</string>
   <string name="common_chat_backup">"Vestluse varukoopia"</string>
   <string name="common_copied_to_clipboard">"Kopeeritud lõikelauale"</string>
@@ -142,8 +148,10 @@
   <string name="common_device_id">"Seadme tunnus"</string>
   <string name="common_direct_chat">"Otsevestlus"</string>
   <string name="common_do_not_show_this_again">"Ära enam näita seda uuesti"</string>
+  <string name="common_downloading">"Laadime alla"</string>
   <string name="common_edited_suffix">"(muudetud)"</string>
   <string name="common_editing">"Muutmine"</string>
+  <string name="common_editing_caption">"Muudame selgitust"</string>
   <string name="common_emote">"* %1$s %2$s"</string>
   <string name="common_encryption">"Krüptimine"</string>
   <string name="common_encryption_enabled">"Krüptimine on kasutusel"</string>
@@ -247,6 +255,7 @@ Põhjus: %1$s."</string>
   <string name="common_unable_to_invite_title">"Kutse(te) saatmine ei õnnestunud"</string>
   <string name="common_unlock">"Eemalda lukustus"</string>
   <string name="common_unmute">"Lõpeta summutamine"</string>
+  <string name="common_unsupported_call">"See kõne pole toetatud"</string>
   <string name="common_unsupported_event">"Toetamata sündmus"</string>
   <string name="common_username">"Kasutajanimi"</string>
   <string name="common_verification_cancelled">"Verifitseerimine on katkestatud"</string>
@@ -292,6 +301,7 @@ Põhjus: %1$s."</string>
   <string name="login_initial_device_name_android">"%1$s Android"</string>
   <string name="preference_rageshake">"Veast teatamiseks raputa nutiseadet ägedalt"</string>
   <string name="screen_media_picker_error_failed_selection">"Meediafaili valimine ei õnnestunud. Palun proovi uuesti."</string>
+  <string name="screen_media_upload_preview_caption_warning">"Selgitused ja alapealkirjad ei pruugi olla nähtavad vanemate rakenduste kasutajatele."</string>
   <string name="screen_media_upload_preview_error_failed_processing">"Meediafaili töötlemine enne üleslaadimist ei õnnestunud. Palun proovi uuesti."</string>
   <string name="screen_media_upload_preview_error_failed_sending">"Meediafaili üleslaadimine ei õnnestunud. Palun proovi uuesti."</string>
   <string name="screen_pinned_timeline_empty_state_description">"Siia lisamiseks vajuta sõnumil ja vali „%1$s“."</string>
@@ -311,7 +321,6 @@ Põhjus: %1$s."</string>
   <string name="screen_resolve_send_failure_unsigned_device_title">"Sinu sõnum on saatmata, kuna %1$s pole verifitseerinud kõiki oma seadmeid"</string>
   <string name="screen_resolve_send_failure_you_unsigned_device_subtitle">"Üks või enam sinu seadet on verifitseerimata. Sa võid sõnumi ikkagi ära saata või katkestad saatmise ning proovid uuesti, kui oled kõik oma seadmed verifitseerinud."</string>
   <string name="screen_resolve_send_failure_you_unsigned_device_title">"Kuna sul on üks või enam verifitseerimata seadet, siis sinu sõnum jäi saatmata"</string>
-  <string name="screen_room_details_pinned_events_row_title">"Esiletõstetud sõnumid"</string>
   <string name="screen_room_error_failed_processing_media">"Meediafaili töötlemine enne üleslaadimist ei õnnestunud. Palun proovi uuesti."</string>
   <string name="screen_room_error_failed_retrieving_user_details">"Kasutaja andmete laadimine ei õnnestunud"</string>
   <string name="screen_room_pinned_banner_indicator">"%1$s / %2$s"</string>
@@ -332,4 +341,8 @@ Põhjus: %1$s."</string>
   <string name="screen_view_location_title">"Asukoht"</string>
   <string name="settings_version_number">"Versioon: %1$s (%2$s)"</string>
   <string name="test_language_identifier">"et"</string>
+  <string name="timeline_decryption_failure_historical_event_no_key_backup">"Vanu sõnumeid ei saa selles seadmes näha"</string>
+  <string name="timeline_decryption_failure_historical_event_user_not_joined">"Sul puudub ligipääs sellele sõnumile"</string>
+  <string name="timeline_decryption_failure_unable_to_decrypt">"Sõnumi dekrüptimine ei õnnestu"</string>
+  <string name="timeline_decryption_failure_withheld_unverified">"Kuna seade on verifitseerimata või saatja pole sind verifitseerinud, siis sõnumi näitamine on blokeeritud."</string>
 </resources>

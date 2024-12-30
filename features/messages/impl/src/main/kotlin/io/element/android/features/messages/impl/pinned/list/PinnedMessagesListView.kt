@@ -217,7 +217,7 @@ private fun PinnedMessagesListLoaded(
                 focusedEventId = null,
                 onUserDataClick = onUserDataClick,
                 onLinkClick = onLinkClick,
-                onClick = onEventClick,
+                onContentClick = onEventClick,
                 onLongClick = ::onMessageLongClick,
                 inReplyToClick = {},
                 onReactionClick = { _, _ -> },
@@ -231,6 +231,8 @@ private fun PinnedMessagesListLoaded(
                     TimelineItemEventContentViewWrapper(
                         event = event,
                         timelineProtectionState = state.timelineProtectionState,
+                        onContentClick = { onEventClick(event) },
+                        onLongClick = { onMessageLongClick(event) },
                         onLinkClick = onLinkClick,
                         modifier = contentModifier,
                         onContentLayoutChange = onContentLayoutChange
@@ -245,7 +247,9 @@ private fun PinnedMessagesListLoaded(
 private fun TimelineItemEventContentViewWrapper(
     event: TimelineItem.Event,
     timelineProtectionState: TimelineProtectionState,
+    onContentClick: () -> Unit,
     onLinkClick: (String) -> Unit,
+    onLongClick: (() -> Unit)?,
     onContentLayoutChange: (ContentAvoidingLayoutData) -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -259,10 +263,12 @@ private fun TimelineItemEventContentViewWrapper(
         TimelineItemEventContentView(
             content = event.content,
             hideMediaContent = timelineProtectionState.hideMediaContent(event.eventId),
-            onShowClick = { timelineProtectionState.eventSink(TimelineProtectionEvent.ShowContent(event.eventId)) },
+            onShowContentClick = { timelineProtectionState.eventSink(TimelineProtectionEvent.ShowContent(event.eventId)) },
             onLinkClick = onLinkClick,
             eventSink = { },
             modifier = modifier,
+            onContentClick = onContentClick,
+            onLongClick = onLongClick,
             onContentLayoutChange = onContentLayoutChange
         )
     }
