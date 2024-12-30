@@ -36,12 +36,12 @@ fun TimelineItemFileView(
         modifier = modifier,
         icon = {
             Icon(
-                resourceId = CompoundDrawables.ic_compound_attachment,
+                resourceId = io.element.android.libraries.matrix.ui.R.drawable.ic_attachment,
                 contentDescription = null,
                 tint = ElementTheme.materialColors.primary,
                 modifier = Modifier
                     .size(16.dp)
-                    .rotate(-45f),
+//                    .rotate(-45f),
             )
         }
     )

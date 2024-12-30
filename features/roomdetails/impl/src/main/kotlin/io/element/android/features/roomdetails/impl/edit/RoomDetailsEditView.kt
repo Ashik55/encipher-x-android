@@ -9,8 +9,11 @@
 
 package io.element.android.features.roomdetails.impl.edit
 
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.imePadding
@@ -20,11 +23,15 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.tooling.preview.PreviewParameter
@@ -88,52 +95,64 @@ fun RoomDetailsEditView(
                             state.eventSink(RoomDetailsEditEvents.Save)
                         },
                     )
-                }
+                },
+                colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.Transparent)
             )
         },
     ) { padding ->
-        Column(
-            modifier = Modifier
-                .padding(padding)
-                .padding(horizontal = 16.dp)
-                .navigationBarsPadding()
-                .imePadding()
-                .verticalScroll(rememberScrollState())
-        ) {
-            Spacer(modifier = Modifier.height(24.dp))
-            EditableAvatarView(
-                matrixId = state.roomId.value,
-                // As per Element Web, we use the raw name for the avatar as well
-                displayName = state.roomRawName,
-                avatarUrl = state.roomAvatarUrl,
-                avatarSize = AvatarSize.EditRoomDetails,
-                onAvatarClick = ::onAvatarClick,
-                modifier = Modifier.fillMaxWidth(),
-            )
-            Spacer(modifier = Modifier.height(60.dp))
-
-            TextField(
-                label = stringResource(id = R.string.screen_room_details_room_name_label),
-                value = state.roomRawName,
-                placeholder = stringResource(CommonStrings.common_room_name_placeholder),
-                singleLine = true,
-                readOnly = !state.canChangeName,
-                onValueChange = { state.eventSink(RoomDetailsEditEvents.UpdateRoomName(it)) },
+        Box {
+            Image(
+                painter = painterResource(id = R.drawable.bg),
+                contentDescription = null,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .fillMaxHeight(),
+                contentScale = ContentScale.Crop
             )
 
-            Spacer(modifier = Modifier.height(28.dp))
+            Column(
+                modifier = Modifier
+                    .padding(padding)
+                    .padding(horizontal = 16.dp)
+                    .navigationBarsPadding()
+                    .imePadding()
+                    .verticalScroll(rememberScrollState())
+            ) {
+                Spacer(modifier = Modifier.height(24.dp))
+                EditableAvatarView(
+                    matrixId = state.roomId.value,
+                    // As per Element Web, we use the raw name for the avatar as well
+                    displayName = state.roomRawName,
+                    avatarUrl = state.roomAvatarUrl,
+                    avatarSize = AvatarSize.EditRoomDetails,
+                    onAvatarClick = ::onAvatarClick,
+                    modifier = Modifier.fillMaxWidth(),
+                )
+                Spacer(modifier = Modifier.height(60.dp))
 
-            TextField(
-                label = stringResource(CommonStrings.common_topic),
-                value = state.roomTopic,
-                placeholder = stringResource(CommonStrings.common_topic_placeholder),
-                maxLines = 10,
-                readOnly = !state.canChangeTopic,
-                onValueChange = { state.eventSink(RoomDetailsEditEvents.UpdateRoomTopic(it)) },
-                keyboardOptions = KeyboardOptions(
-                    capitalization = KeyboardCapitalization.Sentences,
-                ),
-            )
+                TextField(
+                    label = stringResource(id = R.string.screen_room_details_room_name_label),
+                    value = state.roomRawName,
+                    placeholder = stringResource(CommonStrings.common_room_name_placeholder),
+                    singleLine = true,
+                    readOnly = !state.canChangeName,
+                    onValueChange = { state.eventSink(RoomDetailsEditEvents.UpdateRoomName(it)) },
+                )
+
+                Spacer(modifier = Modifier.height(28.dp))
+
+                TextField(
+                    label = stringResource(CommonStrings.common_topic),
+                    value = state.roomTopic,
+                    placeholder = stringResource(CommonStrings.common_topic_placeholder),
+                    maxLines = 10,
+                    readOnly = !state.canChangeTopic,
+                    onValueChange = { state.eventSink(RoomDetailsEditEvents.UpdateRoomTopic(it)) },
+                    keyboardOptions = KeyboardOptions(
+                        capitalization = KeyboardCapitalization.Sentences,
+                    ),
+                )
+            }
         }
     }
 

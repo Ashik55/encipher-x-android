@@ -99,8 +99,8 @@ fun ChangeRolesView(
     Box(modifier = modifier) {
         Scaffold(
             modifier = Modifier
-                .fillMaxSize()
-                .systemBarsPadding(),
+                .fillMaxSize(),
+//                .systemBarsPadding(),
             topBar = {
                 AnimatedVisibility(visible = !state.isSearchActive) {
                     TopAppBar(

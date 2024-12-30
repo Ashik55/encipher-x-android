@@ -380,6 +380,7 @@ private fun MessagesViewContent(
                         forceJumpToBottomVisibility = forceJumpToBottomVisibility,
                         onJoinCallClick = onJoinCallClick,
                         nestedScrollConnection = scrollBehavior.nestedScrollConnection,
+                        backgroundImage = painterResource(id = R.drawable.bg)
                     )
                     AnimatedVisibility(
                         visible = state.pinnedMessagesBannerState is PinnedMessagesBannerState.Visible && scrollBehavior.isVisible,

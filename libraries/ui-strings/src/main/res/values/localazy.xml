@@ -32,7 +32,7 @@
   <string name="a11y_voice_message_record">"Record voice message."</string>
   <string name="a11y_voice_message_stop_recording">"Stop recording"</string>
   <string name="action_accept">"Accept"</string>
-  <string name="action_add_caption">"Add caption"</string>
+  <string name="action_add_caption">"Add Caption"</string>
   <string name="action_add_to_timeline">"Add to timeline"</string>
   <string name="action_back">"Back"</string>
   <string name="action_call">"Call"</string>
@@ -46,7 +46,7 @@
   <string name="action_confirm_password">"Confirm Password"</string>
   <string name="action_continue">"Continue"</string>
   <string name="action_copy">"Copy"</string>
-  <string name="action_copy_caption">"Copy caption"</string>
+  <string name="action_copy_caption">"Copy Caption"</string>
   <string name="action_copy_link">"Copy link"</string>
   <string name="action_copy_link_to_message">"Copy link to message"</string>
   <string name="action_copy_text">"Copy"</string>
@@ -61,7 +61,7 @@
   <string name="action_done">"Done"</string>
   <string name="action_edit">"Edit"</string>
   <string name="action_edit_poll">"Edit Poll"</string>
-  <string name="action_edit_caption">"Edit caption"</string>
+  <string name="action_edit_caption">"Edit Caption"</string>
   <string name="action_enable">"Enable"</string>
   <string name="action_end_poll">"End Poll"</string>
   <string name="action_enter_pin">"Enter PIN"</string>
@@ -95,7 +95,7 @@
   <string name="action_react">"React"</string>
   <string name="action_reject">"Reject"</string>
   <string name="action_remove">"Remove"</string>
-  <string name="action_remove_caption">"Remove caption"</string>
+  <string name="action_remove_caption">"Remove Caption"</string>
   <string name="action_remove_message">"Remove message"</string>
   <string name="action_reply">"Reply"</string>
   <string name="action_reply_in_thread">"Reply in thread"</string>

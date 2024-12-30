@@ -172,35 +172,46 @@ private fun RoomListSearchContent(
                         }
                     }
                 },
-                windowInsets = TopAppBarDefaults.windowInsets.copy(top = 0)
+                windowInsets = TopAppBarDefaults.windowInsets.copy(top = 0),
+                    colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.Transparent)
             )
         }
     ) { padding ->
-        Column(
-            modifier = Modifier
-                .padding(padding)
-                .consumeWindowInsets(padding)
-        ) {
-            if (state.displayRoomDirectorySearch) {
-                RoomDirectorySearchButton(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(vertical = 24.dp, horizontal = 16.dp),
-                    onClick = onRoomDirectorySearchClick
-                )
-            }
-            LazyColumn(
-                modifier = Modifier.weight(1f),
+        Box {
+            Image(
+                painter = painterResource(id = R.drawable.bg),
+                contentDescription = null,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .fillMaxHeight(),
+                contentScale = ContentScale.Crop
+            )
+            Column(
+                modifier = Modifier
+                    .padding(padding)
+                    .consumeWindowInsets(padding)
             ) {
-                items(
-                    items = state.results,
-                    contentType = { room -> room.contentType() },
-                ) { room ->
-                    RoomSummaryRow(
-                        room = room,
-                        onClick = ::onRoomClick,
-                        eventSink = eventSink,
+                if (state.displayRoomDirectorySearch) {
+                    RoomDirectorySearchButton(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(vertical = 24.dp, horizontal = 16.dp),
+                        onClick = onRoomDirectorySearchClick
                     )
+                }
+                LazyColumn(
+                    modifier = Modifier.weight(1f),
+                ) {
+                    items(
+                        items = state.results,
+                        contentType = { room -> room.contentType() },
+                    ) { room ->
+                        RoomSummaryRow(
+                            room = room,
+                            onClick = ::onRoomClick,
+                            eventSink = eventSink,
+                        )
+                    }
                 }
             }
         }

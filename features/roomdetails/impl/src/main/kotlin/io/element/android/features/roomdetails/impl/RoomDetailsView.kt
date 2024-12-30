@@ -851,8 +851,18 @@ private fun MediaGallerySection(
     PreferenceCategory {
         ListItem(
             headlineContent = { Text(stringResource(R.string.screen_room_details_media_gallery_title)) },
-            leadingContent = ListItemContent.Icon(IconSource.Vector(CompoundIcons.Image())),
+            leadingContent = ListItemContent.Custom {
+                Icon(
+                    imageVector = ImageVector.vectorResource(id =  io.element.android.libraries.matrix.ui.R.drawable.ic_image),
+                    contentDescription = null,
+                    tint = Color(0xFF11181C)
+                )
+            },
             onClick = onClick,
+            modifier = Modifier.padding(horizontal =10.dp, vertical = 5.dp).background(
+                color = Color(0xffEFEFEF),
+                shape = RoundedCornerShape(18.dp)
+            )
         )
     }
 }

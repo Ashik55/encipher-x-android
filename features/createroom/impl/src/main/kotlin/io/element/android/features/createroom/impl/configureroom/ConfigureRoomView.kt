@@ -103,65 +103,77 @@ fun ConfigureRoomView(
             )
         }
     ) { padding ->
-        Column(
-            modifier = Modifier
-                .padding(padding)
-                .imePadding()
-                .verticalScroll(rememberScrollState())
-                .consumeWindowInsets(padding),
-            verticalArrangement = Arrangement.spacedBy(24.dp),
-        ) {
-            RoomNameWithAvatar(
-                modifier = Modifier.padding(horizontal = 16.dp),
-                avatarUri = state.config.avatarUri,
-                roomName = state.config.roomName.orEmpty(),
-                onAvatarClick = ::onAvatarClick,
-                onChangeRoomName = { state.eventSink(ConfigureRoomEvents.RoomNameChanged(it)) },
+
+        Box(modifier = Modifier.fillMaxSize()) {
+            Image(
+                painter = painterResource(id = R.drawable.bg),
+                contentDescription = null,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .fillMaxHeight(),
+                contentScale = ContentScale.Crop
             )
-            RoomTopic(
-                modifier = Modifier.padding(horizontal = 16.dp),
-                topic = state.config.topic.orEmpty(),
-                onTopicChange = { state.eventSink(ConfigureRoomEvents.TopicChanged(it)) },
-            )
-            if (state.config.invites.isNotEmpty()) {
-                SelectedUsersRowList(
-                    contentPadding = PaddingValues(horizontal = 24.dp),
-                    selectedUsers = state.config.invites,
-                    onUserRemove = {
-                        focusManager.clearFocus()
-                        state.eventSink(ConfigureRoomEvents.RemoveUserFromSelection(it))
-                    },
+
+            Column(
+                modifier = Modifier
+                    .padding(padding)
+                    .imePadding()
+                    .verticalScroll(rememberScrollState())
+                    .consumeWindowInsets(padding),
+                verticalArrangement = Arrangement.spacedBy(24.dp),
+            ) {
+                RoomNameWithAvatar(
+                    modifier = Modifier.padding(horizontal = 16.dp),
+                    avatarUri = state.config.avatarUri,
+                    roomName = state.config.roomName.orEmpty(),
+                    onAvatarClick = ::onAvatarClick,
+                    onChangeRoomName = { state.eventSink(ConfigureRoomEvents.RoomNameChanged(it)) },
                 )
-            }
-            RoomVisibilityOptions(
-                selected = when (state.config.roomVisibility) {
-                    is RoomVisibilityState.Private -> RoomVisibilityItem.Private
-                    is RoomVisibilityState.Public -> RoomVisibilityItem.Public
-                },
-                onOptionClick = {
-                    focusManager.clearFocus()
-                    state.eventSink(ConfigureRoomEvents.RoomVisibilityChanged(it))
-                },
-            )
-            if (state.config.roomVisibility is RoomVisibilityState.Public && state.isKnockFeatureEnabled) {
-                RoomAccessOptions(
-                    selected = when (state.config.roomVisibility.roomAccess) {
-                        RoomAccess.Anyone -> RoomAccessItem.Anyone
-                        RoomAccess.Knocking -> RoomAccessItem.AskToJoin
+                RoomTopic(
+                    modifier = Modifier.padding(horizontal = 16.dp),
+                    topic = state.config.topic.orEmpty(),
+                    onTopicChange = { state.eventSink(ConfigureRoomEvents.TopicChanged(it)) },
+                )
+                if (state.config.invites.isNotEmpty()) {
+                    SelectedUsersRowList(
+                        contentPadding = PaddingValues(horizontal = 24.dp),
+                        selectedUsers = state.config.invites,
+                        onUserRemove = {
+                            focusManager.clearFocus()
+                            state.eventSink(ConfigureRoomEvents.RemoveUserFromSelection(it))
+                        },
+                    )
+                }
+                RoomVisibilityOptions(
+                    selected = when (state.config.roomVisibility) {
+                        is RoomVisibilityState.Private -> RoomVisibilityItem.Private
+                        is RoomVisibilityState.Public -> RoomVisibilityItem.Public
                     },
                     onOptionClick = {
                         focusManager.clearFocus()
-                        state.eventSink(ConfigureRoomEvents.RoomAccessChanged(it))
+                        state.eventSink(ConfigureRoomEvents.RoomVisibilityChanged(it))
                     },
                 )
-                RoomAddressField(
-                    modifier = Modifier.padding(horizontal = 16.dp),
-                    address = state.config.roomVisibility.roomAddress,
-                    homeserverName = state.homeserverName,
-                    addressValidity = state.roomAddressValidity,
-                    onAddressChange = { state.eventSink(ConfigureRoomEvents.RoomAddressChanged(it)) },
-                )
-                Spacer(Modifier)
+                if (state.config.roomVisibility is RoomVisibilityState.Public && state.isKnockFeatureEnabled) {
+                    RoomAccessOptions(
+                        selected = when (state.config.roomVisibility.roomAccess) {
+                            RoomAccess.Anyone -> RoomAccessItem.Anyone
+                            RoomAccess.Knocking -> RoomAccessItem.AskToJoin
+                        },
+                        onOptionClick = {
+                            focusManager.clearFocus()
+                            state.eventSink(ConfigureRoomEvents.RoomAccessChanged(it))
+                        },
+                    )
+                    RoomAddressField(
+                        modifier = Modifier.padding(horizontal = 16.dp),
+                        address = state.config.roomVisibility.roomAddress,
+                        homeserverName = state.homeserverName,
+                        addressValidity = state.roomAddressValidity,
+                        onAddressChange = { state.eventSink(ConfigureRoomEvents.RoomAddressChanged(it)) },
+                    )
+                    Spacer(Modifier)
+                }
             }
         }
     }
@@ -241,7 +253,7 @@ private fun RoomNameWithAvatar(
         )
 
         TextField(
-            label = stringResource(R.string.screen_create_room_room_name_label),
+//            label = stringResource(R.string.screen_create_room_room_name_label),
             value = roomName,
             placeholder = stringResource(CommonStrings.common_room_name_placeholder),
             singleLine = true,
@@ -258,11 +270,11 @@ private fun RoomTopic(
 ) {
     TextField(
         modifier = modifier,
-        label = stringResource(R.string.screen_create_room_topic_label),
+//        label = stringResource(R.string.screen_create_room_topic_label),
         value = topic,
         onValueChange = onTopicChange,
         maxLines = 3,
-        supportingText = stringResource(CommonStrings.common_topic_placeholder),
+        placeholder = stringResource(CommonStrings.common_topic_placeholder),
         keyboardOptions = KeyboardOptions(
             capitalization = KeyboardCapitalization.Sentences,
         ),
