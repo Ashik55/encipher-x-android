@@ -94,12 +94,12 @@ fun BugReportView(
                 )
             }
             Spacer(modifier = Modifier.height(16.dp))
-            PreferenceDivider()
-            PreferenceText(
-                title = stringResource(id = R.string.screen_bug_report_view_logs),
-                enabled = isFormEnabled,
-                onClick = onViewLogs,
-            )
+//            PreferenceDivider()
+//            PreferenceText(
+//                title = stringResource(id = R.string.screen_bug_report_view_logs),
+//                enabled = isFormEnabled,
+//                onClick = onViewLogs,
+//            )
             PreferenceDivider()
             PreferenceSwitch(
                 isChecked = state.formState.sendLogs,

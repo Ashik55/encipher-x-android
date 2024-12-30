@@ -477,7 +477,6 @@ private fun LoadingContent(
     Box(
         modifier = Modifier.fillMaxSize(),
     ) {
-        OnboardingBackground()
         Column(
             modifier = Modifier
                 .fillMaxSize()

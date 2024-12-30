@@ -65,15 +65,15 @@ fun DmAvatars(
                 }
                 .drawWithContent {
                     drawContent()
-                    drawCircle(
-                        color = Color.Black,
-                        center = Offset(
-                            x = (boxSizePx - otherAvatarRadius) - 4f,
-                            y = 103F,
-                        ),
-                        radius = otherAvatarRadius / 0.99f,
-                        blendMode = BlendMode.Clear,
-                    )
+//                    drawCircle(
+//                        color = Color.Black,
+//                        center = Offset(
+//                            x = (boxSizePx - otherAvatarRadius) - 4f,
+//                            y = 103F,
+//                        ),
+//                        radius = otherAvatarRadius / 0.99f,
+//                        blendMode = BlendMode.Clear,
+//                    )
                 }
                 .clip(CircleShape)
                 .clickable(enabled = userAvatarData.url != null) {
