@@ -27,16 +27,21 @@ import java.util.Collections
 import kotlin.math.PI
 import kotlin.math.cos
 import kotlin.math.sin
-
 @Composable
 fun CompositeAvatar(
     avatarData: AvatarData,
     heroes: ImmutableList<AvatarData>,
     modifier: Modifier = Modifier,
     contentDescription: String? = null,
+    isDm: Boolean = false
 ) {
     if (avatarData.url != null || heroes.isEmpty()) {
-        Avatar(avatarData, modifier, contentDescription)
+        NewAvatar(
+            avatarData = avatarData,
+            modifier = modifier,
+            contentDescription = contentDescription,
+            isDm = isDm
+        )
     } else {
         val limitedHeroes = heroes.take(4)
         val numberOfHeroes = limitedHeroes.size
@@ -49,7 +54,12 @@ fun CompositeAvatar(
                 error("Unsupported number of heroes: 0")
             }
             1 -> {
-                Avatar(heroes[0], modifier, contentDescription)
+                NewAvatar(
+                    avatarData = heroes[0],
+                    modifier = modifier,
+                    contentDescription = contentDescription,
+                    isDm = isDm
+                )
             }
             else -> {
                 val angle = 2 * Math.PI / numberOfHeroes
@@ -90,9 +100,10 @@ fun CompositeAvatar(
                                     y = yOffset,
                                 )
                         ) {
-                            Avatar(
-                                heroAvatar,
+                            NewAvatar(
+                                avatarData = heroAvatar,
                                 forcedAvatarSize = heroAvatarSize,
+                                isDm = isDm
                             )
                         }
                     }

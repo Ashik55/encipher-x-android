@@ -158,7 +158,6 @@ internal fun RoomSummaryRow(
         }
     }
 }
-
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 private fun RoomSummaryScaffoldRow(
@@ -186,6 +185,7 @@ private fun RoomSummaryScaffoldRow(
         CompositeAvatar(
             avatarData = room.avatarData,
             heroes = room.heroes,
+            isDm = room.isDm
         )
         Spacer(modifier = Modifier.width(16.dp))
         Column(
