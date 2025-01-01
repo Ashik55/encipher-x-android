@@ -36,6 +36,7 @@ dependencies {
     implementation(projects.features.logout.api)
     api(libs.statemachine)
     api(projects.features.verifysession.api)
+    implementation(project(":features:securebackup:impl"))
 
     testImplementation(libs.test.junit)
     testImplementation(libs.coroutines.test)

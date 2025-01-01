@@ -21,6 +21,7 @@ import io.element.android.anvilannotations.ContributesNode
 import io.element.android.appconfig.LearnMoreConfig
 import io.element.android.compound.theme.ElementTheme
 import io.element.android.features.logout.api.util.onSuccessLogout
+import io.element.android.features.securebackup.impl.setup.SecureBackupSetupPresenter
 import io.element.android.features.verifysession.api.VerifySessionEntryPoint
 import io.element.android.libraries.androidutils.browser.openUrlInChromeCustomTab
 import io.element.android.libraries.architecture.inputs
@@ -31,6 +32,7 @@ class VerifySelfSessionNode @AssistedInject constructor(
     @Assisted buildContext: BuildContext,
     @Assisted plugins: List<Plugin>,
     presenterFactory: VerifySelfSessionPresenter.Factory,
+    private val secureBackupSetupPresenterFactory: SecureBackupSetupPresenter.Factory
 ) : Node(buildContext, plugins = plugins) {
     private val callback = plugins<VerifySessionEntryPoint.Callback>().first()
 
@@ -56,6 +58,7 @@ class VerifySelfSessionNode @AssistedInject constructor(
             onEnterRecoveryKey = callback::onEnterRecoveryKey,
             onResetKey = callback::onResetKey,
             onFinish = callback::onDone,
+            secureBackupSetupPresenterFactory = secureBackupSetupPresenterFactory,
             onSuccessLogout = { onSuccessLogout(activity, isDark, it) },
         )
     }

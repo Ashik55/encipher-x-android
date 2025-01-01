@@ -23,6 +23,7 @@ import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
 import io.element.android.features.logout.api.LogoutUseCase
+import io.element.android.features.securebackup.impl.setup.SecureBackupSetupPresenter
 import io.element.android.libraries.architecture.AsyncAction
 import io.element.android.libraries.architecture.AsyncData
 import io.element.android.libraries.architecture.Presenter
@@ -49,6 +50,7 @@ class VerifySelfSessionPresenter @AssistedInject constructor(
     private val encryptionService: EncryptionService,
     private val stateMachine: VerifySelfSessionStateMachine,
     private val buildMeta: BuildMeta,
+    private val secureBackupSetupPresenterFactory: SecureBackupSetupPresenter.Factory,
     private val sessionPreferencesStore: SessionPreferencesStore,
     private val logoutUseCase: LogoutUseCase,
 ) : Presenter<VerifySelfSessionState> {
@@ -71,10 +73,25 @@ class VerifySelfSessionPresenter @AssistedInject constructor(
         val signOutAction = remember {
             mutableStateOf<AsyncAction<String?>>(AsyncAction.Uninitialized)
         }
+
+        // Add state for secure backup
+        val secureBackupPresenter = remember { secureBackupSetupPresenterFactory.create(false) }
+        val secureBackupState = secureBackupPresenter.present()
+
         val step by remember {
             derivedStateOf {
                 if (skipVerification) {
-                    VerifySelfSessionState.Step.Skipped
+                    // When skipped, check if we need recovery key setup
+                    when (recoveryState) {
+                        RecoveryState.ENABLED -> VerifySelfSessionState.Step.Skipped
+                        RecoveryState.INCOMPLETE -> {
+                            // Transition to recovery key setup
+                            VerifySelfSessionState.Step.SkippedWithRecoveryKeySetup(
+                                secureBackupState = secureBackupState
+                            )
+                        }
+                        else -> VerifySelfSessionState.Step.Skipped
+                    }
                 } else {
                     when (sessionVerifiedStatus) {
                         SessionVerifiedStatus.Unknown -> VerifySelfSessionState.Step.Loading
@@ -85,17 +102,25 @@ class VerifySelfSessionPresenter @AssistedInject constructor(
                         }
                         SessionVerifiedStatus.Verified -> {
                             if (stateAndDispatch.state.value != StateMachineState.Initial || showDeviceVerifiedScreen) {
-                                // The user has verified the session, we need to show the success screen
                                 VerifySelfSessionState.Step.Completed
                             } else {
-                                // Automatic verification, which can happen on freshly created account, in this case, skip the screen
-                                VerifySelfSessionState.Step.Skipped
+                                // Check recovery state here too
+                                when (recoveryState) {
+                                    RecoveryState.ENABLED -> VerifySelfSessionState.Step.Skipped
+                                    RecoveryState.INCOMPLETE -> {
+                                        VerifySelfSessionState.Step.SkippedWithRecoveryKeySetup(
+                                            secureBackupState = secureBackupState
+                                        )
+                                    }
+                                    else -> VerifySelfSessionState.Step.Skipped
+                                }
                             }
                         }
                     }
                 }
             }
         }
+
         // Start this after observing state machine
         LaunchedEffect(Unit) {
             observeVerificationService()
@@ -114,9 +139,14 @@ class VerifySelfSessionPresenter @AssistedInject constructor(
                 VerifySelfSessionViewEvents.SignOut -> coroutineScope.signOut(signOutAction)
                 VerifySelfSessionViewEvents.SkipVerification -> coroutineScope.launch {
                     sessionPreferencesStore.setSkipSessionVerification(true)
+                    // Check if we need to setup recovery key after skipping
+                    if (recoveryState == RecoveryState.INCOMPLETE) {
+                        encryptionService.enableRecovery(waitForBackupsToUpload = false)
+                    }
                 }
             }
         }
+
         return VerifySelfSessionState(
             step = step,
             signOutAction = signOutAction.value,

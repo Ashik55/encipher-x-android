@@ -18,12 +18,17 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -31,8 +36,16 @@ import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
 import io.element.android.compound.theme.ElementTheme
 import io.element.android.compound.tokens.generated.CompoundIcons
+import io.element.android.features.securebackup.impl.setup.SecureBackupSetupEvents
+import io.element.android.features.securebackup.impl.setup.SecureBackupSetupPresenter
+import io.element.android.features.securebackup.impl.setup.SecureBackupSetupState
+import io.element.android.features.securebackup.impl.setup.SecureBackupSetupView
+import io.element.android.features.securebackup.impl.setup.SetupState
+import io.element.android.features.securebackup.impl.setup.views.RecoveryKeyUserStory
+import io.element.android.features.securebackup.impl.setup.views.RecoveryKeyViewState
 import io.element.android.features.verifysession.impl.R
 import io.element.android.features.verifysession.impl.outgoing.VerifySelfSessionState.Step
+import io.element.android.features.verifysession.impl.outgoing.VerifySelfSessionState.Step.SkippedWithRecoveryKeySetup
 import io.element.android.features.verifysession.impl.ui.VerificationBottomMenu
 import io.element.android.features.verifysession.impl.ui.VerificationContentVerifying
 import io.element.android.libraries.architecture.AsyncAction
@@ -65,10 +78,33 @@ fun VerifySelfSessionView(
     onEnterRecoveryKey: () -> Unit,
     onResetKey: () -> Unit,
     onFinish: () -> Unit,
+    secureBackupSetupPresenterFactory: SecureBackupSetupPresenter.Factory,
     onSuccessLogout: (String?) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val step = state.step
+    when (step) {
+        is Step.Skipped, is SkippedWithRecoveryKeySetup -> {
+            val presenter = remember {
+                secureBackupSetupPresenterFactory.create(isChangeRecoveryKeyUserStory = false)
+            }
+
+            val secureBackupState = presenter.present()
+
+            SecureBackupSetupView(
+                state = secureBackupState,
+                onSuccess = {
+                    onFinish()
+                },
+                onBackClick = {
+                    state.eventSink(VerifySelfSessionViewEvents.Reset)
+                }
+            )
+            return
+        }
+        else -> Unit
+    }
+
     fun cancelOrResetFlow() {
         when (step) {
             is Step.Canceled -> state.eventSink(VerifySelfSessionViewEvents.Reset)
@@ -85,17 +121,17 @@ fun VerifySelfSessionView(
     }
 
     val latestOnFinish by rememberUpdatedState(newValue = onFinish)
-    LaunchedEffect(step, latestOnFinish) {
-        if (step is Step.Skipped) {
+    LaunchedEffect(step) {
+        if (step is Step.Skipped || step is SkippedWithRecoveryKeySetup) {
             latestOnFinish()
         }
     }
+
     BackHandler {
         cancelOrResetFlow()
     }
 
-    if (step is Step.Loading ||
-        step is Step.Skipped) {
+    if (step is Step.Loading) {
         // Just display a loader in this case, to avoid UI glitch.
         Box(
             modifier = Modifier.fillMaxSize(),
@@ -106,7 +142,7 @@ fun VerifySelfSessionView(
     } else {
         HeaderFooterPage(
             modifier = modifier
-                .statusBarsPadding()
+//                .statusBarsPadding()
                 .fillMaxSize(),
             topBar = {
                 TopAppBar(
@@ -114,7 +150,8 @@ fun VerifySelfSessionView(
                     actions = {
 //                        if (step !is Step.Completed &&
 //                            state.displaySkipButton &&
-//                            LocalInspectionMode.current.not()) {
+//                            LocalInspectionMode.current.not()
+//                        ) {
 //                            TextButton(
 //                                text = stringResource(CommonStrings.action_skip),
 //                                onClick = { state.eventSink(VerifySelfSessionViewEvents.SkipVerification) }
@@ -126,7 +163,11 @@ fun VerifySelfSessionView(
                                 onClick = { state.eventSink(VerifySelfSessionViewEvents.SignOut) }
                             )
                         }
-                    }
+                    },
+                    // TopAppBar background transparent
+                    colors = TopAppBarDefaults.topAppBarColors(
+                        containerColor = Color.Transparent
+                    )
                 )
             },
             background = { OnboardingBackground() },
@@ -176,7 +217,8 @@ private fun VerifySelfSessionHeader(step: Step) {
         Step.Canceled -> NewBigIcon.Style.AlertSolid
         Step.Ready, is Step.Verifying -> NewBigIcon.Style.Default(CompoundIcons.Reaction())
         Step.Completed -> NewBigIcon.Style.SuccessSolid
-        is Step.Skipped -> return
+        Step.Skipped,
+        is SkippedWithRecoveryKeySetup -> return
     }
     val titleText = when (step) {
         Step.Loading -> error("Should not happen")
@@ -190,7 +232,8 @@ private fun VerifySelfSessionHeader(step: Step) {
             is SessionVerificationData.Decimals -> stringResource(id = R.string.screen_session_verification_compare_numbers_title)
             is SessionVerificationData.Emojis -> stringResource(id = R.string.screen_session_verification_compare_emojis_title)
         }
-        is Step.Skipped -> return
+        Step.Skipped,
+        is SkippedWithRecoveryKeySetup -> return
     }
     val subtitleText = when (step) {
         Step.Loading -> error("Should not happen")
@@ -204,7 +247,8 @@ private fun VerifySelfSessionHeader(step: Step) {
             is SessionVerificationData.Decimals -> stringResource(id = R.string.screen_session_verification_compare_numbers_subtitle)
             is SessionVerificationData.Emojis -> stringResource(id = R.string.screen_session_verification_compare_emojis_subtitle)
         }
-        is Step.Skipped -> return
+        Step.Skipped,
+        is SkippedWithRecoveryKeySetup -> return
     }
 
     NewPageTitle(
@@ -272,6 +316,13 @@ private fun VerifySelfSessionBottomMenu(
                         onClick = { eventSink(VerifySelfSessionViewEvents.UseAnotherDevice) },
                     )
                 }
+//                if (verificationViewState.canEnterRecoveryKey) {
+//                    Button(
+//                        modifier = Modifier.fillMaxWidth(),
+//                        text = stringResource(R.string.screen_session_verification_enter_recovery_key),
+//                        onClick = onEnterRecoveryKey,
+//                    )
+//                }
                 Button(
                     modifier = Modifier.fillMaxWidth(),
                     text = stringResource(R.string.screen_session_verification_enter_recovery_key),
@@ -369,7 +420,8 @@ private fun VerifySelfSessionBottomMenu(
                 InvisibleButton()
             }
         }
-        is Step.Skipped -> return
+        is Step.Skipped,
+        is SkippedWithRecoveryKeySetup -> return
     }
 }
 
@@ -382,6 +434,7 @@ internal fun VerifySelfSessionViewPreview(@PreviewParameter(VerifySelfSessionSta
         onEnterRecoveryKey = {},
         onResetKey = {},
         onFinish = {},
+        secureBackupSetupPresenterFactory = SecureBackupSetupPresenter.Factory { _ -> error("Preview only") },
         onSuccessLogout = {},
     )
 }
