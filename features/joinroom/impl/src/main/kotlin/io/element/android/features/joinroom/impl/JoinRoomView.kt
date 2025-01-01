@@ -44,11 +44,13 @@ import io.element.android.libraries.designsystem.atomic.atoms.RoomPreviewTitleAt
 import io.element.android.libraries.designsystem.atomic.molecules.ButtonRowMolecule
 import io.element.android.libraries.designsystem.atomic.molecules.IconTitlePlaceholdersRowMolecule
 import io.element.android.libraries.designsystem.atomic.molecules.IconTitleSubtitleMolecule
+import io.element.android.libraries.designsystem.atomic.molecules.NewIconTitleSubtitleMolecule
 import io.element.android.libraries.designsystem.atomic.molecules.RoomPreviewMembersCountMolecule
 import io.element.android.libraries.designsystem.atomic.organisms.RoomPreviewOrganism
 import io.element.android.libraries.designsystem.atomic.pages.HeaderFooterPage
 import io.element.android.libraries.designsystem.background.LightGradientBackground
 import io.element.android.libraries.designsystem.components.BigIcon
+import io.element.android.libraries.designsystem.components.LockIcon
 import io.element.android.libraries.designsystem.components.async.AsyncActionView
 import io.element.android.libraries.designsystem.components.avatar.Avatar
 import io.element.android.libraries.designsystem.components.avatar.AvatarSize
@@ -326,9 +328,9 @@ private fun IsKnockedLoadedContent(modifier: Modifier = Modifier) {
                 .padding(horizontal = 16.dp),
         contentAlignment = Alignment.Center,
     ) {
-        IconTitleSubtitleMolecule(
+        NewIconTitleSubtitleMolecule(
             modifier = Modifier.sizeIn(minHeight = maxHeight * 0.7f),
-            iconStyle = BigIcon.Style.SuccessSolid,
+            iconStyle = LockIcon.Style.SuccessSolid,
             title = stringResource(R.string.screen_join_room_knock_sent_title),
             subTitle = stringResource(R.string.screen_join_room_knock_sent_description),
         )
