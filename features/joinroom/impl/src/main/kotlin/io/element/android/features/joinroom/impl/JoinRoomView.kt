@@ -52,6 +52,7 @@ import io.element.android.libraries.designsystem.components.BigIcon
 import io.element.android.libraries.designsystem.components.async.AsyncActionView
 import io.element.android.libraries.designsystem.components.avatar.Avatar
 import io.element.android.libraries.designsystem.components.avatar.AvatarSize
+import io.element.android.libraries.designsystem.components.avatar.NewAvatar
 import io.element.android.libraries.designsystem.components.button.BackButton
 import io.element.android.libraries.designsystem.components.button.SuperButton
 import io.element.android.libraries.designsystem.components.dialogs.ConfirmationDialog
@@ -345,7 +346,7 @@ private fun DefaultLoadedContent(
     RoomPreviewOrganism(
         modifier = modifier,
         avatar = {
-            Avatar(contentState.avatarData(AvatarSize.RoomHeader))
+            NewAvatar(contentState.avatarData(AvatarSize.RoomHeader))
         },
         title = {
             if (contentState.name != null) {
