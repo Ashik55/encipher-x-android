@@ -75,6 +75,7 @@ class ElementCallActivity :
     private val requestPermissionsLauncher = registerPermissionResultLauncher()
 
     private var isDarkMode = false
+    private var isAudioCall = false
     private val webViewTarget = mutableStateOf<CallType?>(null)
 
     private var eventSink: ((CallScreenEvents) -> Unit)? = null
@@ -197,6 +198,12 @@ class ElementCallActivity :
             IntentCompat.getParcelableExtra(intent, DefaultElementCallEntryPoint.EXTRA_CALL_TYPE, CallType::class.java)
                 ?: intent.dataString?.let(::parseUrl)?.let(::ExternalUrl)
         }
+
+        val isAudioCall = intent?.getBooleanExtra(DefaultElementCallEntryPoint.IS_AUDIO_CALL, false) ?: false
+
+        Timber.tag("AUDIO_CALL ==>>>").d(isAudioCall.toString())
+        print(isAudioCall)
+
         val currentCallType = webViewTarget.value
         if (currentCallType == null) {
             if (callType == null) {
@@ -227,6 +234,8 @@ class ElementCallActivity :
         return registerForActivityResult(
             ActivityResultContracts.RequestMultiplePermissions()
         ) { permissions ->
+
+
             val callback = requestPermissionCallback ?: return@registerForActivityResult
             val permissionsToGrant = mutableListOf<String>()
             permissions.forEach { (permission, granted) ->
@@ -246,6 +255,8 @@ class ElementCallActivity :
 
     @Suppress("DEPRECATION")
     private fun requestAudioFocus() {
+        Timber.tag("requestAudioFocus==>").d("Request Audio")
+
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             val audioAttributes = AudioAttributes.Builder()
                 .setUsage(AudioAttributes.USAGE_VOICE_COMMUNICATION)
@@ -321,6 +332,7 @@ class ElementCallActivity :
 }
 
 internal fun mapWebkitPermissions(permissions: Array<String>): List<String> {
+    Timber.tag("mapWebkitPermissions==>>>").d(permissions.toString())
     return permissions.mapNotNull { permission ->
         when (permission) {
             PermissionRequest.RESOURCE_AUDIO_CAPTURE -> Manifest.permission.RECORD_AUDIO

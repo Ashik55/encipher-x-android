@@ -200,7 +200,7 @@ private fun WebView.setup(
                 ConsoleMessage.MessageLevel.WARNING -> Log.WARN
                 else -> Log.DEBUG
             }
-            Timber.tag("WebView").log(
+            Timber.tag("WebView==>").log(
                 priority = priority,
                 message = buildString {
                     append(consoleMessage.sourceId())

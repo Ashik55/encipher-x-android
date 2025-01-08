@@ -233,6 +233,24 @@ class MessagesFlowNode @AssistedInject constructor(
                         elementCallEntryPoint.startCall(callType)
                     }
 
+                    override fun onAudioJoinCallClick(roomId: RoomId, isAudio: Boolean) {
+                        val callType = CallType.RoomCall(
+                            sessionId = matrixClient.sessionId,
+                            roomId = roomId,
+                        )
+                        analyticsService.captureInteraction(Interaction.Name.MobileRoomCallButton)
+                        elementCallEntryPoint.startCall(callType, true)
+                    }
+
+                    override fun onVideoJoinCallClick(roomId: RoomId) {
+                        val callType = CallType.RoomCall(
+                            sessionId = matrixClient.sessionId,
+                            roomId = roomId,
+                        )
+                        analyticsService.captureInteraction(Interaction.Name.MobileRoomCallButton)
+                        elementCallEntryPoint.startCall(callType)
+                    }
+
                     override fun onViewAllPinnedEvents() {
                         backstack.push(NavTarget.PinnedMessagesList)
                     }

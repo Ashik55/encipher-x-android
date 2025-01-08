@@ -18,7 +18,7 @@ interface ElementCallEntryPoint {
      * Start a call of the given type.
      * @param callType The type of call to start.
      */
-    fun startCall(callType: CallType)
+    fun startCall(callType: CallType, isAudioCall: Boolean = false)
 
     /**
      * Handle an incoming call.

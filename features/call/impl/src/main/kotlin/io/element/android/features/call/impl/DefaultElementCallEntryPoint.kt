@@ -27,11 +27,12 @@ class DefaultElementCallEntryPoint @Inject constructor(
 ) : ElementCallEntryPoint {
     companion object {
         const val EXTRA_CALL_TYPE = "EXTRA_CALL_TYPE"
+        const val IS_AUDIO_CALL = "IS_AUDIO_CALL"
         const val REQUEST_CODE = 2255
     }
 
-    override fun startCall(callType: CallType) {
-        context.startActivity(IntentProvider.createIntent(context, callType))
+    override fun startCall(callType: CallType, isAudioCall: Boolean) {
+        context.startActivity(IntentProvider.createIntent(context, callType, isAudioCall))
     }
 
     override fun handleIncomingCall(

@@ -59,20 +59,8 @@ import io.element.android.libraries.mediaplayer.api.MediaPlayer
 import io.element.android.services.analytics.api.AnalyticsService
 import kotlinx.collections.immutable.ImmutableList
 
-@ContributesNode(RoomScope::class)
-class MessagesNode @AssistedInject constructor(
-    @Assisted buildContext: BuildContext,
-    @Assisted plugins: List<Plugin>,
-    private val room: MatrixRoom,
-    private val analyticsService: AnalyticsService,
-    messageComposerPresenterFactory: MessageComposerPresenter.Factory,
-    timelinePresenterFactory: TimelinePresenter.Factory,
-    presenterFactory: MessagesPresenter.Factory,
-    actionListPresenterFactory: ActionListPresenter.Factory,
-    private val timelineItemPresenterFactories: TimelineItemPresenterFactories,
-    private val mediaPlayer: MediaPlayer,
-    private val permalinkParser: PermalinkParser,
-    private val knockRequestsBannerRenderer: KnockRequestsBannerRenderer
+@ContributesNode(RoomScope::class) class MessagesNode @AssistedInject constructor(
+    @Assisted buildContext: BuildContext, @Assisted plugins: List<Plugin>, private val room: MatrixRoom, private val analyticsService: AnalyticsService, messageComposerPresenterFactory: MessageComposerPresenter.Factory, timelinePresenterFactory: TimelinePresenter.Factory, presenterFactory: MessagesPresenter.Factory, actionListPresenterFactory: ActionListPresenter.Factory, private val timelineItemPresenterFactories: TimelineItemPresenterFactories, private val mediaPlayer: MediaPlayer, private val permalinkParser: PermalinkParser, private val knockRequestsBannerRenderer: KnockRequestsBannerRenderer
 ) : Node(buildContext, plugins = plugins), MessagesNavigator {
     private val presenter = presenterFactory.create(
         navigator = this,
@@ -99,20 +87,19 @@ class MessagesNode @AssistedInject constructor(
         fun onCreatePollClick()
         fun onEditPollClick(eventId: EventId)
         fun onJoinCallClick(roomId: RoomId)
+        fun onAudioJoinCallClick(roomId: RoomId, isAudio: Boolean)
+        fun onVideoJoinCallClick(roomId: RoomId)
         fun onViewAllPinnedEvents()
         fun onViewKnockRequests()
     }
 
     override fun onBuilt() {
         super.onBuilt()
-        lifecycle.subscribe(
-            onCreate = {
-                analyticsService.capture(room.toAnalyticsViewRoom())
-            },
-            onDestroy = {
-                mediaPlayer.close()
-            }
-        )
+        lifecycle.subscribe(onCreate = {
+            analyticsService.capture(room.toAnalyticsViewRoom())
+        }, onDestroy = {
+            mediaPlayer.close()
+        })
     }
 
     private fun onRoomDetailsClick() {
@@ -123,10 +110,7 @@ class MessagesNode @AssistedInject constructor(
         // Note: cannot use `callbacks.all { it.onEventClick(event) }` because:
         // - if callbacks is empty, it will return true and we want to return false.
         // - if a callback returns false, the other callback will not be invoked.
-        return callbacks.takeIf { it.isNotEmpty() }
-            ?.map { it.onEventClick(event) }
-            ?.all { it }
-            .orFalse()
+        return callbacks.takeIf { it.isNotEmpty() }?.map { it.onEventClick(event) }?.all { it }.orFalse()
     }
 
     private fun onUserDataClick(userId: UserId) {
@@ -148,8 +132,7 @@ class MessagesNode @AssistedInject constructor(
             is PermalinkData.RoomLink -> {
                 handleRoomLinkClick(activity, permalink, eventSink)
             }
-            is PermalinkData.FallbackLink,
-            is PermalinkData.RoomEmailInviteLink -> {
+            is PermalinkData.FallbackLink, is PermalinkData.RoomEmailInviteLink -> {
                 activity.openUrlInChromeCustomTab(null, darkTheme, url)
             }
         }
@@ -209,6 +192,14 @@ class MessagesNode @AssistedInject constructor(
         callbacks.forEach { it.onJoinCallClick(room.roomId) }
     }
 
+    private fun onAudioJoinCallClick() {
+        callbacks.forEach { it.onAudioJoinCallClick(room.roomId, true) }
+    }
+
+    private fun onVideoJoinCallClick() {
+        callbacks.forEach { it.onVideoJoinCallClick(room.roomId) }
+    }
+
     private fun onViewKnockRequestsClick() {
         callbacks.forEach { it.onViewKnockRequests() }
     }
@@ -237,11 +228,12 @@ class MessagesNode @AssistedInject constructor(
                 onSendLocationClick = this::onSendLocationClick,
                 onCreatePollClick = this::onCreatePollClick,
                 onJoinCallClick = this::onJoinCallClick,
+                onAudioJoinCallClick = this::onAudioJoinCallClick,
+                onVideoJoinCallClick = this::onVideoJoinCallClick,
                 onViewAllPinnedMessagesClick = this::onViewAllPinnedMessagesClick,
                 knockRequestsBannerView = {
                     knockRequestsBannerRenderer.View(
-                        modifier = Modifier,
-                        onViewRequestsClick = this::onViewKnockRequestsClick
+                        modifier = Modifier, onViewRequestsClick = this::onViewKnockRequestsClick
                     )
                 },
                 modifier = modifier,

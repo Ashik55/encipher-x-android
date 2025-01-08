@@ -125,13 +125,15 @@ fun MessagesView(
     onSendLocationClick: () -> Unit,
     onCreatePollClick: () -> Unit,
     onJoinCallClick: () -> Unit,
+    onAudioJoinCallClick: () -> Unit,
+    onVideoJoinCallClick: () -> Unit,
     onViewAllPinnedMessagesClick: () -> Unit,
     modifier: Modifier = Modifier,
     forceJumpToBottomVisibility: Boolean = false,
     knockRequestsBannerView: @Composable () -> Unit,
 ) {
     val systemUiController = rememberSystemUiController()
-    val backgroundColor = if(ElementTheme.isLightTheme) Color(0xFFC6E3D4)  else Color(0xFF112922)
+    val backgroundColor = if (ElementTheme.isLightTheme) Color(0xFFC6E3D4) else Color(0xFF112922)
 
     DisposableEffect(Unit) {
         systemUiController.setSystemBarsColor(color = backgroundColor)
@@ -211,6 +213,8 @@ fun MessagesView(
                     onBackClick = { hidingKeyboard { onBackClick() } },
                     onRoomDetailsClick = { hidingKeyboard { onRoomDetailsClick() } },
                     onJoinCallClick = onJoinCallClick,
+                    onAudioJoinCallClick = onAudioJoinCallClick,
+                    onVideoJoinCallClick = onVideoJoinCallClick,
                 )
             }
         },
@@ -218,8 +222,8 @@ fun MessagesView(
             MessagesViewContent(
                 state = state,
                 modifier = Modifier
-                        .padding(padding)
-                        .consumeWindowInsets(padding),
+                    .padding(padding)
+                    .consumeWindowInsets(padding),
                 onContentClick = ::onContentClick,
                 onMessageLongClick = ::onMessageLongClick,
                 onUserDataClick = { hidingKeyboard { onUserDataClick(it) } },
@@ -243,8 +247,7 @@ fun MessagesView(
         },
         snackbarHost = {
             SnackbarHost(
-                snackbarHostState,
-                modifier = Modifier.navigationBarsPadding()
+                snackbarHostState, modifier = Modifier.navigationBarsPadding()
             )
         },
     )
@@ -261,12 +264,9 @@ fun MessagesView(
         },
     )
 
-    CustomReactionBottomSheet(
-        state = state.customReactionState,
-        onSelectEmoji = { uniqueId, emoji ->
-            state.eventSink(MessagesEvents.ToggleReaction(emoji.unicode, uniqueId))
-        }
-    )
+    CustomReactionBottomSheet(state = state.customReactionState, onSelectEmoji = { uniqueId, emoji ->
+        state.eventSink(MessagesEvents.ToggleReaction(emoji.unicode, uniqueId))
+    })
 
     ReactionSummaryView(state = state.reactionSummaryState)
     ReadReceiptBottomSheet(
@@ -279,14 +279,12 @@ fun MessagesView(
 @Composable
 private fun ReinviteDialog(state: MessagesState) {
     if (state.showReinvitePrompt) {
-        ConfirmationDialog(
-            title = stringResource(id = R.string.screen_room_invite_again_alert_title),
+        ConfirmationDialog(title = stringResource(id = R.string.screen_room_invite_again_alert_title),
             content = stringResource(id = R.string.screen_room_invite_again_alert_message),
             cancelText = stringResource(id = CommonStrings.action_cancel),
             submitText = stringResource(id = CommonStrings.action_invite),
             onSubmitClick = { state.eventSink(MessagesEvents.InviteDialogDismissed(InviteDialogAction.Invite)) },
-            onDismiss = { state.eventSink(MessagesEvents.InviteDialogDismissed(InviteDialogAction.Cancel)) }
-        )
+            onDismiss = { state.eventSink(MessagesEvents.InviteDialogDismissed(InviteDialogAction.Cancel)) })
     }
 }
 
@@ -312,9 +310,9 @@ private fun MessagesViewContent(
 ) {
     Box(
         modifier = modifier
-                .fillMaxSize()
-                .navigationBarsPadding()
-                .imePadding(),
+            .fillMaxSize()
+            .navigationBarsPadding()
+            .imePadding(),
     ) {
         AttachmentsBottomSheet(
             state = state.composerState,
@@ -324,14 +322,11 @@ private fun MessagesViewContent(
         )
 
         if (state.enableVoiceMessages && state.voiceMessageComposerState.showPermissionRationaleDialog) {
-            VoiceMessagePermissionRationaleDialog(
-                onContinue = {
-                    state.voiceMessageComposerState.eventSink(VoiceMessageComposerEvents.AcceptPermissionRationale)
-                },
-                onDismiss = {
-                    state.voiceMessageComposerState.eventSink(VoiceMessageComposerEvents.DismissPermissionsRationale)
-                },
-                appName = state.appName
+            VoiceMessagePermissionRationaleDialog(onContinue = {
+                state.voiceMessageComposerState.eventSink(VoiceMessageComposerEvents.AcceptPermissionRationale)
+            }, onDismiss = {
+                state.voiceMessageComposerState.eventSink(VoiceMessageComposerEvents.DismissPermissionsRationale)
+            }, appName = state.appName
             )
         }
         if (state.enableVoiceMessages && state.voiceMessageComposerState.showSendFailureDialog) {
@@ -423,26 +418,23 @@ private fun MessagesViewComposerBottomSheetContents(
 ) {
     if (state.userEventPermissions.canSendMessage) {
         Column(modifier = Modifier.fillMaxWidth()) {
-            SuggestionsPickerView(
-                modifier = Modifier
-                        .heightIn(max = 230.dp)
-                        // Consume all scrolling, preventing the bottom sheet from being dragged when interacting with the list of suggestions
-                        .nestedScroll(object : NestedScrollConnection {
-                            override fun onPostScroll(consumed: Offset, available: Offset, source: NestedScrollSource): Offset {
-                                return available
-                            }
-                        }),
+            SuggestionsPickerView(modifier = Modifier
+                .heightIn(max = 230.dp)
+                // Consume all scrolling, preventing the bottom sheet from being dragged when interacting with the list of suggestions
+                .nestedScroll(object : NestedScrollConnection {
+                    override fun onPostScroll(consumed: Offset, available: Offset, source: NestedScrollSource): Offset {
+                        return available
+                    }
+                }),
                 roomId = state.roomId,
                 roomName = state.roomName.dataOrNull(),
                 roomAvatarData = state.roomAvatar.dataOrNull(),
                 suggestions = state.composerState.suggestions,
                 onSelectSuggestion = {
                     state.composerState.eventSink(MessageComposerEvents.InsertSuggestion(it))
-                }
-            )
+                })
             // Do not show the identity change if user is composing a Rich message or is seeing suggestion(s).
-            if (state.composerState.suggestions.isEmpty() &&
-                state.composerState.textEditorState is TextEditorState.Markdown) {
+            if (state.composerState.suggestions.isEmpty() && state.composerState.textEditorState is TextEditorState.Markdown) {
                 IdentityChangeStateView(
                     state = state.identityChangeState,
                     onLinkClick = onLinkClick,
@@ -470,57 +462,46 @@ private fun MessagesViewTopBar(
     roomCallState: RoomCallState,
     onRoomDetailsClick: () -> Unit,
     onJoinCallClick: () -> Unit,
+    onAudioJoinCallClick: () -> Unit,
+    onVideoJoinCallClick: () -> Unit,
     onBackClick: () -> Unit,
 ) {
-    TopAppBarWithBackground(
-        navigationIcon = {
-            BackButton(onClick = onBackClick)
-        },
-        backgroundImage = io.element.android.libraries.designsystem.R.drawable.home_top_bg,
-            title = {
-            val roundedCornerShape = RoundedCornerShape(8.dp)
-            val titleModifier = Modifier
-                    .clip(roundedCornerShape)
-                    .clickable { onRoomDetailsClick() }
-            if (roomName != null && roomAvatar != null) {
-                RoomAvatarAndNameRow(
-                    roomName = roomName,
-                    roomAvatar = roomAvatar,
-                    heroes = heroes,
-                    modifier = titleModifier
-                )
-            } else {
-                IconTitlePlaceholdersRowMolecule(
-                    iconSize = AvatarSize.TimelineRoom.dp,
-                    modifier = titleModifier
-                )
-            }
-        },
-        actions = {
-            AudioCallMenuItem(
-                roomCallState = roomCallState,
-                onJoinCallClick = onJoinCallClick,
+    TopAppBarWithBackground(navigationIcon = {
+        BackButton(onClick = onBackClick)
+    }, backgroundImage = io.element.android.libraries.designsystem.R.drawable.home_top_bg, title = {
+        val roundedCornerShape = RoundedCornerShape(8.dp)
+        val titleModifier = Modifier
+            .clip(roundedCornerShape)
+            .clickable { onRoomDetailsClick() }
+        if (roomName != null && roomAvatar != null) {
+            RoomAvatarAndNameRow(
+                roomName = roomName, roomAvatar = roomAvatar, heroes = heroes, modifier = titleModifier
             )
-            CallMenuItem(
-                roomCallState = roomCallState,
-                onJoinCallClick = onJoinCallClick,
+        } else {
+            IconTitlePlaceholdersRowMolecule(
+                iconSize = AvatarSize.TimelineRoom.dp, modifier = titleModifier
             )
-            Spacer(Modifier.width(8.dp))
-        },
-        windowInsets = WindowInsets(0.dp)
+        }
+    }, actions = {
+        AudioCallMenuItem(
+            roomCallState = roomCallState,
+            onJoinCallClick = onAudioJoinCallClick,
+        )
+        CallMenuItem(
+            roomCallState = roomCallState,
+            onJoinCallClick = onJoinCallClick,
+        )
+        Spacer(Modifier.width(8.dp))
+    }, windowInsets = WindowInsets(0.dp)
     )
 }
 
 @Composable
 private fun RoomAvatarAndNameRow(
-    roomName: String,
-    roomAvatar: AvatarData,
-    heroes: ImmutableList<AvatarData>,
-    modifier: Modifier = Modifier
+    roomName: String, roomAvatar: AvatarData, heroes: ImmutableList<AvatarData>, modifier: Modifier = Modifier
 ) {
     Row(
-        modifier = modifier,
-        verticalAlignment = Alignment.CenterVertically
+        modifier = modifier, verticalAlignment = Alignment.CenterVertically
     ) {
         CompositeAvatar(
             avatarData = roomAvatar,
@@ -540,9 +521,9 @@ private fun RoomAvatarAndNameRow(
 private fun CantSendMessageBanner() {
     Row(
         modifier = Modifier
-                .fillMaxWidth()
-                .background(MaterialTheme.colorScheme.secondary)
-                .padding(16.dp),
+            .fillMaxWidth()
+            .background(MaterialTheme.colorScheme.secondary)
+            .padding(16.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.Center
     ) {
@@ -569,8 +550,11 @@ internal fun MessagesViewPreview(@PreviewParameter(MessagesStateProvider::class)
         onSendLocationClick = {},
         onCreatePollClick = {},
         onJoinCallClick = {},
+        onAudioJoinCallClick = {},
+        onVideoJoinCallClick = {},
         onViewAllPinnedMessagesClick = { },
         forceJumpToBottomVisibility = true,
         knockRequestsBannerView = {},
-    )
+
+        )
 }
