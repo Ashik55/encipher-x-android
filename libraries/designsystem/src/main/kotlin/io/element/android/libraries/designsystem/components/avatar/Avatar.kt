@@ -127,27 +127,27 @@ private fun InitialsAvatar(
 
     val paddingValue = remember(avatarSize) {
         when {
-            avatarSize < 20.dp -> 2.dp
-            avatarSize < 35.dp -> 5.dp
-            else -> 10.dp
+            avatarSize < 25.dp -> 2.dp
+            avatarSize < 35.dp -> 4.dp
+            else -> 12.dp
         }
     }
 
     Box(
         modifier
             .background(
-                color = if (ElementTheme.isLightTheme) Color(0xFFF3F3F3) else Color(0xFF11181C),
+                color = Color(0xFFA0A4AF),
                 shape = RoundedCornerShape(50))
-            .border(
-                width = when {
-                    avatarSize < 20.dp -> 0.5.dp
-                    avatarSize < 35.dp -> 1.5.dp
-                    else -> 2.dp
-                },
-                color = if (ElementTheme.isLightTheme) Color(0xFF11181C) else Color(0xFFFFFFFF),
-                shape = RoundedCornerShape(50)
-
-            )
+//            .border(
+//                width = when {
+//                    avatarSize < 20.dp -> 0.5.dp
+//                    avatarSize < 35.dp -> 1.5.dp
+//                    else -> 2.dp
+//                },
+//                color = if (ElementTheme.isLightTheme) Color(0xFF11181C) else Color(0xFFFFFFFF),
+//                shape = RoundedCornerShape(50)
+//
+//            )
     ) {
 //        val fontSize = (forcedAvatarSize ?: avatarData.size.dp).toSp() / 2
 //        val originalFont = ElementTheme.typography.fontHeadingMdBold
@@ -162,7 +162,7 @@ private fun InitialsAvatar(
 //            color = avatarColors.foreground,
 //        )
         Image(
-            painter = painterResource(id = if (ElementTheme.isLightTheme) io.element.android.libraries.designsystem.R.drawable.ic_avatar_placeholder else io.element.android.libraries.designsystem.R.drawable.ic_avatar_placeholder_dark),
+            painter = painterResource(id = io.element.android.libraries.designsystem.R.drawable.ic_avatar_placeholder),
             contentDescription = null,
             modifier = Modifier
                 .align(Alignment.Center)
