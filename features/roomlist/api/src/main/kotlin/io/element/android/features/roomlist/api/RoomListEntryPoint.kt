@@ -30,5 +30,7 @@ interface RoomListEntryPoint : FeatureEntryPoint {
         fun onReportBugClick()
         fun onRoomDirectorySearchClick()
         fun onLogoutForNativeSlidingSyncMigrationNeeded()
+//        fun onNavigateToGroup()
+//        fun onNavigateToSettings()
     }
 }

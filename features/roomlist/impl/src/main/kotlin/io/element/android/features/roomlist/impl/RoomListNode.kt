@@ -26,6 +26,7 @@ import io.element.android.features.logout.api.direct.DirectLogoutView
 import io.element.android.features.roomlist.api.RoomListEntryPoint
 import io.element.android.features.roomlist.impl.components.RoomListMenuAction
 import io.element.android.libraries.deeplink.usecase.InviteFriendsUseCase
+import io.element.android.libraries.designsystem.components.navbar.BottomNavRoute
 import io.element.android.libraries.di.SessionScope
 import io.element.android.libraries.matrix.api.core.RoomId
 import io.element.android.libraries.preferences.api.store.EnableNativeSlidingSyncUseCase
@@ -48,6 +49,14 @@ class RoomListNode @AssistedInject constructor(
                 analyticsService.screen(MobileScreen(screenName = MobileScreen.ScreenName.Home))
             }
         )
+    }
+
+    private fun onBottomNavigation(route: BottomNavRoute) {
+        when (route) {
+            BottomNavRoute.Home -> Unit
+//            BottomNavRoute.Group -> onCreateRoomClick()
+            BottomNavRoute.Settings -> onOpenSettings()
+        }
     }
 
     private fun onRoomClick(roomId: RoomId) {
@@ -104,6 +113,7 @@ class RoomListNode @AssistedInject constructor(
             onRoomSettingsClick = this::onRoomSettingsClick,
             onMenuActionClick = { onMenuActionClick(activity, it) },
             onRoomDirectorySearchClick = this::onRoomDirectorySearchClick,
+            onBottomNavigation = this::onBottomNavigation,
             onMigrateToNativeSlidingSyncClick = {
                 if (state.directLogoutState.canDoDirectSignOut) {
                     state.directLogoutState.eventSink(DirectLogoutEvents.Logout(ignoreSdkError = false))

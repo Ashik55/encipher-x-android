@@ -22,5 +22,6 @@ interface CreateRoomEntryPoint : FeatureEntryPoint {
 
     interface Callback : Plugin {
         fun onSuccess(roomId: RoomId)
+//        fun onNavigateToSettings()
     }
 }

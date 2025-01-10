@@ -26,7 +26,7 @@ import androidx.compose.ui.draw.blur
 
 enum class BottomNavRoute {
     Home,
-    Group,
+//    Group,
     Settings
 }
 
@@ -70,7 +70,7 @@ fun BottomNavBar(
                         Icon(
                             imageVector = when (route) {
                                 BottomNavRoute.Home -> ImageVector.vectorResource(id = R.drawable.ic_home_nav)
-                                BottomNavRoute.Group -> ImageVector.vectorResource(id = R.drawable.ic_grp_nav)
+//                                BottomNavRoute.Group -> ImageVector.vectorResource(id = R.drawable.ic_grp_nav)
                                 BottomNavRoute.Settings -> ImageVector.vectorResource(id = R.drawable.ic_settings_nav)
                             },
                             contentDescription = route.name,

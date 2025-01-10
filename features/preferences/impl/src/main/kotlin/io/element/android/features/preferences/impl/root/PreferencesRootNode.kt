@@ -23,6 +23,7 @@ import io.element.android.features.logout.api.direct.DirectLogoutEvents
 import io.element.android.features.logout.api.direct.DirectLogoutView
 import io.element.android.features.logout.api.util.onSuccessLogout
 import io.element.android.libraries.androidutils.browser.openUrlInChromeCustomTab
+import io.element.android.libraries.designsystem.components.navbar.BottomNavRoute
 import io.element.android.libraries.di.SessionScope
 import io.element.android.libraries.matrix.api.user.MatrixUser
 
@@ -46,6 +47,16 @@ class PreferencesRootNode @AssistedInject constructor(
         fun onOpenBlockedUsers()
         fun onSignOutClick()
         fun onOpenAccountDeactivation()
+        fun onNavigateToHome()
+//        fun onNavigateToGroup()
+    }
+
+    private fun onBottomNavigation(route: BottomNavRoute) {
+        when (route) {
+            BottomNavRoute.Home -> plugins<Callback>().forEach { it.onNavigateToHome() }
+//            BottomNavRoute.Group -> plugins<Callback>().forEach { it.onNavigateToGroup() }
+            BottomNavRoute.Settings -> Unit
+        }
     }
 
     private fun onOpenBugReport() {
@@ -130,6 +141,7 @@ class PreferencesRootNode @AssistedInject constructor(
             onOpenLockScreenSettings = this::onOpenLockScreenSettings,
             onOpenUserProfile = this::onOpenUserProfile,
             onOpenBlockedUsers = this::onOpenBlockedUsers,
+            onBottomNavigation = this::onBottomNavigation,
             onSignOutClick = {
                 if (state.directLogoutState.canDoDirectSignOut) {
                     state.directLogoutState.eventSink(DirectLogoutEvents.Logout(ignoreSdkError = false))

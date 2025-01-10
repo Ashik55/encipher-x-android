@@ -9,6 +9,7 @@ package io.element.android.features.preferences.impl.root
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.ColumnScope
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
@@ -26,6 +27,8 @@ import io.element.android.features.preferences.impl.R
 import io.element.android.features.preferences.impl.user.UserPreferences
 import io.element.android.libraries.architecture.coverage.ExcludeFromCoverage
 import io.element.android.libraries.designsystem.components.list.ListItemContent
+import io.element.android.libraries.designsystem.components.navbar.BottomNavBar
+import io.element.android.libraries.designsystem.components.navbar.BottomNavRoute
 import io.element.android.libraries.designsystem.components.preferences.PreferencePage
 import io.element.android.libraries.designsystem.icons.CompoundDrawables
 import io.element.android.libraries.designsystem.preview.ElementPreviewDark
@@ -35,6 +38,7 @@ import io.element.android.libraries.designsystem.theme.components.HorizontalDivi
 import io.element.android.libraries.designsystem.theme.components.IconSource
 import io.element.android.libraries.designsystem.theme.components.ListItem
 import io.element.android.libraries.designsystem.theme.components.ListItemStyle
+import io.element.android.libraries.designsystem.theme.components.Scaffold
 import io.element.android.libraries.designsystem.theme.components.Text
 import io.element.android.libraries.designsystem.utils.snackbar.SnackbarHost
 import io.element.android.libraries.designsystem.utils.snackbar.rememberSnackbarHostState
@@ -60,9 +64,20 @@ fun PreferencesRootView(
     onOpenBlockedUsers: () -> Unit,
     onSignOutClick: () -> Unit,
     onDeactivateClick: () -> Unit,
+    onBottomNavigation: (BottomNavRoute) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val snackbarHostState = rememberSnackbarHostState(snackbarMessage = state.snackbarMessage)
+
+    Scaffold(
+        modifier = modifier.fillMaxWidth(),
+        bottomBar = {
+            BottomNavBar(
+                currentRoute = BottomNavRoute.Settings,
+                onRouteSelected = onBottomNavigation
+            )
+        }
+    ) { paddingValues ->
 
     // Include pref from other modules
     PreferencePage(
@@ -116,6 +131,7 @@ fun PreferencesRootView(
                 null
             }
         )
+    }
     }
 }
 
@@ -308,5 +324,6 @@ private fun ContentToPreview(matrixUser: MatrixUser) {
         onOpenBlockedUsers = {},
         onSignOutClick = {},
         onDeactivateClick = {},
+        onBottomNavigation = {},
     )
 }

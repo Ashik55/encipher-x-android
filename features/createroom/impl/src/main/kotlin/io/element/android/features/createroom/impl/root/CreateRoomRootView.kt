@@ -31,6 +31,8 @@ import io.element.android.features.createroom.impl.components.UserListView
 import io.element.android.libraries.designsystem.components.async.AsyncActionView
 import io.element.android.libraries.designsystem.components.async.AsyncActionViewDefaults
 import io.element.android.libraries.designsystem.components.button.BackButton
+import io.element.android.libraries.designsystem.components.navbar.BottomNavBar
+import io.element.android.libraries.designsystem.components.navbar.BottomNavRoute
 import io.element.android.libraries.designsystem.icons.CompoundDrawables
 import io.element.android.libraries.designsystem.preview.ElementPreview
 import io.element.android.libraries.designsystem.preview.PreviewsDayNight
@@ -52,6 +54,7 @@ fun CreateRoomRootView(
     onNewRoomClick: () -> Unit,
     onOpenDM: (RoomId) -> Unit,
     onInviteFriendsClick: () -> Unit,
+//    onBottomNavigation: (BottomNavRoute) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     Scaffold(
@@ -60,7 +63,13 @@ fun CreateRoomRootView(
             if (!state.userListState.isSearchActive) {
                 CreateRoomRootViewTopBar(onCloseClick = onCloseClick)
             }
-        }
+        },
+//        bottomBar = {
+//            BottomNavBar(
+//                currentRoute = BottomNavRoute.Group,
+//                onRouteSelected = onBottomNavigation
+//            )
+//        }
     ) { paddingValues ->
         Box {
             Image(
@@ -227,5 +236,6 @@ internal fun CreateRoomRootViewPreview(@PreviewParameter(CreateRoomRootStateProv
             onNewRoomClick = {},
             onOpenDM = {},
             onInviteFriendsClick = {},
+//            onBottomNavigation = {},
         )
     }

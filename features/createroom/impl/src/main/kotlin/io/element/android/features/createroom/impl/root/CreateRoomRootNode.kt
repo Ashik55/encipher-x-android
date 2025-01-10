@@ -21,6 +21,7 @@ import dagger.assisted.AssistedInject
 import im.vector.app.features.analytics.plan.MobileScreen
 import io.element.android.anvilannotations.ContributesNode
 import io.element.android.libraries.deeplink.usecase.InviteFriendsUseCase
+import io.element.android.libraries.designsystem.components.navbar.BottomNavRoute
 import io.element.android.libraries.di.SessionScope
 import io.element.android.libraries.matrix.api.core.RoomId
 import io.element.android.services.analytics.api.AnalyticsService
@@ -36,7 +37,17 @@ class CreateRoomRootNode @AssistedInject constructor(
     interface Callback : Plugin {
         fun onCreateNewRoom()
         fun onStartChatSuccess(roomId: RoomId)
+//        fun onNavigateToHome()
+//        fun onSettingsClick()
     }
+
+//    private fun onBottomNavigation(route: BottomNavRoute) {
+//        when (route) {
+//            BottomNavRoute.Home -> plugins<Callback>().forEach { it.onNavigateToHome() }
+//            BottomNavRoute.Group -> Unit
+//            BottomNavRoute.Settings ->plugins<Callback>().forEach { it.onSettingsClick() }
+//        }
+//    }
 
     private fun onCreateNewRoom() {
         plugins<Callback>().forEach { it.onCreateNewRoom() }
@@ -62,6 +73,7 @@ class CreateRoomRootNode @AssistedInject constructor(
             onCloseClick = this::navigateUp,
             onNewRoomClick = ::onCreateNewRoom,
             onOpenDM = ::onStartChatSuccess,
+//            onBottomNavigation = this::onBottomNavigation,
             onInviteFriendsClick = { invitePeople(activity) }
         )
     }

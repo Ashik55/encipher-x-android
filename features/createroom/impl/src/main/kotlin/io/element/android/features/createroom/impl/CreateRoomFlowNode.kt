@@ -60,6 +60,14 @@ class CreateRoomFlowNode @AssistedInject constructor(
                     override fun onStartChatSuccess(roomId: RoomId) {
                         plugins<CreateRoomEntryPoint.Callback>().forEach { it.onSuccess(roomId) }
                     }
+
+//                    override fun onNavigateToHome() {
+//                        navigateUp()
+//                    }
+//
+//                    override fun onSettingsClick() {
+//                        plugins<CreateRoomEntryPoint.Callback>().forEach { it.onNavigateToSettings() }
+//                    }
                 }
                 createNode<CreateRoomRootNode>(buildContext = buildContext, plugins = listOf(callback))
             }

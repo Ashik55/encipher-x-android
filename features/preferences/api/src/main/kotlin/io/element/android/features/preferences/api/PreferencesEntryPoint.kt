@@ -41,5 +41,6 @@ interface PreferencesEntryPoint : FeatureEntryPoint {
         fun onOpenBugReport()
         fun onSecureBackupClick()
         fun onOpenRoomNotificationSettings(roomId: RoomId)
+//        fun onNavigateToGroup()
     }
 }

@@ -160,6 +160,14 @@ class PreferencesFlowNode @AssistedInject constructor(
                     override fun onOpenAccountDeactivation() {
                         backstack.push(NavTarget.AccountDeactivation)
                     }
+
+                    override fun onNavigateToHome() {
+                        navigateUp()
+                    }
+
+//                    override fun onNavigateToGroup() {
+//                        plugins<PreferencesEntryPoint.Callback>().forEach { it.onNavigateToGroup() }
+//                    }
                 }
                 createNode<PreferencesRootNode>(buildContext, plugins = listOf(callback))
             }
