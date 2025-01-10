@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "818394930758",
+    "project_id": "encipherx-c4032",
+    "storage_bucket": "encipherx-c4032.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:818394930758:android:9368c25c3bad4866ccb447",
+        "android_client_info": {
+          "package_name": "io.element.android.x"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDsF38k3jFWQ-q2vrLvgHb72kpr8k7VW1I"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:818394930758:android:f6b0f40b3ffcf411ccb447",
+        "android_client_info": {
+          "package_name": "io.element.android.x.debug"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDsF38k3jFWQ-q2vrLvgHb72kpr8k7VW1I"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

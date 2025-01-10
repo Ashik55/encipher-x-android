@@ -33,8 +33,8 @@ plugins {
     id("kotlin-parcelize")
     alias(libs.plugins.licensee)
     alias(libs.plugins.kotlin.serialization)
-    // To be able to update the firebase.xml files, uncomment and build the project
-    // id("com.google.gms.google-services")
+    // To be able to update the firebase.xml files, uncomment and build the project -- Firebase FCM Added
+     id("com.google.gms.google-services")
 }
 
 setupKover()

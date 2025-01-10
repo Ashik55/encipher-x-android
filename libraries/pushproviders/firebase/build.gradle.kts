@@ -13,6 +13,18 @@ plugins {
     id("io.element.android-library")
 }
 
+//<?xml version="1.0" encoding="utf-8"?>
+//<resources>
+//<string name="gcm_defaultSenderId" translatable="false">818394930758</string>
+//<string name="google_api_key" translatable="false">AIzaSyDsF38k3jFWQ-q2vrLvgHb72kpr8k7VW1I</string>
+//<string name="google_app_id" translatable="false">1:818394930758:android:9368c25c3bad4866ccb447</string>
+//<string name="google_crash_reporting_api_key" translatable="false">AIzaSyDsF38k3jFWQ-q2vrLvgHb72kpr8k7VW1I</string>
+//<string name="google_storage_bucket" translatable="false">encipherx-c4032.firebasestorage.app</string>
+//<string name="project_id" translatable="false">encipherx-c4032</string>
+//</resources>
+
+
+
 android {
     namespace = "io.element.android.libraries.pushproviders.firebase"
 
@@ -23,9 +35,9 @@ android {
                 type = "string",
                 name = "google_app_id",
                 value = if (isEnterpriseBuild) {
-                    "1:912726360885:android:d273c2077ec3291500427c"
+                    "1:818394930758:android:9368c25c3bad4866ccb447"
                 } else {
-                    "1:912726360885:android:d097de99a4c23d2700427c"
+                    "1:818394930758:android:9368c25c3bad4866ccb447"
                 }
             )
         }
@@ -34,9 +46,9 @@ android {
                 type = "string",
                 name = "google_app_id",
                 value = if (isEnterpriseBuild) {
-                    "1:912726360885:android:f8de9126a94143d300427c"
+                    "1:818394930758:android:9368c25c3bad4866ccb447"
                 } else {
-                    "1:912726360885:android:def0a4e454042e9b00427c"
+                    "1:818394930758:android:9368c25c3bad4866ccb447"
                 }
             )
         }
@@ -47,9 +59,9 @@ android {
                 type = "string",
                 name = "google_app_id",
                 value = if (isEnterpriseBuild) {
-                    "1:912726360885:android:3f7e1fe644d99d5a00427c"
+                    "1:818394930758:android:9368c25c3bad4866ccb447"
                 } else {
-                    "1:912726360885:android:e17435e0beb0303000427c"
+                    "1:818394930758:android:9368c25c3bad4866ccb447"
                 }
             )
         }
