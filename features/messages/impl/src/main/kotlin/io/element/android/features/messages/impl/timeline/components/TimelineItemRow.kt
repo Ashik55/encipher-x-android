@@ -109,6 +109,7 @@ internal fun TimelineItemRow(
                             roomCallState = timelineRoomInfo.roomCallState,
                             onLongClick = onLongClick,
                             onJoinCallClick = onJoinCallClick,
+                            isLastMessage = isLastOutgoingMessage
                         )
                     }
                     else -> {

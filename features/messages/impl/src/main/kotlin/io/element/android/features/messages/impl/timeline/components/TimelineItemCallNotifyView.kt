@@ -46,6 +46,7 @@ internal fun TimelineItemCallNotifyView(
     roomCallState: RoomCallState,
     onLongClick: (TimelineItem.Event) -> Unit,
     onJoinCallClick: () -> Unit,
+    isLastMessage: Boolean,
     modifier: Modifier = Modifier
 ) {
     Row(
@@ -84,7 +85,7 @@ internal fun TimelineItemCallNotifyView(
                 )
             }
         }
-        if (roomCallState is RoomCallState.OnGoing) {
+        if (roomCallState is RoomCallState.OnGoing && isLastMessage) {
             CallMenuItem(
                 roomCallState = roomCallState,
                 onJoinCallClick = onJoinCallClick,
@@ -112,6 +113,7 @@ internal fun TimelineItemCallNotifyViewPreview() {
                     roomCallState = roomCallState,
                     onLongClick = {},
                     onJoinCallClick = {},
+                    isLastMessage = true
                 )
             }
         }
