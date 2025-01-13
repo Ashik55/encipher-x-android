@@ -12,6 +12,7 @@ import androidx.compose.animation.expandVertically
 import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -200,6 +201,18 @@ fun MessagesView(
         state.customReactionState.eventSink(CustomReactionEvents.ShowCustomReactionSheet(event))
     }
 
+    // Create a nested scroll connection that hides keyboard on scroll
+    val keyboardDismissingScrollConnection = remember {
+        object : NestedScrollConnection {
+            override fun onPreScroll(available: Offset, source: NestedScrollSource): Offset {
+                if (available.y != 0f) {
+                    localView.hideKeyboard()
+                }
+                return Offset.Zero
+            }
+        }
+    }
+
     Scaffold(
         modifier = modifier,
         contentWindowInsets = WindowInsets(0),
@@ -221,31 +234,45 @@ fun MessagesView(
             }
         },
         content = { padding ->
-            MessagesViewContent(
-                state = state,
+            //This box is add for dismiss keyboard on outside tap, If u don't want just remove this box and keyboardDismissingScrollConnection
+            Box(
                 modifier = Modifier
-                    .padding(padding)
-                    .consumeWindowInsets(padding),
-                onContentClick = ::onContentClick,
-                onMessageLongClick = ::onMessageLongClick,
-                onUserDataClick = { hidingKeyboard { onUserDataClick(it) } },
-                onLinkClick = onLinkClick,
-                onReactionClick = ::onEmojiReactionClick,
-                onReactionLongClick = ::onEmojiReactionLongClick,
-                onMoreReactionsClick = ::onMoreReactionsClick,
-                onReadReceiptClick = { event ->
-                    state.readReceiptBottomSheetState.eventSink(ReadReceiptBottomSheetEvents.EventSelected(event))
-                },
-                onSendLocationClick = onSendLocationClick,
-                onCreatePollClick = onCreatePollClick,
-                onSwipeToReply = { targetEvent ->
-                    state.eventSink(MessagesEvents.HandleAction(TimelineItemAction.Reply, targetEvent))
-                },
-                forceJumpToBottomVisibility = forceJumpToBottomVisibility,
-                onJoinCallClick = onJoinCallClick,
-                onViewAllPinnedMessagesClick = onViewAllPinnedMessagesClick,
-                knockRequestsBannerView = knockRequestsBannerView,
-            )
+                    // Add clickable modifier to dismiss keyboard on outside tap
+                    .clickable(
+                        interactionSource = remember { MutableInteractionSource() },
+                        indication = null
+                    ) {
+                        localView.hideKeyboard()
+                    }
+                    // Add nested scroll connection to dismiss keyboard on scroll
+                    .nestedScroll(keyboardDismissingScrollConnection)
+            ) {
+                MessagesViewContent(
+                    state = state,
+                    modifier = Modifier
+                        .padding(padding)
+                        .consumeWindowInsets(padding),
+                    onContentClick = ::onContentClick,
+                    onMessageLongClick = ::onMessageLongClick,
+                    onUserDataClick = { hidingKeyboard { onUserDataClick(it) } },
+                    onLinkClick = onLinkClick,
+                    onReactionClick = ::onEmojiReactionClick,
+                    onReactionLongClick = ::onEmojiReactionLongClick,
+                    onMoreReactionsClick = ::onMoreReactionsClick,
+                    onReadReceiptClick = { event ->
+                        state.readReceiptBottomSheetState.eventSink(ReadReceiptBottomSheetEvents.EventSelected(event))
+                    },
+                    onSendLocationClick = onSendLocationClick,
+                    onCreatePollClick = onCreatePollClick,
+                    onSwipeToReply = { targetEvent ->
+                        state.eventSink(MessagesEvents.HandleAction(TimelineItemAction.Reply, targetEvent))
+                    },
+                    forceJumpToBottomVisibility = forceJumpToBottomVisibility,
+                    onJoinCallClick = onJoinCallClick,
+                    onViewAllPinnedMessagesClick = onViewAllPinnedMessagesClick,
+                    knockRequestsBannerView = knockRequestsBannerView,
+                )
+            }
         },
         snackbarHost = {
             SnackbarHost(
