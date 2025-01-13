@@ -49,6 +49,7 @@ data class MessagesState(
     val enableVoiceMessages: Boolean,
     val roomCallState: RoomCallState,
     val appName: String,
+    val isDm: Boolean,
     val pinnedMessagesBannerState: PinnedMessagesBannerState,
     val eventSink: (MessagesEvents) -> Unit
 )

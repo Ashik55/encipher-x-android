@@ -107,6 +107,7 @@ fun aMessagesState(
     hasNetworkConnection: Boolean = true,
     showReinvitePrompt: Boolean = false,
     enableVoiceMessages: Boolean = true,
+    isDm: Boolean = false,
     roomCallState: RoomCallState = aStandByCallState(),
     pinnedMessagesBannerState: PinnedMessagesBannerState = aLoadedPinnedMessagesBannerState(),
     eventSink: (MessagesEvents) -> Unit = {},
@@ -135,6 +136,7 @@ fun aMessagesState(
     appName = "Encipher",
     pinnedMessagesBannerState = pinnedMessagesBannerState,
     eventSink = eventSink,
+    isDm = isDm,
 )
 
 fun aUserEventPermissions(

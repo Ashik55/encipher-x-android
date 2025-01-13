@@ -229,7 +229,8 @@ class MessagesPresenter @AssistedInject constructor(
             appName = buildMeta.applicationName,
             roomCallState = roomCallState,
             pinnedMessagesBannerState = pinnedMessagesBannerState,
-            eventSink = { handleEvents(it) }
+            eventSink = { handleEvents(it) },
+            isDm = roomInfo?.isDm ?: false,
         )
     }
 

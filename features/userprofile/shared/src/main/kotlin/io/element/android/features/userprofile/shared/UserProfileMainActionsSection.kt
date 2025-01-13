@@ -46,10 +46,10 @@ fun UserProfileMainActionsSection(
                 onClick = onCall,
             )
         }
-        MainActionButton(
-            title = stringResource(CommonStrings.action_share),
-            imageVector = CompoundIcons.ShareAndroid(),
-            onClick = onShareUser
-        )
+//        MainActionButton(
+//            title = stringResource(CommonStrings.action_share),
+//            imageVector = CompoundIcons.ShareAndroid(),
+//            onClick = onShareUser
+//        )
     }
 }

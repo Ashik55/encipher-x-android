@@ -29,7 +29,7 @@ import kotlin.math.cos
 import kotlin.math.sin
 
 @Composable
-fun CompositeAvatar(
+fun NewCompositeAvatar(
     avatarData: AvatarData,
     heroes: ImmutableList<AvatarData>,
     modifier: Modifier = Modifier,
@@ -69,7 +69,7 @@ fun CompositeAvatar(
                         contentDescription = contentDescription
                     )
                 } else {
-                    NewAvatar(
+                    Avatar(
                         avatarData = heroes[0],
                         modifier = modifier,
                         contentDescription = contentDescription
@@ -77,20 +77,20 @@ fun CompositeAvatar(
                 }
             }
             2 -> {
-            if (isDm) {
-                Avatar(
-                    avatarData = heroes[0],
-                    modifier = modifier,
-                    contentDescription = contentDescription
-                )
-            } else {
-                NewAvatar(
-                    avatarData = heroes[0],
-                    modifier = modifier,
-                    contentDescription = contentDescription
-                )
+                if (isDm) {
+                    Avatar(
+                        avatarData = heroes[0],
+                        modifier = modifier,
+                        contentDescription = contentDescription
+                    )
+                } else {
+                    Avatar(
+                        avatarData = heroes[0],
+                        modifier = modifier,
+                        contentDescription = contentDescription
+                    )
+                }
             }
-        }
             else -> {
                 val angle = 2 * Math.PI / numberOfHeroes
                 val offsetRadius = when (numberOfHeroes) {
@@ -136,7 +136,7 @@ fun CompositeAvatar(
                                     forcedAvatarSize = heroAvatarSize
                                 )
                             } else {
-                                NewAvatar(
+                                Avatar(
                                     avatarData = heroAvatar,
                                     forcedAvatarSize = heroAvatarSize
                                 )
@@ -151,7 +151,7 @@ fun CompositeAvatar(
 
 @Preview(group = PreviewGroup.Avatars)
 @Composable
-internal fun CompositeAvatarPreview() = ElementThemedPreview {
+internal fun NewCompositeAvatarPreview() = ElementThemedPreview {
     val mainAvatar = anAvatarData(
         id = "Zac",
         name = "Zac",
@@ -161,7 +161,7 @@ internal fun CompositeAvatarPreview() = ElementThemedPreview {
         horizontalArrangement = Arrangement.spacedBy(8.dp)
     ) {
         repeat(6) { nbOfHeroes ->
-            CompositeAvatar(
+            NewCompositeAvatar(
                 avatarData = mainAvatar,
                 heroes = List(nbOfHeroes) { aHeroAvatarData(it) }.toPersistentList(),
             )

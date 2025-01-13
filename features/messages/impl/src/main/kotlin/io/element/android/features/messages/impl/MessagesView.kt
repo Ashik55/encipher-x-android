@@ -90,6 +90,7 @@ import io.element.android.libraries.designsystem.atomic.molecules.IconTitlePlace
 import io.element.android.libraries.designsystem.components.avatar.AvatarData
 import io.element.android.libraries.designsystem.components.avatar.AvatarSize
 import io.element.android.libraries.designsystem.components.avatar.CompositeAvatar
+import io.element.android.libraries.designsystem.components.avatar.NewCompositeAvatar
 import io.element.android.libraries.designsystem.components.button.BackButton
 import io.element.android.libraries.designsystem.components.dialogs.ConfirmationDialog
 import io.element.android.libraries.designsystem.preview.ElementPreview
@@ -215,6 +216,7 @@ fun MessagesView(
                     onJoinCallClick = onJoinCallClick,
                     onAudioJoinCallClick = onAudioJoinCallClick,
                     onVideoJoinCallClick = onVideoJoinCallClick,
+                    isDm = state.isDm
                 )
             }
         },
@@ -465,6 +467,7 @@ private fun MessagesViewTopBar(
     onAudioJoinCallClick: () -> Unit,
     onVideoJoinCallClick: () -> Unit,
     onBackClick: () -> Unit,
+    isDm: Boolean,
 ) {
     TopAppBarWithBackground(navigationIcon = {
         BackButton(onClick = onBackClick)
@@ -475,7 +478,8 @@ private fun MessagesViewTopBar(
             .clickable { onRoomDetailsClick() }
         if (roomName != null && roomAvatar != null) {
             RoomAvatarAndNameRow(
-                roomName = roomName, roomAvatar = roomAvatar, heroes = heroes, modifier = titleModifier
+                roomName = roomName, roomAvatar = roomAvatar, heroes = heroes, modifier = titleModifier,
+                isDm = isDm
             )
         } else {
             IconTitlePlaceholdersRowMolecule(
@@ -498,15 +502,23 @@ private fun MessagesViewTopBar(
 
 @Composable
 private fun RoomAvatarAndNameRow(
-    roomName: String, roomAvatar: AvatarData, heroes: ImmutableList<AvatarData>, modifier: Modifier = Modifier
+    roomName: String, roomAvatar: AvatarData, heroes: ImmutableList<AvatarData>, modifier: Modifier = Modifier, isDm: Boolean
 ) {
     Row(
         modifier = modifier, verticalAlignment = Alignment.CenterVertically
     ) {
-        CompositeAvatar(
-            avatarData = roomAvatar,
-            heroes = heroes,
-        )
+        if (isDm) {
+            NewCompositeAvatar(
+                avatarData = roomAvatar,
+                heroes = heroes,
+            )
+        } else {
+            CompositeAvatar(
+                avatarData = roomAvatar,
+                heroes = heroes,
+                isDm = false
+            )
+        }
         Text(
             modifier = Modifier.padding(horizontal = 8.dp),
             text = roomName,
