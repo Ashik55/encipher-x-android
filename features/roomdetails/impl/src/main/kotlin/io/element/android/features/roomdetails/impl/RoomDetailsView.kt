@@ -127,6 +127,7 @@ fun RoomDetailsView(
         modifier = modifier,
         topBar = {
             RoomDetailsTopBar(
+                state = state,
                 goBack = goBack,
                 showEdit = state.canEdit,
                 onActionClick = onActionClick
@@ -308,6 +309,7 @@ private fun KnockRequestsItem(knockRequestsCount: Int?, onKnockRequestsClick: ()
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun RoomDetailsTopBar(
+    state: RoomDetailsState,
     goBack: () -> Unit,
     onActionClick: (RoomDetailsAction) -> Unit,
     showEdit: Boolean,
@@ -315,13 +317,21 @@ private fun RoomDetailsTopBar(
     var showMenu by remember { mutableStateOf(false) }
 
     TopAppBar(
-        title = { Text(stringResource(R.string.room_info),
-            style = MaterialTheme.typography.titleLarge.copy( // Use a predefined style and customize
-                fontSize = 20.sp,
-                fontWeight = FontWeight.W500,
-                textAlign = TextAlign.Center // Center-align the text
-            ),
-            maxLines = 1 )},
+            title = {
+                Text(
+                    text = if (state.roomType is RoomDetailsType.Dm) {
+                        stringResource(R.string.dm_info)
+                    } else {
+                        stringResource(R.string.room_info)
+                    },
+                    style = MaterialTheme.typography.titleLarge.copy(
+                        fontSize = 20.sp,
+                        fontWeight = FontWeight.W500,
+                        textAlign = TextAlign.Center
+                    ),
+                    maxLines = 1
+                )
+            },
         navigationIcon = { BackButton(onClick = goBack) },
         actions = {
             if (showEdit) {
