@@ -8,6 +8,8 @@
 package io.element.android.features.roomdetails.impl.invite
 
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -21,15 +23,22 @@ import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
+import androidx.compose.ui.input.nestedscroll.NestedScrollSource
+import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
 import io.element.android.compound.theme.ElementTheme
 import io.element.android.features.roomdetails.impl.R
+import io.element.android.libraries.androidutils.ui.hideKeyboard
 import io.element.android.libraries.designsystem.components.async.AsyncLoading
 import io.element.android.libraries.designsystem.components.avatar.AvatarSize
 import io.element.android.libraries.designsystem.components.button.BackButton
@@ -61,6 +70,20 @@ fun RoomInviteMembersView(
     onSubmitClick: (List<MatrixUser>) -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    val localView = LocalView.current
+
+    // Create a nested scroll connection that hides keyboard on scroll
+    val keyboardDismissingScrollConnection = remember {
+        object : NestedScrollConnection {
+            override fun onPreScroll(available: Offset, source: NestedScrollSource): Offset {
+                if (available.y != 0f) {
+                    localView.hideKeyboard()
+                }
+                return Offset.Zero
+            }
+        }
+    }
+
     Scaffold(
         modifier = modifier,
         topBar = {
@@ -88,33 +111,46 @@ fun RoomInviteMembersView(
                 contentScale = ContentScale.Crop
             )
 
-            Column(
+            // Add keyboard dismissing box
+            Box(
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(padding)
-                    .consumeWindowInsets(padding),
-                verticalArrangement = Arrangement.spacedBy(16.dp),
+                    .clickable(
+                        interactionSource = remember { MutableInteractionSource() },
+                        indication = null
+                    ) {
+                        localView.hideKeyboard()
+                    }
+                    .nestedScroll(keyboardDismissingScrollConnection)
             ) {
-                RoomInviteMembersSearchBar(
-                    modifier = Modifier.fillMaxWidth(),
-                    query = state.searchQuery,
-                    showLoader = state.showSearchLoader,
-                    selectedUsers = state.selectedUsers,
-                    state = state.searchResults,
-                    active = state.isSearchActive,
-                    onActiveChange = { state.eventSink(RoomInviteMembersEvents.OnSearchActiveChanged(it)) },
-                    onTextChange = { state.eventSink(RoomInviteMembersEvents.UpdateSearchQuery(it)) },
-                    onToggleUser = { state.eventSink(RoomInviteMembersEvents.ToggleUser(it)) },
-                )
 
-                if (!state.isSearchActive) {
-                    SelectedUsersRowList(
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(padding)
+                        .consumeWindowInsets(padding),
+                    verticalArrangement = Arrangement.spacedBy(16.dp),
+                ) {
+                    RoomInviteMembersSearchBar(
                         modifier = Modifier.fillMaxWidth(),
+                        query = state.searchQuery,
+                        showLoader = state.showSearchLoader,
                         selectedUsers = state.selectedUsers,
-                        autoScroll = true,
-                        onUserRemove = { state.eventSink(RoomInviteMembersEvents.ToggleUser(it)) },
-                        contentPadding = PaddingValues(16.dp),
+                        state = state.searchResults,
+                        active = state.isSearchActive,
+                        onActiveChange = { state.eventSink(RoomInviteMembersEvents.OnSearchActiveChanged(it)) },
+                        onTextChange = { state.eventSink(RoomInviteMembersEvents.UpdateSearchQuery(it)) },
+                        onToggleUser = { state.eventSink(RoomInviteMembersEvents.ToggleUser(it)) },
                     )
+
+                    if (!state.isSearchActive) {
+                        SelectedUsersRowList(
+                            modifier = Modifier.fillMaxWidth(),
+                            selectedUsers = state.selectedUsers,
+                            autoScroll = true,
+                            onUserRemove = { state.eventSink(RoomInviteMembersEvents.ToggleUser(it)) },
+                            contentPadding = PaddingValues(16.dp),
+                        )
+                    }
                 }
             }
         }

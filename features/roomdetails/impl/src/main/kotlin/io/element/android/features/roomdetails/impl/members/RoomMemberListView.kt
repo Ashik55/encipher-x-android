@@ -16,6 +16,7 @@ import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -39,8 +40,13 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
+import androidx.compose.ui.input.nestedscroll.NestedScrollSource
+import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
@@ -50,6 +56,7 @@ import androidx.compose.ui.unit.dp
 import io.element.android.compound.theme.ElementTheme
 import io.element.android.features.roomdetails.impl.R
 import io.element.android.features.roomdetails.impl.members.moderation.RoomMembersModerationView
+import io.element.android.libraries.androidutils.ui.hideKeyboard
 import io.element.android.libraries.architecture.AsyncData
 import io.element.android.libraries.designsystem.components.avatar.AvatarSize
 import io.element.android.libraries.designsystem.components.button.BackButton
@@ -89,6 +96,20 @@ fun RoomMemberListView(
         state.eventSink(RoomMemberListEvents.RoomMemberSelected(roomMember))
     }
 
+    val localView = LocalView.current
+
+    // Create a nested scroll connection that hides keyboard on scroll
+    val keyboardDismissingScrollConnection = remember {
+        object : NestedScrollConnection {
+            override fun onPreScroll(available: Offset, source: NestedScrollSource): Offset {
+                if (available.y != 0f) {
+                    localView.hideKeyboard()
+                }
+                return Offset.Zero
+            }
+        }
+    }
+
     Scaffold(
         modifier = modifier,
         topBar = {
@@ -112,40 +133,53 @@ fun RoomMemberListView(
                 contentScale = ContentScale.Crop
             )
 
-            var selectedSection by remember { mutableStateOf(SelectedSection.entries[initialSelectedSectionIndex]) }
-            if (!state.moderationState.canDisplayBannedUsers && selectedSection == SelectedSection.BANNED) {
-                SideEffect {
-                    selectedSection = SelectedSection.MEMBERS
-                }
-            }
-            Column(
+            // Add keyboard dismissing box
+            Box(
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(padding)
-                    .consumeWindowInsets(padding),
-                verticalArrangement = Arrangement.spacedBy(16.dp),
+                    .clickable(
+                        interactionSource = remember { MutableInteractionSource() },
+                        indication = null
+                    ) {
+                        localView.hideKeyboard()
+                    }
+                    .nestedScroll(keyboardDismissingScrollConnection)
             ) {
-                RoomMemberSearchBar(
-                    query = state.searchQuery,
-                    state = state.searchResults,
-                    active = state.isSearchActive,
-                    placeHolderTitle = stringResource(CommonStrings.common_search_for_someone),
-                    onActiveChange = { state.eventSink(RoomMemberListEvents.OnSearchActiveChanged(it)) },
-                    onTextChange = { state.eventSink(RoomMemberListEvents.UpdateSearchQuery(it)) },
-                    onSelectUser = ::onSelectUser,
-                    selectedSection = selectedSection,
-                    modifier = Modifier.fillMaxWidth(),
-                )
 
-                if (!state.isSearchActive) {
-                    RoomMemberList(
-                        roomMembers = state.roomMembers,
-                        showMembersCount = true,
-                        canDisplayBannedUsersControls = state.moderationState.canDisplayBannedUsers,
-                        selectedSection = selectedSection,
-                        onSelectedSectionChange = { selectedSection = it },
+                var selectedSection by remember { mutableStateOf(SelectedSection.entries[initialSelectedSectionIndex]) }
+                if (!state.moderationState.canDisplayBannedUsers && selectedSection == SelectedSection.BANNED) {
+                    SideEffect {
+                        selectedSection = SelectedSection.MEMBERS
+                    }
+                }
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(padding)
+                        .consumeWindowInsets(padding),
+                    verticalArrangement = Arrangement.spacedBy(16.dp),
+                ) {
+                    RoomMemberSearchBar(
+                        query = state.searchQuery,
+                        state = state.searchResults,
+                        active = state.isSearchActive,
+                        placeHolderTitle = stringResource(CommonStrings.common_search_for_someone),
+                        onActiveChange = { state.eventSink(RoomMemberListEvents.OnSearchActiveChanged(it)) },
+                        onTextChange = { state.eventSink(RoomMemberListEvents.UpdateSearchQuery(it)) },
                         onSelectUser = ::onSelectUser,
+                        selectedSection = selectedSection,
+                        modifier = Modifier.fillMaxWidth(),
                     )
+
+                    if (!state.isSearchActive) {
+                        RoomMemberList(
+                            roomMembers = state.roomMembers,
+                            showMembersCount = true,
+                            canDisplayBannedUsersControls = state.moderationState.canDisplayBannedUsers,
+                            selectedSection = selectedSection,
+                            onSelectedSectionChange = { selectedSection = it },
+                            onSelectUser = ::onSelectUser,
+                        )
+                    }
                 }
             }
         }

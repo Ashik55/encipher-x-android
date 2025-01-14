@@ -12,6 +12,8 @@ import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -29,6 +31,7 @@ import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawBehind
@@ -36,8 +39,12 @@ import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
+import androidx.compose.ui.input.nestedscroll.NestedScrollSource
+import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.PreviewParameter
@@ -48,6 +55,7 @@ import io.element.android.features.roomlist.impl.RoomListEvents
 import io.element.android.features.roomlist.impl.components.RoomSummaryRow
 import io.element.android.features.roomlist.impl.contentType
 import io.element.android.features.roomlist.impl.model.RoomListRoomSummary
+import io.element.android.libraries.androidutils.ui.hideKeyboard
 import io.element.android.libraries.designsystem.components.button.BackButton
 import io.element.android.libraries.designsystem.components.button.SuperButton
 import io.element.android.libraries.designsystem.modifiers.applyIf
@@ -64,6 +72,29 @@ import io.element.android.libraries.designsystem.theme.components.TopAppBar
 import io.element.android.libraries.designsystem.utils.copy
 import io.element.android.libraries.matrix.api.core.RoomId
 import io.element.android.libraries.ui.strings.CommonStrings
+@Composable
+private fun rememberKeyboardDismissingConnection(localView: android.view.View): NestedScrollConnection {
+    return remember {
+        object : NestedScrollConnection {
+            override fun onPreScroll(available: Offset, source: NestedScrollSource): Offset {
+                if (available.y != 0f) {
+                    localView.hideKeyboard()
+                }
+                return Offset.Zero
+            }
+        }
+    }
+}
+
+@Composable
+private fun Modifier.keyboardDismissingClickable(localView: android.view.View): Modifier {
+    return this.clickable(
+        interactionSource = remember { MutableInteractionSource() },
+        indication = null
+    ) {
+        localView.hideKeyboard()
+    }
+}
 
 @Composable
 internal fun RoomListSearchView(
@@ -73,6 +104,9 @@ internal fun RoomListSearchView(
     onRoomDirectorySearchClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    val localView = LocalView.current
+    val keyboardDismissingScrollConnection = rememberKeyboardDismissingConnection(localView)
+
     BackHandler(enabled = state.isSearchActive) {
         state.eventSink(RoomListSearchEvents.ToggleSearchVisibility)
     }
@@ -84,10 +118,11 @@ internal fun RoomListSearchView(
     ) {
         Column(
             modifier = modifier
+                .keyboardDismissingClickable(localView)
+                .nestedScroll(keyboardDismissingScrollConnection)
                 .applyIf(
                     condition = state.isSearchActive,
                     ifTrue = {
-                        // Disable input interaction to underlying views
                         pointerInput(Unit) {}
                     }
                 )
@@ -98,6 +133,7 @@ internal fun RoomListSearchView(
                     onRoomClick = onRoomClick,
                     eventSink = eventSink,
                     onRoomDirectorySearchClick = onRoomDirectorySearchClick,
+                    keyboardDismissingScrollConnection = keyboardDismissingScrollConnection,
                 )
             }
         }
@@ -111,7 +147,10 @@ private fun RoomListSearchContent(
     eventSink: (RoomListEvents) -> Unit,
     onRoomClick: (RoomId) -> Unit,
     onRoomDirectorySearchClick: () -> Unit,
+    keyboardDismissingScrollConnection: NestedScrollConnection,
 ) {
+    val localView = LocalView.current
+
     val borderColor = MaterialTheme.colorScheme.tertiary
     val strokeWidth = 1.dp
     fun onBackButtonClick() {
@@ -173,7 +212,7 @@ private fun RoomListSearchContent(
                     }
                 },
                 windowInsets = TopAppBarDefaults.windowInsets.copy(top = 0),
-                    colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.Transparent)
+                colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.Transparent)
             )
         }
     ) { padding ->
@@ -186,31 +225,39 @@ private fun RoomListSearchContent(
                     .fillMaxHeight(),
                 contentScale = ContentScale.Crop
             )
-            Column(
+
+            // Add keyboard dismissing box
+            Box(
                 modifier = Modifier
-                    .padding(padding)
-                    .consumeWindowInsets(padding)
+                    .keyboardDismissingClickable(localView)
+                    .nestedScroll(keyboardDismissingScrollConnection)
             ) {
-                if (state.displayRoomDirectorySearch) {
-                    RoomDirectorySearchButton(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(vertical = 24.dp, horizontal = 16.dp),
-                        onClick = onRoomDirectorySearchClick
-                    )
-                }
-                LazyColumn(
-                    modifier = Modifier.weight(1f),
+                Column(
+                    modifier = Modifier
+                        .padding(padding)
+                        .consumeWindowInsets(padding)
                 ) {
-                    items(
-                        items = state.results,
-                        contentType = { room -> room.contentType() },
-                    ) { room ->
-                        RoomSummaryRow(
-                            room = room,
-                            onClick = ::onRoomClick,
-                            eventSink = eventSink,
+                    if (state.displayRoomDirectorySearch) {
+                        RoomDirectorySearchButton(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(vertical = 24.dp, horizontal = 16.dp),
+                            onClick = onRoomDirectorySearchClick
                         )
+                    }
+                    LazyColumn(
+                        modifier = Modifier.weight(1f),
+                    ) {
+                        items(
+                            items = state.results,
+                            contentType = { room -> room.contentType() },
+                        ) { room ->
+                            RoomSummaryRow(
+                                room = room,
+                                onClick = ::onRoomClick,
+                                eventSink = eventSink,
+                            )
+                        }
                     }
                 }
             }
@@ -245,11 +292,20 @@ private fun RoomDirectorySearchButton(
 
 @PreviewsDayNight
 @Composable
-internal fun RoomListSearchContentPreview(@PreviewParameter(RoomListSearchStateProvider::class) state: RoomListSearchState) = ElementPreview {
+internal fun RoomListSearchContentPreview(
+    @PreviewParameter(RoomListSearchStateProvider::class) state: RoomListSearchState
+) = ElementPreview {
+    val dummyScrollConnection = remember {
+        object : NestedScrollConnection {
+            override fun onPreScroll(available: Offset, source: NestedScrollSource) = Offset.Zero
+        }
+    }
+
     RoomListSearchContent(
         state = state,
         onRoomClick = {},
         eventSink = {},
         onRoomDirectorySearchClick = {},
+        keyboardDismissingScrollConnection = dummyScrollConnection
     )
 }

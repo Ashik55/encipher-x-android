@@ -15,6 +15,7 @@ import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -36,11 +37,17 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
+import androidx.compose.ui.input.nestedscroll.NestedScrollSource
+import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontStyle
@@ -49,6 +56,7 @@ import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
 import io.element.android.compound.theme.ElementTheme
 import io.element.android.features.roomdetails.impl.R
+import io.element.android.libraries.androidutils.ui.hideKeyboard
 import io.element.android.libraries.architecture.AsyncAction
 import io.element.android.libraries.designsystem.components.ProgressDialog
 import io.element.android.libraries.designsystem.components.async.AsyncActionView
@@ -94,6 +102,20 @@ fun ChangeRolesView(
     val latestNavigateUp by rememberUpdatedState(newValue = navigateUp)
     BackHandler(enabled = !state.isSearchActive) {
         state.eventSink(ChangeRolesEvent.Exit)
+    }
+
+    val localView = LocalView.current
+
+    // Create a nested scroll connection that hides keyboard on scroll
+    val keyboardDismissingScrollConnection = remember {
+        object : NestedScrollConnection {
+            override fun onPreScroll(available: Offset, source: NestedScrollSource): Offset {
+                if (available.y != 0f) {
+                    localView.hideKeyboard()
+                }
+                return Offset.Zero
+            }
+        }
     }
 
     Box(modifier = modifier) {
@@ -146,6 +168,18 @@ fun ChangeRolesView(
                     contentScale = ContentScale.Crop
                 )
 
+                // Add keyboard dismissing box
+                Box(
+                    modifier = Modifier
+                        .clickable(
+                            interactionSource = remember { MutableInteractionSource() },
+                            indication = null
+                        ) {
+                            localView.hideKeyboard()
+                        }
+                        .nestedScroll(keyboardDismissingScrollConnection)
+                )
+                {
                 Column(
                     modifier = Modifier.padding(paddingValues),
                 ) {
@@ -198,6 +232,7 @@ fun ChangeRolesView(
                         }
                     }
                 }
+            }
             }
         }
 
@@ -320,7 +355,7 @@ private fun SearchResultsList(
 private fun ListSectionHeader(text: String) {
     Text(
         modifier = Modifier
-            .background(ElementTheme.colors.bgCanvasDefault)
+            .background(Color.Transparent)
             .padding(horizontal = 16.dp, vertical = 8.dp)
             .fillMaxWidth(),
         text = text,

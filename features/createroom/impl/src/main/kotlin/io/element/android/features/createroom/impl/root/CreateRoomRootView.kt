@@ -10,16 +10,23 @@ package io.element.android.features.createroom.impl.root
 import androidx.annotation.DrawableRes
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
+import androidx.compose.ui.input.nestedscroll.NestedScrollSource
+import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.PreviewParameter
@@ -28,6 +35,7 @@ import io.element.android.compound.theme.ElementTheme
 import io.element.android.compound.tokens.generated.CompoundIcons
 import io.element.android.features.createroom.impl.R
 import io.element.android.features.createroom.impl.components.UserListView
+import io.element.android.libraries.androidutils.ui.hideKeyboard
 import io.element.android.libraries.designsystem.components.async.AsyncActionView
 import io.element.android.libraries.designsystem.components.async.AsyncActionViewDefaults
 import io.element.android.libraries.designsystem.components.button.BackButton
@@ -57,6 +65,20 @@ fun CreateRoomRootView(
 //    onBottomNavigation: (BottomNavRoute) -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    val localView = LocalView.current
+
+    // Create a nested scroll connection that hides keyboard on scroll
+    val keyboardDismissingScrollConnection = remember {
+        object : NestedScrollConnection {
+            override fun onPreScroll(available: Offset, source: NestedScrollSource): Offset {
+                if (available.y != 0f) {
+                    localView.hideKeyboard()
+                }
+                return Offset.Zero
+            }
+        }
+    }
+
     Scaffold(
         modifier = modifier.fillMaxWidth(),
         topBar = {
@@ -80,6 +102,18 @@ fun CreateRoomRootView(
                     .fillMaxHeight(),
                 contentScale = ContentScale.Crop
             )
+
+            // Add keyboard dismissing box
+            Box(
+                modifier = Modifier
+                    .clickable(
+                        interactionSource = remember { MutableInteractionSource() },
+                        indication = null
+                    ) {
+                        localView.hideKeyboard()
+                    }
+                    .nestedScroll(keyboardDismissingScrollConnection)
+            ){
 
             Column(
                 modifier = Modifier
@@ -107,6 +141,7 @@ fun CreateRoomRootView(
                     )
                 }
             }
+        }
         }
     }
 
