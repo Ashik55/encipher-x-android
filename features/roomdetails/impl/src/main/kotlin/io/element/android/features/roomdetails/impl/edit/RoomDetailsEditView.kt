@@ -55,6 +55,7 @@ import io.element.android.libraries.designsystem.theme.components.TextField
 import io.element.android.libraries.designsystem.theme.components.TopAppBar
 import io.element.android.libraries.matrix.ui.components.AvatarActionBottomSheet
 import io.element.android.libraries.matrix.ui.components.EditableAvatarView
+import io.element.android.libraries.matrix.ui.components.NewEditableAvatarView
 import io.element.android.libraries.permissions.api.PermissionsView
 import io.element.android.libraries.ui.strings.CommonStrings
 
@@ -119,7 +120,7 @@ fun RoomDetailsEditView(
                     .verticalScroll(rememberScrollState())
             ) {
                 Spacer(modifier = Modifier.height(24.dp))
-                EditableAvatarView(
+                NewEditableAvatarView(
                     matrixId = state.roomId.value,
                     // As per Element Web, we use the raw name for the avatar as well
                     displayName = state.roomRawName,
