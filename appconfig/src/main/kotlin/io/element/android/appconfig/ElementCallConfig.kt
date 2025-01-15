@@ -11,7 +11,10 @@ object ElementCallConfig {
     /**
      * The default base URL for the Element Call service.
      */
-    const val DEFAULT_BASE_URL = "https://call.enciph-er.com"
+//    const val DEFAULT_BASE_URL = "https://call.enciph-er.com"
+    const val DEFAULT_BASE_URL = "https://call.dev.enciph-er.com"
+
+
 
     /**
      * The default duration of a ringing call in seconds before it's automatically dismissed.
