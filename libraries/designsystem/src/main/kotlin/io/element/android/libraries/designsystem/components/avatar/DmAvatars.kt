@@ -52,29 +52,30 @@ fun DmAvatars(
     val boxSize = userAvatarData.size.dp * SIZE_RATIO
     val boxSizePx = boxSize.toPx()
     val otherAvatarRadius = otherUserAvatarData.size.dp.toPx() / 2
-    val isRtl = LocalLayoutDirection.current == LayoutDirection.Rtl
     Box(
-        modifier = modifier.size(boxSize),
+        modifier = modifier
+            .height(80.dp)
+            .width(boxSize)
     ) {
         // Draw user avatar and cut top right corner
         Avatar(
             avatarData = userAvatarData,
             modifier = Modifier
-                .align(Alignment.BottomStart)
+                .align(Alignment.CenterStart)
                 .graphicsLayer {
                     compositingStrategy = CompositingStrategy.Offscreen
                 }
                 .drawWithContent {
                     drawContent()
-                    drawCircle(
-                        color = Color.Black,
-                        center = Offset(
-                            x = boxSizePx - otherAvatarRadius,
-                            y = size.height - (boxSizePx - otherAvatarRadius),
-                        ),
-                        radius = otherAvatarRadius / 0.9f,
-                        blendMode = BlendMode.Clear,
-                    )
+//                    drawCircle(
+//                        color = Color.Black,
+//                        center = Offset(
+//                            x = (boxSizePx - otherAvatarRadius) - 4f,
+//                            y = 103F,
+//                        ),
+//                        radius = otherAvatarRadius / 0.99f,
+//                        blendMode = BlendMode.Clear,
+//                    )
                 }
                 .clip(CircleShape)
                 .clickable(enabled = userAvatarData.url != null) {
@@ -85,7 +86,7 @@ fun DmAvatars(
         Avatar(
             avatarData = otherUserAvatarData,
             modifier = Modifier
-                .align(Alignment.TopEnd)
+                .align(Alignment.CenterEnd)
                 .clip(CircleShape)
                 .clickable(enabled = otherUserAvatarData.url != null) {
                     otherUserAvatarData.url?.let { openOtherAvatarPreview(it) }
@@ -114,3 +115,4 @@ internal fun DmAvatarsPreview() = ElementThemedPreview {
         openOtherAvatarPreview = {},
     )
 }
+
