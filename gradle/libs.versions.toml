@@ -3,7 +3,7 @@
 
 [versions]
 # Project
-android_gradle_plugin = "8.7.3"
+android_gradle_plugin = "8.8.0"
 kotlin = "2.1.0"
 kotlinpoet = "2.0.0"
 ksp = "2.1.0-1.0.29"
@@ -39,36 +39,36 @@ test_core = "1.6.1"
 
 # Jetbrain
 datetime = "0.6.1"
-serialization_json = "1.7.3"
+serialization_json = "1.8.0"
 
 #other
 coil = "2.7.0"
 showkase = "1.0.3"
-appyx = "1.5.1"
+appyx = "1.6.0"
 sqldelight = "2.0.2"
-wysiwyg = "2.37.14"
+wysiwyg = "2.38.0"
 telephoto = "0.14.0"
 
 # Dependency analysis
-dependencyAnalysis = "2.6.1"
+dependencyAnalysis = "2.7.0"
 
 # DI
-dagger = "2.53.1"
-anvil = "0.4.0"
+dagger = "2.55"
+anvil = "0.4.1"
 
 # Auto service
 autoservice = "1.1.1"
 
 # quality
 androidx-test-ext-junit = "1.2.1"
-kover = "0.9.0"
+kover = "0.9.1"
 
 [libraries]
 # Project
 android_gradle_plugin = { module = "com.android.tools.build:gradle", version.ref = "android_gradle_plugin" }
 compose_compiler_plugin = { module = "org.jetbrains.kotlin:compose-compiler-gradle-plugin", version.ref = "kotlin" }
 # https://developer.android.com/studio/write/java8-support#library-desugaring-versions
-android_desugar = "com.android.tools:desugar_jdk_libs:2.1.3"
+android_desugar = "com.android.tools:desugar_jdk_libs:2.1.4"
 anvil_gradle_plugin = { module = "dev.zacsweers.anvil:gradle-plugin", version.ref = "anvil" }
 kotlin_gradle_plugin = { module = "org.jetbrains.kotlin:kotlin-gradle-plugin", version.ref = "kotlin" }
 kotlinpoet = { module = "com.squareup:kotlinpoet", version.ref = "kotlinpoet" }
@@ -149,7 +149,7 @@ test_corektx = { module = "androidx.test:core-ktx", version.ref = "test_core" }
 test_arch_core = "androidx.arch.core:core-testing:2.2.0"
 test_junit = "junit:junit:4.13.2"
 test_runner = "androidx.test:runner:1.6.2"
-test_mockk = "io.mockk:mockk:1.13.14"
+test_mockk = "io.mockk:mockk:1.13.16"
 test_konsist = "com.lemonappdev:konsist:0.17.3"
 test_turbine = "app.cash.turbine:turbine:1.2.0"
 test_truth = "com.google.truth:truth:1.4.4"
@@ -187,15 +187,15 @@ vanniktech_blurhash = "com.vanniktech:blurhash:0.3.0"
 telephoto_zoomableimage = { module = "me.saket.telephoto:zoomable-image-coil", version.ref = "telephoto" }
 telephoto_flick = { module = "me.saket.telephoto:flick-android", version.ref = "telephoto" }
 statemachine = "com.freeletics.flowredux:compose:1.2.2"
-maplibre = "org.maplibre.gl:android-sdk:11.7.1"
+maplibre = "org.maplibre.gl:android-sdk:11.8.0"
 maplibre_ktx = "org.maplibre.gl:android-sdk-ktx-v7:3.0.2"
 maplibre_annotation = "org.maplibre.gl:android-plugin-annotation-v9:3.0.2"
 opusencoder = "io.element.android:opusencoder:1.1.0"
 zxing_cpp = "io.github.zxing-cpp:android:2.2.0"
 
 # Analytics
-posthog = "com.posthog:posthog-android:3.9.3"
-sentry = "io.sentry:sentry-android:7.19.0"
+posthog = "com.posthog:posthog-android:3.10.0"
+sentry = "io.sentry:sentry-android:7.20.0"
 # main branch can be tested replacing the version with main-SNAPSHOT
 matrix_analytics_events = "com.github.matrix-org:matrix-analytics-events:0.28.0"
 
@@ -235,7 +235,7 @@ anvil = { id = "dev.zacsweers.anvil", version.ref = "anvil" }
 detekt = "io.gitlab.arturbosch.detekt:1.23.7"
 ktlint = "org.jlleitschuh.gradle.ktlint:12.1.2"
 dependencygraph = "com.savvasdalkitsis.module-dependency-graph:0.12"
-dependencycheck = "org.owasp.dependencycheck:11.1.1"
+dependencycheck = "org.owasp.dependencycheck:12.0.0"
 dependencyanalysis = { id = "com.autonomousapps.dependency-analysis", version.ref = "dependencyAnalysis" }
 paparazzi = "app.cash.paparazzi:1.3.5"
 sqldelight = { id = "app.cash.sqldelight", version.ref = "sqldelight" }

@@ -1,8 +1,8 @@
 /*
  * Copyright 2024 New Vector Ltd.
  *
- * SPDX-License-Identifier: AGPL-3.0-only
- * Please see LICENSE in the repository root for full details.
+ * SPDX-License-Identifier: AGPL-3.0-only OR LicenseRef-Element-Commercial
+ * Please see LICENSE files in the repository root for full details.
  */
 
 package io.element.android.libraries.designsystem.components.avatar
@@ -15,6 +15,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -24,14 +25,15 @@ import androidx.compose.ui.graphics.BlendMode
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.CompositingStrategy
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.LayoutDirection
 import io.element.android.libraries.designsystem.preview.ElementThemedPreview
 import io.element.android.libraries.designsystem.preview.PreviewGroup
 import io.element.android.libraries.designsystem.text.toPx
 import io.element.android.libraries.testtags.TestTags
 import io.element.android.libraries.testtags.testTag
-
 
 /** Ratio between the box size (120 on Figma) and the avatar size (75 on Figma). */
 private const val SIZE_RATIO = 1.6f
@@ -50,30 +52,29 @@ fun DmAvatars(
     val boxSize = userAvatarData.size.dp * SIZE_RATIO
     val boxSizePx = boxSize.toPx()
     val otherAvatarRadius = otherUserAvatarData.size.dp.toPx() / 2
+    val isRtl = LocalLayoutDirection.current == LayoutDirection.Rtl
     Box(
-        modifier = modifier
-            .height(80.dp)
-            .width(boxSize)
+        modifier = modifier.size(boxSize),
     ) {
         // Draw user avatar and cut top right corner
         Avatar(
             avatarData = userAvatarData,
             modifier = Modifier
-                .align(Alignment.CenterStart)
+                .align(Alignment.BottomStart)
                 .graphicsLayer {
                     compositingStrategy = CompositingStrategy.Offscreen
                 }
                 .drawWithContent {
                     drawContent()
-//                    drawCircle(
-//                        color = Color.Black,
-//                        center = Offset(
-//                            x = (boxSizePx - otherAvatarRadius) - 4f,
-//                            y = 103F,
-//                        ),
-//                        radius = otherAvatarRadius / 0.99f,
-//                        blendMode = BlendMode.Clear,
-//                    )
+                    drawCircle(
+                        color = Color.Black,
+                        center = Offset(
+                            x = boxSizePx - otherAvatarRadius,
+                            y = size.height - (boxSizePx - otherAvatarRadius),
+                        ),
+                        radius = otherAvatarRadius / 0.9f,
+                        blendMode = BlendMode.Clear,
+                    )
                 }
                 .clip(CircleShape)
                 .clickable(enabled = userAvatarData.url != null) {
@@ -84,7 +85,7 @@ fun DmAvatars(
         Avatar(
             avatarData = otherUserAvatarData,
             modifier = Modifier
-                .align(Alignment.CenterEnd)
+                .align(Alignment.TopEnd)
                 .clip(CircleShape)
                 .clickable(enabled = otherUserAvatarData.url != null) {
                     otherUserAvatarData.url?.let { openOtherAvatarPreview(it) }

@@ -1,8 +1,8 @@
 /*
  * Copyright 2024 New Vector Ltd.
  *
- * SPDX-License-Identifier: AGPL-3.0-only
- * Please see LICENSE in the repository root for full details.
+ * SPDX-License-Identifier: AGPL-3.0-only OR LicenseRef-Element-Commercial
+ * Please see LICENSE files in the repository root for full details.
  */
 
 package io.element.android.libraries.matrix.impl.timeline
@@ -158,8 +158,8 @@ class RustTimeline(
 
     override val membershipChangeEventReceived: Flow<Unit> = timelineDiffProcessor.membershipChangeEventReceived
 
-    override suspend fun sendReadReceipt(eventId: EventId, receiptType: ReceiptType): Result<Unit> {
-        return runCatching {
+    override suspend fun sendReadReceipt(eventId: EventId, receiptType: ReceiptType): Result<Unit> = withContext(dispatcher) {
+        runCatching {
             inner.sendReadReceipt(receiptType.toRustReceiptType(), eventId.value)
         }
     }
@@ -590,8 +590,8 @@ class RustTimeline(
         }
     }
 
-    private suspend fun fetchDetailsForEvent(eventId: EventId): Result<Unit> {
-        return runCatching {
+    private suspend fun fetchDetailsForEvent(eventId: EventId): Result<Unit> = withContext(dispatcher) {
+        runCatching {
             inner.fetchDetailsForEvent(eventId.value)
         }
     }

@@ -1,8 +1,8 @@
 /*
  * Copyright 2024 New Vector Ltd.
  *
- * SPDX-License-Identifier: AGPL-3.0-only
- * Please see LICENSE in the repository root for full details.
+ * SPDX-License-Identifier: AGPL-3.0-only OR LicenseRef-Element-Commercial
+ * Please see LICENSE files in the repository root for full details.
  */
 
 package io.element.android.features.roomlist.impl.components
@@ -141,13 +141,13 @@ private fun EmptyView(
                 SecurityBannerState.SetUpRecovery -> {
                     SetUpRecoveryKeyBanner(
                         onContinueClick = onSetUpRecoveryClick,
-                        onDismissClick = { eventSink(RoomListEvents.DismissBanner) }
+                        onDismissClick = { eventSink(RoomListEvents.DismissBanner) },
                     )
                 }
                 SecurityBannerState.RecoveryKeyConfirmation -> {
                     ConfirmRecoveryKeyBanner(
                         onContinueClick = onConfirmRecoveryKeyClick,
-                        onDismissClick = { eventSink(RoomListEvents.DismissBanner) }
+                        onDismissClick = { eventSink(RoomListEvents.DismissBanner) },
                     )
                 }
                 else -> Unit
@@ -219,7 +219,7 @@ private fun RoomsViewList(
                 item {
                     SetUpRecoveryKeyBanner(
                         onContinueClick = onSetUpRecoveryClick,
-                        onDismissClick = { updatedEventSink(RoomListEvents.DismissBanner) }
+                        onDismissClick = { updatedEventSink(RoomListEvents.DismissBanner) },
                     )
                 }
             }
@@ -227,7 +227,7 @@ private fun RoomsViewList(
                 item {
                     ConfirmRecoveryKeyBanner(
                         onContinueClick = onConfirmRecoveryKeyClick,
-                        onDismissClick = { updatedEventSink(RoomListEvents.DismissBanner) }
+                        onDismissClick = { updatedEventSink(RoomListEvents.DismissBanner) },
                     )
                 }
             }
@@ -235,7 +235,7 @@ private fun RoomsViewList(
                 item {
                     NativeSlidingSyncMigrationBanner(
                         onContinueClick = onMigrateToNativeSlidingSyncClick,
-                        onDismissClick = { updatedEventSink(RoomListEvents.DismissBanner) }
+                        onDismissClick = { updatedEventSink(RoomListEvents.DismissBanner) },
                     )
                 }
             }
