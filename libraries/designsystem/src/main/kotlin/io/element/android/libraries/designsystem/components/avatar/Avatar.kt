@@ -37,12 +37,10 @@ import coil.compose.AsyncImagePainter
 import androidx.compose.ui.res.painterResource
 import coil.compose.SubcomposeAsyncImage
 import coil.compose.SubcomposeAsyncImageContent
-import io.element.android.compound.theme.ElementTheme
 import io.element.android.libraries.designsystem.colors.AvatarColorsProvider
 import io.element.android.libraries.designsystem.preview.ElementThemedPreview
 import io.element.android.libraries.designsystem.preview.PreviewGroup
 import io.element.android.libraries.designsystem.preview.debugPlaceholderAvatar
-import io.element.android.libraries.designsystem.text.toSp
 import io.element.android.libraries.designsystem.theme.components.Text
 import timber.log.Timber
 

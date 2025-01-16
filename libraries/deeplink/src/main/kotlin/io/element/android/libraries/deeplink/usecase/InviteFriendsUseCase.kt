@@ -11,10 +11,8 @@ import android.app.Activity
 import io.element.android.libraries.androidutils.system.startSharePlainTextIntent
 import io.element.android.libraries.core.meta.BuildMeta
 import io.element.android.libraries.matrix.api.MatrixClient
-import io.element.android.libraries.matrix.api.permalink.PermalinkBuilder
 import io.element.android.libraries.ui.strings.CommonStrings
 import io.element.android.services.toolbox.api.strings.StringProvider
-import timber.log.Timber
 import javax.inject.Inject
 import io.element.android.libraries.androidutils.R as AndroidUtilsR
 

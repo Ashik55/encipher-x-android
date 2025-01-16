@@ -11,11 +11,8 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.WindowInsets
-import androidx.compose.foundation.layout.aspectRatio
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.TopAppBarColors
@@ -39,16 +36,17 @@ import io.element.android.libraries.designsystem.preview.PreviewGroup
 @Composable
 fun TopAppBarWithBackground(
     title: @Composable () -> Unit,
+    backgroundImage: Int,
     modifier: Modifier = Modifier,
     navigationIcon: @Composable () -> Unit = {},
     actions: @Composable RowScope.() -> Unit = {},
     windowInsets: WindowInsets = TopAppBarDefaults.windowInsets,
     colors: TopAppBarColors = TopAppBarDefaults.topAppBarColors(),
     scrollBehavior: TopAppBarScrollBehavior? = null,
-    backgroundImage: Int
 ) {
-    Box(modifier = modifier
-        .fillMaxWidth()
+    Box(
+        modifier = modifier
+            .fillMaxWidth()
     ) {
         Image(
             painter = painterResource(id = backgroundImage),
@@ -81,6 +79,7 @@ fun TopAppBarWithBackground(
 internal fun TopAppBarWithBackgroundPreview() = ElementThemedPreview {
     TopAppBarWithBackground(
         title = { Text(text = "Title") },
+        backgroundImage = R.drawable.home_top_bg,
         navigationIcon = { BackButton(onClick = {}) },
         actions = {
             TextButton(text = "Action", onClick = {})
@@ -90,7 +89,6 @@ internal fun TopAppBarWithBackgroundPreview() = ElementThemedPreview {
                     contentDescription = null,
                 )
             }
-        },
-        backgroundImage = R.drawable.home_top_bg
+        }
     )
 }

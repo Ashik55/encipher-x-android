@@ -145,7 +145,7 @@ private fun RoomListScaffold(
         bottomBar = {
             BottomNavBar(
                 currentRoute = BottomNavRoute.Home,
-                onRouteSelected = onBottomNavigation
+                onRouteSelect = onBottomNavigation
             )
         },
         content = { padding ->

@@ -86,7 +86,10 @@ object LockIcon {
      * Display a [LockIcon].
      *
      * @param style the style of the icon
+     * @param size the size configuration for the logo
      * @param modifier the modifier to apply to this layout
+     * @param useBlurredShadow whether to use blurred shadow effect
+     * @param darkTheme whether to use dark theme styling
      */
     @Composable
     operator fun invoke(

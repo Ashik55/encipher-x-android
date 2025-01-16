@@ -94,7 +94,7 @@ onboarding](docs/_developer_onboarding.md#build-the-sdk-locally) instructions.
 When you are experiencing an issue on Element X Android, please first search in [GitHub issues](https://github.com/element-hq/element-x-android/issues)
 and then in [#element-x-android:matrix.org](https://matrix.to/#/#element-x-android:matrix.org).
 If after your research you still have a question, ask at [#element-x-android:matrix.org](https://matrix.to/#/#element-x-android:matrix.org). Otherwise feel free to create a GitHub issue if you encounter a bug or a crash, by explaining clearly in detail what happened. You can also perform bug reporting from the application settings. This is especially recommended when you encounter a crash.
-
+./gradlew cleanBuildCache
 ## Copyright and License
 
 Copyright (c) 2022 - 2025 New Vector Ltd

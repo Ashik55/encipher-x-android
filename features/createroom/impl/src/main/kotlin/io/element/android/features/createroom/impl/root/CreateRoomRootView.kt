@@ -89,7 +89,7 @@ fun CreateRoomRootView(
 //        bottomBar = {
 //            BottomNavBar(
 //                currentRoute = BottomNavRoute.Group,
-//                onRouteSelected = onBottomNavigation
+//                onRouteSelect = onBottomNavigation
 //            )
 //        }
     ) { paddingValues ->

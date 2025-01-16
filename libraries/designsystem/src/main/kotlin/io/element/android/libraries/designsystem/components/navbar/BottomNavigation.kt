@@ -30,18 +30,13 @@ enum class BottomNavRoute {
     Settings
 }
 
-data class BottomNavItem(
-    val route: BottomNavRoute,
-    val iconResId: Int,
-    val label: String
-)
-
 @Composable
 fun BottomNavBar(
+    modifier: Modifier = Modifier,
     currentRoute: BottomNavRoute,
-    onRouteSelected: (BottomNavRoute) -> Unit
+    onRouteSelect: (BottomNavRoute) -> Unit
 ) {
-    Box {
+    Box(modifier = modifier) {
         Box(
             modifier = Modifier
                 .matchParentSize()
@@ -65,12 +60,11 @@ fun BottomNavBar(
 
                 NavigationBarItem(
                     selected = selected,
-                    onClick = { onRouteSelected(route) },
+                    onClick = { onRouteSelect(route) },
                     icon = {
                         Icon(
                             imageVector = when (route) {
                                 BottomNavRoute.Home -> ImageVector.vectorResource(id = R.drawable.ic_home_nav)
-//                                BottomNavRoute.Group -> ImageVector.vectorResource(id = R.drawable.ic_grp_nav)
                                 BottomNavRoute.Settings -> ImageVector.vectorResource(id = R.drawable.ic_settings_nav)
                             },
                             contentDescription = route.name,
@@ -103,7 +97,8 @@ fun BottomNavBar(
 @Composable
 internal fun BottomNavBarPreview() = ElementPreview {
     BottomNavBar(
+        modifier = Modifier,
         currentRoute = BottomNavRoute.Home,
-        onRouteSelected = {}
+        onRouteSelect = {}
     )
 }

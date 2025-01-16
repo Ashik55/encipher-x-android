@@ -74,7 +74,7 @@ fun PreferencesRootView(
         bottomBar = {
             BottomNavBar(
                 currentRoute = BottomNavRoute.Settings,
-                onRouteSelected = onBottomNavigation
+                onRouteSelect = onBottomNavigation
             )
         }
     ) { paddingValues ->
