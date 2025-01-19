@@ -32,17 +32,17 @@ class OnBoardingNode @AssistedInject constructor(
         plugins<OnBoardingEntryPoint.Callback>().forEach { it.onSignIn() }
     }
 
-    private fun onSignUp() {
-        plugins<OnBoardingEntryPoint.Callback>().forEach { it.onSignUp() }
-    }
+//    private fun onSignUp() {
+//        plugins<OnBoardingEntryPoint.Callback>().forEach { it.onSignUp() }
+//    }
 
     private fun onSignInWithQrCode() {
         plugins<OnBoardingEntryPoint.Callback>().forEach { it.onSignInWithQrCode() }
     }
 
-    private fun onReportProblem() {
-        plugins<OnBoardingEntryPoint.Callback>().forEach { it.onReportProblem() }
-    }
+//    private fun onReportProblem() {
+//        plugins<OnBoardingEntryPoint.Callback>().forEach { it.onReportProblem() }
+//    }
 
     @Composable
     override fun View(modifier: Modifier) {
@@ -51,16 +51,8 @@ class OnBoardingNode @AssistedInject constructor(
             state = state,
             modifier = modifier,
             onSignIn = ::onSignIn,
-            onCreateAccount = ::onSignUp,
-            onSignInWithQrCode = ::onSignInWithQrCode,
-            onReportProblem = ::onReportProblem,
-
-            //For Onboarding pages
-//            onPageChange = { newPage ->
-//                // You'll need to add a method to update the page in your presenter
-//                // This might look something like:
-//                presenter.setPage(newPage)
-//            }
+//            onSignInWithQrCode = ::onSignInWithQrCode,
+            onPageChange = { newPage -> presenter.setPage(newPage) }
         )
     }
 }
