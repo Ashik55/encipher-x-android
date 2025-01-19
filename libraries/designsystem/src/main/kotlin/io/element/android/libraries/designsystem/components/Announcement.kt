@@ -22,10 +22,13 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.unit.dp
 import io.element.android.compound.theme.ElementTheme
 import io.element.android.compound.tokens.generated.CompoundIcons
+import io.element.android.libraries.designsystem.R
 import io.element.android.libraries.designsystem.preview.ElementPreview
 import io.element.android.libraries.designsystem.preview.PreviewsDayNight
 import io.element.android.libraries.designsystem.theme.components.Button
@@ -91,7 +94,7 @@ private fun ActionableAnnouncement(
                     {
                         Icon(
                             modifier = Modifier.clickable(onClick = onDismissClick),
-                            imageVector = CompoundIcons.Close(),
+                            imageVector = ImageVector.vectorResource(id = R.drawable.ic_dialog_close),
                             contentDescription = stringResource(CommonStrings.action_close)
                         )
                     }
