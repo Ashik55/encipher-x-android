@@ -47,7 +47,10 @@ import kotlinx.coroutines.launch
 import kotlinx.serialization.json.contentOrNull
 import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
+import timber.log.Timber
 import java.util.UUID
+
+private const val TAG = "CallScreen"
 
 class CallScreenPresenter @AssistedInject constructor(
     @Assisted private val callType: CallType,
@@ -83,6 +86,7 @@ class CallScreenPresenter @AssistedInject constructor(
         val languageTag = languageTagProvider.provideLanguageTag()
         val theme = if (ElementTheme.isLightTheme) "light" else "dark"
         DisposableEffect(Unit) {
+            Timber.tag(TAG).d("Initializing call screen")
             coroutineScope.launch {
                 // Sets the call as joined
                 activeCallManager.joinedCall(callType)
@@ -95,6 +99,7 @@ class CallScreenPresenter @AssistedInject constructor(
                 )
             }
             onDispose {
+                Timber.tag(TAG).d("Disposing call screen")
                 activeCallManager.hungUpCall(callType)
             }
         }
@@ -152,6 +157,7 @@ class CallScreenPresenter @AssistedInject constructor(
         fun handleEvents(event: CallScreenEvents) {
             when (event) {
                 is CallScreenEvents.Hangup -> {
+                    Timber.tag(TAG).i("User initiated hangup")
                     val widgetId = callWidgetDriver.value?.id
                     val interceptor = messageInterceptor.value
                     if (widgetId != null && interceptor != null && isJoinedCall) {
@@ -168,6 +174,7 @@ class CallScreenPresenter @AssistedInject constructor(
                     messageInterceptor.value = event.widgetMessageInterceptor
                 }
                 is CallScreenEvents.OnWebViewError -> {
+                    Timber.tag(TAG).e("WebView error: ${event.description}")
                     if (!ignoreWebViewError) {
                         webViewError = event.description.orEmpty()
                     }

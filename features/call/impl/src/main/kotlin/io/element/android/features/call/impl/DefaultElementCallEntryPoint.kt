@@ -18,7 +18,10 @@ import io.element.android.libraries.di.AppScope
 import io.element.android.libraries.di.ApplicationContext
 import io.element.android.libraries.matrix.api.core.EventId
 import io.element.android.libraries.matrix.api.core.UserId
+import timber.log.Timber
 import javax.inject.Inject
+
+private const val TAG = "CallEntry"
 
 @ContributesBinding(AppScope::class)
 class DefaultElementCallEntryPoint @Inject constructor(
@@ -32,6 +35,7 @@ class DefaultElementCallEntryPoint @Inject constructor(
     }
 
     override fun startCall(callType: CallType, isAudioCall: Boolean) {
+        Timber.tag(TAG).i("Starting call of type: $callType")
         context.startActivity(IntentProvider.createIntent(context, callType, isAudioCall))
     }
 
@@ -45,6 +49,7 @@ class DefaultElementCallEntryPoint @Inject constructor(
         timestamp: Long,
         notificationChannelId: String,
     ) {
+        Timber.tag(TAG).i("Handling incoming call from: $senderId in room: ${callType.roomId}")
         val incomingCallNotificationData = CallNotificationData(
             sessionId = callType.sessionId,
             roomId = callType.roomId,

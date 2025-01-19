@@ -47,6 +47,8 @@ import io.element.android.libraries.designsystem.theme.components.TopAppBar
 import io.element.android.libraries.ui.strings.CommonStrings
 import timber.log.Timber
 
+private const val TAG = "CallWebView"
+
 typealias RequestPermissionCallback = (Array<String>) -> Unit
 
 interface CallScreenNavigator {
@@ -172,6 +174,7 @@ private fun WebView.setup(
     userAgent: String,
     onPermissionsRequested: (PermissionRequest) -> Unit,
 ) {
+    Timber.tag(TAG).d("Setting up WebView with userAgent: $userAgent")
     layoutParams = ViewGroup.LayoutParams(
         ViewGroup.LayoutParams.MATCH_PARENT,
         ViewGroup.LayoutParams.MATCH_PARENT
@@ -191,6 +194,7 @@ private fun WebView.setup(
 
     webChromeClient = object : WebChromeClient() {
         override fun onPermissionRequest(request: PermissionRequest) {
+            Timber.tag(TAG).d("WebView permission request: ${request.resources.joinToString()}")
             onPermissionsRequested(request)
         }
 

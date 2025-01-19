@@ -32,6 +32,9 @@ import timber.log.Timber
 /**
  * A foreground service that shows a notification for an ongoing call while the UI is in background.
  */
+
+private const val TAG = "CallService"
+
 class CallForegroundService : Service() {
     companion object {
         fun start(context: Context) {
@@ -53,6 +56,8 @@ class CallForegroundService : Service() {
 
     override fun onCreate() {
         super.onCreate()
+
+        Timber.tag(TAG).d("Starting call foreground service")
 
         notificationManagerCompat = NotificationManagerCompat.from(this)
 
@@ -87,6 +92,8 @@ class CallForegroundService : Service() {
 
     override fun onDestroy() {
         super.onDestroy()
+
+        Timber.tag(TAG).d("Destroying call foreground service")
 
         stopForeground(STOP_FOREGROUND_REMOVE)
     }

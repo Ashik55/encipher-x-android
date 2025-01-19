@@ -29,12 +29,16 @@ import io.element.android.libraries.matrix.api.core.SessionId
 import io.element.android.libraries.matrix.api.core.UserId
 import io.element.android.libraries.matrix.ui.media.ImageLoaderHolder
 import io.element.android.libraries.push.api.notifications.NotificationBitmapLoader
+import timber.log.Timber
 import javax.inject.Inject
 import kotlin.time.Duration.Companion.seconds
 
 /**
  * Creates a notification for a ringing call.
  */
+
+private const val TAG = "CallNotification"
+
 class RingingCallNotificationCreator @Inject constructor(
     @ApplicationContext private val context: Context,
     private val matrixClientProvider: MatrixClientProvider,
@@ -64,7 +68,14 @@ class RingingCallNotificationCreator @Inject constructor(
         notificationChannelId: String,
         timestamp: Long,
     ): Notification? {
-        val matrixClient = matrixClientProvider.getOrRestore(sessionId).getOrNull() ?: return null
+//        val matrixClient = matrixClientProvider.getOrRestore(sessionId).getOrNull() ?: return null
+        val matrixClient = matrixClientProvider.getOrRestore(sessionId).getOrNull() ?: run {
+            Timber.tag(TAG).e("Failed to get Matrix client for session: $sessionId")
+            return null
+        }
+
+        Timber.tag(TAG).i("Creating ringing call notification for room: $roomId")
+
         val imageLoader = imageLoaderHolder.get(matrixClient)
         val largeIcon = notificationBitmapLoader.getUserIcon(roomAvatarUrl, imageLoader)
 
