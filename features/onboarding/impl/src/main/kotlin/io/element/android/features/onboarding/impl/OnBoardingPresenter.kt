@@ -16,7 +16,6 @@ import androidx.compose.runtime.setValue
 import io.element.android.appconfig.OnBoardingConfig
 import io.element.android.libraries.architecture.Presenter
 import io.element.android.libraries.core.meta.BuildMeta
-import io.element.android.libraries.core.meta.BuildType
 import io.element.android.libraries.featureflag.api.FeatureFlagService
 import io.element.android.libraries.featureflag.api.FeatureFlags
 import javax.inject.Inject
@@ -36,16 +35,16 @@ class OnBoardingPresenter @Inject constructor(
         val canLoginWithQrCode by produceState(initialValue = false) {
             value = featureFlagService.isFeatureEnabled(FeatureFlags.QrCodeLogin)
         }
-
         return OnBoardingState(
-            isDebugBuild = buildMeta.buildType != BuildType.RELEASE,
             productionApplicationName = buildMeta.productionApplicationName,
             canLoginWithQrCode = canLoginWithQrCode,
             canCreateAccount = OnBoardingConfig.CAN_CREATE_ACCOUNT,
+            //For Onboarding Pages
             currentPage = _currentPage
         )
     }
 
+    //For Onboarding Pages
     fun setPage(page: Int) {
         _currentPage = page.coerceIn(0, 3) // Ensure page is between 0 and 3
     }

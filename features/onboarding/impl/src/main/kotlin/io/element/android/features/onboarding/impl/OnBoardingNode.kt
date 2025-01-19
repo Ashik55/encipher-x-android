@@ -40,10 +40,6 @@ class OnBoardingNode @AssistedInject constructor(
         plugins<OnBoardingEntryPoint.Callback>().forEach { it.onSignInWithQrCode() }
     }
 
-    private fun onOpenDeveloperSettings() {
-        plugins<OnBoardingEntryPoint.Callback>().forEach { it.onOpenDeveloperSettings() }
-    }
-
     private fun onReportProblem() {
         plugins<OnBoardingEntryPoint.Callback>().forEach { it.onReportProblem() }
     }
@@ -55,12 +51,16 @@ class OnBoardingNode @AssistedInject constructor(
             state = state,
             modifier = modifier,
             onSignIn = ::onSignIn,
-//            onOpenDeveloperSettings = ::onOpenDeveloperSettings,
-            onPageChange = { newPage ->
-                // You'll need to add a method to update the page in your presenter
-                // This might look something like:
-                presenter.setPage(newPage)
-            }
+            onCreateAccount = ::onSignUp,
+            onSignInWithQrCode = ::onSignInWithQrCode,
+            onReportProblem = ::onReportProblem,
+
+            //For Onboarding pages
+//            onPageChange = { newPage ->
+//                // You'll need to add a method to update the page in your presenter
+//                // This might look something like:
+//                presenter.setPage(newPage)
+//            }
         )
     }
 }
