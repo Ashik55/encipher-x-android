@@ -68,6 +68,7 @@ class RingingCallNotificationCreator @Inject constructor(
         notificationChannelId: String,
         timestamp: Long,
     ): Notification? {
+        Timber.tag(TAG).i("createNotification called with sessionId: $sessionId, roomId: $roomId, eventId: $eventId, senderId: $senderId, roomName: $roomName, senderDisplayName: $senderDisplayName, roomAvatarUrl: $roomAvatarUrl, notificationChannelId: $notificationChannelId, timestamp: $timestamp")
 //        val matrixClient = matrixClientProvider.getOrRestore(sessionId).getOrNull() ?: return null
         val matrixClient = matrixClientProvider.getOrRestore(sessionId).getOrNull() ?: run {
             Timber.tag(TAG).e("Failed to get Matrix client for session: $sessionId")
