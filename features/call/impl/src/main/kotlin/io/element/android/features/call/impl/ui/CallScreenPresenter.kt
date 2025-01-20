@@ -213,6 +213,7 @@ class CallScreenPresenter @AssistedInject constructor(
                         languageTag = languageTag,
                         theme = theme,
                     ).getOrThrow()
+                    Timber.tag(TAG).d("Generated call URL: ${result.url}")
                     callWidgetDriver.value = result.driver
                     result.url
                 }

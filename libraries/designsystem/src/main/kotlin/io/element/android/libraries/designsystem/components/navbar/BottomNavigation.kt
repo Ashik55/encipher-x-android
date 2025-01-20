@@ -16,17 +16,16 @@ import io.element.android.compound.theme.ElementTheme
 import io.element.android.libraries.designsystem.R
 import io.element.android.libraries.designsystem.preview.ElementPreview
 import io.element.android.libraries.designsystem.preview.PreviewsDayNight
-import io.element.android.libraries.designsystem.theme.components.Icon
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.size
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.draw.blur
+import io.element.android.libraries.designsystem.theme.components.Icon
 
 enum class BottomNavRoute {
     Home,
-//    Group,
     Settings
 }
 
@@ -42,7 +41,7 @@ fun BottomNavBar(
                 .matchParentSize()
                 .blur(radius = 25.dp)
                 .background(
-                    if(ElementTheme.isLightTheme)
+                    if (ElementTheme.isLightTheme)
                         Color.White.copy(alpha = 0.99f)
                     else
                         Color(0xFF11181C).copy(alpha = 0.99f)
@@ -97,8 +96,8 @@ fun BottomNavBar(
 @Composable
 internal fun BottomNavBarPreview() = ElementPreview {
     BottomNavBar(
-        modifier = Modifier,
         currentRoute = BottomNavRoute.Home,
         onRouteSelect = {}
     )
 }
+

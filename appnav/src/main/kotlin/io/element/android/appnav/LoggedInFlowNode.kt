@@ -32,6 +32,7 @@ import com.bumble.appyx.navmodel.backstack.BackStack.State.CREATED
 import com.bumble.appyx.navmodel.backstack.BackStack.State.STASHED
 import com.bumble.appyx.navmodel.backstack.BackStackElement
 import com.bumble.appyx.navmodel.backstack.BackStackElements
+import com.bumble.appyx.navmodel.backstack.activeElement
 import com.bumble.appyx.navmodel.backstack.operation.BackStackOperation
 import com.bumble.appyx.navmodel.backstack.operation.Push
 import com.bumble.appyx.navmodel.backstack.operation.pop
@@ -66,6 +67,9 @@ import io.element.android.libraries.architecture.BackstackView
 import io.element.android.libraries.architecture.BaseFlowNode
 import io.element.android.libraries.architecture.createNode
 import io.element.android.libraries.architecture.waitForNavTargetAttached
+import io.element.android.libraries.designsystem.components.navbar.BottomNavBar
+import io.element.android.libraries.designsystem.components.navbar.BottomNavRoute
+import io.element.android.libraries.designsystem.theme.components.Scaffold
 import io.element.android.libraries.designsystem.utils.snackbar.SnackbarDispatcher
 import io.element.android.libraries.di.AppScope
 import io.element.android.libraries.di.SessionScope
@@ -94,6 +98,8 @@ import kotlinx.parcelize.Parcelize
 import timber.log.Timber
 import java.util.Optional
 import java.util.UUID
+
+private const val TAG = "LoggedInFlowNode"
 
 @ContributesNode(SessionScope::class)
 class LoggedInFlowNode @AssistedInject constructor(
@@ -266,6 +272,7 @@ class LoggedInFlowNode @AssistedInject constructor(
     }
 
     override fun resolve(navTarget: NavTarget, buildContext: BuildContext): Node {
+        Timber.tag(TAG).d("Resolving nav target: $navTarget")
         return when (navTarget) {
             NavTarget.Placeholder -> createNode<PlaceholderNode>(buildContext)
             NavTarget.LoggedInPermanent -> {
@@ -307,6 +314,7 @@ class LoggedInFlowNode @AssistedInject constructor(
                     }
 
                     override fun onRoomDirectorySearchClick() {
+                        Timber.tag("$TAG:RoomList").d("Room directory search clicked")
                         backstack.push(NavTarget.RoomDirectorySearch)
                     }
 
@@ -426,9 +434,11 @@ class LoggedInFlowNode @AssistedInject constructor(
                     .build()
             }
             NavTarget.RoomDirectorySearch -> {
+                Timber.tag("$TAG:Search").d("Setting up room directory search")
                 roomDirectoryEntryPoint.nodeBuilder(this, buildContext)
                     .callback(object : RoomDirectoryEntryPoint.Callback {
                         override fun onResultClick(roomDescription: RoomDescription) {
+                            Timber.tag("$TAG:Search").d("Search result clicked: ${roomDescription.roomId}")
                             backstack.push(
                                 NavTarget.Room(
                                     roomIdOrAlias = roomDescription.roomId.toRoomIdOrAlias(),
@@ -530,14 +540,50 @@ class LoggedInFlowNode @AssistedInject constructor(
 
     @Composable
     override fun View(modifier: Modifier) {
-        Box(modifier = modifier) {
-            val ftueState by ftueService.state.collectAsState()
-            BackstackView()
-            if (ftueState is FtueState.Complete) {
-                PermanentChild(permanentNavModel = permanentNavModel, navTarget = NavTarget.LoggedInPermanent)
+        val navState by backstack.elements.collectAsState()
+        val shouldShowBottomBar = when (val target = navState.lastOrNull { it.targetState == ACTIVE }?.key?.navTarget) {
+            is NavTarget.RoomList -> true
+            is NavTarget.Settings -> target.initialElement == PreferencesEntryPoint.InitialTarget.Root
+            is NavTarget.RoomDirectorySearch -> {
+                Timber.tag("$TAG:UI").d("Room directory search active, hiding bottom bar")
+                false
+            }
+            else -> false
+        }.also {
+            Timber.tag("$TAG:UI").d("Bottom bar visibility: $it for target: ${navState.lastOrNull { it.targetState == ACTIVE }?.key?.navTarget}")
+        }
+
+        val currentRoute = when (navState.lastOrNull { it.targetState == ACTIVE }?.key?.navTarget) {
+            is NavTarget.RoomList -> BottomNavRoute.Home
+            is NavTarget.Settings -> BottomNavRoute.Settings
+            else -> BottomNavRoute.Home
+        }
+
+        Scaffold(
+            bottomBar = {
+                if (shouldShowBottomBar) {
+                    BottomNavBar(
+                        currentRoute = currentRoute,
+                        onRouteSelect = { route ->
+                            when (route) {
+                                BottomNavRoute.Home -> backstack.push(NavTarget.RoomList)
+                                BottomNavRoute.Settings -> backstack.push(NavTarget.Settings())
+                            }
+                        }
+                    )
+                }
+            }
+        ) { paddingValues ->
+            Box(modifier = modifier) {
+                val ftueState by ftueService.state.collectAsState()
+                BackstackView()
+                if (ftueState is FtueState.Complete) {
+                    PermanentChild(permanentNavModel = permanentNavModel, navTarget = NavTarget.LoggedInPermanent)
+                }
             }
         }
     }
+
 
     @ContributesNode(AppScope::class)
     class PlaceholderNode @AssistedInject constructor(
@@ -573,3 +619,4 @@ private class AttachRoomOperation(
         }
     }
 }
+
