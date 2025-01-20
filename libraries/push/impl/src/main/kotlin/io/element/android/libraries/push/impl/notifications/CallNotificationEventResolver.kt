@@ -17,6 +17,7 @@ import io.element.android.libraries.push.impl.R
 import io.element.android.libraries.push.impl.notifications.model.NotifiableEvent
 import io.element.android.libraries.push.impl.notifications.model.NotifiableRingingCallEvent
 import io.element.android.services.toolbox.api.strings.StringProvider
+import timber.log.Timber
 import javax.inject.Inject
 
 /**
@@ -33,15 +34,23 @@ interface CallNotificationEventResolver {
     fun resolveEvent(sessionId: SessionId, notificationData: NotificationData, forceNotify: Boolean = false): NotifiableEvent?
 }
 
+private const val TAG = "Call Notification Msg"
+
 @ContributesBinding(AppScope::class)
 class DefaultCallNotificationEventResolver @Inject constructor(
     private val stringProvider: StringProvider,
 ) : CallNotificationEventResolver {
     override fun resolveEvent(sessionId: SessionId, notificationData: NotificationData, forceNotify: Boolean): NotifiableEvent? {
+        Timber.tag(TAG).d("Resolving call event - sessionId: $sessionId, forceNotify: $forceNotify")
         val content = notificationData.content as? NotificationContent.MessageLike.CallNotify ?: return null
+        Timber.tag(TAG).d("Notification content type: ${notificationData.content::class.simpleName}")
         return notificationData.run {
+
+            val shouldRing = NotifiableRingingCallEvent.shouldRing(content.type, timestamp)
+            Timber.tag(TAG).d("Should ring: $shouldRing, timestamp: $timestamp, type: ${content.type}")
+
             if (NotifiableRingingCallEvent.shouldRing(content.type, timestamp) && !forceNotify) {
-                NotifiableRingingCallEvent(
+                val ringingEvent = NotifiableRingingCallEvent(
                     sessionId = sessionId,
                     roomId = roomId,
                     eventId = eventId,
@@ -58,9 +67,11 @@ class DefaultCallNotificationEventResolver @Inject constructor(
                     senderId = content.senderId,
                     senderAvatarUrl = senderAvatarUrl,
                 )
+                Timber.tag(TAG).d("Created ringing event: $ringingEvent")
+                ringingEvent
             } else {
                 // Create a simple message notification event
-                buildNotifiableMessageEvent(
+                val messageEvent = buildNotifiableMessageEvent(
                     sessionId = sessionId,
                     senderId = content.senderId,
                     roomId = roomId,
@@ -75,6 +86,8 @@ class DefaultCallNotificationEventResolver @Inject constructor(
                     senderAvatarPath = senderAvatarUrl,
                     type = EventType.CALL_NOTIFY,
                 )
+                Timber.tag(TAG).d("Created message event: $messageEvent")
+                messageEvent
             }
         }
     }
