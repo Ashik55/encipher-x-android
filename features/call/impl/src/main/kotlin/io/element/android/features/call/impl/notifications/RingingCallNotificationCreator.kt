@@ -121,6 +121,8 @@ class RingingCallNotificationCreator @Inject constructor(
 
         // TODO use a fallback ringtone if the default ringtone is not available
         val ringtoneUri = runCatching { RingtoneManager.getActualDefaultRingtoneUri(context, RingtoneManager.TYPE_RINGTONE) }.getOrNull()
+        Timber.d("Creating ring channel with URI: $ringtoneUri")
+
         return NotificationCompat.Builder(context, notificationChannelId)
             .setSmallIcon(CommonDrawables.ic_notification_small)
             .setPriority(NotificationCompat.PRIORITY_MAX)
