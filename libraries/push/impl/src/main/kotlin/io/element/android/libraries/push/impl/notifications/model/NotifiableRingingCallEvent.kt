@@ -37,7 +37,7 @@ data class NotifiableRingingCallEvent(
             val timeout = 10.seconds.inWholeMilliseconds
             val elapsed = Instant.now().toEpochMilli() - timestamp
             // Only ring if the type is RING and the elapsed time is less than the timeout
-            return callNotifyType == CallNotifyType.RING && elapsed < timeout
+            return (callNotifyType == CallNotifyType.RING || callNotifyType == CallNotifyType.NOTIFY) && elapsed < timeout
         }
     }
 }
