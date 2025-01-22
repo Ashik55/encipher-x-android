@@ -54,6 +54,7 @@ private const val TAG = "CallScreen"
 
 class CallScreenPresenter @AssistedInject constructor(
     @Assisted private val callType: CallType,
+    @Assisted private val isAudioCall: Boolean,
     @Assisted private val navigator: CallScreenNavigator,
     private val callWidgetProvider: CallWidgetProvider,
     userAgentProvider: UserAgentProvider,
@@ -67,7 +68,7 @@ class CallScreenPresenter @AssistedInject constructor(
 ) : Presenter<CallScreenState> {
     @AssistedFactory
     interface Factory {
-        fun create(callType: CallType, navigator: CallScreenNavigator): CallScreenPresenter
+        fun create(callType: CallType, isAudioCall: Boolean, navigator: CallScreenNavigator): CallScreenPresenter
     }
 
     private val isInWidgetMode = callType is CallType.RoomCall
@@ -212,10 +213,11 @@ class CallScreenPresenter @AssistedInject constructor(
                         clientId = UUID.randomUUID().toString(),
                         languageTag = languageTag,
                         theme = theme,
+                        callType = if (isAudioCall) "audio" else "video"
                     ).getOrThrow()
                     Timber.tag(TAG).d("Generated call URL: ${result.url}")
                     callWidgetDriver.value = result.driver
-                    result.url
+                    result.url + "&call_type=${if (isAudioCall) "audio" else "video"}"
                 }
             }
         }

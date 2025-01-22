@@ -205,6 +205,7 @@ class ElementCallActivity :
         print(isAudioCall)
 
         val currentCallType = webViewTarget.value
+
         if (currentCallType == null) {
             if (callType == null) {
                 Timber.tag(loggerTag.value).d("Re-opened the activity but we have no url to load or a cached one, finish the activity")
@@ -212,7 +213,7 @@ class ElementCallActivity :
             } else {
                 Timber.tag(loggerTag.value).d("Set the call type and create the presenter")
                 webViewTarget.value = callType
-                presenter = presenterFactory.create(callType, this)
+                presenter = presenterFactory.create(callType, isAudioCall, this)
             }
         } else {
             if (callType == null) {

@@ -32,6 +32,7 @@ class DefaultCallWidgetProvider @Inject constructor(
         clientId: String,
         languageTag: String?,
         theme: String?,
+        callType: String?
     ): Result<CallWidgetProvider.GetWidgetResult> = runCatching {
         val matrixClient = matrixClientsProvider.getOrRestore(sessionId).getOrThrow()
         val room = matrixClient.getRoom(roomId) ?: error("Room not found")
@@ -44,7 +45,9 @@ class DefaultCallWidgetProvider @Inject constructor(
             clientId = clientId,
             languageTag = languageTag,
             theme = theme,
-        ).getOrThrow()
+        ).getOrThrow().let { url ->
+            if (callType != null) "$url&call_type=$callType" else url
+        }
         CallWidgetProvider.GetWidgetResult(
             driver = room.getWidgetDriver(widgetSettings).getOrThrow(),
             url = callUrl
