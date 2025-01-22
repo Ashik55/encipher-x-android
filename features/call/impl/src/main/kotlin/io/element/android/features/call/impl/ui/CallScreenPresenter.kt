@@ -217,7 +217,7 @@ class CallScreenPresenter @AssistedInject constructor(
                     ).getOrThrow()
                     Timber.tag(TAG).d("Generated call URL: ${result.url}")
                     callWidgetDriver.value = result.driver
-                    result.url + "&call_type=${if (isAudioCall) "audio" else "video"}"
+                    result.url
                 }
             }
         }
