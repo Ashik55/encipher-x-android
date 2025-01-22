@@ -46,7 +46,7 @@ class DefaultCallWidgetProvider @Inject constructor(
             languageTag = languageTag,
             theme = theme,
         ).getOrThrow().let { url ->
-            if (callType != null) "$url&call_type=$callType" else url
+            "$url&call_type=$callType"
         }
         CallWidgetProvider.GetWidgetResult(
             driver = room.getWidgetDriver(widgetSettings).getOrThrow(),
