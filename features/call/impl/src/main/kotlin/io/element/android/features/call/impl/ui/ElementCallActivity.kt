@@ -75,7 +75,7 @@ class ElementCallActivity :
     private val requestPermissionsLauncher = registerPermissionResultLauncher()
 
     private var isDarkMode = false
-    private var isAudioCall = false
+
     private val webViewTarget = mutableStateOf<CallType?>(null)
 
     private var eventSink: ((CallScreenEvents) -> Unit)? = null
