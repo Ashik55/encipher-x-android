@@ -20,6 +20,7 @@ import io.element.android.libraries.usersearch.api.UserSearchResultState
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
+import timber.log.Timber
 import javax.inject.Inject
 
 @ContributesBinding(SessionScope::class)
@@ -28,21 +29,42 @@ class MatrixUserRepository @Inject constructor(
     private val dataSource: UserListDataSource
 ) : UserRepository {
     override fun search(query: String): Flow<UserSearchResultState> = flow {
-        val shouldQueryProfile = MatrixPatterns.isUserId(query) && !client.isMe(UserId(query))
-        val shouldFetchSearchResults = query.length >= MINIMUM_SEARCH_LENGTH
-        // If the search term is a MXID that's not ours, we'll show a 'fake' result for that user, then update it when we get search results.
+        val processedQuery = when {
+            query.startsWith("@") && query.contains(":") -> query  // Full MXID
+            query.startsWith("@") -> "$query:dev.enciph-er.com"      // Only @username
+            query.isNotEmpty() -> "@$query:dev.enciph-er.com"        // Just username
+            else -> query
+        }
+
+        Timber.d("Original query: $query")
+        Timber.d("Processed query: $processedQuery")
+
+        val shouldQueryProfile = processedQuery.startsWith("@") &&
+            MatrixPatterns.isUserId(processedQuery) &&
+            !client.isMe(UserId(processedQuery))
+
+        val shouldFetchSearchResults = processedQuery.length >= MINIMUM_SEARCH_LENGTH
+
         val fakeSearchResult = if (shouldQueryProfile) {
-            UserSearchResult(MatrixUser(UserId(query)))
+            UserSearchResult(MatrixUser(UserId(processedQuery)))
         } else {
             null
         }
+
         if (shouldQueryProfile || shouldFetchSearchResults) {
-            emit(UserSearchResultState(isSearching = shouldFetchSearchResults, results = listOfNotNull(fakeSearchResult)))
+            emit(UserSearchResultState(
+                isSearching = shouldFetchSearchResults,
+                results = listOfNotNull(fakeSearchResult)
+            ))
+
+            if (shouldFetchSearchResults) {
+                val results = fetchSearchResults(processedQuery, shouldQueryProfile)
+                emit(results)
+            }
         }
-        if (shouldFetchSearchResults) {
-            val results = fetchSearchResults(query, shouldQueryProfile)
-            emit(results)
-        }
+
+        Timber.d("Should fetch search results: $shouldFetchSearchResults")
+
     }
 
     private suspend fun fetchSearchResults(query: String, shouldQueryProfile: Boolean): UserSearchResultState {
@@ -73,3 +95,4 @@ class MatrixUserRepository @Inject constructor(
         private const val MAXIMUM_SEARCH_RESULTS = 10L
     }
 }
+
