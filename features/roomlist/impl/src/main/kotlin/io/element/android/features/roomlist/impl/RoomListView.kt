@@ -25,6 +25,7 @@ import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.tooling.preview.PreviewParameter
+import androidx.compose.ui.unit.dp
 import io.element.android.compound.tokens.generated.CompoundIcons
 import io.element.android.features.leaveroom.api.LeaveRoomView
 import io.element.android.features.networkmonitor.api.ui.ConnectivityIndicatorContainer
@@ -55,7 +56,7 @@ fun RoomListView(
     onRoomSettingsClick: (roomId: RoomId) -> Unit,
     onMenuActionClick: (RoomListMenuAction) -> Unit,
     onRoomDirectorySearchClick: () -> Unit,
-    onBottomNavigation: (BottomNavRoute) -> Unit,
+//    onBottomNavigation: (BottomNavRoute) -> Unit,
     onMigrateToNativeSlidingSyncClick: () -> Unit,
     modifier: Modifier = Modifier,
     acceptDeclineInviteView: @Composable () -> Unit,
@@ -85,7 +86,7 @@ fun RoomListView(
                 onMenuActionClick = onMenuActionClick,
                 onMigrateToNativeSlidingSyncClick = onMigrateToNativeSlidingSyncClick,
                 modifier = Modifier.padding(top = topPadding),
-                onBottomNavigation = onBottomNavigation,
+//                onBottomNavigation = onBottomNavigation,
             )
             // This overlaid view will only be visible when state.displaySearchResults is true
             RoomListSearchView(
@@ -116,7 +117,7 @@ private fun RoomListScaffold(
     onMenuActionClick: (RoomListMenuAction) -> Unit,
     onMigrateToNativeSlidingSyncClick: () -> Unit,
     modifier: Modifier = Modifier,
-    onBottomNavigation: (BottomNavRoute) -> Unit,
+//    onBottomNavigation: (BottomNavRoute) -> Unit,
 ) {
     fun onRoomClick(room: RoomListRoomSummary) {
         onRoomClick(room.roomId)
@@ -142,12 +143,12 @@ private fun RoomListScaffold(
                 filtersState = state.filtersState,
             )
         },
-        bottomBar = {
-            BottomNavBar(
-                currentRoute = BottomNavRoute.Home,
-                onRouteSelect = onBottomNavigation
-            )
-        },
+//        bottomBar = {
+//            BottomNavBar(
+//                currentRoute = BottomNavRoute.Home,
+//                onRouteSelect = onBottomNavigation
+//            )
+//        },
         content = { padding ->
             RoomListContentView(
                 contentState = state.contentState,
@@ -168,7 +169,8 @@ private fun RoomListScaffold(
                 FloatingActionButton(
                     // FIXME align on Design system theme
                     containerColor = Color(0xFF0A8741),
-                    onClick = onCreateRoomClick
+                    onClick = onCreateRoomClick,
+                    modifier = Modifier.padding(bottom = 80.dp)
                 ) {
                     Icon(
                         // Note cannot use Icons.Outlined.EditSquare, it does not exist :/
@@ -200,6 +202,6 @@ internal fun RoomListViewPreview(@PreviewParameter(RoomListStateProvider::class)
         onRoomDirectorySearchClick = {},
         acceptDeclineInviteView = {},
         onMigrateToNativeSlidingSyncClick = {},
-        onBottomNavigation = {},
+//        onBottomNavigation = {},
     )
 }

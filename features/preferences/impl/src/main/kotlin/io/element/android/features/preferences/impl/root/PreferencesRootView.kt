@@ -64,20 +64,20 @@ fun PreferencesRootView(
     onOpenBlockedUsers: () -> Unit,
     onSignOutClick: () -> Unit,
     onDeactivateClick: () -> Unit,
-    onBottomNavigation: (BottomNavRoute) -> Unit,
+//    onBottomNavigation: (BottomNavRoute) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val snackbarHostState = rememberSnackbarHostState(snackbarMessage = state.snackbarMessage)
 
-    Scaffold(
-        modifier = modifier.fillMaxWidth(),
-        bottomBar = {
-            BottomNavBar(
-                currentRoute = BottomNavRoute.Settings,
-                onRouteSelect = onBottomNavigation
-            )
-        }
-    ) { paddingValues ->
+//    Scaffold(
+//        modifier = modifier.fillMaxWidth(),
+//        bottomBar = {
+//            BottomNavBar(
+//                currentRoute = BottomNavRoute.Settings,
+//                onRouteSelect = onBottomNavigation
+//            )
+//        }
+//    ) { paddingValues ->
 
     // Include pref from other modules
     PreferencePage(
@@ -132,7 +132,7 @@ fun PreferencesRootView(
             }
         )
     }
-    }
+//    }
 }
 
 @Composable
@@ -324,6 +324,6 @@ private fun ContentToPreview(matrixUser: MatrixUser) {
         onOpenBlockedUsers = {},
         onSignOutClick = {},
         onDeactivateClick = {},
-        onBottomNavigation = {},
+//        onBottomNavigation = {},
     )
 }

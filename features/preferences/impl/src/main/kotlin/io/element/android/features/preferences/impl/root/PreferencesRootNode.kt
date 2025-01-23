@@ -47,17 +47,17 @@ class PreferencesRootNode @AssistedInject constructor(
         fun onOpenBlockedUsers()
         fun onSignOutClick()
         fun onOpenAccountDeactivation()
-        fun onNavigateToHome()
+//        fun onNavigateToHome()
 //        fun onNavigateToGroup()
     }
 
-    private fun onBottomNavigation(route: BottomNavRoute) {
-        when (route) {
-            BottomNavRoute.Home -> plugins<Callback>().forEach { it.onNavigateToHome() }
-//            BottomNavRoute.Group -> plugins<Callback>().forEach { it.onNavigateToGroup() }
-            BottomNavRoute.Settings -> Unit
-        }
-    }
+//    private fun onBottomNavigation(route: BottomNavRoute) {
+//        when (route) {
+//            BottomNavRoute.Home -> plugins<Callback>().forEach { it.onNavigateToHome() }
+////            BottomNavRoute.Group -> plugins<Callback>().forEach { it.onNavigateToGroup() }
+//            BottomNavRoute.Settings -> Unit
+//        }
+//    }
 
     private fun onOpenBugReport() {
         plugins<Callback>().forEach { it.onOpenBugReport() }
@@ -141,7 +141,7 @@ class PreferencesRootNode @AssistedInject constructor(
             onOpenLockScreenSettings = this::onOpenLockScreenSettings,
             onOpenUserProfile = this::onOpenUserProfile,
             onOpenBlockedUsers = this::onOpenBlockedUsers,
-            onBottomNavigation = this::onBottomNavigation,
+//            onBottomNavigation = this::onBottomNavigation,
             onSignOutClick = {
                 if (state.directLogoutState.canDoDirectSignOut) {
                     state.directLogoutState.eventSink(DirectLogoutEvents.Logout(ignoreSdkError = false))

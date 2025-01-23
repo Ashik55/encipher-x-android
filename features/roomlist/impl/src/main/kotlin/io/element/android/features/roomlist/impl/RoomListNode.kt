@@ -51,13 +51,13 @@ class RoomListNode @AssistedInject constructor(
         )
     }
 
-    private fun onBottomNavigation(route: BottomNavRoute) {
-        when (route) {
-            BottomNavRoute.Home -> Unit
-//            BottomNavRoute.Group -> onCreateRoomClick()
-            BottomNavRoute.Settings -> onOpenSettings()
-        }
-    }
+//    private fun onBottomNavigation(route: BottomNavRoute) {
+//        when (route) {
+//            BottomNavRoute.Home -> Unit
+////            BottomNavRoute.Group -> onCreateRoomClick()
+//            BottomNavRoute.Settings -> onOpenSettings()
+//        }
+//    }
 
     private fun onRoomClick(roomId: RoomId) {
         plugins<RoomListEntryPoint.Callback>().forEach { it.onRoomClick(roomId) }
@@ -113,7 +113,7 @@ class RoomListNode @AssistedInject constructor(
             onRoomSettingsClick = this::onRoomSettingsClick,
             onMenuActionClick = { onMenuActionClick(activity, it) },
             onRoomDirectorySearchClick = this::onRoomDirectorySearchClick,
-            onBottomNavigation = this::onBottomNavigation,
+//            onBottomNavigation = this::onBottomNavigation,
             onMigrateToNativeSlidingSyncClick = {
                 if (state.directLogoutState.canDoDirectSignOut) {
                     state.directLogoutState.eventSink(DirectLogoutEvents.Logout(ignoreSdkError = false))
