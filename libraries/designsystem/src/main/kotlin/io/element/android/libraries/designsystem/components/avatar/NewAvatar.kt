@@ -140,7 +140,7 @@ private fun NewInitialsAvatar(
     Box(
         modifier
             .background(
-                color = Color(0xFFA0A4AF),
+                color = Color(0xFF969AA5),
                 shape = RoundedCornerShape(50))
 //            .border(
 //                width = when {
@@ -155,8 +155,8 @@ private fun NewInitialsAvatar(
         Image(
             painter = painterResource(
                 id = when {
-                    !(isDm) -> io.element.android.libraries.designsystem.R.drawable.ic_grp_avatar_placeholder
-                    else -> io.element.android.libraries.designsystem.R.drawable.ic_avatar_placeholder
+                    !(isDm) -> io.element.android.libraries.designsystem.R.drawable.ic_grp_placeholder
+                    else -> io.element.android.libraries.designsystem.R.drawable.ic_dm_placeholder
                 }
             ),
             contentDescription = null,

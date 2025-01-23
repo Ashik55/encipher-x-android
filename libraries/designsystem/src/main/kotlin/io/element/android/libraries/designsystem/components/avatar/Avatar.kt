@@ -134,7 +134,7 @@ private fun InitialsAvatar(
     Box(
         modifier
             .background(
-                color = Color(0xFFA0A4AF),
+                color = Color(0xFF969AA5),
                 shape = RoundedCornerShape(50))
 //            .border(
 //                width = when {
@@ -160,7 +160,7 @@ private fun InitialsAvatar(
 //            color = avatarColors.foreground,
 //        )
         Image(
-            painter = painterResource(id = io.element.android.libraries.designsystem.R.drawable.ic_avatar_placeholder),
+            painter = painterResource(id = io.element.android.libraries.designsystem.R.drawable.ic_dm_placeholder),
             contentDescription = null,
             modifier = Modifier
                 .align(Alignment.Center)
