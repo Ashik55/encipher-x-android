@@ -69,7 +69,7 @@ private fun StandByCallMenuItem(
         enabled = roomCallState.canStartCall,
     ) {
         Image(
-            painter = painterResource(id = io.element.android.features.messages.impl.R.drawable.ic_video),
+            painter = painterResource(id = io.element.android.features.messages.impl.R.drawable.ic_call),
             contentDescription = null
         )
 //        Icon(
@@ -96,9 +96,9 @@ private fun OnGoingCallMenuItem(
             modifier = modifier.heightIn(min = 36.dp),
             enabled = roomCallState.canJoinCall,
         ) {
-            Icon(
+            Image(
                 modifier = Modifier.size(20.dp),
-                imageVector = CompoundIcons.VideoCallSolid(),
+                painter = painterResource(id = io.element.android.features.messages.impl.R.drawable.ic_call_join),
                 contentDescription = null
             )
             Spacer(Modifier.width(8.dp))

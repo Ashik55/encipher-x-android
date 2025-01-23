@@ -213,7 +213,7 @@ class ElementCallActivity :
             } else {
                 Timber.tag(loggerTag.value).d("Set the call type and create the presenter")
                 webViewTarget.value = callType
-                presenter = presenterFactory.create(callType, isAudioCall, this)
+                presenter = presenterFactory.create(callType, !isAudioCall, this)
             }
         } else {
             if (callType == null) {
