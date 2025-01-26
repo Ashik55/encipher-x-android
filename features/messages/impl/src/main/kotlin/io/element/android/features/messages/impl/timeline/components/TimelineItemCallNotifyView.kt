@@ -22,7 +22,9 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -33,6 +35,7 @@ import io.element.android.features.messages.impl.timeline.model.TimelineItem
 import io.element.android.features.messages.impl.timeline.model.event.TimelineItemCallNotifyContent
 import io.element.android.features.roomcall.api.RoomCallState
 import io.element.android.features.roomcall.api.RoomCallStateProvider
+import io.element.android.libraries.designsystem.R
 import io.element.android.libraries.designsystem.components.avatar.Avatar
 import io.element.android.libraries.designsystem.preview.ElementPreview
 import io.element.android.libraries.designsystem.preview.PreviewsDayNight
@@ -71,8 +74,8 @@ internal fun TimelineItemCallNotifyView(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Icon(
-                    modifier = Modifier.size(20.sp.toDp()),
-                    imageVector = CompoundIcons.VideoCallSolid(),
+                    modifier = Modifier.size(15.sp.toDp()),
+                    imageVector = ImageVector.vectorResource(id = R.drawable.ic_call),
                     contentDescription = null,
                     tint = ElementTheme.colors.iconSecondary,
                 )

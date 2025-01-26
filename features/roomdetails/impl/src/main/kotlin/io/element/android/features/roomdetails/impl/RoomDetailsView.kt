@@ -458,7 +458,7 @@ private fun CustomMainActionsSection(
             // TODO Improve the view depending on all the cases here?
             CustomMainActionButton(
                 title = stringResource(CommonStrings.action_call),
-                imageVector = ImageVector.vectorResource(id =  R.drawable.ic_video_call),
+                imageVector = ImageVector.vectorResource(id =  io.element.android.libraries.designsystem.R.drawable.ic_call),
                 onClick = onCall,
             )
         }
