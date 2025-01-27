@@ -19,7 +19,7 @@
   <string name="screen_room_attachment_source_gallery">"Gallery"</string>
   <string name="screen_room_attachment_source_location">"Location"</string>
   <string name="screen_room_attachment_source_poll">"Poll"</string>
-  <string name="screen_room_attachment_text_formatting">"Text Formatting"</string>
+  <string name="screen_room_attachment_text_formatting">"Formatting"</string>
   <string name="screen_room_encrypted_history_banner">"Message history is currently unavailable."</string>
   <string name="screen_room_encrypted_history_banner_unverified">"Message history is unavailable in this group. Verify this device to see your message history."</string>
   <string name="screen_room_invite_again_alert_message">"Would you like to invite them back?"</string>

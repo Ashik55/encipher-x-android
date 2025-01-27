@@ -288,48 +288,48 @@ private fun AttachmentSourcePickerMenu(
                 },
                 style = ListItemStyle.Primary,
             )
-            if (state.canShareLocation) {
-                ListItem(
-                    modifier = Modifier
-                        .weight(1f)
-                        .clickable(
-                            interactionSource = remember { MutableInteractionSource() },
-                            indication = ripple
-                        ) {
-                            state.eventSink(MessageComposerEvents.PickAttachmentSource.Location)
-                            onSendLocationClick()
-                        },
-                    headlineContent = {
-                        Column(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalAlignment = Alignment.CenterHorizontally,
-                            verticalArrangement = Arrangement.Center
-                        ) {
-                            Box(
-                                modifier = Modifier
-                                    .size(48.dp)
-                                    .background(
-                                        color = Color.Gray.copy(alpha = 0.2f),
-                                        shape = CircleShape
-                                    )
-                                    .padding(8.dp),
-                                contentAlignment = Alignment.Center
-                            ) {
-                                Image(
-                                    painter = painterResource(id = R.drawable.ic_location),
-                                    contentDescription = null,
-                                )
-                            }
-                            Spacer(modifier = Modifier.height(8.dp))
-                            Text(
-                                text = stringResource(R.string.screen_room_attachment_source_location),
-                                textAlign = TextAlign.Center
-                            )
-                        }
-                    },
-                    style = ListItemStyle.Primary,
-                )
-            }
+//            if (state.canShareLocation) {
+//                ListItem(
+//                    modifier = Modifier
+//                        .weight(1f)
+//                        .clickable(
+//                            interactionSource = remember { MutableInteractionSource() },
+//                            indication = ripple
+//                        ) {
+//                            state.eventSink(MessageComposerEvents.PickAttachmentSource.Location)
+//                            onSendLocationClick()
+//                        },
+//                    headlineContent = {
+//                        Column(
+//                            modifier = Modifier.fillMaxWidth(),
+//                            horizontalAlignment = Alignment.CenterHorizontally,
+//                            verticalArrangement = Arrangement.Center
+//                        ) {
+//                            Box(
+//                                modifier = Modifier
+//                                    .size(48.dp)
+//                                    .background(
+//                                        color = Color.Gray.copy(alpha = 0.2f),
+//                                        shape = CircleShape
+//                                    )
+//                                    .padding(8.dp),
+//                                contentAlignment = Alignment.Center
+//                            ) {
+//                                Image(
+//                                    painter = painterResource(id = R.drawable.ic_location),
+//                                    contentDescription = null,
+//                                )
+//                            }
+//                            Spacer(modifier = Modifier.height(8.dp))
+//                            Text(
+//                                text = stringResource(R.string.screen_room_attachment_source_location),
+//                                textAlign = TextAlign.Center
+//                            )
+//                        }
+//                    },
+//                    style = ListItemStyle.Primary,
+//                )
+//            }
             if (state.canCreatePoll) {
                 ListItem(
                     modifier = Modifier
@@ -372,54 +372,51 @@ private fun AttachmentSourcePickerMenu(
                     style = ListItemStyle.Primary,
                 )
             }
-        }
 
-        if (enableTextFormatting) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.Start
-            ) {
-                ListItem(
-                    modifier = Modifier
-                        .padding(bottom = 8.dp)
-                        .clickable(
-                            interactionSource = remember { MutableInteractionSource() },
-                            indication = ripple
-                        ) {
-                            state.eventSink(MessageComposerEvents.ToggleTextFormatting(enabled = true))
-                        },
-                    headlineContent = {
-                        Column(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalAlignment = Alignment.CenterHorizontally,
-                            verticalArrangement = Arrangement.Center
-                        ) {
-                            Box(
-                                modifier = Modifier
-                                    .size(48.dp)
-                                    .background(
-                                        color = Color.Gray.copy(alpha = 0.2f),
-                                        shape = CircleShape
-                                    )
-                                    .padding(8.dp),
-                                contentAlignment = Alignment.Center
+            if (enableTextFormatting) {
+                    ListItem(
+                        modifier = Modifier
+                            .padding(bottom = 8.dp)
+                            .weight(1f)
+                            .clickable(
+                                interactionSource = remember { MutableInteractionSource() },
+                                indication = ripple
                             ) {
-                                Icon(
-                                    imageVector = CompoundIcons.TextFormatting(),
-                                    contentDescription = null,
+                                state.eventSink(MessageComposerEvents.ToggleTextFormatting(enabled = true))
+                            },
+                        headlineContent = {
+                            Column(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalAlignment = Alignment.CenterHorizontally,
+                                verticalArrangement = Arrangement.Center
+                            ) {
+                                Box(
+                                    modifier = Modifier
+                                        .size(48.dp)
+                                        .background(
+                                            color = Color.Gray.copy(alpha = 0.2f),
+                                            shape = CircleShape
+                                        )
+                                        .padding(8.dp),
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    Icon(
+                                        imageVector = CompoundIcons.TextFormatting(),
+                                        contentDescription = null,
+                                    )
+                                }
+                                Spacer(modifier = Modifier.height(8.dp))
+                                Text(
+                                    text = stringResource(R.string.screen_room_attachment_text_formatting),
+                                    textAlign = TextAlign.Center
                                 )
                             }
-                            Spacer(modifier = Modifier.height(8.dp))
-                            Text(
-                                text = stringResource(R.string.screen_room_attachment_text_formatting),
-                                textAlign = TextAlign.Center
-                            )
-                        }
-                    },
-                    style = ListItemStyle.Primary,
-                )
+                        },
+                        style = ListItemStyle.Primary,
+                    )
             }
         }
+
     }
 }
 @PreviewsDayNight

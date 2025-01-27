@@ -26,9 +26,22 @@ interface PreferencesEntryPoint : FeatureEntryPoint {
 
         @Parcelize
         data object NotificationTroubleshoot : InitialTarget
+
+        @Parcelize
+        data object ScreenLock : InitialTarget
+
+        @Parcelize
+        data object AdvancedSettings : InitialTarget
+
+        @Parcelize
+        data object SignOut : InitialTarget
+
+        @Parcelize
+        data object DeactivateAccount : InitialTarget
     }
 
     data class Params(val initialElement: InitialTarget) : NodeInputs
+
     fun nodeBuilder(parentNode: Node, buildContext: BuildContext): NodeBuilder
 
     interface NodeBuilder {
@@ -41,6 +54,10 @@ interface PreferencesEntryPoint : FeatureEntryPoint {
         fun onOpenBugReport()
         fun onSecureBackupClick()
         fun onOpenRoomNotificationSettings(roomId: RoomId)
-//        fun onNavigateToGroup()
+        fun onScreenLockClick()
+        fun onAdvancedSettingsClick()
+        fun onSignOutClick()
+        fun onDeactivateAccountClick()
+        fun onSettingsRootVisibilityChanged(isVisible: Boolean)
     }
 }

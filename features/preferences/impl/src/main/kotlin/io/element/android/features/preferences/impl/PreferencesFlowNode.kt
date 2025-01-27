@@ -10,11 +10,15 @@ package io.element.android.features.preferences.impl
 import android.os.Parcelable
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import com.bumble.appyx.core.modality.BuildContext
 import com.bumble.appyx.core.node.Node
 import com.bumble.appyx.core.plugin.Plugin
 import com.bumble.appyx.core.plugin.plugins
 import com.bumble.appyx.navmodel.backstack.BackStack
+import com.bumble.appyx.navmodel.backstack.activeElement
 import com.bumble.appyx.navmodel.backstack.operation.pop
 import com.bumble.appyx.navmodel.backstack.operation.push
 import dagger.assisted.Assisted
@@ -42,6 +46,7 @@ import io.element.android.libraries.di.SessionScope
 import io.element.android.libraries.matrix.api.core.RoomId
 import io.element.android.libraries.matrix.api.user.MatrixUser
 import io.element.android.libraries.troubleshoot.api.NotificationTroubleShootEntryPoint
+import kotlinx.coroutines.launch
 import kotlinx.parcelize.Parcelize
 
 @ContributesNode(SessionScope::class)
@@ -61,6 +66,21 @@ class PreferencesFlowNode @AssistedInject constructor(
     buildContext = buildContext,
     plugins = plugins
 ) {
+    override fun onBuilt() {
+        super.onBuilt()
+        lifecycleScope.launch {
+            repeatOnLifecycle(Lifecycle.State.STARTED) {
+                backstack.elements.collect { elements ->
+                    val activeElement = elements.lastOrNull { it.targetState == BackStack.State.ACTIVE }
+                    val isRoot = activeElement?.key?.navTarget == NavTarget.Root
+                    plugins<PreferencesEntryPoint.Callback>().forEach { callback ->
+                        callback.onSettingsRootVisibilityChanged(isRoot)
+                    }
+                }
+            }
+        }
+    }
+
     sealed interface NavTarget : Parcelable {
         @Parcelize
         data object Root : NavTarget
@@ -157,9 +177,9 @@ class PreferencesFlowNode @AssistedInject constructor(
                         backstack.push(NavTarget.AccountDeactivation)
                     }
 
-                    override fun onNavigateToHome() {
-                        navigateUp()
-                    }
+//                     fun onNavigateToHome() {
+//                        navigateUp()
+//                    }
 
 //                    override fun onNavigateToGroup() {
 //                        plugins<PreferencesEntryPoint.Callback>().forEach { it.onNavigateToGroup() }

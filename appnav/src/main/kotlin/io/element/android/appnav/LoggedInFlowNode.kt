@@ -11,6 +11,7 @@ import android.content.Intent
 import android.os.Parcelable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
@@ -88,6 +89,7 @@ import io.element.android.libraries.preferences.api.store.EnableNativeSlidingSyn
 import io.element.android.services.appnavstate.api.AppNavigationStateService
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.FlowPreview
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.launchIn
@@ -138,6 +140,8 @@ class LoggedInFlowNode @AssistedInject constructor(
     interface Callback : Plugin {
         fun onOpenBugReport()
     }
+
+    private val settingsRootVisible = MutableStateFlow(false)
 
     private val syncService = matrixClient.syncService()
     private val loggedInFlowProcessor = LoggedInEventProcessor(
@@ -389,6 +393,9 @@ class LoggedInFlowNode @AssistedInject constructor(
             }
             is NavTarget.Settings -> {
                 val callback = object : PreferencesEntryPoint.Callback {
+                    override fun onSettingsRootVisibilityChanged(isVisible: Boolean) {
+                        settingsRootVisible.value = isVisible
+                    }
                     override fun onOpenBugReport() {
                         plugins<Callback>().forEach { it.onOpenBugReport() }
                     }
@@ -399,6 +406,23 @@ class LoggedInFlowNode @AssistedInject constructor(
 
                     override fun onOpenRoomNotificationSettings(roomId: RoomId) {
                         backstack.push(NavTarget.Room(roomId.toRoomIdOrAlias(), initialElement = RoomNavigationTarget.NotificationSettings))
+                    }
+
+                    // Add the missing callback implementations
+                    override fun onScreenLockClick() {
+                        backstack.push(NavTarget.Settings(PreferencesEntryPoint.InitialTarget.ScreenLock))
+                    }
+
+                    override fun onAdvancedSettingsClick() {
+                        backstack.push(NavTarget.Settings(PreferencesEntryPoint.InitialTarget.AdvancedSettings))
+                    }
+
+                    override fun onSignOutClick() {
+                        backstack.push(NavTarget.Settings(PreferencesEntryPoint.InitialTarget.SignOut))
+                    }
+
+                    override fun onDeactivateAccountClick() {
+                        backstack.push(NavTarget.Settings(PreferencesEntryPoint.InitialTarget.DeactivateAccount))
                     }
                 }
                 val inputs = PreferencesEntryPoint.Params(navTarget.initialElement)
@@ -541,19 +565,22 @@ class LoggedInFlowNode @AssistedInject constructor(
     @Composable
     override fun View(modifier: Modifier) {
         val navState by backstack.elements.collectAsState()
-        val shouldShowBottomBar = when (val target = navState.lastOrNull { it.targetState == ACTIVE }?.key?.navTarget) {
-            is NavTarget.RoomList -> true
-            is NavTarget.Settings -> target.initialElement == PreferencesEntryPoint.InitialTarget.Root
-            is NavTarget.RoomDirectorySearch -> {
-                Timber.tag("$TAG:UI").d("Room directory search active, hiding bottom bar")
-                false
+        val activeNavTarget = navState.lastOrNull { it.targetState == ACTIVE }?.key?.navTarget
+        val isSettingsRootVisible by settingsRootVisible.collectAsState()
+
+        LaunchedEffect(activeNavTarget) {
+            if (activeNavTarget !is NavTarget.Settings) {
+                settingsRootVisible.value = false
             }
-            else -> false
-        }.also {
-            Timber.tag("$TAG:UI").d("Bottom bar visibility: $it for target: ${navState.lastOrNull { it.targetState == ACTIVE }?.key?.navTarget}")
         }
 
-        val currentRoute = when (navState.lastOrNull { it.targetState == ACTIVE }?.key?.navTarget) {
+        val shouldShowBottomBar = when (activeNavTarget) {
+            is NavTarget.RoomList -> true
+            is NavTarget.Settings -> isSettingsRootVisible
+            else -> false
+        }
+
+        val currentRoute = when (activeNavTarget) {
             is NavTarget.RoomList -> BottomNavRoute.Home
             is NavTarget.Settings -> BottomNavRoute.Settings
             else -> BottomNavRoute.Home

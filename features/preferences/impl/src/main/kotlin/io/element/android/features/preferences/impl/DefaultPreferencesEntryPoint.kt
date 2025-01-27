@@ -40,7 +40,11 @@ class DefaultPreferencesEntryPoint @Inject constructor() : PreferencesEntryPoint
 }
 
 internal fun PreferencesEntryPoint.InitialTarget.toNavTarget() = when (this) {
-    is PreferencesEntryPoint.InitialTarget.Root -> PreferencesFlowNode.NavTarget.Root
-    is PreferencesEntryPoint.InitialTarget.NotificationSettings -> PreferencesFlowNode.NavTarget.NotificationSettings
+    PreferencesEntryPoint.InitialTarget.Root -> PreferencesFlowNode.NavTarget.Root
+    PreferencesEntryPoint.InitialTarget.NotificationSettings -> PreferencesFlowNode.NavTarget.NotificationSettings
     PreferencesEntryPoint.InitialTarget.NotificationTroubleshoot -> PreferencesFlowNode.NavTarget.TroubleshootNotifications
+    PreferencesEntryPoint.InitialTarget.ScreenLock -> PreferencesFlowNode.NavTarget.LockScreenSettings
+    PreferencesEntryPoint.InitialTarget.AdvancedSettings -> PreferencesFlowNode.NavTarget.AdvancedSettings
+    PreferencesEntryPoint.InitialTarget.SignOut -> PreferencesFlowNode.NavTarget.SignOut
+    PreferencesEntryPoint.InitialTarget.DeactivateAccount -> PreferencesFlowNode.NavTarget.AccountDeactivation
 }
