@@ -127,7 +127,7 @@ class RingingCallNotificationCreator @Inject constructor(
             .setSmallIcon(CommonDrawables.ic_notification_small)
             .setPriority(NotificationCompat.PRIORITY_MAX)
             .setCategory(NotificationCompat.CATEGORY_CALL)
-            .setStyle(NotificationCompat.CallStyle.forIncomingCall(caller, declineIntent, answerIntent).setIsVideo(true))
+            .setStyle(NotificationCompat.CallStyle.forIncomingCall(caller, declineIntent, answerIntent).setIsVideo(false))
             .addPerson(caller)
             .setAutoCancel(true)
             .setWhen(timestamp)

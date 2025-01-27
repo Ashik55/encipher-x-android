@@ -211,7 +211,7 @@ private fun RoomMemberList(
                     )
                     SingleChoiceSegmentedButtonRow(
                         modifier = Modifier
-                            .background(ElementTheme.colors.bgCanvasDefault)
+                            .background(Color.Transparent)
                             .fillMaxWidth()
                             .padding(start = 16.dp, end = 16.dp, bottom = 16.dp),
                     ) {

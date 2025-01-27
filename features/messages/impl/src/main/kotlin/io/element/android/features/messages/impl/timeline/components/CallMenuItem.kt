@@ -69,6 +69,7 @@ private fun StandByCallMenuItem(
         enabled = roomCallState.canStartCall,
     ) {
         Image(
+            modifier = Modifier.size(20.dp),
             painter = painterResource(id = io.element.android.features.messages.impl.R.drawable.ic_call),
             contentDescription = null
         )
@@ -97,7 +98,7 @@ private fun OnGoingCallMenuItem(
             enabled = roomCallState.canJoinCall,
         ) {
             Image(
-                modifier = Modifier.size(20.dp),
+                modifier = Modifier.size(16.dp),
                 painter = painterResource(id = io.element.android.features.messages.impl.R.drawable.ic_call_join),
                 contentDescription = null
             )

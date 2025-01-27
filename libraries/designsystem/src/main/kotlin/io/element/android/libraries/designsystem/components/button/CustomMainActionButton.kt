@@ -16,6 +16,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -64,10 +65,12 @@ fun CustomMainActionButton(
             )
             .widthIn(min = 76.dp, max = 96.dp),
         verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.Center
     ) {
 //        val tintColor = if (enabled) LocalContentColor.current else MaterialTheme.colorScheme.secondary
         val appliedTintColor = tintColor ?: if (enabled) Color(0xFF11181C) else Color(0xFF0A8741)
         Icon(
+            modifier = Modifier.size(16.dp),
             imageVector = imageVector,
             contentDescription = contentDescription,
             tint = appliedTintColor,

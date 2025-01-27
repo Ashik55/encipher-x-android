@@ -31,7 +31,9 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.style.TextOverflow
@@ -356,7 +358,7 @@ private fun OnGoingCallIcon(
 ) {
     Icon(
         modifier = Modifier.size(16.dp),
-        imageVector = CompoundIcons.VideoCallSolid(),
+        imageVector = ImageVector.vectorResource(id = io.element.android.libraries.designsystem.R.drawable.ic_call),
         contentDescription = null,
         tint = color,
     )
