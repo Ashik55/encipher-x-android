@@ -13,7 +13,9 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.unit.dp
 import io.element.android.compound.tokens.generated.CompoundIcons
 import io.element.android.libraries.designsystem.components.button.MainActionButton
@@ -42,7 +44,7 @@ fun UserProfileMainActionsSection(
         if (canCall) {
             MainActionButton(
                 title = stringResource(CommonStrings.action_call),
-                imageVector = CompoundIcons.VideoCall(),
+                imageVector = ImageVector.vectorResource(id =  io.element.android.libraries.designsystem.R.drawable.ic_call),
                 onClick = onCall,
             )
         }
