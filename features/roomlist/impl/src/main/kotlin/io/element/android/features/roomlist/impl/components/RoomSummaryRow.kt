@@ -76,6 +76,9 @@ internal fun RoomSummaryRow(
     eventSink: (RoomListEvents) -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    if (room.displayType == RoomSummaryDisplayType.INVITE) {
+        Timber.tag("Invite").d("Rendering invite room: isDm=${room.isDm} inviteSender=${room.inviteSender}")
+    }
     Box(modifier = modifier) {
         when (room.displayType) {
             RoomSummaryDisplayType.PLACEHOLDER -> {
@@ -208,6 +211,7 @@ private fun NameAndTimestampRow(
         modifier = modifier.fillMaxWidth(),
         horizontalArrangement = spacedBy(16.dp)
     ) {
+        Timber.tag("Invite").d("NameAndTimestampRow: name=$name timestamp=$timestamp isHighlighted=$isHighlighted")
         // Name
         Text(
             modifier = Modifier.weight(1f),
@@ -238,6 +242,7 @@ private fun InviteSubtitle(
     canonicalAlias: RoomAlias?,
     modifier: Modifier = Modifier
 ) {
+    Timber.tag("Invite").d("InviteSubtitle: isDm=$isDm inviteSender=$inviteSender canonicalAlias=$canonicalAlias")
     val subtitle = if (isDm) {
         inviteSender?.userId?.value
     } else {
@@ -307,6 +312,7 @@ private fun InviteNameAndIndicatorRow(
     name: String?,
     modifier: Modifier = Modifier,
 ) {
+    Timber.tag("Invite").d("InviteNameAndIndicatorRow: name=$name")
     Row(
         modifier = modifier.fillMaxWidth(),
         horizontalArrangement = spacedBy(16.dp),
