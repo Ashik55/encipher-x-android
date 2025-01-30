@@ -78,7 +78,7 @@ internal fun IncomingCallScreen(
             )
             Spacer(modifier = Modifier.height(24.dp))
             Text(
-                text = notificationData.senderName ?: notificationData.senderId.value,
+                text = notificationData.roomName ?: notificationData.senderId.value,
                 style = ElementTheme.typography.fontHeadingMdBold,
                 textAlign = TextAlign.Center,
             )
