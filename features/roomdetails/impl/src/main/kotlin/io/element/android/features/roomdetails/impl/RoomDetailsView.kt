@@ -860,7 +860,7 @@ private fun MediaGallerySection(
 ) {
     PreferenceCategory {
         ListItem(
-            headlineContent = { Text(stringResource(R.string.screen_room_details_media_gallery_title)) },
+            headlineContent = { Text(stringResource(R.string.screen_room_details_media_gallery_title), color = Color(0xFF11181C)) },
             leadingContent = ListItemContent.Custom {
                 Icon(
                     imageVector = ImageVector.vectorResource(id =  io.element.android.libraries.matrix.ui.R.drawable.ic_image),
