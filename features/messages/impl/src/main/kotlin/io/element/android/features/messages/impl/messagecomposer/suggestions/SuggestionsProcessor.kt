@@ -96,7 +96,7 @@ class SuggestionsProcessor @Inject constructor() {
                 }
                 .map(ResolvedSuggestion::Member)
 
-            if ("room".contains(query) && canSendRoomMention) {
+            if ("group".contains(query) && canSendRoomMention) {
                 listOf(ResolvedSuggestion.AtRoom) + matchingMembers
             } else {
                 matchingMembers
