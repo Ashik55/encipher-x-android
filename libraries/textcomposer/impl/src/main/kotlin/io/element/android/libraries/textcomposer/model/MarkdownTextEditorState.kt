@@ -104,7 +104,7 @@ class MarkdownTextEditorState(
                                 }
                             }
                             MentionSpan.Type.EVERYONE -> {
-                                replace(start, end, "@room")
+                                replace(start, end, "@group")
                             }
                             MentionSpan.Type.ROOM -> {
                                 permalinkBuilder.permalinkForRoomAlias(RoomAlias(mention.rawValue)).getOrNull()?.let { link ->
