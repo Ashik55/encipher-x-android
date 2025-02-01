@@ -174,7 +174,7 @@ fun TextComposer(
                             composerMode = composerMode,
                             onResetComposerMode = onResetComposerMode,
                             resolveMentionDisplay = resolveMentionDisplay,
-                            resolveRoomMentionDisplay = { resolveMentionDisplay("@room", "#") },
+                            resolveRoomMentionDisplay = { resolveMentionDisplay("@group", "#") },
                             onError = onError,
                             onTyping = onTyping,
                             onSelectRichContent = onSelectRichContent,

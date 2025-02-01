@@ -54,7 +54,7 @@ class MarkdownTextEditorState(
         when (resolvedSuggestion) {
             is ResolvedSuggestion.AtRoom -> {
                 val currentText = SpannableStringBuilder(text.value())
-                val replaceText = "@room"
+                val replaceText = "@group"
                 val roomPill = mentionSpanProvider.getMentionSpanFor(replaceText, "")
                 currentText.replace(suggestion.start, suggestion.end, "@ ")
                 val end = suggestion.start + 1

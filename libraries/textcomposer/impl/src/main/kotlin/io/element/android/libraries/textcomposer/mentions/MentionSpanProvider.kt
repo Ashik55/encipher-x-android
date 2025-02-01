@@ -26,10 +26,10 @@ open class MentionSpanProvider @Inject constructor(
                     type = MentionSpan.Type.USER,
                 )
             }
-            text == "@room" && permalinkData is PermalinkData.FallbackLink -> {
+            text == "@group" && permalinkData is PermalinkData.FallbackLink -> {
                 MentionSpan(
                     text = text,
-                    rawValue = "@room",
+                    rawValue = "@group",
                     type = MentionSpan.Type.EVERYONE,
                 )
             }

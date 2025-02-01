@@ -133,7 +133,7 @@ val LocalMentionSpanTheme = staticCompositionLocalOf {
         fun mentionSpanMe() = provider.getMentionSpanFor("mention", "https://matrix.to/#/@me:matrix.org")
         fun mentionSpanOther() = provider.getMentionSpanFor("mention", "https://matrix.to/#/@other:matrix.org")
         fun mentionSpanRoom() = provider.getMentionSpanFor("room:matrix.org", "https://matrix.to/#/#room:matrix.org")
-        fun mentionSpanEveryone() = provider.getMentionSpanFor("@room", "@room")
+        fun mentionSpanEveryone() = provider.getMentionSpanFor("@group", "@room")
         mentionSpanTheme.updateStyles(currentUserId = UserId("@me:matrix.org"))
 
         CompositionLocalProvider(

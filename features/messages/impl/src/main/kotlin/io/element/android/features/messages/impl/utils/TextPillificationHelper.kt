@@ -65,7 +65,7 @@ class DefaultTextPillificationHelper @Inject constructor(
                 MatrixPatternType.AT_ROOM -> {
                     val mentionSpanExists = spannable.getSpans<MentionSpan>(match.start, match.end).isNotEmpty()
                     if (!mentionSpanExists) {
-                        val mentionSpan = mentionSpanProvider.getMentionSpanFor("@room", "")
+                        val mentionSpan = mentionSpanProvider.getMentionSpanFor("@group", "")
                         spannable.replace(match.start, match.end, "@ ")
                         spannable.setSpan(mentionSpan, match.start, match.start + 1, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE)
                     }
