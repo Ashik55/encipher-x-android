@@ -72,6 +72,7 @@ import io.element.android.libraries.matrix.api.core.RoomId
 import io.element.android.libraries.matrix.ui.components.AvatarActionBottomSheet
 import io.element.android.libraries.matrix.ui.components.SelectedUsersRowList
 import io.element.android.libraries.matrix.ui.components.UnsavedAvatar
+import io.element.android.libraries.matrix.ui.room.address.RoomAddressField
 import io.element.android.libraries.permissions.api.PermissionsView
 import io.element.android.libraries.ui.strings.CommonStrings
 
@@ -167,11 +168,13 @@ fun ConfigureRoomView(
                     )
                     RoomAddressField(
                         modifier = Modifier.padding(horizontal = 16.dp),
-                        address = state.config.roomVisibility.roomAddress,
+                        address = state.config.roomVisibility.roomAddress.value,
                         homeserverName = state.homeserverName,
                         addressValidity = state.roomAddressValidity,
                         onAddressChange = { state.eventSink(ConfigureRoomEvents.RoomAddressChanged(it)) },
-                    )
+                        label = stringResource(R.string.screen_create_room_room_address_section_title),
+                        supportingText = stringResource(R.string.screen_create_room_room_address_section_footer),
+                        )
                     Spacer(Modifier)
                 }
             }
@@ -348,47 +351,6 @@ private fun RoomAccessOptions(
             )
         }
     }
-}
-
-@Composable
-private fun RoomAddressField(
-    address: RoomAddress,
-    homeserverName: String,
-    addressValidity: RoomAddressValidity,
-    onAddressChange: (String) -> Unit,
-    modifier: Modifier = Modifier,
-) {
-    TextField(
-        modifier = modifier.fillMaxWidth(),
-        value = address.value,
-        label = stringResource(R.string.screen_create_room_room_address_section_title),
-        leadingIcon = {
-            Text(
-                text = "#",
-                style = ElementTheme.typography.fontBodyLgMedium,
-                color = ElementTheme.colors.textSecondary,
-            )
-        },
-        trailingIcon = {
-            Text(
-                text = homeserverName,
-                style = ElementTheme.typography.fontBodyLgMedium,
-                color = ElementTheme.colors.textSecondary,
-            )
-        },
-        supportingText = when (addressValidity) {
-            RoomAddressValidity.InvalidSymbols -> {
-                stringResource(CommonStrings.error_room_address_invalid_symbols)
-            }
-            RoomAddressValidity.NotAvailable -> {
-                stringResource(CommonStrings.error_room_address_already_exists)
-            }
-            else -> stringResource(R.string.screen_create_room_room_address_section_footer)
-        },
-        isError = addressValidity.isError(),
-        onValueChange = onAddressChange,
-        singleLine = true,
-    )
 }
 
 @PreviewWithLargeHeight

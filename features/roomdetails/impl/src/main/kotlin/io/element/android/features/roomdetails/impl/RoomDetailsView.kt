@@ -14,7 +14,6 @@ import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.consumeWindowInsets
@@ -121,6 +120,7 @@ fun RoomDetailsView(
     onJoinCallClick: () -> Unit,
     onPinnedMessagesClick: () -> Unit,
     onKnockRequestsClick: () -> Unit,
+    onSecurityAndPrivacyClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     Scaffold(
@@ -211,13 +211,32 @@ fun RoomDetailsView(
                         }
                     )
 
-                    if (state.canShowPinnedMessages) {
-                        PinnedMessagesItem(
-                            pinnedMessagesCount = state.pinnedMessagesCount,
-                            onPinnedMessagesClick = onPinnedMessagesClick
+                    if (state.canShowSecurityAndPrivacy) {
+                        SecurityAndPrivacyItem(
+                            onClick = onSecurityAndPrivacyClick
                         )
                     }
 
+//                    if (state.canShowPinnedMessages) {
+//                        PinnedMessagesItem(
+//                            pinnedMessagesCount = state.pinnedMessagesCount,
+//                            onPinnedMessagesClick = onPinnedMessagesClick
+//                        )
+//                    }
+                }
+
+            if (state.roomType is RoomDetailsType.Room) {
+                PreferenceCategory {
+                    MembersItem(
+                        memberCount = state.memberCount,
+                        openRoomMemberList = openRoomMemberList,
+                    )
+                    if (state.canShowKnockRequests) {
+                        KnockRequestsItem(
+                            knockRequestsCount = state.knockRequestsCount,
+                            onKnockRequestsClick = onKnockRequestsClick
+                        )
+                    }
                     if (state.displayRolesAndPermissionsSettings) {
                         ListItem(
                             headlineContent = { Text(stringResource(R.string.screen_room_details_roles_and_permissions), color = Color(0xFF11181C)) },
@@ -248,33 +267,23 @@ fun RoomDetailsView(
                         )
                     }
                 }
+            }
 
-            val displayMemberListItem = state.roomType is RoomDetailsType.Room
-            if (displayMemberListItem) {
-                PreferenceCategory {
-                    MembersItem(
-                        memberCount = state.memberCount,
-                        openRoomMemberList = openRoomMemberList,
+            PreferenceCategory {
+                if (state.canShowPinnedMessages) {
+                    PinnedMessagesItem(
+                        pinnedMessagesCount = state.pinnedMessagesCount,
+                        onPinnedMessagesClick = onPinnedMessagesClick
                     )
-                    if (state.canShowKnockRequests) {
-                        KnockRequestsItem(
-                            knockRequestsCount = state.knockRequestsCount,
-                            onKnockRequestsClick = onKnockRequestsClick
-                        )
-                    }
                 }
-            }
-
-            PollsSection(
-                openPollHistory = openPollHistory
-            )
-            if (state.canShowMediaGallery) {
-                MediaGallerySection(
-                    onClick = openMediaGallery
+                PollsItem(
+                    openPollHistory = openPollHistory
                 )
-            }
-            if (state.isEncrypted) {
-                SecuritySection()
+                if (state.canShowMediaGallery) {
+                    MediaGalleryItem(
+                        onClick = openMediaGallery
+                    )
+                }
             }
 
                 if (state.roomType is RoomDetailsType.Dm && state.roomMemberDetailsState != null) {
@@ -295,14 +304,26 @@ fun RoomDetailsView(
 @Composable
 private fun KnockRequestsItem(knockRequestsCount: Int?, onKnockRequestsClick: () -> Unit) {
     ListItem(
-        headlineContent = { Text(stringResource(R.string.screen_room_details_requests_to_join_title)) },
-        leadingContent = ListItemContent.Icon(IconSource.Vector(CompoundIcons.AskToJoin())),
+        headlineContent = { Text(stringResource(R.string.screen_room_details_requests_to_join_title), color = Color(0xFF11181C)) },
+        leadingContent = ListItemContent.Custom {
+            Icon(
+                imageVector = ImageVector.vectorResource(id =  R.drawable.ic_ask_join),
+                contentDescription = null,
+                tint = Color(0xFF11181C)
+            )
+        },
         trailingContent = if (knockRequestsCount == null || knockRequestsCount == 0) {
             null
         } else {
             ListItemContent.Counter(knockRequestsCount)
         },
         onClick = onKnockRequestsClick,
+        modifier = Modifier
+            .padding(horizontal = 10.dp, vertical = 5.dp)
+            .background(
+                color = Color(0xffEFEFEF),
+                shape = RoundedCornerShape(18.dp)
+            )
     )
 }
 
@@ -361,7 +382,6 @@ private fun RoomDetailsTopBar(
 
     )
 }
-
 
 @Composable
 private fun MainActionsSection(
@@ -536,24 +556,26 @@ private fun DmHeaderSection(
 }
 
 @Composable
-private fun ColumnScope.TitleAndSubtitle(
+private fun TitleAndSubtitle(
     title: String,
     subtitle: String?,
 ) {
-    Spacer(modifier = Modifier.height(24.dp))
-    Text(
-        text = title,
-        style = ElementTheme.typography.fontHeadingLgBold,
-        textAlign = TextAlign.Center,
-    )
-    if (subtitle != null) {
-        Spacer(modifier = Modifier.height(6.dp))
+    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+        Spacer(modifier = Modifier.height(24.dp))
         Text(
-            text = subtitle,
-            style = ElementTheme.typography.fontBodyLgRegular,
-            color = MaterialTheme.colorScheme.secondary,
+            text = title,
+            style = ElementTheme.typography.fontHeadingLgBold,
             textAlign = TextAlign.Center,
         )
+        if (subtitle != null) {
+            Spacer(modifier = Modifier.height(6.dp))
+            Text(
+                text = subtitle,
+                style = ElementTheme.typography.fontBodyLgRegular,
+                color = MaterialTheme.colorScheme.secondary,
+                textAlign = TextAlign.Center,
+            )
+        }
     }
 }
 
@@ -736,6 +758,30 @@ private fun NotificationItem(
 }
 
 @Composable
+private fun SecurityAndPrivacyItem(
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    ListItem(
+        headlineContent = { Text(stringResource(R.string.screen_room_details_security_and_privacy_title), color = Color(0xFF11181C)) },
+        leadingContent = ListItemContent.Custom {
+            Icon(
+                imageVector = ImageVector.vectorResource(id =  R.drawable.ic_encryption_enabled),
+                contentDescription = null,
+                tint = Color(0xFF11181C)
+            )
+        },
+        onClick = onClick,
+        modifier = Modifier
+            .padding(horizontal = 10.dp, vertical = 5.dp)
+            .background(
+                color = Color(0xffEFEFEF),
+                shape = RoundedCornerShape(18.dp)
+            )
+    )
+}
+
+@Composable
 private fun FavoriteItem(
     isFavorite: Boolean,
     onFavoriteChanges: (Boolean) -> Unit,
@@ -830,7 +876,7 @@ private fun PinnedMessagesItem(
 }
 
 @Composable
-private fun PollsSection(
+private fun PollsItem(
     openPollHistory: () -> Unit,
 ) {
     PreferenceCategory {
@@ -855,7 +901,7 @@ private fun PollsSection(
 }
 
 @Composable
-private fun MediaGallerySection(
+private fun MediaGalleryItem(
     onClick: () -> Unit,
 ) {
     PreferenceCategory {
@@ -960,5 +1006,6 @@ private fun ContentToPreview(state: RoomDetailsState) {
         onJoinCallClick = {},
         onPinnedMessagesClick = {},
         onKnockRequestsClick = {},
+        onSecurityAndPrivacyClick = {},
     )
 }

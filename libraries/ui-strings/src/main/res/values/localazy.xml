@@ -26,6 +26,7 @@
   <string name="a11y_read_receipts_tap_to_show_all">"Tap to show all"</string>
   <string name="a11y_remove_reaction_with">"Remove reaction with %1$s"</string>
   <string name="a11y_send_files">"Send files"</string>
+  <string name="a11y_view_details">"View Details"</string>
   <string name="a11y_show_password">"Show Password"</string>
   <string name="a11y_start_call">"Start a Call"</string>
   <string name="a11y_user_menu">"User Menu"</string>
@@ -182,6 +183,7 @@ Reason: %1$s."</string>
   <string name="common_light">"Light"</string>
   <string name="common_link_copied_to_clipboard">"Link copied to clipboard"</string>
   <string name="common_loading">"Loading…"</string>
+  <string name="common_loading_more">"Loading more…"</string>
   <plurals name="common_member_count">
     <item quantity="one">"%1$d member"</item>
     <item quantity="other">"%1$d members"</item>
@@ -346,7 +348,7 @@ Reason: %1$s."</string>
   <string name="screen_room_pinned_banner_view_all_button_title">"View All"</string>
   <string name="screen_room_title">"Chat"</string>
   <string name="screen_roomlist_knock_event_sent_description">"Request to join sent"</string>
-  <string name="screen_security_and_privacy_add_room_address_action">"Add room address"</string>
+  <string name="screen_security_and_privacy_add_room_address_action">"Add group address"</string>
   <string name="screen_security_and_privacy_ask_to_join_option_description">"Anyone can ask to join the group but an administrator or moderator will have to accept the request."</string>
   <string name="screen_security_and_privacy_ask_to_join_option_title">"Ask to join"</string>
   <string name="screen_security_and_privacy_enable_encryption_alert_confirm_button_title">"Yes, enable encryption"</string>

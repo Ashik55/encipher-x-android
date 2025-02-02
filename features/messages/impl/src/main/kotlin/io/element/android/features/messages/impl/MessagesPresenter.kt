@@ -485,7 +485,7 @@ class MessagesPresenter @AssistedInject constructor(
 //        )
 //    }
 
-    private suspend fun handleCopyContents(event: TimelineItem.Event) {
+    private fun handleCopyContents(event: TimelineItem.Event) {
         val content = when (event.content) {
             is TimelineItemTextBasedContent -> event.content.body
             is TimelineItemStateContent -> event.content.body
@@ -497,7 +497,7 @@ class MessagesPresenter @AssistedInject constructor(
         }
     }
 
-    private suspend fun handleCopyCaption(event: TimelineItem.Event) {
+    private fun handleCopyCaption(event: TimelineItem.Event) {
         val content = (event.content as? TimelineItemEventContentWithAttachment)?.caption ?: return
         clipboardHelper.copyPlainText(content)
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU) {
