@@ -41,6 +41,7 @@ import io.element.android.libraries.designsystem.theme.components.Text
 import io.element.android.libraries.matrix.api.user.MatrixUser
 import io.element.android.libraries.matrix.ui.model.getAvatarData
 import io.element.android.libraries.matrix.ui.model.getBestName
+import timber.log.Timber
 
 @Composable
 fun MatrixUserHeader(
@@ -116,6 +117,11 @@ private fun MatrixUserHeaderContent(
                     overflow = TextOverflow.Ellipsis
                 )
             }
+
+            Timber.tag("USER_HEADER").d("matrixUser: $matrixUser, " +
+                "matrixUser.userId: ${matrixUser.userId}, matrixUser.displayName: ${matrixUser.displayName}, " +
+                "matrixUser.getBestName: ${matrixUser.getBestName()}, matrixUser.userId.value: ${matrixUser.userId.value}, " +
+                "matrixUser.userId.extractedDisplayName: ${matrixUser.userId.extractedDisplayName}")
         }
     }
 }
