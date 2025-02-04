@@ -117,11 +117,8 @@ private fun MatrixUserHeaderContent(
                     overflow = TextOverflow.Ellipsis
                 )
             }
-
-            Timber.tag("USER_HEADER").d("matrixUser: $matrixUser, " +
-                "matrixUser.userId: ${matrixUser.userId}, matrixUser.displayName: ${matrixUser.displayName}, " +
-                "matrixUser.getBestName: ${matrixUser.getBestName()}, matrixUser.userId.value: ${matrixUser.userId.value}, " +
-                "matrixUser.userId.extractedDisplayName: ${matrixUser.userId.extractedDisplayName}")
+            // Debug
+            Timber.tag("USER_HEADER").d("matrixUser: $matrixUser, matrixUser.userId: ${matrixUser.userId}, matrixUser.displayName: ${matrixUser.displayName}, matrixUser.getBestName: ${matrixUser.getBestName()}, matrixUser.userId.value: ${matrixUser.userId.value}, matrixUser.userId.extractedDisplayName: ${matrixUser.userId.extractedDisplayName}")
         }
     }
 }
