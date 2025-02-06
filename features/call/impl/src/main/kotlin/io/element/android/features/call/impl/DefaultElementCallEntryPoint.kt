@@ -48,6 +48,7 @@ class DefaultElementCallEntryPoint @Inject constructor(
         avatarUrl: String?,
         timestamp: Long,
         notificationChannelId: String,
+        textContent: String?,
     ) {
         Timber.tag(TAG).i("Handling incoming call from: $senderId in room: ${callType.roomId}")
         val incomingCallNotificationData = CallNotificationData(
@@ -60,6 +61,7 @@ class DefaultElementCallEntryPoint @Inject constructor(
             avatarUrl = avatarUrl,
             timestamp = timestamp,
             notificationChannelId = notificationChannelId,
+            textContent = textContent,
         )
         activeCallManager.registerIncomingCall(notificationData = incomingCallNotificationData)
     }

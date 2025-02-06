@@ -67,6 +67,7 @@ class RingingCallNotificationCreator @Inject constructor(
         roomAvatarUrl: String?,
         notificationChannelId: String,
         timestamp: Long,
+        textContent: String?,
     ): Notification? {
         Timber.tag(TAG).i("createNotification called with sessionId: $sessionId, roomId: $roomId, eventId: $eventId, senderId: $senderId, roomName: $roomName, senderDisplayName: $senderDisplayName, roomAvatarUrl: $roomAvatarUrl, notificationChannelId: $notificationChannelId, timestamp: $timestamp")
 //        val matrixClient = matrixClientProvider.getOrRestore(sessionId).getOrNull() ?: return null
@@ -96,7 +97,8 @@ class RingingCallNotificationCreator @Inject constructor(
             senderName = senderDisplayName,
             avatarUrl = roomAvatarUrl,
             notificationChannelId = notificationChannelId,
-            timestamp = timestamp
+            timestamp = timestamp,
+            textContent = textContent,
         )
 
         val declineIntent = PendingIntentCompat.getBroadcast(
@@ -134,6 +136,10 @@ class RingingCallNotificationCreator @Inject constructor(
             .setOngoing(true)
             .setShowWhen(false)
             .apply {
+                if (textContent != null) {
+                    setContentText(textContent)
+                    // Else the content text is set by the style (will be "Incoming call")
+                }
                 if (ringtoneUri != null) {
                     setSound(ringtoneUri, AudioManager.STREAM_RING)
                 }
