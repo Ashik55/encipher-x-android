@@ -62,7 +62,7 @@ abstract class BaseFlowNode<NavTarget : Any>(
 inline fun <reified NavTarget : Any> BaseFlowNode<NavTarget>.BackstackView(
     modifier: Modifier = Modifier,
     transitionHandler: TransitionHandler<NavTarget, BackStack.State> = rememberBackstackSlider(
-        transitionSpec = { spring(stiffness = Spring.StiffnessMediumLow) },
+        transitionSpec = { spring(stiffness = Spring.StiffnessHigh) },
     ),
 ) {
     Children(
