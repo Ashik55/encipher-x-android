@@ -298,9 +298,10 @@ private fun LastMessageAndIndicatorRow(
                     color = tint,
                 )
             }
-            if (room.userDefinedNotificationMode == RoomNotificationMode.MUTE) {
-                NotificationOffIndicatorAtom()
-            } else if (room.numberOfUnreadMentions > 0) {
+//            if (room.userDefinedNotificationMode == RoomNotificationMode.MUTE) {
+//                NotificationOffIndicatorAtom()
+//            } else
+            if (room.numberOfUnreadMentions > 0) {
                 MentionIndicatorAtom()
             }
             if (room.hasNewContent) {
