@@ -15,18 +15,22 @@ import android.webkit.PermissionRequest
 import android.webkit.WebChromeClient
 import android.webkit.WebView
 import androidx.activity.compose.BackHandler
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.viewinterop.AndroidView
+import io.element.android.compound.theme.ElementTheme
 import io.element.android.compound.tokens.generated.CompoundIcons
 import io.element.android.features.call.impl.R
 import io.element.android.features.call.impl.pip.PictureInPictureEvents
@@ -72,65 +76,81 @@ internal fun CallScreenView(
     }
 
     Scaffold(
-        modifier = modifier,
-        topBar = {
-            if (!pipState.isInPictureInPicture) {
-                TopAppBar(
-                    title = { Text("") },
-                    navigationIcon = {
-                        BackButton(
-                            imageVector = if (pipState.supportPip) CompoundIcons.ArrowLeft() else CompoundIcons.Close(),
-                            onClick = ::handleBack,
-                        )
-                    }
-                )
-            }
-        }
+        modifier = modifier
+            .background(
+                if(ElementTheme.isLightTheme) Color(0xFFFFFFFF) else Color(0xFF111317)
+            ),
+//        topBar = {
+//            if (!pipState.isInPictureInPicture) {
+//                TopAppBar(
+//                    title = { Text("") },
+//                    navigationIcon = {
+//                        BackButton(
+//                            imageVector = if (pipState.supportPip) CompoundIcons.ArrowLeft() else CompoundIcons.Close(),
+//                            onClick = ::handleBack,
+//                        )
+//                    },
+//                    colors = TopAppBarDefaults.topAppBarColors(
+//                        containerColor = Color.Transparent
+//                    )
+//                )
+//            }
+//        }
     ) { padding ->
         BackHandler {
             handleBack()
         }
-        if (state.webViewError != null) {
-            ErrorDialog(
-                content = buildString {
-                    append(stringResource(CommonStrings.error_unknown))
-                    state.webViewError.takeIf { it.isNotEmpty() }?.let { append("\n\n").append(it) }
-                },
-                onSubmit = { state.eventSink(CallScreenEvents.Hangup) },
-            )
-        } else {
-            CallWebView(
-                modifier = Modifier
-                    .padding(padding)
-                    .consumeWindowInsets(padding)
-                    .fillMaxSize(),
-                url = state.urlState,
-                userAgent = state.userAgent,
-                onPermissionsRequest = { request ->
-                    val androidPermissions = mapWebkitPermissions(request.resources)
-                    val callback: RequestPermissionCallback = { request.grant(it) }
-                    requestPermissions(androidPermissions.toTypedArray(), callback)
-                },
-                onWebViewCreate = { webView ->
-                    val interceptor = WebViewWidgetMessageInterceptor(
-                        webView = webView,
-                        onError = { state.eventSink(CallScreenEvents.OnWebViewError(it)) },
-                    )
-                    state.eventSink(CallScreenEvents.SetupMessageChannels(interceptor))
-                    val pipController = WebViewPipController(webView)
-                    pipState.eventSink(PictureInPictureEvents.SetPipController(pipController))
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(
+                    if(ElementTheme.isLightTheme) Color(0xFFFFFFFF) else Color(0xFF111317)
+                )
+                .padding(padding)
+                .consumeWindowInsets(padding),
+        ) {
+            if (state.webViewError != null) {
+                ErrorDialog(
+                    content = buildString {
+                        append(stringResource(CommonStrings.error_unknown))
+                        state.webViewError.takeIf { it.isNotEmpty() }?.let { append("\n\n").append(it) }
+                    },
+                    onSubmit = { state.eventSink(CallScreenEvents.Hangup) },
+                )
+            } else {
+                CallWebView(
+                    modifier = Modifier
+                        .padding(padding)
+                        .consumeWindowInsets(padding)
+                        .fillMaxSize(),
+                    url = state.urlState,
+                    userAgent = state.userAgent,
+                    onPermissionsRequest = { request ->
+                        val androidPermissions = mapWebkitPermissions(request.resources)
+                        val callback: RequestPermissionCallback = { request.grant(it) }
+                        requestPermissions(androidPermissions.toTypedArray(), callback)
+                    },
+                    onWebViewCreate = { webView ->
+                        val interceptor = WebViewWidgetMessageInterceptor(
+                            webView = webView,
+                            onError = { state.eventSink(CallScreenEvents.OnWebViewError(it)) },
+                        )
+                        state.eventSink(CallScreenEvents.SetupMessageChannels(interceptor))
+                        val pipController = WebViewPipController(webView)
+                        pipState.eventSink(PictureInPictureEvents.SetPipController(pipController))
+                    }
+                )
+                when (state.urlState) {
+                    AsyncData.Uninitialized,
+                    is AsyncData.Loading ->
+                        ProgressDialog(text = stringResource(id = CommonStrings.common_please_wait))
+                    is AsyncData.Failure ->
+                        ErrorDialog(
+                            content = state.urlState.error.message.orEmpty(),
+                            onSubmit = { state.eventSink(CallScreenEvents.Hangup) },
+                        )
+                    is AsyncData.Success -> Unit
                 }
-            )
-            when (state.urlState) {
-                AsyncData.Uninitialized,
-                is AsyncData.Loading ->
-                    ProgressDialog(text = stringResource(id = CommonStrings.common_please_wait))
-                is AsyncData.Failure ->
-                    ErrorDialog(
-                        content = state.urlState.error.message.orEmpty(),
-                        onSubmit = { state.eventSink(CallScreenEvents.Hangup) },
-                    )
-                is AsyncData.Success -> Unit
             }
         }
     }
