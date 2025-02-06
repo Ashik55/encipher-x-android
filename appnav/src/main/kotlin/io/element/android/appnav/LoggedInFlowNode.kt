@@ -7,14 +7,17 @@
 
 package io.element.android.appnav
 
+import android.app.Activity
 import android.content.Intent
 import android.os.Parcelable
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.Box
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
@@ -567,6 +570,13 @@ class LoggedInFlowNode @AssistedInject constructor(
         val navState by backstack.elements.collectAsState()
         val activeNavTarget = navState.lastOrNull { it.targetState == ACTIVE }?.key?.navTarget
         val isSettingsRootVisible by settingsRootVisible.collectAsState()
+        val activity = LocalContext.current as? Activity
+
+        BackHandler(
+            enabled = activeNavTarget == NavTarget.RoomList
+        ) {
+            activity?.finish()
+        }
 
         LaunchedEffect(activeNavTarget) {
             if (activeNavTarget !is NavTarget.Settings) {
