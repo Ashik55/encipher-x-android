@@ -25,6 +25,7 @@ import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.tooling.preview.PreviewParameter
+import io.element.android.compound.theme.ElementTheme
 import androidx.compose.ui.unit.dp
 import io.element.android.compound.tokens.generated.CompoundIcons
 import io.element.android.features.leaveroom.api.LeaveRoomView
@@ -99,6 +100,7 @@ fun RoomListView(
                     .padding(top = topPadding)
                     .fillMaxSize()
                     .background(MaterialTheme.colorScheme.background)
+//                    .background(ElementTheme.colors.bgCanvasDefault)
             )
             acceptDeclineInviteView()
         }

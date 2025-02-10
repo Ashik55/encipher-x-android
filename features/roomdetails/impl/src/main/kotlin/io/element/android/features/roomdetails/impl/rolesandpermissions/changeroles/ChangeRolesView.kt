@@ -356,6 +356,7 @@ private fun ListSectionHeader(text: String) {
     Text(
         modifier = Modifier
             .background(Color.Transparent)
+//            .background(ElementTheme.colors.bgCanvasDefault)
             .padding(horizontal = 16.dp, vertical = 8.dp)
             .fillMaxWidth(),
         text = text,
@@ -418,6 +419,7 @@ private fun MemberRow(
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
                     color = MaterialTheme.colorScheme.primary,
+//                    color = ElementTheme.colors.textPrimary,
                     style = ElementTheme.typography.fontBodyLgRegular,
                 )
                 // Invitation pending marker
@@ -427,6 +429,7 @@ private fun MemberRow(
                         text = stringResource(id = R.string.screen_room_member_list_pending_header_title),
                         style = ElementTheme.typography.fontBodySmRegular.copy(fontStyle = FontStyle.Italic),
                         color = MaterialTheme.colorScheme.secondary
+//                        color = ElementTheme.colors.textSecondary
                     )
                 }
             }
@@ -435,6 +438,7 @@ private fun MemberRow(
                 Text(
                     text = userId,
                     color = MaterialTheme.colorScheme.secondary,
+//                    color = ElementTheme.colors.textSecondary,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
                     style = ElementTheme.typography.fontBodySmRegular,

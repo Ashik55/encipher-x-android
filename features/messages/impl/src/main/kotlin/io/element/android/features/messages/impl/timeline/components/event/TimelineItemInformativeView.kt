@@ -55,6 +55,7 @@ fun TimelineItemInformativeView(
             Icon(
                 resourceId = iconResourceId,
                 tint = MaterialTheme.colorScheme.secondary,
+                //tint = ElementTheme.colors.iconSecondary,
                 contentDescription = iconDescription,
                 modifier = Modifier.size(16.dp)
             )
@@ -63,6 +64,7 @@ fun TimelineItemInformativeView(
         Text(
 //            fontStyle = FontStyle.Italic,
             color = MaterialTheme.colorScheme.secondary,
+            //color = ElementTheme.colors.textSecondary,
             style = ElementTheme.typography.fontBodyMdRegular,
             text = text
         )

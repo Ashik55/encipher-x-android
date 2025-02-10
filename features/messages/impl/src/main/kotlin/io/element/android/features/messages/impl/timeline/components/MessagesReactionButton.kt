@@ -79,6 +79,7 @@ fun MessagesReactionButton(
             // Outer border, same colour as background
             .border(
                 BorderStroke(2.dp, MaterialTheme.colorScheme.background),
+                //BorderStroke(2.dp, ElementTheme.colors.bgCanvasDefault),
                 shape = RoundedCornerShape(corner = CornerSize(14.dp))
             )
             .padding(vertical = 2.dp, horizontal = 2.dp)
@@ -125,6 +126,7 @@ private fun TextContent(
     text = text,
     style = ElementTheme.typography.fontBodyMdRegular,
     color = ElementTheme.materialColors.primary
+    //color = ElementTheme.colors.textPrimary
 )
 
 @Composable
@@ -166,6 +168,7 @@ private fun ReactionContent(
         Text(
             text = reaction.count.toString(),
             color = if (reaction.isHighlighted) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.secondary,
+            //color = if (reaction.isHighlighted) ElementTheme.colors.textPrimary else ElementTheme.colors.textSecondary,
             style = ElementTheme.typography.fontBodyMdRegular,
         )
     }

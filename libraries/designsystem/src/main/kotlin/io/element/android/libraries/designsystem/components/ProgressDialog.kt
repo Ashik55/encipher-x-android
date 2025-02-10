@@ -26,6 +26,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
+import io.element.android.compound.theme.ElementTheme
 import io.element.android.libraries.designsystem.preview.ElementPreview
 import io.element.android.libraries.designsystem.preview.ElementThemedPreview
 import io.element.android.libraries.designsystem.preview.PreviewGroup
@@ -111,6 +112,7 @@ private fun ProgressDialogContent(
                 Text(
                     text = text,
                     color = MaterialTheme.colorScheme.primary,
+                    //color = ElementTheme.colors.textPrimary,
                 )
             }
             if (showCancelButton) {

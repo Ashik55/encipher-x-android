@@ -159,6 +159,7 @@ fun CreateRoomRootView(
         onRetry = {
             state.userListState.selectedUsers.firstOrNull()
                 ?.let { state.eventSink(CreateRoomRootEvents.StartDM(it)) }
+            // Cancel start DM if there is no more selected user (should not happen)
                 ?: state.eventSink(CreateRoomRootEvents.CancelStartDM)
         },
         onErrorDismiss = { state.eventSink(CreateRoomRootEvents.CancelStartDM) },
@@ -195,11 +196,7 @@ private fun CreateRoomRootViewTopBar(
                 imageVector = CompoundIcons.Close(),
                 onClick = onCloseClick,
             )
-        },
-        // TopAppBar background transparent
-        colors = TopAppBarDefaults.topAppBarColors(
-            containerColor = Color.Transparent
-        )
+        }
     )
 }
 
@@ -265,7 +262,8 @@ private fun CreateRoomActionButton(
     ) {
         Icon(
             modifier = Modifier.size(24.dp),
-            tint = MaterialTheme.colorScheme.secondary,
+            //tint = MaterialTheme.colorScheme.secondary,
+            tint = ElementTheme.colors.iconSecondary,
             resourceId = iconRes,
             contentDescription = null,
         )

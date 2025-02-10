@@ -100,7 +100,6 @@ import io.element.android.libraries.designsystem.theme.components.BottomSheetDra
 import io.element.android.libraries.designsystem.theme.components.Scaffold
 import io.element.android.libraries.designsystem.theme.components.Text
 import io.element.android.libraries.designsystem.theme.components.TopAppBar
-
 import io.element.android.libraries.designsystem.theme.components.TopAppBarWithBackground
 import io.element.android.libraries.designsystem.utils.HideKeyboardWhenDisposed
 import io.element.android.libraries.designsystem.utils.KeepScreenOn
@@ -123,7 +122,7 @@ fun MessagesView(
     onRoomDetailsClick: () -> Unit,
     onEventContentClick: (event: TimelineItem.Event) -> Boolean,
     onUserDataClick: (UserId) -> Unit,
-    onLinkClick: (String) -> Unit,
+    onLinkClick: (String, Boolean) -> Unit,
     onSendLocationClick: () -> Unit,
     onCreatePollClick: () -> Unit,
     onJoinCallClick: () -> Unit,
@@ -276,7 +275,8 @@ fun MessagesView(
         },
         snackbarHost = {
             SnackbarHost(
-                snackbarHostState, modifier = Modifier.navigationBarsPadding()
+                snackbarHostState,
+                modifier = Modifier.navigationBarsPadding()
             )
         },
     )
@@ -322,7 +322,7 @@ private fun MessagesViewContent(
     state: MessagesState,
     onContentClick: (TimelineItem.Event) -> Unit,
     onUserDataClick: (UserId) -> Unit,
-    onLinkClick: (String) -> Unit,
+    onLinkClick: (String, Boolean) -> Unit,
     onReactionClick: (key: String, TimelineItem.Event) -> Unit,
     onReactionLongClick: (key: String, TimelineItem.Event) -> Unit,
     onMoreReactionsClick: (TimelineItem.Event) -> Unit,
@@ -393,7 +393,7 @@ private fun MessagesViewContent(
                         state = state.timelineState,
                         timelineProtectionState = state.timelineProtectionState,
                         onUserDataClick = onUserDataClick,
-                        onLinkClick = onLinkClick,
+                        onLinkClick = { url -> onLinkClick(url, false) },
                         onContentClick = onContentClick,
                         onMessageLongClick = onMessageLongClick,
                         onSwipeToReply = onSwipeToReply,
@@ -443,7 +443,7 @@ private fun MessagesViewContent(
 private fun MessagesViewComposerBottomSheetContents(
     subcomposing: Boolean,
     state: MessagesState,
-    onLinkClick: (String) -> Unit,
+    onLinkClick: (String, Boolean) -> Unit,
 ) {
     if (state.userEventPermissions.canSendMessage) {
         Column(modifier = Modifier.fillMaxWidth()) {
@@ -562,12 +562,14 @@ private fun CantSendMessageBanner() {
         modifier = Modifier
             .fillMaxWidth()
             .background(MaterialTheme.colorScheme.secondary)
+            //.background(ElementTheme.colors.bgSubtleSecondary)
             .padding(16.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.Center
     ) {
         Text(
             text = stringResource(id = R.string.screen_room_timeline_no_permission_to_post),
+            //color = ElementTheme.colors.textSecondary,
             color = MaterialTheme.colorScheme.onSecondary,
             style = MaterialTheme.typography.bodyMedium,
             textAlign = TextAlign.Center,
@@ -585,7 +587,7 @@ internal fun MessagesViewPreview(@PreviewParameter(MessagesStateProvider::class)
         onRoomDetailsClick = {},
         onEventContentClick = { false },
         onUserDataClick = {},
-        onLinkClick = {},
+        onLinkClick = { _, _ -> },
         onSendLocationClick = {},
         onCreatePollClick = {},
         onJoinCallClick = {},
@@ -594,6 +596,5 @@ internal fun MessagesViewPreview(@PreviewParameter(MessagesStateProvider::class)
         onViewAllPinnedMessagesClick = { },
         forceJumpToBottomVisibility = true,
         knockRequestsBannerView = {},
-
         )
 }

@@ -9,6 +9,7 @@ package io.element.android.features.messages.impl
 
 import android.app.Activity
 import android.content.Context
+import androidx.activity.compose.LocalActivity
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
@@ -40,6 +41,7 @@ import io.element.android.features.messages.impl.timeline.di.LocalTimelineItemPr
 import io.element.android.features.messages.impl.timeline.di.TimelineItemPresenterFactories
 import io.element.android.features.messages.impl.timeline.model.TimelineItem
 import io.element.android.libraries.androidutils.browser.openUrlInChromeCustomTab
+import io.element.android.libraries.androidutils.system.openUrlInExternalApp
 import io.element.android.libraries.androidutils.system.toast
 import io.element.android.libraries.architecture.NodeInputs
 import io.element.android.libraries.architecture.inputs
@@ -59,8 +61,20 @@ import io.element.android.libraries.mediaplayer.api.MediaPlayer
 import io.element.android.services.analytics.api.AnalyticsService
 import kotlinx.collections.immutable.ImmutableList
 
-@ContributesNode(RoomScope::class) class MessagesNode @AssistedInject constructor(
-    @Assisted buildContext: BuildContext, @Assisted plugins: List<Plugin>, private val room: MatrixRoom, private val analyticsService: AnalyticsService, messageComposerPresenterFactory: MessageComposerPresenter.Factory, timelinePresenterFactory: TimelinePresenter.Factory, presenterFactory: MessagesPresenter.Factory, actionListPresenterFactory: ActionListPresenter.Factory, private val timelineItemPresenterFactories: TimelineItemPresenterFactories, private val mediaPlayer: MediaPlayer, private val permalinkParser: PermalinkParser, private val knockRequestsBannerRenderer: KnockRequestsBannerRenderer
+@ContributesNode(RoomScope::class)
+class MessagesNode @AssistedInject constructor(
+    @Assisted buildContext: BuildContext,
+    @Assisted plugins: List<Plugin>,
+    private val room: MatrixRoom,
+    private val analyticsService: AnalyticsService,
+    messageComposerPresenterFactory: MessageComposerPresenter.Factory,
+    timelinePresenterFactory: TimelinePresenter.Factory,
+    presenterFactory: MessagesPresenter.Factory,
+    actionListPresenterFactory: ActionListPresenter.Factory,
+    private val timelineItemPresenterFactories: TimelineItemPresenterFactories,
+    private val mediaPlayer: MediaPlayer,
+    private val permalinkParser: PermalinkParser,
+    private val knockRequestsBannerRenderer: KnockRequestsBannerRenderer
 ) : Node(buildContext, plugins = plugins), MessagesNavigator {
     private val presenter = presenterFactory.create(
         navigator = this,
@@ -110,7 +124,10 @@ import kotlinx.collections.immutable.ImmutableList
         // Note: cannot use `callbacks.all { it.onEventClick(event) }` because:
         // - if callbacks is empty, it will return true and we want to return false.
         // - if a callback returns false, the other callback will not be invoked.
-        return callbacks.takeIf { it.isNotEmpty() }?.map { it.onEventClick(event) }?.all { it }.orFalse()
+        return callbacks.takeIf { it.isNotEmpty() }
+            ?.map { it.onEventClick(event) }
+            ?.all { it }
+            .orFalse()
     }
 
     private fun onUserDataClick(userId: UserId) {
@@ -122,6 +139,7 @@ import kotlinx.collections.immutable.ImmutableList
         darkTheme: Boolean,
         url: String,
         eventSink: (TimelineEvents) -> Unit,
+        customTab: Boolean
     ) {
         when (val permalink = permalinkParser.parse(url)) {
             is PermalinkData.UserLink -> {
@@ -132,7 +150,14 @@ import kotlinx.collections.immutable.ImmutableList
             is PermalinkData.RoomLink -> {
                 handleRoomLinkClick(activity, permalink, eventSink)
             }
-            is PermalinkData.FallbackLink, is PermalinkData.RoomEmailInviteLink -> {
+            is PermalinkData.FallbackLink -> {
+                if (customTab) {
+                    activity.openUrlInChromeCustomTab(null, darkTheme, url)
+                } else {
+                    activity.openUrlInExternalApp(url)
+                }
+            }
+            is PermalinkData.RoomEmailInviteLink -> {
                 activity.openUrlInChromeCustomTab(null, darkTheme, url)
             }
         }
@@ -206,7 +231,8 @@ import kotlinx.collections.immutable.ImmutableList
 
     @Composable
     override fun View(modifier: Modifier) {
-        val activity = LocalContext.current as Activity
+//        val activity = LocalContext.current as Activity
+        val activity = requireNotNull(LocalActivity.current)
         val isDark = ElementTheme.isLightTheme.not()
         CompositionLocalProvider(
             LocalTimelineItemPresenterFactories provides timelineItemPresenterFactories,
@@ -224,7 +250,7 @@ import kotlinx.collections.immutable.ImmutableList
                 onRoomDetailsClick = this::onRoomDetailsClick,
                 onEventContentClick = this::onEventClick,
                 onUserDataClick = this::onUserDataClick,
-                onLinkClick = { url -> onLinkClick(activity, isDark, url, state.timelineState.eventSink) },
+                onLinkClick = { url, customTab -> onLinkClick(activity, isDark, url, state.timelineState.eventSink, customTab) },
                 onSendLocationClick = this::onSendLocationClick,
                 onCreatePollClick = this::onCreatePollClick,
                 onJoinCallClick = this::onJoinCallClick,
@@ -233,7 +259,8 @@ import kotlinx.collections.immutable.ImmutableList
                 onViewAllPinnedMessagesClick = this::onViewAllPinnedMessagesClick,
                 knockRequestsBannerView = {
                     knockRequestsBannerRenderer.View(
-                        modifier = Modifier, onViewRequestsClick = this::onViewKnockRequestsClick
+                        modifier = Modifier,
+                        onViewRequestsClick = this::onViewKnockRequestsClick
                     )
                 },
                 modifier = modifier,

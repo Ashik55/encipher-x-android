@@ -28,7 +28,6 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ListItemDefaults
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.material3.ripple
 import androidx.compose.runtime.Composable
@@ -257,7 +256,7 @@ private fun MessageSummary(
 ) {
     val content: @Composable () -> Unit
     val icon: @Composable () -> Unit = { Avatar(avatarData = event.senderAvatar.copy(size = AvatarSize.MessageActionSender)) }
-    val contentStyle = ElementTheme.typography.fontBodyMdRegular.copy(color = MaterialTheme.colorScheme.secondary)
+    val contentStyle = ElementTheme.typography.fontBodyMdRegular.copy(color = ElementTheme.colors.textSecondary)
 
     @Composable
     fun ContentForBody(body: String) {
@@ -335,7 +334,7 @@ private fun MessageSummary(
                 Text(
                     text = sentTimeFull,
                     style = ElementTheme.typography.fontBodyXsRegular,
-                    color = MaterialTheme.colorScheme.secondary,
+                    color = ElementTheme.colors.textSecondary,
                     textAlign = TextAlign.End,
                 )
             }
@@ -382,7 +381,7 @@ private fun EmojiReactionsRow(
             Icon(
                 painter = painterResource(id = R.drawable.ic_dots),
                 contentDescription = stringResource(id = CommonStrings.a11y_react_with_other_emojis),
-                tint = MaterialTheme.colorScheme.secondary,
+                tint = ElementTheme.colors.iconSecondary,
                 modifier = Modifier
                     .size(24.dp)
                     .clickable(

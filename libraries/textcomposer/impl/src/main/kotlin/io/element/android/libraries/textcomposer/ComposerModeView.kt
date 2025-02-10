@@ -90,7 +90,8 @@ private fun EditingModeView(
         Icon(
             imageVector = ImageVector.vectorResource(id = R.drawable.ic_edit_text),
             contentDescription = stringResource(CommonStrings.common_editing),
-            tint = ElementTheme.materialColors.secondary,
+//            tint = ElementTheme.materialColors.secondary,
+            tint = ElementTheme.colors.iconSecondary,
             modifier = Modifier
                 .padding(vertical = 8.dp)
                 .size(16.dp),
@@ -99,7 +100,8 @@ private fun EditingModeView(
             text = text,
             style = ElementTheme.typography.fontBodySmRegular,
             textAlign = TextAlign.Start,
-            color = ElementTheme.materialColors.secondary,
+            //color = ElementTheme.materialColors.secondary,
+            color = ElementTheme.colors.textSecondary,
             modifier = Modifier
                 .padding(vertical = 8.dp)
                 .weight(1f)
@@ -107,7 +109,8 @@ private fun EditingModeView(
         Icon(
             imageVector = CompoundIcons.Close(),
             contentDescription = stringResource(CommonStrings.action_close),
-            tint = ElementTheme.materialColors.secondary,
+            //tint = ElementTheme.materialColors.secondary,
+            tint = ElementTheme.colors.iconSecondary,
             modifier = Modifier
                 .padding(top = 8.dp, bottom = 8.dp, start = 16.dp, end = 12.dp)
                 .size(16.dp)
@@ -142,7 +145,8 @@ private fun ReplyToModeView(
         Icon(
             imageVector = CompoundIcons.Close(),
             contentDescription = stringResource(CommonStrings.action_close),
-            tint = MaterialTheme.colorScheme.secondary,
+            //tint = MaterialTheme.colorScheme.secondary,
+            tint = ElementTheme.colors.iconSecondary,
             modifier = Modifier
                 .padding(end = 4.dp, top = 4.dp, start = 8.dp, bottom = 16.dp)
                 .size(16.dp)

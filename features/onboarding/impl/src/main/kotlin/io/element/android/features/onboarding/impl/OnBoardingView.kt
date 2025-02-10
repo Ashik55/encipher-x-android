@@ -56,6 +56,7 @@ import io.element.android.libraries.designsystem.preview.PreviewsDayNight
 import io.element.android.libraries.designsystem.theme.components.Button
 import io.element.android.libraries.designsystem.theme.components.IconSource
 import io.element.android.libraries.designsystem.theme.components.Text
+import io.element.android.libraries.designsystem.theme.components.TextButton
 import io.element.android.libraries.testtags.TestTags
 import io.element.android.libraries.testtags.testTag
 import io.element.android.libraries.ui.strings.CommonStrings
@@ -253,7 +254,6 @@ private fun PageIndicator(totalPages: Int, currentPage: Int, onPageChange: (Int)
     }
 }
 
-
 @PreviewsDayNight
 @Composable
 internal fun OnBoardingViewPreview(
@@ -266,4 +266,3 @@ internal fun OnBoardingViewPreview(
         onPageChange = {}
     )
 }
-

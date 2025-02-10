@@ -42,6 +42,7 @@ import io.element.android.libraries.designsystem.components.WelcomeIcon
 import io.element.android.libraries.designsystem.components.WelcomePageTitle
 import io.element.android.libraries.designsystem.preview.ElementPreview
 import io.element.android.libraries.designsystem.preview.PreviewsDayNight
+import io.element.android.libraries.designsystem.text.buildAnnotatedStringWithStyledPart
 import io.element.android.libraries.designsystem.theme.components.Button
 import io.element.android.libraries.designsystem.theme.components.ButtonSize
 import io.element.android.libraries.designsystem.theme.components.TextButton

@@ -57,8 +57,6 @@ import io.element.android.features.ftue.api.FtueEntryPoint
 import io.element.android.features.ftue.api.state.FtueService
 import io.element.android.features.ftue.api.state.FtueState
 import io.element.android.features.logout.api.LogoutEntryPoint
-import io.element.android.features.networkmonitor.api.NetworkMonitor
-import io.element.android.features.networkmonitor.api.NetworkStatus
 import io.element.android.features.preferences.api.PreferencesEntryPoint
 import io.element.android.features.roomdirectory.api.RoomDescription
 import io.element.android.features.roomdirectory.api.RoomDirectoryEntryPoint
@@ -85,7 +83,6 @@ import io.element.android.libraries.matrix.api.core.RoomIdOrAlias
 import io.element.android.libraries.matrix.api.core.UserId
 import io.element.android.libraries.matrix.api.core.toRoomIdOrAlias
 import io.element.android.libraries.matrix.api.permalink.PermalinkData
-import io.element.android.libraries.matrix.api.sync.SyncState
 import io.element.android.libraries.matrix.api.verification.SessionVerificationRequestDetails
 import io.element.android.libraries.matrix.api.verification.SessionVerificationServiceListener
 import io.element.android.libraries.preferences.api.store.EnableNativeSlidingSyncUseCase
@@ -118,7 +115,6 @@ class LoggedInFlowNode @AssistedInject constructor(
     private val userProfileEntryPoint: UserProfileEntryPoint,
     private val ftueEntryPoint: FtueEntryPoint,
     private val coroutineScope: CoroutineScope,
-    private val networkMonitor: NetworkMonitor,
     private val ftueService: FtueService,
     private val roomDirectoryEntryPoint: RoomDirectoryEntryPoint,
     private val shareEntryPoint: ShareEntryPoint,
@@ -160,6 +156,7 @@ class LoggedInFlowNode @AssistedInject constructor(
 
     override fun onBuilt() {
         super.onBuilt()
+
         lifecycle.subscribe(
             onCreate = {
                 appNavigationStateService.onNavigateToSession(id, matrixClient.sessionId)
@@ -178,12 +175,6 @@ class LoggedInFlowNode @AssistedInject constructor(
                     }
                     .launchIn(lifecycleScope)
             },
-            onStop = {
-                coroutineScope.launch {
-                    // Counterpart startSync is done in observeSyncStateAndNetworkStatus method.
-                    syncService.stopSync()
-                }
-            },
             onDestroy = {
                 appNavigationStateService.onLeavingSpace(id)
                 appNavigationStateService.onLeavingSession(id)
@@ -191,37 +182,11 @@ class LoggedInFlowNode @AssistedInject constructor(
                 matrixClient.sessionVerificationService().setListener(null)
             }
         )
-        observeSyncStateAndNetworkStatus()
         setupSendingQueue()
     }
 
     private fun setupSendingQueue() {
         sendingQueue.launchIn(lifecycleScope)
-    }
-
-    @OptIn(FlowPreview::class)
-    private fun observeSyncStateAndNetworkStatus() {
-        lifecycleScope.launch {
-            repeatOnLifecycle(Lifecycle.State.STARTED) {
-                combine(
-                    // small debounce to avoid spamming startSync when the state is changing quickly in case of error.
-                    syncService.syncState.debounce(100),
-                    networkMonitor.connectivity
-                ) { syncState, networkStatus ->
-                    Pair(syncState, networkStatus)
-                }
-                    .onStart {
-                        // Temporary fix to ensure that the sync is started even if the networkStatus is offline.
-                        syncService.startSync()
-                    }
-                    .collect { (syncState, networkStatus) ->
-                        Timber.d("Sync state: $syncState, network status: $networkStatus")
-                        if (syncState != SyncState.Running && networkStatus == NetworkStatus.Online) {
-                            syncService.startSync()
-                        }
-                    }
-            }
-        }
     }
 
     sealed interface NavTarget : Parcelable {
@@ -621,7 +586,6 @@ class LoggedInFlowNode @AssistedInject constructor(
         }
     }
 
-
     @ContributesNode(AppScope::class)
     class PlaceholderNode @AssistedInject constructor(
         @Assisted buildContext: BuildContext,
@@ -656,4 +620,3 @@ private class AttachRoomOperation(
         }
     }
 }
-
