@@ -498,7 +498,9 @@ private fun MessagesViewTopBar(
 ) {
     TopAppBarWithBackground(navigationIcon = {
         BackButton(onClick = onBackClick)
-    }, backgroundImage = io.element.android.libraries.designsystem.R.drawable.home_top_bg, title = {
+    },
+        backgroundImage = if(ElementTheme.isLightTheme) io.element.android.libraries.designsystem.R.drawable.home_top_bg else io.element.android.libraries.designsystem.R.drawable.home_top_bg_night,
+        title = {
         val roundedCornerShape = RoundedCornerShape(8.dp)
         val titleModifier = Modifier
             .clip(roundedCornerShape)
