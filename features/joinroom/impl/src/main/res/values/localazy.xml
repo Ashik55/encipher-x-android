@@ -15,6 +15,8 @@
   <string name="screen_join_room_join_action">"Join group"</string>
   <string name="screen_join_room_knock_action">"Send request to join"</string>
   <string name="screen_join_room_knock_message_description">"Message (optional)"</string>
+  <string name="screen_join_room_loading_alert_message">"We could not display the room preview. This may be due to network or server issues."</string>
+  <string name="screen_join_room_loading_alert_title">"We couldn’t display this room preview"</string>
   <string name="screen_join_room_knock_sent_description">"You will receive an invite to join the group if your request is accepted."</string>
   <string name="screen_join_room_knock_sent_title">"Request to Join Sent"</string>
   <string name="screen_join_room_space_not_supported_description">"%1$s does not support spaces yet. You can access spaces on web."</string>
