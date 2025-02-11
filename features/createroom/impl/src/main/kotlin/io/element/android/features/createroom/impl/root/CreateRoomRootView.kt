@@ -196,7 +196,11 @@ private fun CreateRoomRootViewTopBar(
                 imageVector = CompoundIcons.Close(),
                 onClick = onCloseClick,
             )
-        }
+        },
+        // Transparent background for the TopAppBar
+        colors = TopAppBarDefaults.topAppBarColors(
+            containerColor = Color.Transparent
+        )
     )
 }
 
