@@ -189,6 +189,8 @@ class LoggedInPresenter @Inject constructor(
     }
 
     private fun reportCryptoStatusToAnalytics(verificationState: SessionVerifiedStatus, recoveryState: RecoveryState) {
+        Timber.d("Crypto status - verification: $verificationState, recovery: $recoveryState") 
+        
         // Update first the user property, to store the current status for that posthog user
         val userVerificationState = verificationState.toAnalyticsUserPropertyValue()
         val userRecoveryState = recoveryState.toAnalyticsUserPropertyValue()
@@ -206,6 +208,7 @@ class LoggedInPresenter @Inject constructor(
         val changeVerificationState = verificationState.toAnalyticsStateChangeValue()
         val changeRecoveryState = recoveryState.toAnalyticsStateChangeValue()
         if (changeVerificationState != null && changeRecoveryState != null) {
+            Timber.d("Recovery state change - verification: $changeVerificationState, recovery: $changeRecoveryState")
             analyticsService.capture(CryptoSessionStateChange(changeRecoveryState, changeVerificationState))
         }
     }
