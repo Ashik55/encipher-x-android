@@ -61,6 +61,8 @@ import timber.log.Timber
 import java.util.Optional
 import kotlin.jvm.optionals.getOrNull
 
+private const val TAG = "RoomFlow"
+
 @ContributesNode(SessionScope::class)
 class RoomFlowNode @AssistedInject constructor(
     @Assisted val buildContext: BuildContext,
@@ -107,6 +109,7 @@ class RoomFlowNode @AssistedInject constructor(
     }
 
     override fun onBuilt() {
+        Timber.tag(TAG).d("RoomFlowNode built, resolving room ID")
         super.onBuilt()
         resolveRoomId()
     }
@@ -115,9 +118,11 @@ class RoomFlowNode @AssistedInject constructor(
         lifecycleScope.launch {
             when (val i = inputs.roomIdOrAlias) {
                 is RoomIdOrAlias.Alias -> {
+                    Timber.tag(TAG).d("Resolving room alias: ${i.roomAlias}")
                     backstack.newRoot(NavTarget.Resolving(i.roomAlias))
                 }
                 is RoomIdOrAlias.Id -> {
+                    Timber.tag(TAG).d("Processing direct room ID: ${i.roomId}")
                     subscribeToRoomInfoFlow(i.roomId, inputs.serverNames)
                 }
             }
@@ -129,10 +134,12 @@ class RoomFlowNode @AssistedInject constructor(
         val isSpaceFlow = roomInfoFlow.map { it.getOrNull()?.isSpace.orFalse() }.distinctUntilChanged()
         val currentMembershipFlow = roomInfoFlow.map { it.getOrNull()?.currentUserMembership }.distinctUntilChanged()
         combine(currentMembershipFlow, isSpaceFlow) { membership, isSpace ->
-            Timber.d("Room membership: $membership")
+            Timber.tag(TAG).d("Room membership: $membership")
+            Timber.tag(TAG).d("Subscribing to room info flow for roomId: $roomId with servers: $serverNames")
             when (membership) {
                 CurrentUserMembership.JOINED -> {
                     if (isSpace) {
+                        Timber.tag(TAG).d("Navigating to JoinRoom for space: $roomId")
                         // It should not happen, but probably due to an issue in the sliding sync,
                         // we can have a space here in case the space has just been joined.
                         // So navigate to the JoinRoom target for now, which will
@@ -145,10 +152,12 @@ class RoomFlowNode @AssistedInject constructor(
                             )
                         )
                     } else {
+                        Timber.tag(TAG).d("Navigating to JoinedRoom for roomId: $roomId")
                         backstack.newRoot(NavTarget.JoinedRoom(roomId))
                     }
                 }
                 else -> {
+                    Timber.tag(TAG).d("Navigating to JoinRoom for non-joined room: $roomId with membership: $membership")
                     // Was invited or the room is not known, display the join room screen
                     backstack.newRoot(
                         NavTarget.JoinRoom(
@@ -166,6 +175,7 @@ class RoomFlowNode @AssistedInject constructor(
             membershipObserver.updates
                 .first { it.roomId == roomId && !it.isUserInRoom }
                 .run {
+                    Timber.tag(TAG).d("User left room $roomId, navigating up")
                     navigateUp()
                 }
         }
