@@ -29,7 +29,7 @@ import io.element.android.libraries.deeplink.usecase.InviteFriendsUseCase
 import io.element.android.libraries.designsystem.components.navbar.BottomNavRoute
 import io.element.android.libraries.di.SessionScope
 import io.element.android.libraries.matrix.api.core.RoomId
-import io.element.android.libraries.preferences.api.store.EnableNativeSlidingSyncUseCase
+//import io.element.android.libraries.preferences.api.store.EnableNativeSlidingSyncUseCase
 import io.element.android.services.analytics.api.AnalyticsService
 
 @ContributesNode(SessionScope::class)
@@ -41,7 +41,7 @@ class RoomListNode @AssistedInject constructor(
     private val analyticsService: AnalyticsService,
     private val acceptDeclineInviteView: AcceptDeclineInviteView,
     private val directLogoutView: DirectLogoutView,
-    private val enableNativeSlidingSyncUseCase: EnableNativeSlidingSyncUseCase,
+//    private val enableNativeSlidingSyncUseCase: EnableNativeSlidingSyncUseCase,
 ) : Node(buildContext, plugins = plugins) {
     init {
         lifecycle.subscribe(
@@ -114,13 +114,13 @@ class RoomListNode @AssistedInject constructor(
             onMenuActionClick = { onMenuActionClick(activity, it) },
             onRoomDirectorySearchClick = this::onRoomDirectorySearchClick,
 //            onBottomNavigation = this::onBottomNavigation,
-            onMigrateToNativeSlidingSyncClick = {
-                if (state.directLogoutState.canDoDirectSignOut) {
-                    state.directLogoutState.eventSink(DirectLogoutEvents.Logout(ignoreSdkError = false))
-                } else {
-                    plugins<RoomListEntryPoint.Callback>().forEach { it.onLogoutForNativeSlidingSyncMigrationNeeded() }
-                }
-            },
+//            onMigrateToNativeSlidingSyncClick = {
+//                if (state.directLogoutState.canDoDirectSignOut) {
+//                    state.directLogoutState.eventSink(DirectLogoutEvents.Logout(ignoreSdkError = false))
+//                } else {
+//                    plugins<RoomListEntryPoint.Callback>().forEach { it.onLogoutForNativeSlidingSyncMigrationNeeded() }
+//                }
+//            },
             modifier = modifier,
         ) {
             acceptDeclineInviteView.Render(
@@ -132,7 +132,7 @@ class RoomListNode @AssistedInject constructor(
         }
 
         directLogoutView.Render(state.directLogoutState) {
-            enableNativeSlidingSyncUseCase()
+//            enableNativeSlidingSyncUseCase()
         }
     }
 }

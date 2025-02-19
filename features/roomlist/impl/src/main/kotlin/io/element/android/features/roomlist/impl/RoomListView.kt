@@ -58,7 +58,7 @@ fun RoomListView(
     onMenuActionClick: (RoomListMenuAction) -> Unit,
     onRoomDirectorySearchClick: () -> Unit,
 //    onBottomNavigation: (BottomNavRoute) -> Unit,
-    onMigrateToNativeSlidingSyncClick: () -> Unit,
+//    onMigrateToNativeSlidingSyncClick: () -> Unit,
     modifier: Modifier = Modifier,
     acceptDeclineInviteView: @Composable () -> Unit,
 ) {
@@ -85,7 +85,7 @@ fun RoomListView(
                 onOpenSettings = onSettingsClick,
                 onCreateRoomClick = onCreateRoomClick,
                 onMenuActionClick = onMenuActionClick,
-                onMigrateToNativeSlidingSyncClick = onMigrateToNativeSlidingSyncClick,
+//                onMigrateToNativeSlidingSyncClick = onMigrateToNativeSlidingSyncClick,
                 modifier = Modifier.padding(top = topPadding),
 //                onBottomNavigation = onBottomNavigation,
             )
@@ -117,7 +117,7 @@ private fun RoomListScaffold(
     onOpenSettings: () -> Unit,
     onCreateRoomClick: () -> Unit,
     onMenuActionClick: (RoomListMenuAction) -> Unit,
-    onMigrateToNativeSlidingSyncClick: () -> Unit,
+//    onMigrateToNativeSlidingSyncClick: () -> Unit,
     modifier: Modifier = Modifier,
 //    onBottomNavigation: (BottomNavRoute) -> Unit,
 ) {
@@ -160,7 +160,7 @@ private fun RoomListScaffold(
                 onConfirmRecoveryKeyClick = onConfirmRecoveryKeyClick,
                 onRoomClick = ::onRoomClick,
                 onCreateRoomClick = onCreateRoomClick,
-                onMigrateToNativeSlidingSyncClick = onMigrateToNativeSlidingSyncClick,
+//                onMigrateToNativeSlidingSyncClick = onMigrateToNativeSlidingSyncClick,
                 modifier = Modifier
                     .padding(padding)
                     .consumeWindowInsets(padding)
@@ -203,7 +203,7 @@ internal fun RoomListViewPreview(@PreviewParameter(RoomListStateProvider::class)
         onMenuActionClick = {},
         onRoomDirectorySearchClick = {},
         acceptDeclineInviteView = {},
-        onMigrateToNativeSlidingSyncClick = {},
+//        onMigrateToNativeSlidingSyncClick = {},
 //        onBottomNavigation = {},
     )
 }

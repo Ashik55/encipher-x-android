@@ -66,7 +66,6 @@ fun RoomListContentView(
     onConfirmRecoveryKeyClick: () -> Unit,
     onRoomClick: (RoomListRoomSummary) -> Unit,
     onCreateRoomClick: () -> Unit,
-    onMigrateToNativeSlidingSyncClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     Box(modifier = modifier) {
@@ -92,7 +91,6 @@ fun RoomListContentView(
                     eventSink = eventSink,
                     onSetUpRecoveryClick = onSetUpRecoveryClick,
                     onConfirmRecoveryKeyClick = onConfirmRecoveryKeyClick,
-                    onMigrateToNativeSlidingSyncClick = onMigrateToNativeSlidingSyncClick,
                     onRoomClick = onRoomClick,
                 )
             }
@@ -164,7 +162,6 @@ private fun RoomsView(
     onSetUpRecoveryClick: () -> Unit,
     onConfirmRecoveryKeyClick: () -> Unit,
     onRoomClick: (RoomListRoomSummary) -> Unit,
-    onMigrateToNativeSlidingSyncClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     if (state.summaries.isEmpty() && filtersState.hasAnyFilterSelected) {
@@ -179,7 +176,6 @@ private fun RoomsView(
             onSetUpRecoveryClick = onSetUpRecoveryClick,
             onConfirmRecoveryKeyClick = onConfirmRecoveryKeyClick,
             onRoomClick = onRoomClick,
-            onMigrateToNativeSlidingSyncClick = onMigrateToNativeSlidingSyncClick,
             modifier = modifier.fillMaxSize(),
         )
     }
@@ -192,7 +188,6 @@ private fun RoomsViewList(
     onSetUpRecoveryClick: () -> Unit,
     onConfirmRecoveryKeyClick: () -> Unit,
     onRoomClick: (RoomListRoomSummary) -> Unit,
-    onMigrateToNativeSlidingSyncClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val lazyListState = rememberLazyListState()
@@ -227,14 +222,6 @@ private fun RoomsViewList(
                 item {
                     ConfirmRecoveryKeyBanner(
                         onContinueClick = onConfirmRecoveryKeyClick,
-                        onDismissClick = { updatedEventSink(RoomListEvents.DismissBanner) },
-                    )
-                }
-            }
-            SecurityBannerState.NeedsNativeSlidingSyncMigration -> {
-                item {
-                    NativeSlidingSyncMigrationBanner(
-                        onContinueClick = onMigrateToNativeSlidingSyncClick,
                         onDismissClick = { updatedEventSink(RoomListEvents.DismissBanner) },
                     )
                 }
@@ -320,6 +307,5 @@ internal fun RoomListContentViewPreview(@PreviewParameter(RoomListContentStatePr
         onConfirmRecoveryKeyClick = {},
         onRoomClick = {},
         onCreateRoomClick = {},
-        onMigrateToNativeSlidingSyncClick = {},
     )
 }

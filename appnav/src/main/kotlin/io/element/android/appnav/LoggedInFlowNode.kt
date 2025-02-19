@@ -85,7 +85,6 @@ import io.element.android.libraries.matrix.api.core.toRoomIdOrAlias
 import io.element.android.libraries.matrix.api.permalink.PermalinkData
 import io.element.android.libraries.matrix.api.verification.SessionVerificationRequestDetails
 import io.element.android.libraries.matrix.api.verification.SessionVerificationServiceListener
-import io.element.android.libraries.preferences.api.store.EnableNativeSlidingSyncUseCase
 import io.element.android.services.appnavstate.api.AppNavigationStateService
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.FlowPreview
@@ -122,7 +121,6 @@ class LoggedInFlowNode @AssistedInject constructor(
     private val sendingQueue: SendQueues,
     private val logoutEntryPoint: LogoutEntryPoint,
     private val incomingVerificationEntryPoint: IncomingVerificationEntryPoint,
-    private val enableNativeSlidingSyncUseCase: EnableNativeSlidingSyncUseCase,
     snackbarDispatcher: SnackbarDispatcher,
 ) : BaseFlowNode<LoggedInFlowNode.NavTarget>(
     backstack = BackStack(
@@ -464,9 +462,6 @@ class LoggedInFlowNode @AssistedInject constructor(
                 }
 
                 logoutEntryPoint.nodeBuilder(this, buildContext)
-                    .onSuccessfulLogoutPendingAction {
-                        enableNativeSlidingSyncUseCase()
-                    }
                     .callback(callback)
                     .build()
             }
