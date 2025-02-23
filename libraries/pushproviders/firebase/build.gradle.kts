@@ -7,6 +7,7 @@
 
 @file:Suppress("UnstableApiUsage")
 
+import config.BuildTimeConfig
 import extension.setupAnvil
 
 plugins {
@@ -34,22 +35,24 @@ android {
             resValue(
                 type = "string",
                 name = "google_app_id",
-                value = if (isEnterpriseBuild) {
-                    "1:818394930758:android:9368c25c3bad4866ccb447"
-                } else {
-                    "1:818394930758:android:9368c25c3bad4866ccb447"
-                }
+//                value = if (isEnterpriseBuild) {
+//                    "1:818394930758:android:9368c25c3bad4866ccb447"
+//                } else {
+//                    "1:818394930758:android:9368c25c3bad4866ccb447"
+//                }
+                value = BuildTimeConfig.GOOGLE_APP_ID_RELEASE,
             )
         }
         getByName("debug") {
             resValue(
                 type = "string",
                 name = "google_app_id",
-                value = if (isEnterpriseBuild) {
-                    "1:818394930758:android:9368c25c3bad4866ccb447"
-                } else {
-                    "1:818394930758:android:9368c25c3bad4866ccb447"
-                }
+//                value = if (isEnterpriseBuild) {
+//                    "1:818394930758:android:9368c25c3bad4866ccb447"
+//                } else {
+//                    "1:818394930758:android:9368c25c3bad4866ccb447"
+//                }
+                value = BuildTimeConfig.GOOGLE_APP_ID_DEBUG,
             )
         }
         register("nightly") {
@@ -58,11 +61,12 @@ android {
             resValue(
                 type = "string",
                 name = "google_app_id",
-                value = if (isEnterpriseBuild) {
-                    "1:818394930758:android:9368c25c3bad4866ccb447"
-                } else {
-                    "1:818394930758:android:9368c25c3bad4866ccb447"
-                }
+//                value = if (isEnterpriseBuild) {
+//                    "1:818394930758:android:9368c25c3bad4866ccb447"
+//                } else {
+//                    "1:818394930758:android:9368c25c3bad4866ccb447"
+//                }
+                value = BuildTimeConfig.GOOGLE_APP_ID_NIGHTLY,
             )
         }
     }
