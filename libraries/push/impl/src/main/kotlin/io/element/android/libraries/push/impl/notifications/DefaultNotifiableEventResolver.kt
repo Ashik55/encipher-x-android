@@ -96,7 +96,7 @@ class DefaultNotifiableEventResolver @Inject constructor(
         val notifiableEvent = when (content) {
             is NotificationContent.MessageLike.RoomMessage -> {
                 val senderDisambiguatedDisplayName = getDisambiguatedDisplayName(content.senderId)
-                val messageBody = descriptionFromMessageContent(content, senderDisambiguatedDisplayName)
+                val messageBody = descriptionFromMessageContent(content, senderDisambiguatedDisplayName.toString())
                 buildNotifiableMessageEvent(
                     sessionId = userId,
                     senderId = content.senderId,
@@ -129,7 +129,7 @@ class DefaultNotifiableEventResolver @Inject constructor(
                     soundName = null,
                     isRedacted = false,
                     isUpdated = false,
-                    description = descriptionFromRoomMembershipInvite(senderDisambiguatedDisplayName, isDirect),
+                    description = descriptionFromRoomMembershipInvite(senderDisambiguatedDisplayName.toString(), isDirect),
                     // TODO check if type is needed anymore
                     type = null,
                     // TODO check if title is needed anymore

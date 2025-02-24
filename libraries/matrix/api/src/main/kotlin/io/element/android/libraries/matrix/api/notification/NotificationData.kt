@@ -31,10 +31,10 @@ data class NotificationData(
     val content: NotificationContent,
     val hasMention: Boolean,
 ) {
-    fun getDisambiguatedDisplayName(userId: UserId): String = when {
+    fun getDisambiguatedDisplayName(userId: UserId): String? = when {
         senderDisplayName.isNullOrBlank() -> userId.value
         senderIsNameAmbiguous -> "$senderDisplayName ($userId)"
-        else -> senderDisplayName
+        else -> roomDisplayName
     }
 }
 
