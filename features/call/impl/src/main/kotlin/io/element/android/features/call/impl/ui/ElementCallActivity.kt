@@ -221,14 +221,17 @@ class ElementCallActivity :
         println("RoomName URL ==>> $roomName $displayName")
 
         try {
+            // Get call type from intent
+            val isAudioCall = intent?.getBooleanExtra(DefaultElementCallEntryPoint.IS_AUDIO_CALL, false) ?: false
+
             val options = JitsiMeetConferenceOptions.Builder()
 //                .setServerURL(URL("https://meet.jit.si"))
 //                .setRoom("ashik5575")
                 .setServerURL(URL("https://meet.enciph-er.com/"))
                 .setRoom(roomName)
-                .setAudioMuted(false)
-                .setVideoMuted(false)
-                .setAudioOnly(false)
+//                .setAudioMuted(false)
+//                .setVideoMuted(false)
+                .setAudioOnly(isAudioCall)
                 .apply {
                     if (displayName.isNotBlank()) {
                         setUserInfo(JitsiMeetUserInfo().apply {
