@@ -217,38 +217,19 @@ class ElementCallActivity :
 
     // Function to launch Jitsi Meet
     private fun joinJitsiMeeting(context: Context, roomName: String, displayName: String, ) {
+
         println("RoomName URL ==>> $roomName $displayName")
 
         try {
-            // Get audio manager to control audio routing
-            val audioManager = context.getSystemService(Context.AUDIO_SERVICE) as AudioManager
-
-            // Get call type from intent
-            val isAudioCall = intent?.getBooleanExtra(DefaultElementCallEntryPoint.IS_AUDIO_CALL, false) ?: false
-
             val options = JitsiMeetConferenceOptions.Builder()
+//                .setServerURL(URL("https://meet.jit.si"))
+//                .setRoom("ashik5575")
                 .setServerURL(URL("https://meet.enciph-er.com/"))
                 .setRoom(roomName)
+                .setAudioMuted(false)
+                .setVideoMuted(false)
+                .setAudioOnly(false)
                 .apply {
-                    // Set initial states based on call type
-                    if (isAudioCall) {
-                        // Audio call settings
-                        setAudioOnly(true)  // Force audio-only mode
-                        setVideoMuted(true) // Ensure video is off
-                        setAudioMuted(false) // Enable audio
-                        // Set audio to earpiece
-                        audioManager.mode = AudioManager.MODE_IN_COMMUNICATION
-                        audioManager.isSpeakerphoneOn = false
-                    } else {
-                        // Video call settings
-                        setAudioOnly(false)
-                        setVideoMuted(false) // Enable video
-                        setAudioMuted(false) // Enable audio
-                        // Set audio to speaker
-                        audioManager.mode = AudioManager.MODE_IN_COMMUNICATION
-                        audioManager.isSpeakerphoneOn = true
-                    }
-
                     if (displayName.isNotBlank()) {
                         setUserInfo(JitsiMeetUserInfo().apply {
                             this.displayName = displayName
