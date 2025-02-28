@@ -32,9 +32,7 @@ class DefaultCallWidgetProvider @Inject constructor(
         clientId: String,
         languageTag: String?,
         theme: String?,
-        callType: String?,
-        initialAudioOutput: String?,
-        initialVideoEnabled: Boolean?
+        callType: String?
     ): Result<CallWidgetProvider.GetWidgetResult> = runCatching {
         val matrixClient = matrixClientsProvider.getOrRestore(sessionId).getOrThrow()
         val room = matrixClient.getRoom(roomId) ?: error("Room not found")
@@ -48,14 +46,7 @@ class DefaultCallWidgetProvider @Inject constructor(
             languageTag = languageTag,
             theme = theme,
         ).getOrThrow().let { url ->
-            var finalUrl = "$url&call_type=$callType"
-            if (initialAudioOutput != null) {
-                finalUrl += "&initial_audio_output=$initialAudioOutput"
-            }
-            if (initialVideoEnabled != null) {
-                finalUrl += "&initial_video_enabled=$initialVideoEnabled"
-            }
-            finalUrl
+            "$url&call_type=$callType"
         }
         CallWidgetProvider.GetWidgetResult(
             driver = room.getWidgetDriver(widgetSettings).getOrThrow(),

@@ -218,9 +218,7 @@ class CallScreenPresenter @AssistedInject constructor(
                         clientId = UUID.randomUUID().toString(),
                         languageTag = languageTag,
                         theme = theme,
-                        callType = if (isAudioCall) "audio" else "video",
-                        initialAudioOutput = if (isAudioCall) "earpiece" else "speaker",
-                        initialVideoEnabled = !isAudioCall
+                        callType = if (isAudioCall) "audio" else "video"
                     ).getOrThrow()
                     Timber.tag(TAG).d("Generated call URL: ${result.url}")
                     callWidgetDriver.value = result.driver
