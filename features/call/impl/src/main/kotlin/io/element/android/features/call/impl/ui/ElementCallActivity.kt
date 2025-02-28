@@ -201,10 +201,10 @@ class ElementCallActivity :
 
         try {
             val options = JitsiMeetConferenceOptions.Builder()
-                .setServerURL(URL("https://meet.jit.si"))
-                .setRoom("ashik5575")
-//                .setServerURL(URL("https://meet.enciph-er.com/"))
-//                .setRoom(roomName)
+//                .setServerURL(URL("https://meet.jit.si"))
+//                .setRoom("ashik5575")
+                .setServerURL(URL("https://meet.enciph-er.com/"))
+                .setRoom(roomName)
                 .setAudioMuted(false)
                 .setVideoMuted(false)
                 .setAudioOnly(false)
