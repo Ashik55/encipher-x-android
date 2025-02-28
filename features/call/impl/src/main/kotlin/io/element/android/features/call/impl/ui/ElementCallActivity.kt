@@ -27,12 +27,18 @@ import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.rememberUpdatedState
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.core.app.PictureInPictureModeChangedInfo
 import androidx.core.content.IntentCompat
 import androidx.core.util.Consumer
@@ -53,6 +59,7 @@ import io.element.android.libraries.architecture.Presenter
 import io.element.android.libraries.architecture.bindings
 import io.element.android.libraries.core.log.logger.LoggerTag
 import io.element.android.libraries.designsystem.theme.ElementThemeApp
+import io.element.android.libraries.designsystem.theme.components.CircularProgressIndicator
 import io.element.android.libraries.preferences.api.store.AppPreferencesStore
 import org.jitsi.meet.sdk.JitsiMeetActivity
 import org.jitsi.meet.sdk.JitsiMeetConferenceOptions
@@ -159,12 +166,24 @@ class ElementCallActivity :
                 LaunchedEffect(state.urlState) {
                     if (state.urlState is AsyncData.Success) {
                         val url = state.urlState.data
-                        val roomId = extractRoomId(url)
-                        if (roomId?.isNotBlank() == true) {
+                        val (roomId, displayName) = extractRoomIdAndDisplayName(url)
 
-                            joinJitsiMeeting(this@ElementCallActivity, roomId, "Anonymous")
+                        println("RoomName URL ==>> $roomId $displayName")
+
+                        if (roomId?.isNotBlank() == true) {
+                            joinJitsiMeeting(this@ElementCallActivity, roomId, displayName ?: "Anonymous")
                         }
                     }
+                }
+
+
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .background(Color.Black), // Ensures blank screen
+                    contentAlignment = Alignment.Center
+                ) {
+                    CircularProgressIndicator(color = Color.White)
                 }
 
 //                CallScreenView(
@@ -181,23 +200,25 @@ class ElementCallActivity :
         }
     }
 
-    fun extractRoomId(url: String): String? {
-        val uri = Uri.parse(url)
+    fun extractRoomIdAndDisplayName(callUrl: String): Pair<String?, String?> {
+        val uri = Uri.parse(callUrl)
+        val fragment = uri.fragment // Extract the fragment part after '#?'
 
-        // Extract the fragment (everything after #)
-        val fragment = uri.fragment ?: return null
+        val params = fragment?.split("&")?.associate {
+            val (key, value) = it.split("=")
+            key to Uri.decode(value) // Decode the URL-encoded value
+        }
 
-        // Parse the fragment as a query string
-        val queryParams = Uri.parse("https://dummy.com?$fragment").queryParameterNames
-            .associateWith { key -> Uri.parse("https://dummy.com?$fragment").getQueryParameter(key) }
+        val roomId = params?.get("roomId")
+        val displayName = params?.get("displayName")
 
-        return queryParams["roomId"]
+        return Pair(roomId, displayName)
     }
 
     // Function to launch Jitsi Meet
     private fun joinJitsiMeeting(context: Context, roomName: String, displayName: String) {
 
-        println("RoomName URL ==>> $roomName")
+        println("RoomName URL ==>> $roomName $displayName")
 
         try {
             val options = JitsiMeetConferenceOptions.Builder()
@@ -215,6 +236,8 @@ class ElementCallActivity :
                         })
                     }
                 }
+                .setFeatureFlag("welcomepage.enabled", false)
+                .setFeatureFlag("prejoinpage.enabled", false)
                 .build()
 
             // Launch Jitsi Meet activity
