@@ -332,7 +332,7 @@ class ElementCallActivity :
                 webViewTarget.value = callType
                 presenter = presenterFactory.create(
                     callType,
-//                    isAudioCall,
+                    isAudioCall,
                     this
                 )
             }
