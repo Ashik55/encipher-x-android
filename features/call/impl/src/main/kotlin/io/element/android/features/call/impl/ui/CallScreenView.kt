@@ -8,12 +8,14 @@
 package io.element.android.features.call.impl.ui
 
 import android.annotation.SuppressLint
+import android.content.Context
 import android.util.Log
 import android.view.ViewGroup
 import android.webkit.ConsoleMessage
 import android.webkit.PermissionRequest
 import android.webkit.WebChromeClient
 import android.webkit.WebView
+import android.widget.Toast
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
@@ -23,6 +25,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -50,6 +53,8 @@ import io.element.android.libraries.designsystem.theme.components.Text
 import io.element.android.libraries.designsystem.theme.components.TopAppBar
 import io.element.android.libraries.ui.strings.CommonStrings
 import timber.log.Timber
+import org.jitsi.meet.sdk.*
+import java.net.URL
 
 private const val TAG = "CallWebView"
 
@@ -66,12 +71,23 @@ internal fun CallScreenView(
     pipState: PictureInPictureState,
     requestPermissions: (Array<String>, RequestPermissionCallback) -> Unit,
     modifier: Modifier = Modifier,
+    context: Context // Pass context for launching JitsiMeetActivity
 ) {
     fun handleBack() {
         if (pipState.supportPip) {
             pipState.eventSink.invoke(PictureInPictureEvents.EnterPictureInPicture)
         } else {
             state.eventSink(CallScreenEvents.Hangup)
+        }
+    }
+
+    // Launch Jitsi meeting when the state has a valid URL
+    LaunchedEffect(state.urlState) {
+        if (state.urlState is AsyncData.Success) {
+            val url = state.urlState.data
+            if (url.isNotBlank()) {
+                joinJitsiMeeting(context, url, "User Display Name") // Adjust display name as needed
+            }
         }
     }
 
@@ -109,52 +125,96 @@ internal fun CallScreenView(
                 .padding(padding)
                 .consumeWindowInsets(padding),
         ) {
-            if (state.webViewError != null) {
-                ErrorDialog(
-                    content = buildString {
-                        append(stringResource(CommonStrings.error_unknown))
-                        state.webViewError.takeIf { it.isNotEmpty() }?.let { append("\n\n").append(it) }
-                    },
-                    onSubmit = { state.eventSink(CallScreenEvents.Hangup) },
-                )
-            } else {
-                CallWebView(
-                    modifier = Modifier
-                        .padding(padding)
-                        .consumeWindowInsets(padding)
-                        .fillMaxSize(),
-                    url = state.urlState,
-                    userAgent = state.userAgent,
-                    onPermissionsRequest = { request ->
-                        val androidPermissions = mapWebkitPermissions(request.resources)
-                        val callback: RequestPermissionCallback = { request.grant(it) }
-                        requestPermissions(androidPermissions.toTypedArray(), callback)
-                    },
-                    onWebViewCreate = { webView ->
-                        val interceptor = WebViewWidgetMessageInterceptor(
-                            webView = webView,
-                            onError = { state.eventSink(CallScreenEvents.OnWebViewError(it)) },
-                        )
-                        state.eventSink(CallScreenEvents.SetupMessageChannels(interceptor))
-                        val pipController = WebViewPipController(webView)
-                        pipState.eventSink(PictureInPictureEvents.SetPipController(pipController))
-                    }
-                )
-                when (state.urlState) {
-                    AsyncData.Uninitialized,
-                    is AsyncData.Loading ->
-                        ProgressDialog(text = stringResource(id = CommonStrings.common_please_wait))
-                    is AsyncData.Failure ->
-                        ErrorDialog(
-                            content = state.urlState.error.message.orEmpty(),
-                            onSubmit = { state.eventSink(CallScreenEvents.Hangup) },
-                        )
-                    is AsyncData.Success -> Unit
-                }
+            when (state.urlState) {
+                AsyncData.Uninitialized, is AsyncData.Loading ->
+                    ProgressDialog(text = stringResource(id = CommonStrings.common_please_wait))
+                is AsyncData.Failure ->
+                    ErrorDialog(
+                        content = state.urlState.error.message.orEmpty(),
+                        onSubmit = { state.eventSink(CallScreenEvents.Hangup) },
+                    )
+                is AsyncData.Success -> Unit // Jitsi will launch automatically
             }
+
+            //Element Call
+//            if (state.webViewError != null) {
+//                ErrorDialog(
+//                    content = buildString {
+//                        append(stringResource(CommonStrings.error_unknown))
+//                        state.webViewError.takeIf { it.isNotEmpty() }?.let { append("\n\n").append(it) }
+//                    },
+//                    onSubmit = { state.eventSink(CallScreenEvents.Hangup) },
+//                )
+//            } else {
+//                CallWebView(
+//                    modifier = Modifier
+//                        .padding(padding)
+//                        .consumeWindowInsets(padding)
+//                        .fillMaxSize(),
+//                    url = state.urlState,
+//                    userAgent = state.userAgent,
+//                    onPermissionsRequest = { request ->
+//                        val androidPermissions = mapWebkitPermissions(request.resources)
+//                        val callback: RequestPermissionCallback = { request.grant(it) }
+//                        requestPermissions(androidPermissions.toTypedArray(), callback)
+//                    },
+//                    onWebViewCreate = { webView ->
+//                        val interceptor = WebViewWidgetMessageInterceptor(
+//                            webView = webView,
+//                            onError = { state.eventSink(CallScreenEvents.OnWebViewError(it)) },
+//                        )
+//                        state.eventSink(CallScreenEvents.SetupMessageChannels(interceptor))
+//                        val pipController = WebViewPipController(webView)
+//                        pipState.eventSink(PictureInPictureEvents.SetPipController(pipController))
+//                    }
+//                )
+//                when (state.urlState) {
+//                    AsyncData.Uninitialized,
+//                    is AsyncData.Loading ->
+//                        ProgressDialog(text = stringResource(id = CommonStrings.common_please_wait))
+//                    is AsyncData.Failure ->
+//                        ErrorDialog(
+//                            content = state.urlState.error.message.orEmpty(),
+//                            onSubmit = { state.eventSink(CallScreenEvents.Hangup) },
+//                        )
+//                    is AsyncData.Success -> Unit
+//                }
+//            }
         }
     }
 }
+
+
+// Function to launch Jitsi Meet
+private fun joinJitsiMeeting(context: Context, roomName: String, displayName: String) {
+
+    println("RoomName URL ==>> $roomName")
+
+    try {
+        val options = JitsiMeetConferenceOptions.Builder()
+            .setServerURL(URL("https://meet.jit.si"))
+            .setRoom("ashik5575")
+            .setAudioMuted(false)
+            .setVideoMuted(false)
+            .setAudioOnly(false)
+            .apply {
+                if (displayName.isNotBlank()) {
+                    setUserInfo(JitsiMeetUserInfo().apply {
+                        this.displayName = displayName
+                    })
+                }
+            }
+            .build()
+
+        // Launch Jitsi Meet activity
+        JitsiMeetActivity.launch(context, options)
+
+    } catch (e: Exception) {
+        Toast.makeText(context, "Error joining meeting: ${e.message}", Toast.LENGTH_LONG).show()
+        e.printStackTrace()
+    }
+}
+
 
 @Composable
 private fun CallWebView(
@@ -239,26 +299,26 @@ private fun WebView.setup(
     }
 }
 
-@PreviewsDayNight
-@Composable
-internal fun CallScreenViewPreview(
-    @PreviewParameter(CallScreenStateProvider::class) state: CallScreenState,
-) = ElementPreview {
-    CallScreenView(
-        state = state,
-        pipState = aPictureInPictureState(),
-        requestPermissions = { _, _ -> },
-    )
-}
-
-@PreviewsDayNight
-@Composable
-internal fun CallScreenPipViewPreview(
-    @PreviewParameter(PictureInPictureStateProvider::class) state: PictureInPictureState,
-) = ElementPreview {
-    CallScreenView(
-        state = aCallScreenState(),
-        pipState = state,
-        requestPermissions = { _, _ -> },
-    )
-}
+//@PreviewsDayNight
+//@Composable
+//internal fun CallScreenViewPreview(
+//    @PreviewParameter(CallScreenStateProvider::class) state: CallScreenState,
+//) = ElementPreview {
+//    CallScreenView(
+//        state = state,
+//        pipState = aPictureInPictureState(),
+//        requestPermissions = { _, _ -> },
+//    )
+//}
+//
+//@PreviewsDayNight
+//@Composable
+//internal fun CallScreenPipViewPreview(
+//    @PreviewParameter(PictureInPictureStateProvider::class) state: PictureInPictureState,
+//) = ElementPreview {
+//    CallScreenView(
+//        state = aCallScreenState(),
+//        pipState = state,
+//        requestPermissions = { _, _ -> },
+//    )
+//}

@@ -9,16 +9,19 @@ package io.element.android.features.call.impl.ui
 
 import android.Manifest
 import android.app.PictureInPictureParams
+import android.content.Context
 import android.content.Intent
 import android.content.res.Configuration
 import android.media.AudioAttributes
 import android.media.AudioFocusRequest
 import android.media.AudioManager
+import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.util.Rational
 import android.view.WindowManager
 import android.webkit.PermissionRequest
+import android.widget.Toast
 import androidx.activity.compose.setContent
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
@@ -45,12 +48,17 @@ import io.element.android.features.call.impl.pip.PipView
 import io.element.android.features.call.impl.services.CallForegroundService
 import io.element.android.features.call.impl.utils.CallIntentDataParser
 import io.element.android.features.enterprise.api.EnterpriseService
+import io.element.android.libraries.architecture.AsyncData
 import io.element.android.libraries.architecture.Presenter
 import io.element.android.libraries.architecture.bindings
 import io.element.android.libraries.core.log.logger.LoggerTag
 import io.element.android.libraries.designsystem.theme.ElementThemeApp
 import io.element.android.libraries.preferences.api.store.AppPreferencesStore
+import org.jitsi.meet.sdk.JitsiMeetActivity
+import org.jitsi.meet.sdk.JitsiMeetConferenceOptions
+import org.jitsi.meet.sdk.JitsiMeetUserInfo
 import timber.log.Timber
+import java.net.URL
 import javax.inject.Inject
 
 private val loggerTag = LoggerTag("ElementCallActivity")
@@ -82,8 +90,31 @@ class ElementCallActivity :
 
     private var eventSink: ((CallScreenEvents) -> Unit)? = null
 
+//    @RequiresApi(Build.VERSION_CODES.S)
+//    private val requiredPermissions = arrayOf(
+//        Manifest.permission.CAMERA,
+//        Manifest.permission.RECORD_AUDIO,
+//        Manifest.permission.BLUETOOTH_CONNECT
+//    )
+//
+//    private val permissionLauncher = registerForActivityResult(
+//        ActivityResultContracts.RequestMultiplePermissions()
+//    ) { permissions ->
+//        val allGranted = permissions.entries.all { it.value }
+//        if (!allGranted) {
+//            Toast.makeText(
+//                this,
+//                "Camera and microphone permissions are required for video conferencing",
+//                Toast.LENGTH_LONG
+//            ).show()
+//        }
+//    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        // Request permissions
+//        permissionLauncher.launch(requiredPermissions)
 
         applicationContext.bindings<CallBindings>().inject(this)
 
@@ -105,13 +136,13 @@ class ElementCallActivity :
             updateUiMode(resources.configuration)
         }
 
-        pictureInPicturePresenter.setPipView(this)
+//        pictureInPicturePresenter.setPipView(this)
 
         audioManager = getSystemService(AUDIO_SERVICE) as AudioManager
 
         setContent {
-            val pipState = pictureInPicturePresenter.present()
-            ListenToAndroidEvents(pipState)
+//            val pipState = pictureInPicturePresenter.present()
+//            ListenToAndroidEvents(pipState)
             ElementThemeApp(
                 appPreferencesStore = appPreferencesStore,
                 enterpriseService = enterpriseService,
@@ -124,15 +155,73 @@ class ElementCallActivity :
                         setCallIsActive()
                     }
                 }
-                CallScreenView(
-                    state = state,
-                    pipState = pipState,
-                    requestPermissions = { permissions, callback ->
-                        requestPermissionCallback = callback
-                        requestPermissionsLauncher.launch(permissions)
+
+                LaunchedEffect(state.urlState) {
+                    if (state.urlState is AsyncData.Success) {
+                        val url = state.urlState.data
+                        val roomId = extractRoomId(url)
+                        if (roomId?.isNotBlank() == true) {
+
+                            joinJitsiMeeting(this@ElementCallActivity, roomId, "Anonymous")
+                        }
                     }
-                )
+                }
+
+//                CallScreenView(
+//                    context = this@ElementCallActivity, // Pass context
+//                    state = state,
+//                    pipState = pipState,
+//                    requestPermissions = { permissions, callback ->
+//                        requestPermissionCallback = callback
+//                        requestPermissionsLauncher.launch(permissions)
+//                    }
+//
+//                )
             }
+        }
+    }
+
+    fun extractRoomId(url: String): String? {
+        val uri = Uri.parse(url)
+
+        // Extract the fragment (everything after #)
+        val fragment = uri.fragment ?: return null
+
+        // Parse the fragment as a query string
+        val queryParams = Uri.parse("https://dummy.com?$fragment").queryParameterNames
+            .associateWith { key -> Uri.parse("https://dummy.com?$fragment").getQueryParameter(key) }
+
+        return queryParams["roomId"]
+    }
+
+    // Function to launch Jitsi Meet
+    private fun joinJitsiMeeting(context: Context, roomName: String, displayName: String) {
+
+        println("RoomName URL ==>> $roomName")
+
+        try {
+            val options = JitsiMeetConferenceOptions.Builder()
+                .setServerURL(URL("https://meet.jit.si"))
+                .setRoom("ashik5575")
+//                .setServerURL(URL("https://meet.enciph-er.com/"))
+//                .setRoom(roomName)
+                .setAudioMuted(false)
+                .setVideoMuted(false)
+                .setAudioOnly(false)
+                .apply {
+                    if (displayName.isNotBlank()) {
+                        setUserInfo(JitsiMeetUserInfo().apply {
+                            this.displayName = displayName
+                        })
+                    }
+                }
+                .build()
+
+            // Launch Jitsi Meet activity
+            JitsiMeetActivity.launch(context, options)
+        } catch (e: Exception) {
+            Toast.makeText(context, "Error joining meeting: ${e.message}", Toast.LENGTH_LONG).show()
+            e.printStackTrace()
         }
     }
 
@@ -244,7 +333,6 @@ class ElementCallActivity :
         return registerForActivityResult(
             ActivityResultContracts.RequestMultiplePermissions()
         ) { permissions ->
-
 
             val callback = requestPermissionCallback ?: return@registerForActivityResult
             val permissionsToGrant = mutableListOf<String>()

@@ -35,7 +35,7 @@ plugins {
     alias(libs.plugins.licensee)
     alias(libs.plugins.kotlin.serialization)
     // To be able to update the firebase.xml files, uncomment and build the project -- Firebase FCM Added
-     id("com.google.gms.google-services")
+    id("com.google.gms.google-services")
 }
 
 setupKover()
@@ -211,7 +211,7 @@ androidComponents {
     }
 
     val reportingExtension: ReportingExtension = project.extensions.getByType(ReportingExtension::class.java)
-    configureLicensesTasks(reportingExtension)
+//    configureLicensesTasks(reportingExtension)
 }
 
 // Knit
@@ -280,6 +280,9 @@ dependencies {
 
     implementation(libs.matrix.emojibase.bindings)
 
+    // Jitsi Meet SDK
+    implementation("org.jitsi.react:jitsi-meet-sdk:11.0.4")
+
     testImplementation(libs.test.junit)
     testImplementation(libs.test.robolectric)
     testImplementation(libs.coroutines.test)
@@ -299,43 +302,43 @@ tasks.withType<GenerateBuildConfig>().configureEach {
     android.defaultConfig.buildConfigField("String", "GIT_BRANCH_NAME", "\"$gitBranchName\"")
 }
 
-licensee {
-    allow("Apache-2.0")
-    allow("MIT")
-    allow("BSD-2-Clause")
-    allowUrl("https://opensource.org/licenses/MIT")
-    allowUrl("https://developer.android.com/studio/terms.html")
-    allowUrl("https://www.zetetic.net/sqlcipher/license/")
-    allowUrl("https://jsoup.org/license")
-    allowUrl("https://asm.ow2.io/license.html")
-    allowUrl("https://www.gnu.org/licenses/agpl-3.0.txt")
-    ignoreDependencies("com.github.matrix-org", "matrix-analytics-events")
-    // Ignore dependency that are not third-party licenses to us.
-    ignoreDependencies(groupId = "io.element.android")
-}
+//licensee {
+//    allow("Apache-2.0")
+//    allow("MIT")
+//    allow("BSD-2-Clause")
+//    allowUrl("https://opensource.org/licenses/MIT")
+//    allowUrl("https://developer.android.com/studio/terms.html")
+//    allowUrl("https://www.zetetic.net/sqlcipher/license/")
+//    allowUrl("https://jsoup.org/license")
+//    allowUrl("https://asm.ow2.io/license.html")
+//    allowUrl("https://www.gnu.org/licenses/agpl-3.0.txt")
+//    ignoreDependencies("com.github.matrix-org", "matrix-analytics-events")
+//    // Ignore dependency that are not third-party licenses to us.
+//    ignoreDependencies(groupId = "io.element.android")
+//}
 
-fun Project.configureLicensesTasks(reportingExtension: ReportingExtension) {
-    androidComponents {
-        onVariants { variant ->
-            val capitalizedVariantName = variant.name.replaceFirstChar {
-                if (it.isLowerCase()) {
-                    it.titlecase(Locale.getDefault())
-                } else {
-                    it.toString()
-                }
-            }
-            val artifactsFile = reportingExtension.file("licensee/android$capitalizedVariantName/artifacts.json")
-
-            val copyArtifactsTask =
-                project.tasks.register<AssetCopyTask>("copy${capitalizedVariantName}LicenseeReportToAssets") {
-                    inputFile.set(artifactsFile)
-                    targetFileName.set("licensee-artifacts.json")
-                }
-            variant.sources.assets?.addGeneratedSourceDirectory(
-                copyArtifactsTask,
-                AssetCopyTask::outputDirectory,
-            )
-            copyArtifactsTask.dependsOn("licenseeAndroid$capitalizedVariantName")
-        }
-    }
-}
+//fun Project.configureLicensesTasks(reportingExtension: ReportingExtension) {
+//    androidComponents {
+//        onVariants { variant ->
+//            val capitalizedVariantName = variant.name.replaceFirstChar {
+//                if (it.isLowerCase()) {
+//                    it.titlecase(Locale.getDefault())
+//                } else {
+//                    it.toString()
+//                }
+//            }
+//            val artifactsFile = reportingExtension.file("licensee/android$capitalizedVariantName/artifacts.json")
+//
+//            val copyArtifactsTask =
+//                project.tasks.register<AssetCopyTask>("copy${capitalizedVariantName}LicenseeReportToAssets") {
+//                    inputFile.set(artifactsFile)
+//                    targetFileName.set("licensee-artifacts.json")
+//                }
+//            variant.sources.assets?.addGeneratedSourceDirectory(
+//                copyArtifactsTask,
+//                AssetCopyTask::outputDirectory,
+//            )
+//            copyArtifactsTask.dependsOn("licenseeAndroid$capitalizedVariantName")
+//        }
+//    }
+//}

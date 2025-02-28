@@ -48,6 +48,7 @@ dependencies {
     implementation(libs.network.retrofit)
     implementation(libs.serialization.json)
     api(projects.features.call.api)
+    implementation(libs.jitsi.meet.sdk)
 
     testImplementation(libs.coroutines.test)
     testImplementation(libs.molecule.runtime)
