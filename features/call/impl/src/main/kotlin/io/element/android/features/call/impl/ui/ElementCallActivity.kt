@@ -171,7 +171,9 @@ class ElementCallActivity :
                         println("RoomName URL ==>> $roomId $displayName")
 
                         if (roomId?.isNotBlank() == true) {
-                            joinJitsiMeeting(this@ElementCallActivity, roomId, displayName ?: "Anonymous")
+                            // Get isAudioCall from intent
+                            val isAudioCall = intent?.getBooleanExtra(DefaultElementCallEntryPoint.IS_AUDIO_CALL, false) ?: false
+                            joinJitsiMeeting(this@ElementCallActivity, roomId, displayName ?: "Anonymous", isAudioCall)
                         }
                     }
                 }
@@ -216,19 +218,17 @@ class ElementCallActivity :
     }
 
     // Function to launch Jitsi Meet
-    private fun joinJitsiMeeting(context: Context, roomName: String, displayName: String, ) {
-
+    private fun joinJitsiMeeting(context: Context, roomName: String, displayName: String, isAudioCall: Boolean) {
         println("RoomName URL ==>> $roomName $displayName")
 
         try {
             val options = JitsiMeetConferenceOptions.Builder()
-//                .setServerURL(URL("https://meet.jit.si"))
-//                .setRoom("ashik5575")
                 .setServerURL(URL("https://meet.enciph-er.com/"))
                 .setRoom(roomName)
-                .setAudioMuted(false)
-                .setVideoMuted(false)
-                .setAudioOnly(false)
+                // Configure audio/video based on call type
+                .setAudioMuted(false)  // Always enable audio initially
+                .setVideoMuted(isAudioCall)  // Video muted for audio calls
+                .setAudioOnly(isAudioCall)   // Audio-only mode for audio calls
                 .apply {
                     if (displayName.isNotBlank()) {
                         setUserInfo(JitsiMeetUserInfo().apply {
@@ -238,6 +238,11 @@ class ElementCallActivity :
                 }
                 .setFeatureFlag("welcomepage.enabled", false)
                 .setFeatureFlag("prejoinpage.enabled", false)
+                // Set additional feature flags for audio calls
+                .setFeatureFlag("startWithAudioMuted", false)
+                .setFeatureFlag("startWithVideoMuted", isAudioCall)
+                .setFeatureFlag("startAudioOnly", isAudioCall)
+                .setFeatureFlag("speakerphone", !isAudioCall) // Use speaker for video calls, earpiece for audio calls
                 .build()
 
             // Launch Jitsi Meet activity

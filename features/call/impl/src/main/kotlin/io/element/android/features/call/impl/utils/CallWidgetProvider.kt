@@ -18,7 +18,9 @@ interface CallWidgetProvider {
         clientId: String,
         languageTag: String?,
         theme: String?,
-        callType: String?
+        callType: String?,
+        initialAudioOutput: String? = null,
+        initialVideoEnabled: Boolean? = null
     ): Result<GetWidgetResult>
 
     data class GetWidgetResult(
