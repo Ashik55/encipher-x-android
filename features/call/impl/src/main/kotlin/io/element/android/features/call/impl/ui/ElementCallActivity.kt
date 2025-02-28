@@ -216,7 +216,7 @@ class ElementCallActivity :
     }
 
     // Function to launch Jitsi Meet
-    private fun joinJitsiMeeting(context: Context, roomName: String, displayName: String) {
+    private fun joinJitsiMeeting(context: Context, roomName: String, displayName: String, ) {
 
         println("RoomName URL ==>> $roomName $displayName")
 
