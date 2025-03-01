@@ -42,3 +42,7 @@
 }
 
 -keep class io.element.android.x.di.** { *; }
+
+# Facebook Fresco WebP Support
+-dontwarn com.facebook.imagepipeline.nativecode.WebpTranscoder
+-keep class com.facebook.imagepipeline.nativecode.** { *; }
