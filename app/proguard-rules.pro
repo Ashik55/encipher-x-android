@@ -46,3 +46,28 @@
 # Facebook Fresco WebP Support
 -dontwarn com.facebook.imagepipeline.nativecode.WebpTranscoder
 -keep class com.facebook.imagepipeline.nativecode.** { *; }
+
+# WebRTC
+-keep class org.webrtc.** { *; }
+-dontwarn org.chromium.build.BuildHooksAndroid
+
+# Jitsi Meet SDK
+-keep class org.jitsi.meet.** { *; }
+-keep class org.jitsi.meet.sdk.** { *; }
+
+# React Native related rules
+-keep class com.facebook.react.bridge.CatalystInstanceImpl { *; }
+-keep class com.facebook.react.bridge.ExecutorToken { *; }
+-keep class com.facebook.react.bridge.JavaScriptExecutor { *; }
+-keep class com.facebook.react.bridge.ModuleRegistryHolder { *; }
+-keep class com.facebook.react.bridge.ReadableType { *; }
+-keep class com.facebook.react.bridge.queue.NativeRunnable { *; }
+-keep class com.facebook.react.devsupport.** { *; }
+
+-dontwarn com.facebook.react.devsupport.**
+-dontwarn com.google.appengine.**
+-dontwarn com.squareup.okhttp.**
+-dontwarn javax.servlet.**
+
+# Rule to avoid build errors related to SVGs
+-keep public class com.horcrux.svg.** {*;}

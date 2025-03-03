@@ -145,7 +145,7 @@ private fun ColumnScope.ManageAppSection(
     if (state.showNotificationSettings) {
         ListItem(
             headlineContent = { Text(stringResource(id = R.string.screen_notification_settings_title)) },
-            leadingContent = ListItemContent.Icon(IconSource.Vector( ImageVector.vectorResource(id = R.drawable.ic_notification))),
+            leadingContent = ListItemContent.Icon(IconSource.Vector(CompoundIcons.NotificationsSolid())),
             onClick = onOpenNotificationSettings,
         )
     }

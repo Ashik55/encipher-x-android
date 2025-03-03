@@ -281,7 +281,16 @@ dependencies {
     implementation(libs.matrix.emojibase.bindings)
 
     // Jitsi Meet SDK
-    implementation("org.jitsi.react:jitsi-meet-sdk:11.0.4")
+    implementation("org.jitsi.react:jitsi-meet-sdk:11.0.4") {
+        exclude(group = "com.facebook.react", module = "react-native-locale-detector")
+        exclude(group = "com.facebook.react", module = "react-native-vector-icons")
+        exclude(group = "com.facebook.react", module = "react-native-community-async-storage")
+        exclude(group = "com.facebook.react", module = "react-native-webview")
+        exclude(group = "com.facebook.react", module = "react-native-community_netinfo")
+        exclude(group = "com.facebook.react", module = "react-native-svg")
+        exclude(group = "com.facebook.react", module = "react-native-fetch-blob")
+        exclude(group = "com.facebook.react", module = "react-native-push-notification")
+    }
 
     testImplementation(libs.test.junit)
     testImplementation(libs.test.robolectric)
