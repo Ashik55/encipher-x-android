@@ -9,27 +9,36 @@ package io.element.android.features.call.impl.ui
 
 import android.Manifest
 import android.app.PictureInPictureParams
+import android.content.Context
 import android.content.Intent
 import android.content.res.Configuration
 import android.media.AudioAttributes
 import android.media.AudioFocusRequest
 import android.media.AudioManager
+import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.util.Rational
 import android.view.WindowManager
 import android.webkit.PermissionRequest
+import android.widget.Toast
 import androidx.activity.compose.setContent
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.rememberUpdatedState
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.core.app.PictureInPictureModeChangedInfo
 import androidx.core.content.IntentCompat
 import androidx.core.util.Consumer
@@ -45,12 +54,18 @@ import io.element.android.features.call.impl.pip.PipView
 import io.element.android.features.call.impl.services.CallForegroundService
 import io.element.android.features.call.impl.utils.CallIntentDataParser
 import io.element.android.features.enterprise.api.EnterpriseService
+import io.element.android.libraries.architecture.AsyncData
 import io.element.android.libraries.architecture.Presenter
 import io.element.android.libraries.architecture.bindings
 import io.element.android.libraries.core.log.logger.LoggerTag
 import io.element.android.libraries.designsystem.theme.ElementThemeApp
+import io.element.android.libraries.designsystem.theme.components.CircularProgressIndicator
 import io.element.android.libraries.preferences.api.store.AppPreferencesStore
+import org.jitsi.meet.sdk.JitsiMeetActivity
+import org.jitsi.meet.sdk.JitsiMeetConferenceOptions
+import org.jitsi.meet.sdk.JitsiMeetUserInfo
 import timber.log.Timber
+import java.net.URL
 import javax.inject.Inject
 
 private val loggerTag = LoggerTag("ElementCallActivity")
@@ -82,8 +97,31 @@ class ElementCallActivity :
 
     private var eventSink: ((CallScreenEvents) -> Unit)? = null
 
+//    @RequiresApi(Build.VERSION_CODES.S)
+//    private val requiredPermissions = arrayOf(
+//        Manifest.permission.CAMERA,
+//        Manifest.permission.RECORD_AUDIO,
+//        Manifest.permission.BLUETOOTH_CONNECT
+//    )
+//
+//    private val permissionLauncher = registerForActivityResult(
+//        ActivityResultContracts.RequestMultiplePermissions()
+//    ) { permissions ->
+//        val allGranted = permissions.entries.all { it.value }
+//        if (!allGranted) {
+//            Toast.makeText(
+//                this,
+//                "Camera and microphone permissions are required for video conferencing",
+//                Toast.LENGTH_LONG
+//            ).show()
+//        }
+//    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        // Request permissions
+//        permissionLauncher.launch(requiredPermissions)
 
         applicationContext.bindings<CallBindings>().inject(this)
 
@@ -105,13 +143,13 @@ class ElementCallActivity :
             updateUiMode(resources.configuration)
         }
 
-        pictureInPicturePresenter.setPipView(this)
+//        pictureInPicturePresenter.setPipView(this)
 
         audioManager = getSystemService(AUDIO_SERVICE) as AudioManager
 
         setContent {
-            val pipState = pictureInPicturePresenter.present()
-            ListenToAndroidEvents(pipState)
+//            val pipState = pictureInPicturePresenter.present()
+//            ListenToAndroidEvents(pipState)
             ElementThemeApp(
                 appPreferencesStore = appPreferencesStore,
                 enterpriseService = enterpriseService,
@@ -124,15 +162,92 @@ class ElementCallActivity :
                         setCallIsActive()
                     }
                 }
-                CallScreenView(
-                    state = state,
-                    pipState = pipState,
-                    requestPermissions = { permissions, callback ->
-                        requestPermissionCallback = callback
-                        requestPermissionsLauncher.launch(permissions)
+
+                LaunchedEffect(state.urlState) {
+                    if (state.urlState is AsyncData.Success) {
+                        val url = state.urlState.data
+                        val (roomId, displayName) = extractRoomIdAndDisplayName(url)
+
+                        println("RoomName URL ==>> $roomId $displayName")
+
+                        if (roomId?.isNotBlank() == true) {
+                            joinJitsiMeeting(this@ElementCallActivity, roomId, displayName ?: "Anonymous")
+                        }
                     }
-                )
+                }
+
+
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .background(Color.Black), // Ensures blank screen
+                    contentAlignment = Alignment.Center
+                ) {
+                    CircularProgressIndicator(color = Color.White)
+                }
+
+//                CallScreenView(
+//                    context = this@ElementCallActivity, // Pass context
+//                    state = state,
+//                    pipState = pipState,
+//                    requestPermissions = { permissions, callback ->
+//                        requestPermissionCallback = callback
+//                        requestPermissionsLauncher.launch(permissions)
+//                    }
+//
+//                )
             }
+        }
+    }
+
+    fun extractRoomIdAndDisplayName(callUrl: String): Pair<String?, String?> {
+        val uri = Uri.parse(callUrl)
+        val fragment = uri.fragment // Extract the fragment part after '#?'
+
+        val params = fragment?.split("&")?.associate {
+            val (key, value) = it.split("=")
+            key to Uri.decode(value) // Decode the URL-encoded value
+        }
+
+        val roomId = params?.get("roomId")
+        val displayName = params?.get("displayName")
+
+        return Pair(roomId, displayName)
+    }
+
+    // Function to launch Jitsi Meet
+    private fun joinJitsiMeeting(context: Context, roomName: String, displayName: String, ) {
+
+        println("RoomName URL ==>> $roomName $displayName")
+
+        try {
+            // Get call type from intent
+            val isAudioCall = intent?.getBooleanExtra(DefaultElementCallEntryPoint.IS_AUDIO_CALL, false) ?: false
+
+            val options = JitsiMeetConferenceOptions.Builder()
+//                .setServerURL(URL("https://meet.jit.si"))
+//                .setRoom("ashik5575")
+                .setServerURL(URL("https://meet.enciph-er.com/"))
+                .setRoom(roomName)
+//                .setAudioMuted(false)
+//                .setVideoMuted(false)
+                .setAudioOnly(isAudioCall)
+                .apply {
+                    if (displayName.isNotBlank()) {
+                        setUserInfo(JitsiMeetUserInfo().apply {
+                            this.displayName = displayName
+                        })
+                    }
+                }
+                .setFeatureFlag("welcomepage.enabled", false)
+                .setFeatureFlag("prejoinpage.enabled", false)
+                .build()
+
+            // Launch Jitsi Meet activity
+            JitsiMeetActivity.launch(context, options)
+        } catch (e: Exception) {
+            Toast.makeText(context, "Error joining meeting: ${e.message}", Toast.LENGTH_LONG).show()
+            e.printStackTrace()
         }
     }
 
@@ -220,7 +335,7 @@ class ElementCallActivity :
                 webViewTarget.value = callType
                 presenter = presenterFactory.create(
                     callType,
-//                    isAudioCall,
+                    isAudioCall,
                     this
                 )
             }
@@ -244,7 +359,6 @@ class ElementCallActivity :
         return registerForActivityResult(
             ActivityResultContracts.RequestMultiplePermissions()
         ) { permissions ->
-
 
             val callback = requestPermissionCallback ?: return@registerForActivityResult
             val permissionsToGrant = mutableListOf<String>()
