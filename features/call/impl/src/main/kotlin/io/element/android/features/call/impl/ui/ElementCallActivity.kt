@@ -18,6 +18,8 @@ import android.media.AudioManager
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import android.util.Rational
 import android.view.WindowManager
 import android.webkit.PermissionRequest
@@ -120,9 +122,6 @@ class ElementCallActivity :
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        // Request permissions
-//        permissionLauncher.launch(requiredPermissions)
-
         applicationContext.bindings<CallBindings>().inject(this)
 
         @Suppress("DEPRECATION")
@@ -132,6 +131,10 @@ class ElementCallActivity :
                 WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED or
                 WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON
         )
+
+        // Initialize audio manager early
+        audioManager = getSystemService(AUDIO_SERVICE) as AudioManager
+        requestAudioFocus()
 
         setCallType(intent)
         // If presenter is not created at this point, it means we have no call to display, the Activity is finishing, so return early
@@ -144,8 +147,6 @@ class ElementCallActivity :
         }
 
 //        pictureInPicturePresenter.setPipView(this)
-
-        audioManager = getSystemService(AUDIO_SERVICE) as AudioManager
 
         setContent {
 //            val pipState = pictureInPicturePresenter.present()
@@ -171,16 +172,19 @@ class ElementCallActivity :
                         println("RoomName URL ==>> $roomId $displayName")
 
                         if (roomId?.isNotBlank() == true) {
+                            // Start the call service first to ensure notification
+                            CallForegroundService.start(this@ElementCallActivity)
+                            // Then join the meeting
                             joinJitsiMeeting(this@ElementCallActivity, roomId, displayName ?: "Anonymous")
                         }
                     }
                 }
 
-
+                // Show loading indicator
                 Box(
                     modifier = Modifier
                         .fillMaxSize()
-                        .background(Color.Black), // Ensures blank screen
+                        .background(Color.Black),
                     contentAlignment = Alignment.Center
                 ) {
                     CircularProgressIndicator(color = Color.White)
@@ -221,17 +225,63 @@ class ElementCallActivity :
         println("RoomName URL ==>> $roomName $displayName")
 
         try {
-            // Get call type from intent
             val isAudioCall = intent?.getBooleanExtra(DefaultElementCallEntryPoint.IS_AUDIO_CALL, false) ?: false
 
+            // Pre-initialize Jitsi configuration
             val options = JitsiMeetConferenceOptions.Builder()
-//                .setServerURL(URL("https://meet.jit.si"))
-//                .setRoom("ashik5575")
                 .setServerURL(URL("https://meet.enciph-er.com/"))
                 .setRoom(roomName)
-//                .setAudioMuted(false)
-//                .setVideoMuted(false)
+                // Set initial states
                 .setAudioOnly(isAudioCall)
+                .setAudioMuted(false)
+                .setVideoMuted(isAudioCall)
+                // Conference configuration
+                .setFeatureFlag("welcomepage.enabled", false)
+                .setFeatureFlag("prejoinpage.enabled", false)
+                .setFeatureFlag("pip.enabled", true)
+                .setFeatureFlag("call-integration.enabled", true)
+                .setFeatureFlag("incoming-call-notification.enabled", true)
+                .setFeatureFlag("call.ringbackTone", true)
+                .setFeatureFlag("notifications.enabled", true)
+//                // Call type specific settings
+//                .apply {
+//                    if (isAudioCall) {
+//                        // Audio call configuration
+//                        setFeatureFlag("startAudioOnly", true)
+//                        setFeatureFlag("startWithAudioMuted", false)
+//                        setFeatureFlag("startWithVideoMuted", true)
+//                        setFeatureFlag("disableVideo", true)
+//                        setFeatureFlag("video.enabled", false)
+//                        setFeatureFlag("toolbox.enabled.video", false)
+//                        setFeatureFlag("video-share.enabled", false)
+//                        setFeatureFlag("filmstrip.enabled", false)
+//                        setFeatureFlag("meetings.video.enabled", false)
+//                    } else {
+//                        // Video call configuration
+//                        setFeatureFlag("startAudioOnly", false)
+//                        setFeatureFlag("startWithAudioMuted", false)
+//                        setFeatureFlag("startWithVideoMuted", false)
+//                        setFeatureFlag("disableVideo", false)
+//                        setFeatureFlag("video.enabled", true)
+//                        setFeatureFlag("toolbox.enabled.video", true)
+//                        setFeatureFlag("video-share.enabled", true)
+//                        setFeatureFlag("filmstrip.enabled", true)
+//                        setFeatureFlag("meetings.video.enabled", true)
+//                        setFeatureFlag("resolution", 720)
+//                        setFeatureFlag("chat.enabled", true)
+//                        setFeatureFlag("reactions.enabled", true)
+//                        setFeatureFlag("raise.hand.enabled", true)
+//                        setFeatureFlag("recording.enabled", true)
+//                        setFeatureFlag("live-streaming.enabled", true)
+//                        setFeatureFlag("toolbox.alwaysVisible", true)
+//                        setFeatureFlag("android.screensharing.enabled", true)
+//                    }
+//                }
+//                // Conference-wide settings
+//                .setFeatureFlag("conference.forcedVideoQuality", if (isAudioCall) "disabled" else "720")
+//                .setFeatureFlag("conference.videoQuality.enforcePreferredVideoQuality", true)
+//                .setFeatureFlag("conference.videoCodecPreferenceOrder", if (isAudioCall) "" else "VP8,VP9,H264")
+                // Add user info
                 .apply {
                     if (displayName.isNotBlank()) {
                         setUserInfo(JitsiMeetUserInfo().apply {
@@ -243,8 +293,11 @@ class ElementCallActivity :
                 .setFeatureFlag("prejoinpage.enabled", false)
                 .build()
 
-            // Launch Jitsi Meet activity
-            JitsiMeetActivity.launch(context, options)
+            // Launch Jitsi Meet activity with a slight delay to ensure proper initialization
+            Handler(Looper.getMainLooper()).postDelayed({
+                JitsiMeetActivity.launch(context, options)
+            }, 500)
+
         } catch (e: Exception) {
             Toast.makeText(context, "Error joining meeting: ${e.message}", Toast.LENGTH_LONG).show()
             e.printStackTrace()
@@ -253,6 +306,7 @@ class ElementCallActivity :
 
     private fun setCallIsActive() {
         requestAudioFocus()
+        // Ensure the service is running
         CallForegroundService.start(this)
     }
 
