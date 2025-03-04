@@ -241,6 +241,13 @@ class ElementCallActivity :
                 }
                 .setFeatureFlag("welcomepage.enabled", false)
                 .setFeatureFlag("prejoinpage.enabled", false)
+
+
+            // Try setting the audio device flag
+                .setFeatureFlag("video-share.enabled", isAudioCall)
+                .setFeatureFlag("toolbox.alwaysVisible", false)
+                .setFeatureFlag("reactions.enabled", false)
+                .setFeatureFlag("chat.enabled", false)
                 .build()
 
             // Launch Jitsi Meet activity
