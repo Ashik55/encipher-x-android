@@ -48,7 +48,12 @@ dependencies {
     implementation(libs.network.retrofit)
     implementation(libs.serialization.json)
     api(projects.features.call.api)
-    implementation(libs.jitsi.meet.sdk)
+    implementation(libs.jitsi.meet.sdk) {
+        exclude(group = "com.google.android.exoplayer")
+        exclude(group = "com.facebook.react", module = "react-native-video")
+    }
+    implementation(libs.androidx.media3.exoplayer)
+    implementation(libs.androidx.media3.ui)
 
     testImplementation(libs.coroutines.test)
     testImplementation(libs.molecule.runtime)

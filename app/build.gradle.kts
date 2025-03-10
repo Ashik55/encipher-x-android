@@ -288,9 +288,14 @@ dependencies {
         exclude(group = "com.facebook.react", module = "react-native-webview")
         exclude(group = "com.facebook.react", module = "react-native-community_netinfo")
         exclude(group = "com.facebook.react", module = "react-native-svg")
-        exclude(group = "com.facebook.react", module = "react-native-fetch-blob")
-        exclude(group = "com.facebook.react", module = "react-native-push-notification")
+        // Exclude ExoPlayer2 dependencies to avoid conflicts with Media3
+        exclude(group = "com.google.android.exoplayer")
+        exclude(group = "com.facebook.react", module = "react-native-video")
     }
+
+    // Add explicit Media3 dependencies to ensure they're used by JitsiMeetSDK
+    implementation(libs.androidx.media3.exoplayer)
+    implementation(libs.androidx.media3.ui)
 
     testImplementation(libs.test.junit)
     testImplementation(libs.test.robolectric)
