@@ -252,6 +252,10 @@ class ElementCallActivity :
 
             // Launch Jitsi Meet activity
             JitsiMeetActivity.launch(context, options)
+            
+            // Finish this activity to ensure proper cleanup
+            // This ensures that when returning from Jitsi, the app state is reset
+            finish()
         } catch (e: Exception) {
             Toast.makeText(context, "Error joining meeting: ${e.message}", Toast.LENGTH_LONG).show()
             e.printStackTrace()
