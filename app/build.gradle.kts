@@ -281,7 +281,8 @@ dependencies {
     implementation(libs.matrix.emojibase.bindings)
 
     // Jitsi Meet SDK
-    implementation("org.jitsi.react:jitsi-meet-sdk:11.0.4") {
+    implementation("org.jitsi.react:jitsi-meet-sdk:0.0.0") {
+        isTransitive = true
         exclude(group = "com.facebook.react", module = "react-native-locale-detector")
         exclude(group = "com.facebook.react", module = "react-native-vector-icons")
         exclude(group = "com.facebook.react", module = "react-native-community-async-storage")

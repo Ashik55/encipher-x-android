@@ -49,6 +49,7 @@ dependencies {
     implementation(libs.serialization.json)
     api(projects.features.call.api)
     implementation(libs.jitsi.meet.sdk) {
+        isTransitive = true
         exclude(group = "com.google.android.exoplayer")
         exclude(group = "com.facebook.react", module = "react-native-video")
     }

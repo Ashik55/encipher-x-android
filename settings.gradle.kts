@@ -14,7 +14,7 @@ pluginManagement {
         google()
         mavenCentral()
 //        maven { url = uri("https://www.jitpack.io") }
-        maven { url = uri("https://github.com/jitsi/jitsi-maven-repository/raw/master/releases") }
+        maven { url = uri("file:///tmp/repo") }
     }
 }
 dependencyResolutionManagement {
@@ -47,7 +47,7 @@ dependencyResolutionManagement {
         mavenCentral()
 
         maven { url = uri("https://maven.google.com") }
-        maven { url = uri("https://github.com/jitsi/jitsi-maven-repository/raw/master/releases") }
+        maven { url = uri("file:///tmp/repo") }
 
         maven {
             url = URI("https://www.jitpack.io")

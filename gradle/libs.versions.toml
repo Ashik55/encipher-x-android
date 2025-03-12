@@ -62,7 +62,7 @@ autoservice = "1.1.1"
 # quality
 androidx-test-ext-junit = "1.2.1"
 kover = "0.9.1"
-jitsiMeetSdk = "11.0.4"
+jitsiMeetSdk = "0.0.0"
 
 [libraries]
 # Project
