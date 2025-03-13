@@ -525,10 +525,10 @@ private fun MessagesViewTopBar(
             )
         }
     }, actions = {
-        CallMenuItem(
-            roomCallState = roomCallState,
-            onJoinCallClick = onJoinCallClick,
-        )
+//        CallMenuItem(
+//            roomCallState = roomCallState,
+//            onJoinCallClick = onJoinCallClick,
+//        )
         AudioCallMenuItem(
             roomCallState = roomCallState,
             onJoinCallClick = onAudioJoinCallClick,

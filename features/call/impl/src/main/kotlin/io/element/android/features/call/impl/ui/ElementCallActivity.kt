@@ -222,7 +222,7 @@ class ElementCallActivity :
 
         try {
             // Get call type from intent
-            val isAudioCall = intent?.getBooleanExtra(DefaultElementCallEntryPoint.IS_AUDIO_CALL, false) ?: false
+//            val isAudioCall = intent?.getBooleanExtra(DefaultElementCallEntryPoint.IS_AUDIO_CALL, false) ?: false
 
             val options = JitsiMeetConferenceOptions.Builder()
 //                .setServerURL(URL("https://meet.jit.si"))
@@ -231,7 +231,8 @@ class ElementCallActivity :
                 .setRoom(roomName)
 //                .setAudioMuted(false)
 //                .setVideoMuted(false)
-                .setAudioOnly(isAudioCall)
+               // .setAudioOnly(isAudioCall)
+                .setAudioOnly(true)
                 .apply {
                     if (displayName.isNotBlank()) {
                         setUserInfo(JitsiMeetUserInfo().apply {
@@ -244,7 +245,7 @@ class ElementCallActivity :
 
 
             // Try setting the audio device flag
-                .setFeatureFlag("video-share.enabled", isAudioCall)
+//                .setFeatureFlag("video-share.enabled", isAudioCall)
                 .setFeatureFlag("toolbox.alwaysVisible", false)
                 .setFeatureFlag("reactions.enabled", false)
                 .setFeatureFlag("chat.enabled", false)
@@ -255,7 +256,7 @@ class ElementCallActivity :
             
             // Finish this activity to ensure proper cleanup
             // This ensures that when returning from Jitsi, the app state is reset
-            finish()
+//            finish()
         } catch (e: Exception) {
             Toast.makeText(context, "Error joining meeting: ${e.message}", Toast.LENGTH_LONG).show()
             e.printStackTrace()
