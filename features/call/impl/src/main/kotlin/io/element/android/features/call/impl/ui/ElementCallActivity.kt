@@ -74,6 +74,12 @@ class ElementCallActivity :
     AppCompatActivity(),
     CallScreenNavigator,
     PipView {
+    
+    private val broadcastReceiver = object : android.content.BroadcastReceiver() {
+        override fun onReceive(context: Context, intent: Intent) {
+            onBroadcastReceived(intent)
+        }
+    }
     @Inject lateinit var callIntentDataParser: CallIntentDataParser
     @Inject lateinit var presenterFactory: CallScreenPresenter.Factory
     @Inject lateinit var appPreferencesStore: AppPreferencesStore
@@ -124,6 +130,9 @@ class ElementCallActivity :
 //        permissionLauncher.launch(requiredPermissions)
 
         applicationContext.bindings<CallBindings>().inject(this)
+        
+        // Register for broadcast messages
+        registerForBroadcastMessages()
 
         @Suppress("DEPRECATION")
         window.addFlags(
@@ -216,47 +225,25 @@ class ElementCallActivity :
     }
 
     // Function to launch Jitsi Meet
-    private fun joinJitsiMeeting(context: Context, roomName: String, displayName: String, ) {
-
-        println("RoomName URL ==>> $roomName $displayName")
-
+    private fun joinJitsiMeeting(context: Context, roomName: String, displayName: String) {
         try {
-            // Get call type from intent
-//            val isAudioCall = intent?.getBooleanExtra(DefaultElementCallEntryPoint.IS_AUDIO_CALL, false) ?: false
+            val jitsiMeetUserInfo = JitsiMeetUserInfo().apply {
+                this.displayName = displayName
+            }
 
             val options = JitsiMeetConferenceOptions.Builder()
-//                .setServerURL(URL("https://meet.jit.si"))
-//                .setRoom("ashik5575")
                 .setServerURL(URL("https://meet.enciph-er.com/"))
                 .setRoom(roomName)
-//                .setAudioMuted(false)
-//                .setVideoMuted(false)
-               // .setAudioOnly(isAudioCall)
                 .setAudioOnly(true)
-                .apply {
-                    if (displayName.isNotBlank()) {
-                        setUserInfo(JitsiMeetUserInfo().apply {
-                            this.displayName = displayName
-                        })
-                    }
-                }
+                .setUserInfo(jitsiMeetUserInfo)
                 .setFeatureFlag("welcomepage.enabled", false)
                 .setFeatureFlag("prejoinpage.enabled", false)
-
-
-            // Try setting the audio device flag
-//                .setFeatureFlag("video-share.enabled", isAudioCall)
                 .setFeatureFlag("toolbox.alwaysVisible", false)
                 .setFeatureFlag("reactions.enabled", false)
                 .setFeatureFlag("chat.enabled", false)
                 .build()
 
-            // Launch Jitsi Meet activity
             JitsiMeetActivity.launch(context, options)
-            
-            // Finish this activity to ensure proper cleanup
-            // This ensures that when returning from Jitsi, the app state is reset
-//            finish()
         } catch (e: Exception) {
             Toast.makeText(context, "Error joining meeting: ${e.message}", Toast.LENGTH_LONG).show()
             e.printStackTrace()
@@ -314,6 +301,7 @@ class ElementCallActivity :
         releaseAudioFocus()
         CallForegroundService.stop(this)
         pictureInPicturePresenter.setPipView(null)
+        androidx.localbroadcastmanager.content.LocalBroadcastManager.getInstance(this).unregisterReceiver(broadcastReceiver)
     }
 
     override fun finish() {
@@ -464,6 +452,42 @@ class ElementCallActivity :
 
     override fun hangUp() {
         eventSink?.invoke(CallScreenEvents.Hangup)
+        val hangupBroadcastIntent = org.jitsi.meet.sdk.BroadcastIntentHelper.buildHangUpIntent()
+        androidx.localbroadcastmanager.content.LocalBroadcastManager.getInstance(applicationContext).sendBroadcast(hangupBroadcastIntent)
+    }
+
+    private fun registerForBroadcastMessages() {
+        val intentFilter = android.content.IntentFilter().apply {
+            addAction(org.jitsi.meet.sdk.BroadcastEvent.Type.CONFERENCE_JOINED.action)
+            addAction(org.jitsi.meet.sdk.BroadcastEvent.Type.CONFERENCE_TERMINATED.action)
+            addAction(org.jitsi.meet.sdk.BroadcastEvent.Type.PARTICIPANT_JOINED.action)
+            addAction(org.jitsi.meet.sdk.BroadcastEvent.Type.READY_TO_CLOSE.action)
+        }
+
+        androidx.localbroadcastmanager.content.LocalBroadcastManager.getInstance(this)
+            .registerReceiver(broadcastReceiver, intentFilter)
+    }
+
+    private fun onBroadcastReceived(intent: Intent) {
+        intent?.let {
+            val event = org.jitsi.meet.sdk.BroadcastEvent(intent)
+            when (event.type) {
+                org.jitsi.meet.sdk.BroadcastEvent.Type.CONFERENCE_JOINED -> {
+                    Timber.tag(loggerTag.value).d("Conference Joined: ${event.data}")
+                }
+                org.jitsi.meet.sdk.BroadcastEvent.Type.CONFERENCE_TERMINATED -> {
+                    Timber.tag(loggerTag.value).d("Conference Terminated: ${event.data}")
+                    finish()
+                }
+                org.jitsi.meet.sdk.BroadcastEvent.Type.PARTICIPANT_JOINED -> {
+                    Timber.tag(loggerTag.value).d("Participant joined: ${event.data["name"]}")
+                }
+                org.jitsi.meet.sdk.BroadcastEvent.Type.READY_TO_CLOSE -> {
+                    Timber.tag(loggerTag.value).d("Ready to close: ${event.data}")
+                }
+                else -> {}
+            }
+        }
     }
 }
 
