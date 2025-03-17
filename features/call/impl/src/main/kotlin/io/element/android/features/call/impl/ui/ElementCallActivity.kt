@@ -241,6 +241,7 @@ class ElementCallActivity :
                 .setFeatureFlag("toolbox.alwaysVisible", false)
                 .setFeatureFlag("reactions.enabled", false)
                 .setFeatureFlag("chat.enabled", false)
+                .setFeatureFlag("call-integration.enabled", true)
                 .build()
 
             JitsiMeetActivity.launch(context, options)
