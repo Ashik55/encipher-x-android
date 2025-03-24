@@ -16,5 +16,6 @@
     <string name="screen_recovery_key_vault_need_direct_key">If vault access fails, you can enter your recovery key directly instead</string>
     <string name="screen_recovery_key_vault_save_description">Create a secure passphrase to save your recovery key to the vault</string>
     <string name="screen_recovery_key_copy_description">This is your recovery key. Make sure to copy it to a safe place before saving it to the vault.</string>
-    <string name="screen_recovery_key_vault_passphrase_required">Please enter a passphrase to secure your recovery key in the vault.</string>
+    <string name="screen_recovery_key_vault_passphrase_required">Enter passphrase to continue</string>
+    <string name="screen_recovery_key_vault_swipe_hint">Swipe right to save</string>
 </resources>

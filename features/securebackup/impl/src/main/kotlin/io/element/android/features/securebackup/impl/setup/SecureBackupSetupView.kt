@@ -163,7 +163,7 @@ fun SecureBackupSetupView(
                     text = stringResource(id = R.string.screen_recovery_key_success),
                     textAlign = TextAlign.Center,
                     style = ElementTheme.typography.fontBodyMdMedium,
-                    color = Color(0xFF0DBD8B),
+                    color = Color(0xFF0A8741),
                     modifier = Modifier.padding(horizontal = 24.dp)
                 )
             }
@@ -189,13 +189,13 @@ fun SecureBackupSetupView(
     AsyncActionView(
         async = state.vaultSaveAction,
         onSuccess = {
-            showSnackbar(context, R.string.screen_recovery_key_vault_success)
+//            showSnackbar(context, R.string.screen_recovery_key_vault_success)
             state.eventSink.invoke(SecureBackupSetupEvents.RecoveryKeyHasBeenSaved)
             // Auto-finish after successful vault save
             onSuccess()
         },
         onErrorDismiss = {
-            showSnackbar(context, R.string.screen_recovery_key_vault_error)
+//            showSnackbar(context, R.string.screen_recovery_key_vault_error)
         }
     )
 }
@@ -229,7 +229,7 @@ private fun BottomSheetContent(
                 stringResource(id = R.string.screen_recovery_key_vault_save_description),
             textAlign = TextAlign.Center,
             style = ElementTheme.typography.fontBodyLgMedium,
-            color = if (saveSuccessful) Color(0xFF0DBD8B) else ElementTheme.colors.textPrimary,
+            color = if (saveSuccessful) Color(0xFF0A8741) else ElementTheme.colors.textPrimary,
             modifier = Modifier.padding(bottom = 24.dp)
         )
         
@@ -248,17 +248,7 @@ private fun BottomSheetContent(
             
             Spacer(modifier = Modifier.height(24.dp))
             
-            if (state.recoveryKeyViewState.passphrase.isBlank()) {
-                // Add hint to enter passphrase
-                Text(
-                    text = stringResource(id = R.string.screen_recovery_key_vault_passphrase_required),
-                    color = ElementTheme.colors.textCriticalPrimary,
-                    style = ElementTheme.typography.fontBodyXsRegular,
-                    modifier = Modifier.padding(bottom = 16.dp)
-                )
-            }
-            
-            // Swipable save button
+            // Swipable save button - now disabled until passphrase is entered
             SwipeToSaveButton(
                 enabled = state.recoveryKeyViewState.passphrase.isNotBlank() && !state.isSavingToVault,
                 isLoading = state.isSavingToVault,
@@ -272,7 +262,7 @@ private fun BottomSheetContent(
             io.element.android.libraries.designsystem.theme.components.Icon(
                 imageVector = CompoundIcons.Check(),
                 contentDescription = null,
-                tint = Color(0xFF0DBD8B),
+                tint = Color(0xFF0A8741),
                 modifier = Modifier
                     .size(64.dp)
                     .padding(bottom = 16.dp)
@@ -282,7 +272,7 @@ private fun BottomSheetContent(
                 text = stringResource(id = R.string.screen_recovery_key_vault_success),
                 textAlign = TextAlign.Center,
                 style = ElementTheme.typography.fontBodyMdMedium,
-                color = Color(0xFF0DBD8B),
+                color = Color(0xFF0A8741),
             )
             
             Spacer(modifier = Modifier.height(24.dp))
@@ -308,12 +298,10 @@ private fun SwipeToSaveButton(
 ) {
     val maxWidth = 300.dp
     val height = 56.dp
-    val thumbSize = 48.dp
     
     val density = LocalDensity.current
     val maxWidthPx = with(density) { maxWidth.toPx() }
-    val thumbWidth = with(density) { thumbSize.toPx() }
-    val dragThreshold = maxWidthPx - thumbWidth - 16f // Some padding
+    val dragThreshold = maxWidthPx - 48f // Some padding
     
     var dragOffset by remember { mutableFloatStateOf(0f) }
     var completed by remember(isSuccess) { mutableStateOf(isSuccess) }
@@ -328,20 +316,19 @@ private fun SwipeToSaveButton(
         }
     }
     
-    // Create a gradient color that fills from left to right based on progress
-    val gradientWidth = (progress * maxWidthPx).coerceIn(0f, maxWidthPx)
+    // Attractive colors
+    val primaryColor = Color(0xFF0A8741) // Vibrant blue
+    val successColor = Color(0xFF0A8741) // Success green
+    val disabledColor = Color(0xFFEAEAEA) // Light gray for disabled state
+    val backgroundColor = Color(0xFFFCFCFC) // Pure white background for better contrast
     
-    val offsetAnimation by animateFloatAsState(
-        targetValue = if (completed || isSuccess) dragThreshold else dragOffset,
-        animationSpec = tween(300),
-        label = "ThumbOffset"
-    )
-    
+    // Button background container
     Box(
         modifier = modifier
             .fillMaxWidth()
             .height(height)
             .clip(RoundedCornerShape(28.dp))
+            .background(if (!enabled) disabledColor else backgroundColor)
             .then(
                 if (enabled && !isLoading && !completed && !isSuccess) {
                     Modifier.draggable(
@@ -365,65 +352,94 @@ private fun SwipeToSaveButton(
             ),
         contentAlignment = Alignment.Center
     ) {
-        // Background
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(height)
-                .background(
-                    if (enabled || isSuccess) ElementTheme.colors.bgSubtleSecondary
-                    else Color(0xFFE3E5E6)
-                )
-        )
-        
-        // Animated gradient fill
+        // Left-to-right progress fill with alignment to start
         Box(
             modifier = Modifier
                 .fillMaxWidth(progress)
                 .height(height)
-                .background(
-                    if (completed || isSuccess) 
-                        Color(0xFF0DBD8B)  
-                    else 
-                        Color(0xFF0086EA)
-                )
+                .background(if (completed || isSuccess) successColor else primaryColor)
+                .align(Alignment.CenterStart)
         )
         
-        // Text label always centered
-        Text(
-            text = if (isSuccess) 
-                stringResource(id = R.string.screen_recovery_key_vault_success)
-            else 
-                stringResource(id = R.string.screen_recovery_key_vault_save_button),
-            style = ElementTheme.typography.fontBodyLgMedium,
-            color = if (progress > 0.5 || completed || isSuccess) 
-                Color(0xFFFFFFFF)
-            else 
-                Color(0xFF0086EA),
-            modifier = Modifier.padding(start = 12.dp)
-        )
-        
-        // Thumb
-        Box(
-            modifier = Modifier
-                .offset { IntOffset(offsetAnimation.roundToInt(), 0) }
-                .padding(4.dp)
-                .size(thumbSize)
-                .clip(RoundedCornerShape(24.dp))
-                .background(Color(0xFFFFFFFF)),
-            contentAlignment = Alignment.Center
+        // Button content
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+            modifier = Modifier.fillMaxWidth()
         ) {
-            if (isLoading) {
-                io.element.android.libraries.designsystem.theme.components.CircularProgressIndicator(
-                    color = ElementTheme.colors.iconPrimary,
-                    modifier = Modifier.size(24.dp)
+            // Main button text
+            Text(
+                text = if (isSuccess) 
+                    stringResource(id = R.string.screen_recovery_key_vault_success)
+                else if (!enabled)
+                    stringResource(id = R.string.screen_recovery_key_vault_passphrase_required)
+                else 
+                    stringResource(id = R.string.screen_recovery_key_vault_swipe_hint),
+                style = ElementTheme.typography.fontBodyLgMedium,
+                textAlign = TextAlign.Center,
+                color = if (progress > 0.5 || completed || isSuccess) 
+                    Color(0xFFFFFFFF) // White text on colored background
+                else if (!enabled)
+                    Color(0xFF8C8C8C) // Gray for disabled state
+                else 
+                    Color(0xFF3D3D3D), // Dark text on light background
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp)
+            )
+            
+            // Hint text when enabled and not in success state
+//            if (enabled && !isSuccess && !completed) {
+//                Text(
+//                    text = stringResource(id = R.string.screen_recovery_key_vault_swipe_hint),
+//                    style = ElementTheme.typography.fontBodyXsRegular,
+//                    textAlign = TextAlign.Center,
+//                    color = if (progress > 0.5)
+//                        Color(0xDDFFFFFF)
+//                    else
+//                        Color(0xFF8C8C8C),
+//                    modifier = Modifier
+//                        .fillMaxWidth()
+//                        .padding(top = 2.dp)
+//                )
+//            }
+        }
+        
+        // Visual indicator for arrow that moves with the swipe
+        if (enabled && !completed && !isSuccess && !isLoading) {
+
+            // Add left-most indicating arrow to show starting point
+            Icon(
+                imageVector = CompoundIcons.ArrowRight(),
+                contentDescription = null,
+                tint = if (progress > 0.1) Color(0x99FFFFFF) else Color(0xFF0A8741),
+                modifier = Modifier
+                    .align(Alignment.CenterStart)
+                    .padding(start = 16.dp)
+                    .size(16.dp)
+            )
+        }
+        
+        // Visual indicators for button states
+        when {
+            isLoading -> {
+                // Loading spinner
+                CircularProgressIndicator(
+                    color = Color(0xFFFFFFFF),
+                    modifier = Modifier
+                        .align(Alignment.Center)
+                        .size(24.dp)
                 )
-            } else {
-                io.element.android.libraries.designsystem.theme.components.Icon(
-                    imageVector = if (completed || isSuccess) CompoundIcons.Check() else CompoundIcons.ChevronRight(),
+            }
+            completed || isSuccess -> {
+                // Success check mark
+                Icon(
+                    imageVector = CompoundIcons.Check(),
                     contentDescription = null,
-                    tint = if (completed || isSuccess) Color(0xFF0DBD8B) else ElementTheme.colors.iconPrimary,
-                    modifier = Modifier.size(24.dp)
+                    tint = Color(0xFFFFFFFF),
+                    modifier = Modifier
+                        .align(Alignment.CenterEnd)
+                        .padding(end = 16.dp)
+                        .size(20.dp)
                 )
             }
         }
@@ -464,13 +480,13 @@ private fun subtitle(state: SecureBackupSetupState): String {
     }
 }
 
-private fun showSnackbar(context: Context, messageResId: Int) {
-    Toast.makeText(
-        context,
-        context.getString(messageResId),
-        Toast.LENGTH_SHORT
-    ).show()
-}
+//private fun showSnackbar(context: Context, messageResId: Int) {
+//    Toast.makeText(
+//        context,
+//        context.getString(messageResId),
+//        Toast.LENGTH_SHORT
+//    ).show()
+//}
 
 @PreviewsDayNight
 @Composable

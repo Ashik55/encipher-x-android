@@ -269,7 +269,8 @@ private fun RecoveryKeyFooter(state: RecoveryKeyViewState) {
                 )
             } else {
                 Text(
-                    text = stringResource(id = R.string.screen_recovery_key_save_key_description),
+//                    text = stringResource(id = R.string.screen_recovery_key_save_key_description),
+                    text = stringResource(id = R.string.screen_recovery_key_change_generate_key_description),
 //                    color = ElementTheme.colors.textSecondary,
                     color = if(ElementTheme.isLightTheme){
                         Color(0xFF0A8741)
