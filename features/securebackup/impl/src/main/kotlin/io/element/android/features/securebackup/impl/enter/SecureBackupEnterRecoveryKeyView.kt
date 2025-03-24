@@ -69,11 +69,11 @@ fun SecureBackupEnterRecoveryKeyView(
         async = state.retrieveVaultAction,
         onSuccess = {
             Timber.d("Passkey retrieved successfully from vault")
-            Toast.makeText(
-                context,
-                context.getString(R.string.screen_recovery_key_vault_retrieve_success),
-                Toast.LENGTH_SHORT
-            ).show()
+//            Toast.makeText(
+//                context,
+//                context.getString(R.string.screen_recovery_key_vault_retrieve_success),
+//                Toast.LENGTH_SHORT
+//            ).show()
         },
         errorTitle = { 
             val isNoOpError = (state.retrieveVaultAction as? AsyncAction.Failure)?.error?.message?.contains("Vault feature is not available") == true
