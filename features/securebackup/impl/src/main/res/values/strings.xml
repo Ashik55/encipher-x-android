@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+    <string name="screen_recovery_key_vault_passphrase_hint">Enter a passphrase to secure your recovery key</string>
+    <string name="screen_recovery_key_vault_passphrase_placeholder">Passphrase</string>
+    <string name="screen_recovery_key_vault_save_button">Save to Vault</string>
+    <string name="screen_recovery_key_vault_retrieve_button">Retrieve from Vault</string>
+    <string name="screen_recovery_key_use_recovery_key_button">Use Recovery Key</string>
+    <string name="screen_recovery_key_vault_or_direct_hint">Enter your vault passphrase or recovery key directly</string>
+    <string name="screen_recovery_key_vault_success">Recovery key saved to vault successfully</string>
+    <string name="screen_recovery_key_vault_retrieve_success">Recovery key retrieved successfully</string>
+    <string name="screen_recovery_key_vault_error">Failed to save recovery key to vault</string>
+    <string name="screen_recovery_key_vault_retrieve_error">Failed to retrieve recovery key</string>
+    <string name="screen_recovery_key_vault_retrieve_error_title">Vault Access Failed</string>
+    <string name="screen_recovery_key_vault_unavailable_title">Vault Access Unavailable</string>
+    <string name="screen_recovery_key_vault_need_direct_key">If vault access fails, you can enter your recovery key directly instead</string>
+    <string name="screen_recovery_key_vault_save_description">Create a secure passphrase to save your recovery key to the vault</string>
+    <string name="screen_recovery_key_copy_description">This is your recovery key. Make sure to copy it to a safe place before saving it to the vault.</string>
+    <string name="screen_recovery_key_vault_passphrase_required">Please enter a passphrase to secure your recovery key in the vault.</string>
+</resources>

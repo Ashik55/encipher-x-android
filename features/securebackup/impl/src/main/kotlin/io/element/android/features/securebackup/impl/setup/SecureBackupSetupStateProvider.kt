@@ -11,6 +11,7 @@ import androidx.compose.ui.tooling.preview.PreviewParameterProvider
 import io.element.android.features.securebackup.impl.setup.views.RecoveryKeyUserStory
 import io.element.android.features.securebackup.impl.setup.views.RecoveryKeyViewState
 import io.element.android.features.securebackup.impl.setup.views.aFormattedRecoveryKey
+import io.element.android.libraries.architecture.AsyncAction
 
 open class SecureBackupSetupStateProvider : PreviewParameterProvider<SecureBackupSetupState> {
     override val values: Sequence<SecureBackupSetupState>
@@ -30,11 +31,15 @@ open class SecureBackupSetupStateProvider : PreviewParameterProvider<SecureBacku
 fun aSecureBackupSetupState(
     setupState: SetupState = SetupState.Init,
     showSaveConfirmationDialog: Boolean = false,
+    isSavingToVault: Boolean = false,
+    vaultSaveAction: AsyncAction<Unit> = AsyncAction.Uninitialized,
 ) = SecureBackupSetupState(
     isChangeRecoveryKeyUserStory = false,
     setupState = setupState,
     showSaveConfirmationDialog = showSaveConfirmationDialog,
     recoveryKeyViewState = setupState.toRecoveryKeyViewState(),
+    isSavingToVault = isSavingToVault,
+    vaultSaveAction = vaultSaveAction,
     eventSink = {}
 )
 

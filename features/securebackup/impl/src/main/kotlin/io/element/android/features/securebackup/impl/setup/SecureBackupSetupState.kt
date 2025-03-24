@@ -8,6 +8,7 @@
 package io.element.android.features.securebackup.impl.setup
 
 import io.element.android.features.securebackup.impl.setup.views.RecoveryKeyViewState
+import io.element.android.libraries.architecture.AsyncAction
 
 // Do not use default value, so no member get forgotten in the presenters.
 data class SecureBackupSetupState(
@@ -15,6 +16,8 @@ data class SecureBackupSetupState(
     val recoveryKeyViewState: RecoveryKeyViewState,
     val showSaveConfirmationDialog: Boolean,
     val setupState: SetupState,
+    val isSavingToVault: Boolean,
+    val vaultSaveAction: AsyncAction<Unit>,
     val eventSink: (SecureBackupSetupEvents) -> Unit
 )
 

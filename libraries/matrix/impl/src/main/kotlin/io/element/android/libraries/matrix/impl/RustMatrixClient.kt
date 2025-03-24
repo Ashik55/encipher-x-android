@@ -26,6 +26,7 @@ import io.element.android.libraries.matrix.api.core.toRoomIdOrAlias
 import io.element.android.libraries.matrix.api.createroom.CreateRoomParameters
 import io.element.android.libraries.matrix.api.createroom.RoomPreset
 import io.element.android.libraries.matrix.api.encryption.EncryptionService
+import io.element.android.libraries.matrix.api.encryption.PasskeyService
 import io.element.android.libraries.matrix.api.media.MatrixMediaLoader
 import io.element.android.libraries.matrix.api.notification.NotificationService
 import io.element.android.libraries.matrix.api.notificationsettings.NotificationSettingsService
@@ -50,6 +51,7 @@ import io.element.android.libraries.matrix.api.user.MatrixUser
 import io.element.android.libraries.matrix.api.verification.SessionVerificationService
 import io.element.android.libraries.matrix.impl.core.toProgressWatcher
 import io.element.android.libraries.matrix.impl.encryption.RustEncryptionService
+import io.element.android.libraries.matrix.impl.encryption.DefaultPasskeyService
 import io.element.android.libraries.matrix.impl.exception.mapClientException
 import io.element.android.libraries.matrix.impl.media.RustMediaLoader
 import io.element.android.libraries.matrix.impl.notification.RustNotificationService
@@ -130,6 +132,7 @@ class RustMatrixClient(
     clock: SystemClock,
     timelineEventTypeFilterFactory: TimelineEventTypeFilterFactory,
     featureFlagService: FeatureFlagService,
+    private val passkeyService: PasskeyService,
 ) : MatrixClient {
     override val sessionId: UserId = UserId(innerClient.userId())
     override val deviceId: DeviceId = DeviceId(innerClient.deviceId())
@@ -158,7 +161,7 @@ class RustMatrixClient(
         sessionCoroutineScope = sessionCoroutineScope,
         dispatchers = dispatchers,
     )
-
+    
     private val roomDirectoryService = RustRoomDirectoryService(
         client = innerClient,
         sessionDispatcher = sessionDispatcher,
@@ -472,6 +475,8 @@ class RustMatrixClient(
     override fun notificationSettingsService(): NotificationSettingsService = notificationSettingsService
 
     override fun roomDirectoryService(): RoomDirectoryService = roomDirectoryService
+
+    override fun passkeyService(): PasskeyService = passkeyService
 
     override fun close() {
         appCoroutineScope.launch {

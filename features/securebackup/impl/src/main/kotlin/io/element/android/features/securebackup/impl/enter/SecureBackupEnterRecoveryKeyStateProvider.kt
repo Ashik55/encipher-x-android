@@ -10,31 +10,69 @@ package io.element.android.features.securebackup.impl.enter
 import androidx.compose.ui.tooling.preview.PreviewParameterProvider
 import io.element.android.features.securebackup.impl.setup.views.RecoveryKeyUserStory
 import io.element.android.features.securebackup.impl.setup.views.RecoveryKeyViewState
-import io.element.android.features.securebackup.impl.setup.views.aFormattedRecoveryKey
 import io.element.android.libraries.architecture.AsyncAction
 
-open class SecureBackupEnterRecoveryKeyStateProvider : PreviewParameterProvider<SecureBackupEnterRecoveryKeyState> {
+class SecureBackupEnterRecoveryKeyStateProvider : PreviewParameterProvider<SecureBackupEnterRecoveryKeyState> {
     override val values: Sequence<SecureBackupEnterRecoveryKeyState>
         get() = sequenceOf(
-            aSecureBackupEnterRecoveryKeyState(recoveryKey = ""),
             aSecureBackupEnterRecoveryKeyState(),
-            aSecureBackupEnterRecoveryKeyState(submitAction = AsyncAction.Loading),
-            aSecureBackupEnterRecoveryKeyState(submitAction = AsyncAction.Failure(Exception("A Failure"))),
+            aSecureBackupEnterRecoveryKeyState(
+                recoveryKeyViewState = RecoveryKeyViewState(
+                    recoveryKeyUserStory = RecoveryKeyUserStory.Enter,
+                    formattedRecoveryKey = "1234 5678 90ab cdef ghij klmn opqr stuv wxyz ABCD EFGH IJKL",
+                    inProgress = false,
+                )
+            ),
+            aSecureBackupEnterRecoveryKeyState(
+                submitAction = AsyncAction.Loading,
+                recoveryKeyViewState = RecoveryKeyViewState(
+                    recoveryKeyUserStory = RecoveryKeyUserStory.Enter,
+                    formattedRecoveryKey = "1234 5678 90ab cdef ghij klmn opqr stuv wxyz ABCD EFGH IJKL",
+                    inProgress = true,
+                ),
+                isSubmitEnabled = false,
+            ),
+            // Vault mode states
+            aSecureBackupEnterRecoveryKeyState(
+                isVaultMode = true,
+                recoveryKeyViewState = RecoveryKeyViewState(
+                    recoveryKeyUserStory = RecoveryKeyUserStory.Enter,
+                    formattedRecoveryKey = "my-passphrase",
+                    inProgress = false,
+                    isVaultMode = true,
+                ),
+            ),
+            aSecureBackupEnterRecoveryKeyState(
+                isVaultMode = true,
+                retrieveVaultAction = AsyncAction.Loading,
+                recoveryKeyViewState = RecoveryKeyViewState(
+                    recoveryKeyUserStory = RecoveryKeyUserStory.Enter,
+                    formattedRecoveryKey = "my-passphrase",
+                    inProgress = true,
+                    isVaultMode = true,
+                ),
+                isSubmitEnabled = false,
+            ),
         )
 }
 
 fun aSecureBackupEnterRecoveryKeyState(
-    recoveryKey: String = aFormattedRecoveryKey(),
-    isSubmitEnabled: Boolean = recoveryKey.isNotEmpty(),
-    submitAction: AsyncAction<Unit> = AsyncAction.Uninitialized,
-    eventSink: (SecureBackupEnterRecoveryKeyEvents) -> Unit = {},
-) = SecureBackupEnterRecoveryKeyState(
-    recoveryKeyViewState = RecoveryKeyViewState(
+    recoveryKeyViewState: RecoveryKeyViewState = RecoveryKeyViewState(
         recoveryKeyUserStory = RecoveryKeyUserStory.Enter,
-        formattedRecoveryKey = recoveryKey,
-        inProgress = submitAction.isLoading(),
+        formattedRecoveryKey = "",
+        inProgress = false,
     ),
-    isSubmitEnabled = isSubmitEnabled,
-    submitAction = submitAction,
-    eventSink = eventSink,
-)
+    submitAction: AsyncAction<Unit> = AsyncAction.Uninitialized,
+    retrieveVaultAction: AsyncAction<String> = AsyncAction.Uninitialized,
+    isVaultMode: Boolean = false,
+    isSubmitEnabled: Boolean = true,
+): SecureBackupEnterRecoveryKeyState {
+    return SecureBackupEnterRecoveryKeyState(
+        recoveryKeyViewState = recoveryKeyViewState,
+        submitAction = submitAction,
+        retrieveVaultAction = retrieveVaultAction,
+        isVaultMode = isVaultMode,
+        isSubmitEnabled = isSubmitEnabled,
+        eventSink = {}
+    )
+}

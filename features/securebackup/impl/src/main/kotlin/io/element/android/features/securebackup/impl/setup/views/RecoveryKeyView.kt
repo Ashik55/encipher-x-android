@@ -59,6 +59,8 @@ internal fun RecoveryKeyView(
     onClick: (() -> Unit)?,
     onChange: ((String) -> Unit)?,
     onSubmit: (() -> Unit)?,
+    onPassphraseChange: ((String) -> Unit)? = null,
+    showRecoveryKey: Boolean = true,
     modifier: Modifier = Modifier,
 ) {
     Column(
@@ -69,7 +71,7 @@ internal fun RecoveryKeyView(
 //            text = stringResource(id = CommonStrings.common_recovery_key),
 //            style = ElementTheme.typography.fontBodyMdRegular,
 //        )
-        RecoveryKeyContent(state, onClick, onChange, onSubmit)
+        RecoveryKeyContent(state, onClick, onChange, onSubmit, onPassphraseChange, showRecoveryKey)
         RecoveryKeyFooter(state)
     }
 }
@@ -80,10 +82,12 @@ private fun RecoveryKeyContent(
     onClick: (() -> Unit)?,
     onChange: ((String) -> Unit)?,
     onSubmit: (() -> Unit)?,
+    onPassphraseChange: ((String) -> Unit)?,
+    showRecoveryKey: Boolean,
 ) {
     when (state.recoveryKeyUserStory) {
         RecoveryKeyUserStory.Setup,
-        RecoveryKeyUserStory.Change -> RecoveryKeyStaticContent(state, onClick)
+        RecoveryKeyUserStory.Change -> RecoveryKeyStaticContent(state, onClick, onPassphraseChange, showRecoveryKey)
         RecoveryKeyUserStory.Enter -> RecoveryKeyFormContent(state, onChange, onSubmit)
     }
 }
@@ -92,60 +96,72 @@ private fun RecoveryKeyContent(
 private fun RecoveryKeyStaticContent(
     state: RecoveryKeyViewState,
     onClick: (() -> Unit)?,
+    onPassphraseChange: ((String) -> Unit)?,
+    showRecoveryKey: Boolean,
 ) {
-    Box(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clip(RoundedCornerShape(14.dp))
-            .background(
-                color = ElementTheme.colors.bgSubtleSecondary,
-                shape = RoundedCornerShape(14.dp)
-            )
-            .clickableIfNotNull(onClick)
-            .padding(horizontal = 16.dp, vertical = 11.dp),
-        contentAlignment = Alignment.Center,
+    Column(
+        modifier = Modifier.fillMaxWidth(),
+        verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
-        if (state.formattedRecoveryKey != null) {
-            RecoveryKeyWithCopy(
-                recoveryKey = state.formattedRecoveryKey,
-                alpha = 1f,
-            )
-        } else {
-            // Use an invisible recovery key to ensure that the Box size is correct.
-            val fakeFormattedRecoveryKey = List(12) { "XXXX" }.joinToString(" ")
-            RecoveryKeyWithCopy(
-                recoveryKey = fakeFormattedRecoveryKey,
-                alpha = 0f,
-            )
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.Center,
+        // Only show recovery key box if explicitly requested
+        if (showRecoveryKey) {
+            Box(
                 modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(vertical = 11.dp)
-            ) {
-                if (state.inProgress) {
-                    CustomProgressIndicator(
-                        modifier = Modifier
-                            .progressSemantics()
-                            .padding(end = 8.dp)
-                            .size(16.dp),
-//                        color = ElementTheme.colors.textPrimary,
-//                        strokeWidth = 1.5.dp,
+                    .fillMaxWidth()
+                    .clip(RoundedCornerShape(14.dp))
+                    .background(
+                        color = ElementTheme.colors.bgSubtleSecondary,
+                        shape = RoundedCornerShape(14.dp)
                     )
-                }
-                Text(
-                    text = stringResource(
-                        id = when {
-                            state.inProgress -> R.string.screen_recovery_key_generating_key
-                            state.recoveryKeyUserStory == RecoveryKeyUserStory.Change -> R.string.screen_recovery_key_change_generate_key
-                            else -> R.string.screen_recovery_key_setup_generate_key
+                    .padding(horizontal = 16.dp, vertical = 11.dp),
+                contentAlignment = Alignment.Center,
+            ) {
+                if (state.formattedRecoveryKey != null) {
+                    // Show the actual recovery key when available
+                    RecoveryKeyWithCopy(
+                        recoveryKey = state.formattedRecoveryKey,
+                        alpha = 1f,  // Make it fully visible
+                        onClick = onClick
+                    )
+                } else {
+                    // Show loading state when generating
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.Center,
+                        modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(vertical = 11.dp)
+                    ) {
+                        if (state.inProgress) {
+                            CustomProgressIndicator(
+                                modifier = Modifier
+                                    .progressSemantics()
+                                    .padding(end = 8.dp)
+                                    .size(16.dp),
+                            )
                         }
-                    ),
-                    textAlign = TextAlign.Center,
-                    style = ElementTheme.typography.fontBodyLgMedium,
-                )
+                        Text(
+                            text = stringResource(
+                                id = when {
+                                    state.inProgress -> R.string.screen_recovery_key_generating_key
+                                    else -> R.string.screen_recovery_key_vault_save_description
+                                }
+                            ),
+                            textAlign = TextAlign.Center,
+                            style = ElementTheme.typography.fontBodyLgMedium,
+                        )
+                    }
+                }
             }
+        }
+        
+        // Always show passphrase input field when a recovery key exists
+        if (state.formattedRecoveryKey != null && onPassphraseChange != null) {
+            PassphraseInput(
+                passphrase = state.passphrase,
+                onPassphraseChange = onPassphraseChange,
+                modifier = Modifier.fillMaxWidth(),
+            )
         }
     }
 }
@@ -154,11 +170,13 @@ private fun RecoveryKeyStaticContent(
 private fun RecoveryKeyWithCopy(
     recoveryKey: String,
     alpha: Float,
+    onClick: (() -> Unit)? = null,
 ) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .alpha(alpha),
+            .alpha(alpha)
+            .clickableIfNotNull(onClick),
         horizontalArrangement = Arrangement.spacedBy(8.dp),
     ) {
         Text(
@@ -184,33 +202,45 @@ private fun RecoveryKeyFormContent(
 ) {
     onChange ?: error("onChange should not be null")
     onSubmit ?: error("onSubmit should not be null")
-    val keyHasSpace = state.formattedRecoveryKey.orEmpty().contains(" ")
-    val recoveryKeyVisualTransformation = remember(keyHasSpace) {
-        // Do not apply a visual transformation if the key has spaces, to let user enter passphrase
-        if (keyHasSpace) VisualTransformation.None else RecoveryKeyVisualTransformation()
-    }
-    TextField(
-        modifier = Modifier
-            .fillMaxWidth()
-            .testTag(TestTags.recoveryKey)
-            .autofill(
-                autofillTypes = listOf(AutofillType.Password),
-                onFill = { onChange(it) },
+    
+    if (state.isVaultMode) {
+        // In vault mode, show passphrase input instead of recovery key
+        PassphraseInput(
+            passphrase = state.formattedRecoveryKey.orEmpty(),
+            onPassphraseChange = onChange,
+            onSubmit = onSubmit,
+            modifier = Modifier.fillMaxWidth(),
+        )
+    } else {
+        // Regular recovery key input
+        val keyHasSpace = state.formattedRecoveryKey.orEmpty().contains(" ")
+        val recoveryKeyVisualTransformation = remember(keyHasSpace) {
+            // Do not apply a visual transformation if the key has spaces, to let user enter passphrase
+            if (keyHasSpace) VisualTransformation.None else RecoveryKeyVisualTransformation()
+        }
+        TextField(
+            modifier = Modifier
+                .fillMaxWidth()
+                .testTag(TestTags.recoveryKey)
+                .autofill(
+                    autofillTypes = listOf(AutofillType.Password),
+                    onFill = { onChange(it) },
+                ),
+            minLines = 2,
+            value = state.formattedRecoveryKey.orEmpty(),
+            onValueChange = onChange,
+            enabled = state.inProgress.not(),
+            visualTransformation = recoveryKeyVisualTransformation,
+            keyboardOptions = KeyboardOptions(
+                keyboardType = KeyboardType.Password,
+                imeAction = ImeAction.Done,
             ),
-        minLines = 2,
-        value = state.formattedRecoveryKey.orEmpty(),
-        onValueChange = onChange,
-        enabled = state.inProgress.not(),
-        visualTransformation = recoveryKeyVisualTransformation,
-        keyboardOptions = KeyboardOptions(
-            keyboardType = KeyboardType.Password,
-            imeAction = ImeAction.Done,
-        ),
-        keyboardActions = KeyboardActions(
-            onDone = { onSubmit() }
-        ),
-        placeholder = stringResource(id = R.string.screen_recovery_key_confirm_key_placeholder),
-    )
+            keyboardActions = KeyboardActions(
+                onDone = { onSubmit() }
+            ),
+            placeholder = stringResource(id = R.string.screen_recovery_key_confirm_key_placeholder),
+        )
+    }
 }
 
 @Composable
@@ -270,6 +300,38 @@ private fun RecoveryKeyFooter(state: RecoveryKeyViewState) {
                 )
             }
         }
+    }
+}
+
+@Composable
+private fun PassphraseInput(
+    passphrase: String,
+    onPassphraseChange: (String) -> Unit,
+    modifier: Modifier = Modifier,
+    onSubmit: (() -> Unit)? = null,
+) {
+    Column(
+        modifier = modifier,
+        verticalArrangement = Arrangement.spacedBy(4.dp)
+    ) {
+        Text(
+            text = stringResource(id = R.string.screen_recovery_key_vault_passphrase_hint),
+            style = ElementTheme.typography.fontBodySmRegular,
+            color = ElementTheme.colors.textSecondary,
+        )
+        TextField(
+            value = passphrase,
+            onValueChange = onPassphraseChange,
+            modifier = Modifier.fillMaxWidth(),
+            placeholder = stringResource(id = R.string.screen_recovery_key_vault_passphrase_placeholder),
+            keyboardOptions = KeyboardOptions(
+                keyboardType = KeyboardType.Password,
+                imeAction = ImeAction.Done
+            ),
+            keyboardActions = KeyboardActions(
+                onDone = { onSubmit?.invoke() }
+            ),
+        )
     }
 }
 

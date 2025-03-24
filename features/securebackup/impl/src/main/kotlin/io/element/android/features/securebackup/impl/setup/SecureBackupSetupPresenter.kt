@@ -10,6 +10,7 @@
 package io.element.android.features.securebackup.impl.setup
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -24,9 +25,12 @@ import dagger.assisted.AssistedInject
 import io.element.android.features.securebackup.impl.loggerTagSetup
 import io.element.android.features.securebackup.impl.setup.views.RecoveryKeyUserStory
 import io.element.android.features.securebackup.impl.setup.views.RecoveryKeyViewState
+import io.element.android.libraries.architecture.AsyncAction
 import io.element.android.libraries.architecture.Presenter
-import io.element.android.libraries.matrix.api.encryption.EnableRecoveryProgress
+import io.element.android.libraries.architecture.runCatchingUpdatingState
+import io.element.android.libraries.matrix.api.MatrixClient
 import io.element.android.libraries.matrix.api.encryption.EncryptionService
+import io.element.android.libraries.matrix.api.encryption.EnableRecoveryProgress
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.launch
@@ -36,6 +40,7 @@ class SecureBackupSetupPresenter @AssistedInject constructor(
     @Assisted private val isChangeRecoveryKeyUserStory: Boolean,
     private val stateMachine: SecureBackupSetupStateMachine,
     private val encryptionService: EncryptionService,
+    private val matrixClient: MatrixClient,
 ) : Presenter<SecureBackupSetupState> {
     @AssistedFactory
     fun interface Factory {
@@ -50,6 +55,9 @@ class SecureBackupSetupPresenter @AssistedInject constructor(
             derivedStateOf { stateAndDispatch.state.value.toSetupState() }
         }
         var showSaveConfirmationDialog by remember { mutableStateOf(false) }
+        var isVaultMode by remember { mutableStateOf(false) }
+        var passphrase by remember { mutableStateOf("") }
+        val vaultSaveAction = remember { mutableStateOf<AsyncAction<Unit>>(AsyncAction.Uninitialized) }
 
         fun handleEvents(event: SecureBackupSetupEvents) {
             when (event) {
@@ -64,6 +72,18 @@ class SecureBackupSetupPresenter @AssistedInject constructor(
                 SecureBackupSetupEvents.Done -> {
                     showSaveConfirmationDialog = true
                 }
+                is SecureBackupSetupEvents.PassphraseChanged -> {
+                    passphrase = event.passphrase
+                }
+                SecureBackupSetupEvents.SaveToVault -> {
+                    val recoveryKey = setupState.recoveryKey()
+                    if (recoveryKey != null && passphrase.isNotBlank()) {
+                        coroutineScope.saveToVault(vaultSaveAction, recoveryKey, passphrase)
+                    }
+                }
+                SecureBackupSetupEvents.ToggleVaultMode -> {
+                    isVaultMode = !isVaultMode
+                }
             }
         }
 
@@ -71,6 +91,8 @@ class SecureBackupSetupPresenter @AssistedInject constructor(
             recoveryKeyUserStory = if (isChangeRecoveryKeyUserStory) RecoveryKeyUserStory.Change else RecoveryKeyUserStory.Setup,
             formattedRecoveryKey = setupState.recoveryKey(),
             inProgress = setupState is SetupState.Creating,
+            passphrase = passphrase,
+            isVaultMode = isVaultMode,
         )
 
         return SecureBackupSetupState(
@@ -78,6 +100,8 @@ class SecureBackupSetupPresenter @AssistedInject constructor(
             recoveryKeyViewState = recoveryKeyViewState,
             setupState = setupState,
             showSaveConfirmationDialog = showSaveConfirmationDialog,
+            isSavingToVault = vaultSaveAction.value.isLoading(),
+            vaultSaveAction = vaultSaveAction.value,
             eventSink = ::handleEvents
         )
     }
@@ -127,6 +151,39 @@ class SecureBackupSetupPresenter @AssistedInject constructor(
                 is EnableRecoveryProgress.Done ->
                     stateAndDispatch.dispatchAction(SecureBackupSetupStateMachine.Event.SdkHasCreatedKey(enableRecoveryProgress.recoveryKey))
             }
+        }
+    }
+    
+    private fun CoroutineScope.saveToVault(
+        vaultSaveAction: MutableState<AsyncAction<Unit>>,
+        recoveryKey: String,
+        passphrase: String
+    ) = launch {
+        vaultSaveAction.value = AsyncAction.Loading
+        
+        try {
+            Timber.tag(loggerTagSetup.value).d("Attempting to save passkey to vault")
+            val service = matrixClient.passkeyService()
+            Timber.tag(loggerTagSetup.value).d("Using passkey service: ${service.javaClass.simpleName}")
+            
+            val result = service.savePasskey(
+                passkey = recoveryKey,
+                passphrase = passphrase
+            )
+            
+            result.fold(
+                onSuccess = {
+                    Timber.tag(loggerTagSetup.value).d("Successfully saved passkey to vault")
+                    vaultSaveAction.value = AsyncAction.Success(Unit)
+                },
+                onFailure = { error ->
+                    Timber.tag(loggerTagSetup.value).e(error, "Failed to save passkey to vault: ${error.message}")
+                    vaultSaveAction.value = AsyncAction.Failure(error)
+                }
+            )
+        } catch (e: Exception) {
+            Timber.tag(loggerTagSetup.value).e(e, "Exception while saving passkey to vault: ${e.message}")
+            vaultSaveAction.value = AsyncAction.Failure(e)
         }
     }
 }

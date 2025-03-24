@@ -13,7 +13,9 @@ import io.element.android.libraries.architecture.AsyncAction
 // Do not use default value, so no member get forgotten in the presenters.
 data class SecureBackupEnterRecoveryKeyState(
     val recoveryKeyViewState: RecoveryKeyViewState,
-    val isSubmitEnabled: Boolean,
     val submitAction: AsyncAction<Unit>,
+    val retrieveVaultAction: AsyncAction<String>,
+    val isVaultMode: Boolean,
+    val isSubmitEnabled: Boolean,
     val eventSink: (SecureBackupEnterRecoveryKeyEvents) -> Unit
 )

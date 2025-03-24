@@ -21,65 +21,156 @@ import io.element.android.features.securebackup.impl.tools.RecoveryKeyTools
 import io.element.android.libraries.architecture.AsyncAction
 import io.element.android.libraries.architecture.Presenter
 import io.element.android.libraries.architecture.runCatchingUpdatingState
+import io.element.android.libraries.matrix.api.MatrixClient
 import io.element.android.libraries.matrix.api.encryption.EncryptionService
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
+import timber.log.Timber
 import javax.inject.Inject
 
 class SecureBackupEnterRecoveryKeyPresenter @Inject constructor(
     private val encryptionService: EncryptionService,
     private val recoveryKeyTools: RecoveryKeyTools,
+    private val matrixClient: MatrixClient,
 ) : Presenter<SecureBackupEnterRecoveryKeyState> {
     @Composable
     override fun present(): SecureBackupEnterRecoveryKeyState {
         val coroutineScope = rememberCoroutineScope()
-        var recoveryKey by rememberSaveable {
-            mutableStateOf("")
-        }
-        val submitAction: MutableState<AsyncAction<Unit>> = remember {
-            mutableStateOf(AsyncAction.Uninitialized)
-        }
+        var recoveryKey by rememberSaveable { mutableStateOf("") }
+        var isVaultMode by rememberSaveable { mutableStateOf(true) } // Default to vault mode
+        val submitAction: MutableState<AsyncAction<Unit>> = remember { mutableStateOf(AsyncAction.Uninitialized) }
+        val retrieveVaultAction: MutableState<AsyncAction<String>> = remember { mutableStateOf(AsyncAction.Uninitialized) }
 
         fun handleEvents(event: SecureBackupEnterRecoveryKeyEvents) {
             when (event) {
-                SecureBackupEnterRecoveryKeyEvents.ClearDialog -> {
-                    submitAction.value = AsyncAction.Uninitialized
-                }
                 is SecureBackupEnterRecoveryKeyEvents.OnRecoveryKeyChange -> {
-                    val previousRecoveryKey = recoveryKey
-                    recoveryKey = if (previousRecoveryKey.isEmpty() && recoveryKeyTools.isRecoveryKeyFormatValid(event.recoveryKey)) {
-                        // A Recovery key has been entered, remove the spaces for a better rendering
-                        event.recoveryKey.replace("\\s+".toRegex(), "")
-                    } else {
-                        // Keep the recovery key as entered by the user. May contains spaces.
-                        event.recoveryKey
-                    }
+                    recoveryKey = event.value
                 }
                 SecureBackupEnterRecoveryKeyEvents.Submit -> {
-                    // No need to remove the spaces, the SDK will do it.
-                    coroutineScope.submitRecoveryKey(recoveryKey, submitAction)
+                    // Always use retrievePasskeyAndRecover since we're in vault mode
+                    coroutineScope.retrievePasskeyAndRecover(recoveryKey, submitAction, retrieveVaultAction)
+                }
+                SecureBackupEnterRecoveryKeyEvents.ClearDialog -> {
+                    submitAction.value = AsyncAction.Uninitialized
+                    retrieveVaultAction.value = AsyncAction.Uninitialized
+                }
+                SecureBackupEnterRecoveryKeyEvents.ToggleVaultMode -> {
+                    isVaultMode = true // Always keep it in vault mode
+                }
+                SecureBackupEnterRecoveryKeyEvents.RetrieveFromVault -> {
+                    coroutineScope.retrievePasskeyAndRecover(recoveryKey, submitAction, retrieveVaultAction)
                 }
             }
         }
 
+        val recoveryKeyViewState = RecoveryKeyViewState(
+            recoveryKeyUserStory = RecoveryKeyUserStory.Enter,
+            formattedRecoveryKey = recoveryKey,
+            inProgress = false,
+            isVaultMode = isVaultMode,
+        )
+
+        // Enable submit button when passphrase is not empty
+        val isSubmitEnabled = recoveryKey.isNotBlank()
+
         return SecureBackupEnterRecoveryKeyState(
-            recoveryKeyViewState = RecoveryKeyViewState(
-                recoveryKeyUserStory = RecoveryKeyUserStory.Enter,
-                formattedRecoveryKey = recoveryKey,
-                inProgress = submitAction.value.isLoading(),
-            ),
-            isSubmitEnabled = recoveryKey.isNotEmpty() && submitAction.value.isUninitialized(),
+            recoveryKeyViewState = recoveryKeyViewState,
             submitAction = submitAction.value,
+            retrieveVaultAction = retrieveVaultAction.value,
+            isVaultMode = isVaultMode,
+            isSubmitEnabled = isSubmitEnabled,
             eventSink = ::handleEvents
         )
     }
 
-    private fun CoroutineScope.submitRecoveryKey(
+    private fun CoroutineScope.recover(
         recoveryKey: String,
-        action: MutableState<AsyncAction<Unit>>
+        submitAction: MutableState<AsyncAction<Unit>>,
     ) = launch {
         suspend {
             encryptionService.recover(recoveryKey).getOrThrow()
-        }.runCatchingUpdatingState(action)
+        }.runCatchingUpdatingState(submitAction)
+    }
+    
+    private fun CoroutineScope.retrievePasskeyAndRecover(
+        passphrase: String,
+        submitAction: MutableState<AsyncAction<Unit>>,
+        retrieveVaultAction: MutableState<AsyncAction<String>>,
+    ) = launch {
+        Timber.d("Retrieving passkey with passphrase length: ${passphrase.length}")
+        
+        // Check if input looks like a recovery key rather than a passphrase
+        val containsSpaces = passphrase.contains(" ")
+        val hasCorrectFormat = passphrase.split(" ").size >= 12 || // Check if it has 12+ groups
+                               (passphrase.length > 50 && containsSpaces) // Or it's long with spaces
+        
+        if (hasCorrectFormat) {
+            Timber.d("Input appears to be a direct recovery key format, bypassing vault retrieval")
+            retrieveVaultAction.value = AsyncAction.Success(passphrase)
+            Timber.d("Beginning recovery process with the provided recovery key")
+            recover(passphrase, submitAction)
+            return@launch
+        }
+        
+        // First, retrieve the passkey using the passphrase
+        retrieveVaultAction.value = AsyncAction.Loading
+        Timber.d("Setting retrieveVaultAction to Loading")
+        
+        try {
+            Timber.d("Calling passkeyService().retrievePasskey() with passphrase")
+            val result = matrixClient.passkeyService().retrievePasskey(passphrase)
+            
+            result.fold(
+                onSuccess = { recoveryKey ->
+                    Timber.d("Passkey retrieved successfully, key length: ${recoveryKey.length}")
+                    retrieveVaultAction.value = AsyncAction.Success(recoveryKey)
+                    Timber.d("Setting retrieveVaultAction to Success")
+                    Timber.d("Beginning recovery process with the retrieved passkey")
+                    recover(recoveryKey, submitAction)
+                },
+                onFailure = { error ->
+                    Timber.e(error, "Failed to retrieve passkey with the provided passphrase: ${error.message}")
+                    
+                    // Special case for NoOpPasskeyService - allow direct key entry as fallback
+                    if (error is UnsupportedOperationException && error.message?.contains("NoOp implementation") == true) {
+                        Timber.d("NoOp implementation detected - advising user to enter recovery key directly")
+                        val friendlyError = Exception(
+                            "Vault feature is not available in this build. Please enter your recovery key directly.",
+                            error
+                        )
+                        retrieveVaultAction.value = AsyncAction.Failure(friendlyError)
+                    } else if (error.message?.contains("HTTP 404") == true || error.message?.contains("No recovery key found") == true) {
+                        // Handle the case where no recovery key is found for this user/passphrase
+                        val friendlyError = Exception(
+                            "No recovery key found for this passphrase. If you just created a recovery key, please enter it directly.",
+                            error
+                        )
+                        retrieveVaultAction.value = AsyncAction.Failure(friendlyError)
+                    } else {
+                        val friendlyError = Exception(
+                            "Failed to retrieve recovery key with the provided passphrase. Please check and try again.",
+                            error
+                        )
+                        retrieveVaultAction.value = AsyncAction.Failure(friendlyError)
+                    }
+                    Timber.d("Setting retrieveVaultAction to Failure with error: ${error.message}")
+                }
+            )
+        } catch (e: Exception) {
+            Timber.e(e, "Exception occurred while retrieving passkey: ${e.message}")
+            
+            // Better handle connection-related errors
+            val errorMessage = if (e.message?.contains("Failed to connect") == true || 
+                                  e.message?.contains("timeout") == true ||
+                                  e.message?.contains("UnknownHostException") == true) {
+                "Could not connect to the server. Please check your internet connection and try again."
+            } else {
+                "An error occurred while connecting to the server. Please try again later."
+            }
+            
+            val friendlyError = Exception(errorMessage, e)
+            retrieveVaultAction.value = AsyncAction.Failure(friendlyError)
+            Timber.d("Setting retrieveVaultAction to Failure due to exception: ${friendlyError.message}")
+        }
     }
 }

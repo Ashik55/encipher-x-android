@@ -12,4 +12,9 @@ sealed interface SecureBackupSetupEvents {
     data object RecoveryKeyHasBeenSaved : SecureBackupSetupEvents
     data object Done : SecureBackupSetupEvents
     data object DismissDialog : SecureBackupSetupEvents
+    
+    // New events for vault functionality
+    data class PassphraseChanged(val passphrase: String) : SecureBackupSetupEvents
+    data object SaveToVault : SecureBackupSetupEvents
+    data object ToggleVaultMode : SecureBackupSetupEvents
 }

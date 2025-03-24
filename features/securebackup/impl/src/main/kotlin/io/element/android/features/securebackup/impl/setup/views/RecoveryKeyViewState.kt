@@ -11,6 +11,8 @@ data class RecoveryKeyViewState(
     val recoveryKeyUserStory: RecoveryKeyUserStory,
     val formattedRecoveryKey: String?,
     val inProgress: Boolean,
+    val passphrase: String = "",
+    val isVaultMode: Boolean = false,
 )
 
 enum class RecoveryKeyUserStory {
