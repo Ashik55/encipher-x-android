@@ -6,6 +6,7 @@
     <string name="screen_recovery_key_vault_retrieve_button">Retrieve from Vault</string>
     <string name="screen_recovery_key_use_recovery_key_button">Use Recovery Key</string>
     <string name="screen_recovery_key_vault_or_direct_hint">Enter your vault passphrase or recovery key directly</string>
+    <string name="screen_recovery_key_success">Recovery key generated successfully</string>
     <string name="screen_recovery_key_vault_success">Recovery key saved to vault successfully</string>
     <string name="screen_recovery_key_vault_retrieve_success">Recovery key retrieved successfully</string>
     <string name="screen_recovery_key_vault_error">Failed to save recovery key to vault</string>
