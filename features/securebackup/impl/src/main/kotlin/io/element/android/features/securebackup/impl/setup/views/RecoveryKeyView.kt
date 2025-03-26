@@ -61,6 +61,7 @@ internal fun RecoveryKeyView(
     onSubmit: (() -> Unit)?,
     onPassphraseChange: ((String) -> Unit)? = null,
     showRecoveryKey: Boolean = true,
+    showInputOnly: Boolean = false,
     modifier: Modifier = Modifier,
 ) {
     Column(
@@ -71,7 +72,7 @@ internal fun RecoveryKeyView(
 //            text = stringResource(id = CommonStrings.common_recovery_key),
 //            style = ElementTheme.typography.fontBodyMdRegular,
 //        )
-        RecoveryKeyContent(state, onClick, onChange, onSubmit, onPassphraseChange, showRecoveryKey)
+        RecoveryKeyContent(state, onClick, onChange, onSubmit, onPassphraseChange, showRecoveryKey, showInputOnly)
         RecoveryKeyFooter(state)
     }
 }
@@ -84,11 +85,12 @@ private fun RecoveryKeyContent(
     onSubmit: (() -> Unit)?,
     onPassphraseChange: ((String) -> Unit)?,
     showRecoveryKey: Boolean,
+    showInputOnly: Boolean,
 ) {
     when (state.recoveryKeyUserStory) {
         RecoveryKeyUserStory.Setup,
         RecoveryKeyUserStory.Change -> RecoveryKeyStaticContent(state, onClick, onPassphraseChange, showRecoveryKey)
-        RecoveryKeyUserStory.Enter -> RecoveryKeyFormContent(state, onChange, onSubmit)
+        RecoveryKeyUserStory.Enter -> RecoveryKeyFormContent(state, onChange, onSubmit, showInputOnly)
     }
 }
 
@@ -161,6 +163,7 @@ private fun RecoveryKeyStaticContent(
                 passphrase = state.passphrase,
                 onPassphraseChange = onPassphraseChange,
                 modifier = Modifier.fillMaxWidth(),
+                isRetrievalMode = false,
             )
         }
     }
@@ -199,17 +202,19 @@ private fun RecoveryKeyFormContent(
     state: RecoveryKeyViewState,
     onChange: ((String) -> Unit)?,
     onSubmit: (() -> Unit)?,
+    showInputOnly: Boolean = false,
 ) {
     onChange ?: error("onChange should not be null")
     onSubmit ?: error("onSubmit should not be null")
     
-    if (state.isVaultMode) {
-        // In vault mode, show passphrase input instead of recovery key
+    if (state.isVaultMode || showInputOnly) {
+        // In vault mode or when explicitly showing only input, show passphrase input instead of recovery key
         PassphraseInput(
             passphrase = state.formattedRecoveryKey.orEmpty(),
             onPassphraseChange = onChange,
             onSubmit = onSubmit,
             modifier = Modifier.fillMaxWidth(),
+            isRetrievalMode = true,
         )
     } else {
         // Regular recovery key input
@@ -278,7 +283,7 @@ private fun RecoveryKeyFooter(state: RecoveryKeyViewState) {
                     else {
                         Color(0xFFFFFFFF)
                     },
-                    modifier = Modifier.padding(start = 16.dp),
+                    modifier = Modifier.padding(start = 8.dp),
                     style = ElementTheme.typography.fontBodySmRegular,
                 )
             }
@@ -286,17 +291,18 @@ private fun RecoveryKeyFooter(state: RecoveryKeyViewState) {
         RecoveryKeyUserStory.Enter -> {
             Column(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalAlignment = Alignment.CenterHorizontally
+                horizontalAlignment = Alignment.Start
             ) {
                 Text(
-                    text = stringResource(id = R.string.screen_recovery_key_confirm_key_description),
+                    text = stringResource(id = R.string.screen_recovery_key_setup_generate_key_description),
                     color = if(ElementTheme.isLightTheme){
                         Color(0xFF0A8741)
                     }
                     else {
                         Color(0xFFFFFFFF)
                     },
-                    textAlign = TextAlign.Center,
+                    modifier = Modifier.padding(start = 16.dp),
+                    textAlign = TextAlign.Start,
                     style = ElementTheme.typography.fontBodySmRegular,
                 )
             }
@@ -310,13 +316,21 @@ private fun PassphraseInput(
     onPassphraseChange: (String) -> Unit,
     modifier: Modifier = Modifier,
     onSubmit: (() -> Unit)? = null,
+    isRetrievalMode: Boolean = false,
 ) {
     Column(
         modifier = modifier,
         verticalArrangement = Arrangement.spacedBy(4.dp)
     ) {
         Text(
-            text = stringResource(id = R.string.screen_recovery_key_vault_passphrase_hint),
+            text = stringResource(
+                id = if (isRetrievalMode) {
+                    R.string.screen_recovery_key_vault_hint_input
+                } else {
+                    R.string.screen_recovery_key_vault_passphrase_hint
+                }
+            ),
+            modifier = Modifier.padding(start = 8.dp),
             style = ElementTheme.typography.fontBodySmRegular,
             color = ElementTheme.colors.textSecondary,
         )

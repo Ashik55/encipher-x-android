@@ -37,7 +37,8 @@ class SecureBackupEnterRecoveryKeyPresenter @Inject constructor(
     override fun present(): SecureBackupEnterRecoveryKeyState {
         val coroutineScope = rememberCoroutineScope()
         var recoveryKey by rememberSaveable { mutableStateOf("") }
-        var isVaultMode by rememberSaveable { mutableStateOf(true) } // Default to vault mode
+        // Always use vault mode
+        val isVaultMode = true
         val submitAction: MutableState<AsyncAction<Unit>> = remember { mutableStateOf(AsyncAction.Uninitialized) }
         val retrieveVaultAction: MutableState<AsyncAction<String>> = remember { mutableStateOf(AsyncAction.Uninitialized) }
 
@@ -47,15 +48,11 @@ class SecureBackupEnterRecoveryKeyPresenter @Inject constructor(
                     recoveryKey = event.value
                 }
                 SecureBackupEnterRecoveryKeyEvents.Submit -> {
-                    // Always use retrievePasskeyAndRecover since we're in vault mode
                     coroutineScope.retrievePasskeyAndRecover(recoveryKey, submitAction, retrieveVaultAction)
                 }
                 SecureBackupEnterRecoveryKeyEvents.ClearDialog -> {
                     submitAction.value = AsyncAction.Uninitialized
                     retrieveVaultAction.value = AsyncAction.Uninitialized
-                }
-                SecureBackupEnterRecoveryKeyEvents.ToggleVaultMode -> {
-                    isVaultMode = true // Always keep it in vault mode
                 }
                 SecureBackupEnterRecoveryKeyEvents.RetrieveFromVault -> {
                     coroutineScope.retrievePasskeyAndRecover(recoveryKey, submitAction, retrieveVaultAction)
@@ -99,19 +96,6 @@ class SecureBackupEnterRecoveryKeyPresenter @Inject constructor(
     ) = launch {
         Timber.d("Retrieving passkey with passphrase length: ${passphrase.length}")
         
-        // Check if input looks like a recovery key rather than a passphrase
-        val containsSpaces = passphrase.contains(" ")
-        val hasCorrectFormat = passphrase.split(" ").size >= 12 || // Check if it has 12+ groups
-                               (passphrase.length > 50 && containsSpaces) // Or it's long with spaces
-        
-        if (hasCorrectFormat) {
-            Timber.d("Input appears to be a direct recovery key format, bypassing vault retrieval")
-            retrieveVaultAction.value = AsyncAction.Success(passphrase)
-            Timber.d("Beginning recovery process with the provided recovery key")
-            recover(passphrase, submitAction)
-            return@launch
-        }
-        
         // First, retrieve the passkey using the passphrase
         retrieveVaultAction.value = AsyncAction.Loading
         Timber.d("Setting retrieveVaultAction to Loading")
@@ -131,24 +115,24 @@ class SecureBackupEnterRecoveryKeyPresenter @Inject constructor(
                 onFailure = { error ->
                     Timber.e(error, "Failed to retrieve passkey with the provided passphrase: ${error.message}")
                     
-                    // Special case for NoOpPasskeyService - allow direct key entry as fallback
+                    // Special case for NoOpPasskeyService
                     if (error is UnsupportedOperationException && error.message?.contains("NoOp implementation") == true) {
-                        Timber.d("NoOp implementation detected - advising user to enter recovery key directly")
+                        Timber.d("NoOp implementation detected - vault feature not available")
                         val friendlyError = Exception(
-                            "Vault feature is not available in this build. Please enter your recovery key directly.",
+                            "Vault feature is not available in this build. Please contact support.",
                             error
                         )
                         retrieveVaultAction.value = AsyncAction.Failure(friendlyError)
                     } else if (error.message?.contains("HTTP 404") == true || error.message?.contains("No recovery key found") == true) {
                         // Handle the case where no recovery key is found for this user/passphrase
                         val friendlyError = Exception(
-                            "No recovery key found for this passphrase. If you just created a recovery key, please enter it directly.",
+                            "No recovery key found for this passphrase. Please check and try again.",
                             error
                         )
                         retrieveVaultAction.value = AsyncAction.Failure(friendlyError)
                     } else {
                         val friendlyError = Exception(
-                            "Failed to retrieve recovery key with the provided passphrase. Please check and try again.",
+                            "Failed to retrieve recovery key. Please check your passphrase and try again.",
                             error
                         )
                         retrieveVaultAction.value = AsyncAction.Failure(friendlyError)

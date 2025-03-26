@@ -11,8 +11,5 @@ sealed interface SecureBackupEnterRecoveryKeyEvents {
     data class OnRecoveryKeyChange(val value: String) : SecureBackupEnterRecoveryKeyEvents
     data object Submit : SecureBackupEnterRecoveryKeyEvents
     data object ClearDialog : SecureBackupEnterRecoveryKeyEvents
-    
-    // New events for vault mode
-    data object ToggleVaultMode : SecureBackupEnterRecoveryKeyEvents
     data object RetrieveFromVault : SecureBackupEnterRecoveryKeyEvents
 }
