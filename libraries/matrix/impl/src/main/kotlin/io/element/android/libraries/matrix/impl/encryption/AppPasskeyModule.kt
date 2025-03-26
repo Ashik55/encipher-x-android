@@ -14,8 +14,6 @@ import io.element.android.libraries.di.AppScope
 import io.element.android.libraries.di.SingleIn
 import io.element.android.libraries.matrix.api.encryption.PasskeyService
 import io.element.android.libraries.network.RetrofitFactory
-import kotlinx.serialization.json.Json
-import okhttp3.OkHttpClient
 import javax.inject.Inject
 
 /**
@@ -27,9 +25,17 @@ class AppPasskeyModule @Inject constructor() {
     
     @Provides
     @SingleIn(AppScope::class)
-    fun provideProductionPasskeyService(
+    fun providePasskeyServiceFactory(
         retrofitFactory: RetrofitFactory
+    ): PasskeyServiceFactory {
+        return DefaultPasskeyServiceFactory(retrofitFactory)
+    }
+    
+    @Provides
+    @SingleIn(AppScope::class)
+    fun providePasskeyService(
+        factory: PasskeyServiceFactory
     ): PasskeyService {
-        return ProductionPasskeyService(retrofitFactory)
+        return factory.create()
     }
 } 

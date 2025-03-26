@@ -94,7 +94,10 @@ class DefaultPasskeyService @Inject constructor(
                     try {
                         // Parse the response to get full details including encryption info
                         val saveResponse = json.decodeFromString(SavePasskeyResponse.serializer(), responseBody)
-                        Timber.d("Successfully parsed save response from user: ${saveResponse.requester}")
+                        Timber.d("Successfully saved passkey for user: ${saveResponse.requester}")
+                        Timber.d("Encrypted passkey length: ${saveResponse.encryptedPasskey.length}")
+                        // Store the encrypted passkey in memory as fallback
+                        passkeyStore[passphrase] = saveResponse.encryptedPasskey
                     } catch (e: Exception) {
                         Timber.w(e, "Failed to parse save response details: ${e.message}")
                     }
@@ -166,7 +169,9 @@ class DefaultPasskeyService @Inject constructor(
                 try {
                     // Parse the response to get the passkey
                     val passkeyResponse = json.decodeFromString(PasskeyResponse.serializer(), responseBody)
-                    Timber.d("Successfully parsed response, recovery key length: ${passkeyResponse.passkey.length}")
+                    Timber.d("Successfully retrieved passkey, length: ${passkeyResponse.passkey.length}")
+                    // Store the retrieved passkey in memory as fallback
+                    passkeyStore[passphrase] = passkeyResponse.passkey
                     passkeyResponse.passkey
                 } catch (e: Exception) {
                     Timber.e(e, "Failed to parse API response: ${e.message}")
@@ -239,6 +244,10 @@ class DefaultPasskeyService @Inject constructor(
                     // Parse the response to get the hasPasskey value
                     val checkResponse = json.decodeFromString(CheckPasskeyResponse.serializer(), responseBody)
                     Timber.d("User ${checkResponse.userId} has passkey: ${checkResponse.hasPasskey}")
+                    if (checkResponse.hasPasskey && passphrase != null) {
+                        // If we have a passphrase and the user has a passkey, store it in memory
+                        passkeyStore[passphrase] = "has_passkey"
+                    }
                     checkResponse.hasPasskey
                 } catch (e: Exception) {
                     Timber.e(e, "Failed to parse API response: ${e.message}")

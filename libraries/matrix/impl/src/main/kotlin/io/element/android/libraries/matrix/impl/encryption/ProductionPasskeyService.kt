@@ -12,6 +12,7 @@ import io.element.android.libraries.matrix.impl.encryption.models.CheckPasskeyRe
 import io.element.android.libraries.matrix.impl.encryption.models.CheckPasskeyResponse
 import io.element.android.libraries.matrix.impl.encryption.models.PasskeyResponse
 import io.element.android.libraries.matrix.impl.encryption.models.SavePasskeyRequest
+import io.element.android.libraries.matrix.impl.encryption.models.SavePasskeyResponse
 import io.element.android.libraries.network.RetrofitFactory
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -26,7 +27,8 @@ import timber.log.Timber
  * Production implementation of [PasskeyService] that works with the actual API endpoints.
  */
 class ProductionPasskeyService(
-    private val retrofitFactory: RetrofitFactory
+    private val retrofitFactory: RetrofitFactory,
+    private val userId: String
 ) : PasskeyService {
     // Base URL for the passkey service
     private val baseUrl = "https://dev.enciph-er.com"
@@ -41,16 +43,12 @@ class ProductionPasskeyService(
     private val passkeyStore = mutableMapOf<String, String>()
 
     init {
-        Timber.d("Initializing ProductionPasskeyService with base URL: $baseUrl")
+        Timber.d("Initializing ProductionPasskeyService with base URL: $baseUrl for user: $userId")
     }
 
     override suspend fun savePasskey(passkey: String, passphrase: String): Result<Unit> = withContext(Dispatchers.IO) {
         runCatching {
-            Timber.d("ProductionPasskeyService: Saving passkey")
-            
-            // User ID is required for the API endpoint. Since we're at app scope, we don't have
-            // a session yet, so we use a generic/default user ID format.
-            val userId = "@user:dev.enciph-er.com"
+            Timber.d("ProductionPasskeyService: Saving passkey for user: $userId")
             
             try {
                 // Prepare API request based on the specific endpoint
@@ -77,6 +75,20 @@ class ProductionPasskeyService(
                     throw Exception("Failed to save passkey: HTTP ${response.code} - $errorBody")
                 }
                 
+                val responseBody = response.body?.string()
+                if (responseBody != null) {
+                    try {
+                        // Parse the response to get full details including encryption info
+                        val saveResponse = json.decodeFromString(SavePasskeyResponse.serializer(), responseBody)
+                        Timber.d("Successfully saved passkey for user: ${saveResponse.requester}")
+                        Timber.d("Encrypted passkey length: ${saveResponse.encryptedPasskey.length}")
+                        // Store the encrypted passkey in memory as fallback
+                        passkeyStore[passphrase] = saveResponse.encryptedPasskey
+                    } catch (e: Exception) {
+                        Timber.w(e, "Failed to parse save response details: ${e.message}")
+                    }
+                }
+                
                 Timber.d("Successfully saved passkey to API")
             } catch (e: Exception) {
                 Timber.w(e, "API call failed, falling back to in-memory storage: ${e.message}")
@@ -93,11 +105,7 @@ class ProductionPasskeyService(
 
     override suspend fun retrievePasskey(passphrase: String): Result<String> = withContext(Dispatchers.IO) {
         runCatching {
-            Timber.d("ProductionPasskeyService: Retrieving passkey with passphrase length: ${passphrase.length}")
-            
-            // User ID is required for the API endpoint. Since we're at app scope, we don't have
-            // a session yet, so we use a generic/default user ID format.
-            val userId = "@user:dev.enciph-er.com"
+            Timber.d("ProductionPasskeyService: Retrieving passkey for user: $userId with passphrase length: ${passphrase.length}")
             
             try {
                 // Build the URL with query parameter
@@ -137,7 +145,9 @@ class ProductionPasskeyService(
                 try {
                     // Parse the response to get the passkey
                     val passkeyResponse = json.decodeFromString(PasskeyResponse.serializer(), responseBody)
-                    Timber.d("Successfully parsed response, recovery key length: ${passkeyResponse.passkey.length}")
+                    Timber.d("Successfully retrieved passkey, length: ${passkeyResponse.passkey.length}")
+                    // Store the retrieved passkey in memory as fallback
+                    passkeyStore[passphrase] = passkeyResponse.passkey
                     passkeyResponse.passkey
                 } catch (e: Exception) {
                     Timber.e(e, "Failed to parse API response: ${e.message}")
@@ -161,11 +171,7 @@ class ProductionPasskeyService(
     
     override suspend fun hasPasskey(passphrase: String?): Result<Boolean> = withContext(Dispatchers.IO) {
         runCatching {
-            Timber.d("ProductionPasskeyService: Checking for passkey existence")
-            
-            // User ID is required for the API endpoint. Since we're at app scope, we don't have
-            // a session yet, so we use a generic/default user ID format.
-            val userId = "@user:dev.enciph-er.com"
+            Timber.d("ProductionPasskeyService: Checking for passkey existence for user: $userId")
             
             try {
                 // Construct the URL for checking passkey existence
@@ -214,6 +220,10 @@ class ProductionPasskeyService(
                     // Parse the response to get the hasPasskey value
                     val checkResponse = json.decodeFromString(CheckPasskeyResponse.serializer(), responseBody)
                     Timber.d("User ${checkResponse.userId} has passkey: ${checkResponse.hasPasskey}")
+                    if (checkResponse.hasPasskey && passphrase != null) {
+                        // If we have a passphrase and the user has a passkey, store it in memory
+                        passkeyStore[passphrase] = "has_passkey"
+                    }
                     checkResponse.hasPasskey
                 } catch (e: Exception) {
                     Timber.e(e, "Failed to parse API response: ${e.message}")
