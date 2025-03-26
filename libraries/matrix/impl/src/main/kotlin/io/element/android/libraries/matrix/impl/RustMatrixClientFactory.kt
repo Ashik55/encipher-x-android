@@ -14,6 +14,7 @@ import io.element.android.libraries.featureflag.api.FeatureFlags
 import io.element.android.libraries.matrix.api.encryption.PasskeyService
 import io.element.android.libraries.matrix.impl.analytics.UtdTracker
 import io.element.android.libraries.matrix.impl.certificates.UserCertificatesProvider
+import io.element.android.libraries.matrix.impl.encryption.PasskeyServiceFactory
 import io.element.android.libraries.matrix.impl.paths.SessionPaths
 import io.element.android.libraries.matrix.impl.paths.getSessionPaths
 import io.element.android.libraries.matrix.impl.proxy.ProxyProvider
@@ -52,7 +53,7 @@ class RustMatrixClientFactory @Inject constructor(
     private val featureFlagService: FeatureFlagService,
     private val timelineEventTypeFilterFactory: TimelineEventTypeFilterFactory,
     private val clientBuilderProvider: ClientBuilderProvider,
-    private val passkeyService: PasskeyService,
+    private val passkeyServiceFactory: PasskeyServiceFactory,
 ) {
     private val sessionDelegate = RustClientSessionDelegate(sessionStore, appCoroutineScope, coroutineDispatchers)
 
@@ -68,10 +69,21 @@ class RustMatrixClientFactory @Inject constructor(
 
         client.restoreSession(sessionData.toSession())
 
-        create(client)
+        // Create a PasskeyService with the actual user ID
+        val clientPasskeyService = passkeyServiceFactory.create(sessionData.userId)
+        
+        create(client, clientPasskeyService)
     }
 
     suspend fun create(client: Client): RustMatrixClient {
+        // Get the session user ID to create a proper PasskeyService
+        val userId = client.session().userId
+        val clientPasskeyService = passkeyServiceFactory.create(userId)
+        
+        return create(client, clientPasskeyService)
+    }
+    
+    private suspend fun create(client: Client, passkeyService: PasskeyService): RustMatrixClient {
         val (anonymizedAccessToken, anonymizedRefreshToken) = client.session().anonymizedTokens()
 
         val syncService = client.syncService()

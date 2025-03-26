@@ -9,7 +9,7 @@ package io.element.android.libraries.matrix.impl.encryption
 
 import com.squareup.anvil.annotations.ContributesBinding
 import io.element.android.libraries.di.SessionScope
-import io.element.android.libraries.matrix.api.core.SessionId
+import io.element.android.libraries.matrix.api.MatrixClient
 import io.element.android.libraries.matrix.api.encryption.PasskeyService
 import io.element.android.libraries.network.RetrofitFactory
 import javax.inject.Inject
@@ -19,21 +19,28 @@ import timber.log.Timber
  * Interface for creating PasskeyService instances.
  */
 interface PasskeyServiceFactory {
-    fun create(): PasskeyService
+    /**
+     * Creates a new PasskeyService instance.
+     * 
+     * @param userId The Matrix user ID to create the service for.
+     * @return A new PasskeyService instance.
+     */
+    fun create(userId: String): PasskeyService
 }
 
 /**
- * Implementation of PasskeyServiceFactory that creates PasskeyService instances with the correct user ID from the session.
+ * Implementation of PasskeyServiceFactory that creates PasskeyService instances.
  */
 @ContributesBinding(SessionScope::class, boundType = PasskeyServiceFactory::class)
 class DefaultPasskeyServiceFactory @Inject constructor(
-    private val retrofitFactory: RetrofitFactory
+    private val retrofitFactory: RetrofitFactory,
+    private val matrixClient: MatrixClient
 ) : PasskeyServiceFactory {
-    override fun create(): PasskeyService {
-        Timber.d("Creating PasskeyService")
+    override fun create(userId: String): PasskeyService {
+        Timber.d("Creating PasskeyService for user: $userId")
         return ProductionPasskeyService(
             retrofitFactory = retrofitFactory,
-            userId = "default" // This will be replaced with actual user ID when needed
+            userId = userId
         )
     }
 } 

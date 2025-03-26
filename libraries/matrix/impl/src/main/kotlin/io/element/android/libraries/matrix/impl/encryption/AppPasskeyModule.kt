@@ -15,9 +15,10 @@ import io.element.android.libraries.di.SingleIn
 import io.element.android.libraries.matrix.api.encryption.PasskeyService
 import io.element.android.libraries.network.RetrofitFactory
 import javax.inject.Inject
+import timber.log.Timber
 
 /**
- * Production implementation of PasskeyService that connects to the actual API.
+ * Provides a factory for creating PasskeyService instances at app scope.
  */
 @ContributesTo(AppScope::class)
 @Module
@@ -28,14 +29,22 @@ class AppPasskeyModule @Inject constructor() {
     fun providePasskeyServiceFactory(
         retrofitFactory: RetrofitFactory
     ): PasskeyServiceFactory {
-        return DefaultPasskeyServiceFactory(retrofitFactory)
+        Timber.d("Creating PasskeyServiceFactory in AppScope")
+        return AppScopePasskeyServiceFactory(retrofitFactory)
     }
     
-    @Provides
-    @SingleIn(AppScope::class)
-    fun providePasskeyService(
-        factory: PasskeyServiceFactory
-    ): PasskeyService {
-        return factory.create()
+    /**
+     * App-scoped implementation of PasskeyServiceFactory that doesn't require MatrixClient.
+     */
+    private class AppScopePasskeyServiceFactory(
+        private val retrofitFactory: RetrofitFactory
+    ) : PasskeyServiceFactory {
+        override fun create(userId: String): PasskeyService {
+            Timber.d("Creating PasskeyService with user ID: $userId")
+            return ProductionPasskeyService(
+                retrofitFactory = retrofitFactory,
+                userId = userId
+            )
+        }
     }
 } 

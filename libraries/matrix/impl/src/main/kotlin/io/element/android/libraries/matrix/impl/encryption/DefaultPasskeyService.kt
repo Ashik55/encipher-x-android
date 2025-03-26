@@ -193,7 +193,7 @@ class DefaultPasskeyService @Inject constructor(
         }
     }
     
-    override suspend fun hasPasskey(passphrase: String?): Result<Boolean> = withContext(Dispatchers.IO) {
+    override suspend fun hasPasskey(passphrase: String): Result<Boolean> = withContext(Dispatchers.IO) {
         runCatching {
             val userId = sessionId.value
             Timber.d("Checking if user $userId has a passkey")
@@ -202,21 +202,16 @@ class DefaultPasskeyService @Inject constructor(
                 // Construct request URL
                 val url = "$baseUrl/_matrix/client/v3/auth/check_passkey/$userId"
                 
-                val requestBuilder = Request.Builder()
+                val requestBody = CheckPasskeyRequest(passphrase = passphrase)
+                val jsonBody = json.encodeToString(CheckPasskeyRequest.serializer(), requestBody)
+                
+                val request = Request.Builder()
                     .url(url)
+                    .post(jsonBody.toRequestBody("application/json".toMediaType()))
+                    .header("Content-Type", "application/json")
                     .header("Accept", "application/json")
+                    .build()
                 
-                // If passphrase provided, send as JSON body
-                if (passphrase != null) {
-                    val requestBody = CheckPasskeyRequest(passphrase = passphrase)
-                    val jsonBody = json.encodeToString(CheckPasskeyRequest.serializer(), requestBody)
-                    requestBuilder.post(jsonBody.toRequestBody("application/json".toMediaType()))
-                        .header("Content-Type", "application/json")
-                } else {
-                    requestBuilder.get()
-                }
-                
-                val request = requestBuilder.build()
                 val response = client.newCall(request).execute()
                 
                 Timber.d("Check passkey API response code: ${response.code}")
@@ -225,7 +220,7 @@ class DefaultPasskeyService @Inject constructor(
                     val errorBody = response.body?.string() ?: "Unknown error"
                     Timber.e("API call failed with code ${response.code}: $errorBody")
                     
-                    // For certain errors like 404, we can return false (no passkey) rather than failing
+                    // For 404 errors, we can interpret that as "no passkey exists"
                     if (response.code == 404) {
                         return@runCatching false
                     }
@@ -244,8 +239,8 @@ class DefaultPasskeyService @Inject constructor(
                     // Parse the response to get the hasPasskey value
                     val checkResponse = json.decodeFromString(CheckPasskeyResponse.serializer(), responseBody)
                     Timber.d("User ${checkResponse.userId} has passkey: ${checkResponse.hasPasskey}")
-                    if (checkResponse.hasPasskey && passphrase != null) {
-                        // If we have a passphrase and the user has a passkey, store it in memory
+                    if (checkResponse.hasPasskey) {
+                        // Store in memory for fallback
                         passkeyStore[passphrase] = "has_passkey"
                     }
                     checkResponse.hasPasskey
@@ -255,16 +250,10 @@ class DefaultPasskeyService @Inject constructor(
                 }
             } catch (e: Exception) {
                 Timber.w(e, "API call failed, checking in-memory storage: ${e.message}")
-                // Fall back to memory if API fails
-                if (passphrase != null) {
-                    val hasKey = passkeyStore.containsKey(passphrase)
-                    Timber.d("In-memory store has passkey for passphrase: $hasKey")
-                    hasKey
-                } else {
-                    val hasAnyKey = passkeyStore.isNotEmpty()
-                    Timber.d("In-memory store has any passkeys: $hasAnyKey")
-                    hasAnyKey
-                }
+                // Check in-memory storage if API call fails
+                val hasKey = passkeyStore.containsKey(passphrase)
+                Timber.d("In-memory store has passkey for passphrase: $hasKey")
+                hasKey
             }
         }.onFailure {
             Timber.e(it, "Failed to check passkey: ${it.message}")

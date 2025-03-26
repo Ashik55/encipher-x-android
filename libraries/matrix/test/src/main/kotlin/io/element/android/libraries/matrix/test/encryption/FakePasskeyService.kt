@@ -12,9 +12,11 @@ import io.element.android.libraries.matrix.api.encryption.PasskeyService
 class FakePasskeyService : PasskeyService {
     private val savePasskeyResponses = mutableMapOf<Pair<String, String>, Result<Unit>>()
     private val retrievePasskeyResponses = mutableMapOf<String, Result<String>>()
+    private val hasPasskeyResponses = mutableMapOf<String, Result<Boolean>>()
     
     private var defaultSaveResponse: Result<Unit> = Result.success(Unit)
     private var defaultRetrieveResponse: Result<String> = Result.success("fake-passkey")
+    private var defaultHasPasskeyResponse: Result<Boolean> = Result.success(false)
     
     fun givenSavePasskeyResponse(passkey: String, passphrase: String, response: Result<Unit>) {
         savePasskeyResponses[Pair(passkey, passphrase)] = response
@@ -22,6 +24,10 @@ class FakePasskeyService : PasskeyService {
     
     fun givenRetrievePasskeyResponse(passphrase: String, response: Result<String>) {
         retrievePasskeyResponses[passphrase] = response
+    }
+    
+    fun givenHasPasskeyResponse(passphrase: String, response: Result<Boolean>) {
+        hasPasskeyResponses[passphrase] = response
     }
     
     fun givenDefaultSaveResponse(response: Result<Unit>) {
@@ -32,11 +38,19 @@ class FakePasskeyService : PasskeyService {
         defaultRetrieveResponse = response
     }
     
+    fun givenDefaultHasPasskeyResponse(response: Result<Boolean>) {
+        defaultHasPasskeyResponse = response
+    }
+    
     override suspend fun savePasskey(passkey: String, passphrase: String): Result<Unit> {
         return savePasskeyResponses[Pair(passkey, passphrase)] ?: defaultSaveResponse
     }
     
     override suspend fun retrievePasskey(passphrase: String): Result<String> {
         return retrievePasskeyResponses[passphrase] ?: defaultRetrieveResponse
+    }
+    
+    override suspend fun hasPasskey(passphrase: String): Result<Boolean> {
+        return hasPasskeyResponses[passphrase] ?: defaultHasPasskeyResponse
     }
 } 

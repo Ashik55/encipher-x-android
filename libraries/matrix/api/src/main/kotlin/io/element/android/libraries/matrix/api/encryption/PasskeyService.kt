@@ -28,8 +28,8 @@ interface PasskeyService {
     
     /**
      * Checks if the user has a passkey stored in the vault.
-     * @param passphrase Optional passphrase to check for a specific entry
+     * @param passphrase The passphrase to check for a specific entry
      * @return Result containing true if the user has a passkey, false otherwise
      */
-    suspend fun hasPasskey(passphrase: String? = null): Result<Boolean>
+    suspend fun hasPasskey(passphrase: String): Result<Boolean>
 } 

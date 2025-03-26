@@ -30,7 +30,7 @@ class NoOpPasskeyService @Inject constructor() : PasskeyService {
         return Result.failure(UnsupportedOperationException("NoOp implementation cannot retrieve passkeys"))
     }
     
-    override suspend fun hasPasskey(passphrase: String?): Result<Boolean> {
+    override suspend fun hasPasskey(passphrase: String): Result<Boolean> {
         Timber.d("NoOp: Checking for passkey existence (app scope implementation)")
         return Result.success(false) // Always return false for NoOp implementation
     }

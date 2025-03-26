@@ -12,6 +12,7 @@ import dagger.Binds
 import dagger.Module
 import dagger.Provides
 import io.element.android.libraries.di.SessionScope
+import io.element.android.libraries.matrix.api.MatrixClient
 import io.element.android.libraries.matrix.api.encryption.PasskeyService
 import io.element.android.libraries.network.RetrofitFactory
 import javax.inject.Inject
@@ -25,16 +26,19 @@ abstract class PasskeyServiceModule {
     companion object {
         @Provides
         fun providePasskeyServiceFactory(
-            retrofitFactory: RetrofitFactory
+            retrofitFactory: RetrofitFactory,
+            matrixClient: MatrixClient
         ): PasskeyServiceFactory {
-            return DefaultPasskeyServiceFactory(retrofitFactory)
+            return DefaultPasskeyServiceFactory(retrofitFactory, matrixClient)
         }
         
         @Provides
         fun providePasskeyService(
-            factory: PasskeyServiceFactory
+            factory: PasskeyServiceFactory,
+            matrixClient: MatrixClient
         ): PasskeyService {
-            return factory.create()
+            // Use the actual user ID from the matrix client
+            return factory.create(matrixClient.sessionId.value)
         }
     }
 } 
