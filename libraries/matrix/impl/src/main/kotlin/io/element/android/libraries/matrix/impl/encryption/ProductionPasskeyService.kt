@@ -48,17 +48,28 @@ class ProductionPasskeyService(
 
     override suspend fun savePasskey(passkey: String, passphrase: String): Result<Unit> = withContext(Dispatchers.IO) {
         runCatching {
-            Timber.d("ProductionPasskeyService: Saving passkey for user: $userId")
+            Timber.tag("PasskeyEncryption").d("Original passkey length: ${passkey.length}, passkey: $passkey")
+            Timber.tag("PasskeyEncryption").d("Passphrase length: ${passphrase.length}, passphrase: $passphrase")
             
             // Encrypt the passkey using passphrase as salt
             val encryptedPasskey = PasskeyEncryption.encrypt(passkey, passphrase)
-            Timber.d("Encrypted passkey length: ${encryptedPasskey.length} characters")
+            Timber.tag("PasskeyEncryption").d("Encrypted passkey length: ${encryptedPasskey.length}, encryptedPasskey: $encryptedPasskey")
+            
+            // Verify encryption/decryption immediately
+            val verifyDecrypted = PasskeyEncryption.decrypt(encryptedPasskey, passphrase)
+            Timber.tag("PasskeyEncryption").d("Verification - Original matches decrypted: ${passkey == verifyDecrypted}")
+            Timber.tag("PasskeyEncryption").d("Verification - Original length: ${passkey.length}, Decrypted length: ${verifyDecrypted.length}")
+            if (passkey != verifyDecrypted) {
+                Timber.tag("PasskeyEncryption").e("CRITICAL: Encryption/Decryption verification failed!")
+                Timber.tag("PasskeyEncryption").e("Original: ${passkey.take(20)}...")
+                Timber.tag("PasskeyEncryption").e("Decrypted: ${verifyDecrypted.take(20)}...")
+            }
             
             try {
                 // Prepare API request based on the specific endpoint
                 val requestBody = SavePasskeyRequest(passkey = encryptedPasskey, passphrase = passphrase)
                 val jsonBody = json.encodeToString(SavePasskeyRequest.serializer(), requestBody)
-                Timber.d("Request body JSON length: ${jsonBody.length} characters")
+                Timber.tag("PasskeyEncryption").d("Request JSON length: ${jsonBody.length}")
                 
                 val url = "$baseUrl/_matrix/client/v3/auth/passkey/$userId"
                 Timber.d("Making POST request to: $url")
@@ -84,8 +95,7 @@ class ProductionPasskeyService(
                     try {
                         // Parse the response to get full details including encryption info
                         val saveResponse = json.decodeFromString(SavePasskeyResponse.serializer(), responseBody)
-                        Timber.d("Successfully saved passkey for user: ${saveResponse.requester}")
-                        Timber.d("Encrypted passkey length: ${saveResponse.encryptedPasskey.length}")
+                        Timber.tag("PasskeyEncryption").d("Server response encrypted passkey length: ${saveResponse.encryptedPasskey.length}, encryptedPasskey: ${saveResponse.encryptedPasskey}")
                         // Store the encrypted passkey in memory as fallback
                         passkeyStore[passphrase] = saveResponse.encryptedPasskey
                     } catch (e: Exception) {
@@ -98,7 +108,7 @@ class ProductionPasskeyService(
                 Timber.w(e, "API call failed, falling back to in-memory storage: ${e.message}")
                 // Fallback to in-memory storage if API call fails
                 passkeyStore[passphrase] = encryptedPasskey
-                Timber.d("Saved encrypted passkey to in-memory store as fallback")
+                Timber.tag("PasskeyEncryption").d("Saved encrypted passkey to in-memory store, length: ${encryptedPasskey.length}, encryptedPasskey: $encryptedPasskey")
             }
             
             Unit
@@ -109,7 +119,7 @@ class ProductionPasskeyService(
 
     override suspend fun retrievePasskey(passphrase: String): Result<String> = withContext(Dispatchers.IO) {
         runCatching {
-            Timber.d("ProductionPasskeyService: Retrieving passkey for user: $userId with passphrase length: ${passphrase.length}")
+            Timber.tag("PasskeyEncryption").d("Retrieving with passphrase length: ${passphrase.length}, passphrase: $passphrase")
             
             try {
                 // Build the URL with query parameter
@@ -149,11 +159,26 @@ class ProductionPasskeyService(
                 try {
                     // Parse the response to get the passkey
                     val passkeyResponse = json.decodeFromString(PasskeyResponse.serializer(), responseBody)
-                    Timber.d("Successfully retrieved passkey, length: ${passkeyResponse.passkey.length}")
+                    Timber.tag("PasskeyEncryption").d("Retrieved encrypted passkey length: ${passkeyResponse.passkey.length}, passkey: ${passkeyResponse.passkey}")
                     
                     // Decrypt the passkey using passphrase as salt
                     val decryptedPasskey = PasskeyEncryption.decrypt(passkeyResponse.passkey, passphrase)
-                    Timber.d("Successfully decrypted passkey, length: ${decryptedPasskey.length}")
+                    Timber.tag("PasskeyEncryption").d("Decrypted passkey length: ${decryptedPasskey.length}, decryptedPasskey: $decryptedPasskey")
+                    
+                    // Verify the decrypted passkey is valid
+                    try {
+                        // Try to decrypt it again to verify
+                        val verifyEncrypted = PasskeyEncryption.encrypt(decryptedPasskey, passphrase)
+                        val verifyDecrypted = PasskeyEncryption.decrypt(verifyEncrypted, passphrase)
+                        Timber.tag("PasskeyEncryption").d("Verification - Retrieved matches re-encrypted/decrypted: ${decryptedPasskey == verifyDecrypted}")
+                        if (decryptedPasskey != verifyDecrypted) {
+                            Timber.tag("PasskeyEncryption").e("CRITICAL: Retrieved passkey verification failed!")
+                            Timber.tag("PasskeyEncryption").e("Retrieved: ${decryptedPasskey.take(20)}...")
+                            Timber.tag("PasskeyEncryption").e("Re-verified: ${verifyDecrypted.take(20)}...")
+                        }
+                    } catch (e: Exception) {
+                        Timber.tag("PasskeyEncryption").e(e, "Failed to verify retrieved passkey")
+                    }
                     
                     // Store the encrypted passkey in memory as fallback
                     passkeyStore[passphrase] = passkeyResponse.passkey
@@ -171,9 +196,11 @@ class ProductionPasskeyService(
                     throw IllegalArgumentException("No passkey found for the provided passphrase. If you just set up your recovery key, please try with your actual recovery key.")
                 }
                 
+                Timber.tag("PasskeyEncryption").d("Retrieved from memory encrypted passkey length: ${encryptedPasskey.length}, encryptedPasskey: $encryptedPasskey")
+                
                 // Decrypt the stored passkey
                 val decryptedPasskey = PasskeyEncryption.decrypt(encryptedPasskey, passphrase)
-                Timber.d("Retrieved and decrypted passkey from in-memory store as fallback, length: ${decryptedPasskey.length}")
+                Timber.tag("PasskeyEncryption").d("Decrypted from memory passkey length: ${decryptedPasskey.length}, decryptedPasskey: $decryptedPasskey")
                 decryptedPasskey
             }
         }.onFailure {
