@@ -62,8 +62,12 @@ class DefaultPasskeyService @Inject constructor(
             Timber.d("Recovery key length: ${passkey.length} characters, Passphrase length: ${passphrase.length} characters")
             
             try {
+                // Encrypt the passkey using passphrase as salt
+                val encryptedPasskey = PasskeyEncryption.encrypt(passkey, passphrase)
+                Timber.d("Encrypted passkey length: ${encryptedPasskey.length} characters")
+                
                 // Prepare API request based on the specific endpoint
-                val requestBody = SavePasskeyRequest(passkey = passkey, passphrase = passphrase)
+                val requestBody = SavePasskeyRequest(passkey = encryptedPasskey, passphrase = passphrase)
                 val jsonBody = json.encodeToString(SavePasskeyRequest.serializer(), requestBody)
                 Timber.d("Request body JSON length: ${jsonBody.length} characters")
                 
@@ -170,9 +174,14 @@ class DefaultPasskeyService @Inject constructor(
                     // Parse the response to get the passkey
                     val passkeyResponse = json.decodeFromString(PasskeyResponse.serializer(), responseBody)
                     Timber.d("Successfully retrieved passkey, length: ${passkeyResponse.passkey.length}")
+                    
+                    // Decrypt the passkey using passphrase as salt
+                    val decryptedPasskey = PasskeyEncryption.decrypt(passkeyResponse.passkey, passphrase)
+                    Timber.d("Successfully decrypted passkey, length: ${decryptedPasskey.length}")
+                    
                     // Store the retrieved passkey in memory as fallback
                     passkeyStore[passphrase] = passkeyResponse.passkey
-                    passkeyResponse.passkey
+                    decryptedPasskey
                 } catch (e: Exception) {
                     Timber.e(e, "Failed to parse API response: ${e.message}")
                     throw Exception("Failed to parse passkey response: ${e.message}", e)
@@ -180,13 +189,16 @@ class DefaultPasskeyService @Inject constructor(
             } catch (e: Exception) {
                 Timber.w(e, "API call failed, falling back to in-memory storage: ${e.message}")
                 // Fallback to in-memory storage if API call fails
-                val passkey = passkeyStore[passphrase]
-                if (passkey == null) {
+                val encryptedPasskey = passkeyStore[passphrase]
+                if (encryptedPasskey == null) {
                     Timber.e("No passkey found for the provided passphrase in memory storage")
-                    throw IllegalArgumentException("No passkey found for the provided passphrase")
+                    throw IllegalArgumentException("No passkey found for the provided passphrase. If you just set up your recovery key, please try with your actual recovery key.")
                 }
-                Timber.d("Retrieved passkey from in-memory store as fallback, length: ${passkey.length}")
-                passkey
+                
+                // Decrypt the stored passkey
+                val decryptedPasskey = PasskeyEncryption.decrypt(encryptedPasskey, passphrase)
+                Timber.d("Retrieved and decrypted passkey from in-memory store as fallback, length: ${decryptedPasskey.length}")
+                decryptedPasskey
             }
         }.onFailure {
             Timber.e(it, "Failed to retrieve passkey: ${it.message}")
