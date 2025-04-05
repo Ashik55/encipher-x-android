@@ -84,9 +84,7 @@ fun SecureBackupSetupView(
     val formattedRecoveryKey = state.recoveryKeyViewState.formattedRecoveryKey
     
     // Track if bottom sheet should be shown (when recovery key is available)
-    var showBottomSheet by remember(formattedRecoveryKey) { 
-        mutableStateOf(formattedRecoveryKey != null) 
-    }
+    var showBottomSheet by remember { mutableStateOf(false) }
     
     val bottomSheetState = rememberModalBottomSheetState(
         skipPartiallyExpanded = true
@@ -113,6 +111,14 @@ fun SecureBackupSetupView(
         }
     }
     
+    // Force show bottom sheet when recovery key is available
+    LaunchedEffect(formattedRecoveryKey) {
+        if (formattedRecoveryKey != null) {
+            Timber.d("Recovery key available, showing bottom sheet")
+            showBottomSheet = true
+        }
+    }
+    
     // Automatically hide bottom sheet when save is successful
     LaunchedEffect(state.vaultSaveAction) {
         if (state.vaultSaveAction is AsyncAction.Success) {
@@ -136,6 +142,7 @@ fun SecureBackupSetupView(
                     leadingIcon = IconSource.Vector(CompoundIcons.Key()),
                     modifier = Modifier.fillMaxWidth(),
                     onClick = {
+                        Timber.d("Button clicked to show bottom sheet")
                         showBottomSheet = true
                     }
                 )
@@ -171,17 +178,23 @@ fun SecureBackupSetupView(
     }
     
     // Show bottom sheet when recovery key is generated
-    if (showBottomSheet && formattedRecoveryKey != null) {
-        ModalBottomSheet(
-            onDismissRequest = { showBottomSheet = false },
-            sheetState = bottomSheetState,
-        ) {
-            BottomSheetContent(
-                state = state,
-                onSave = {
-                    // We don't close immediately, we'll let the LaunchedEffect do it after success
-                }
-            )
+    if (formattedRecoveryKey != null) {
+        Timber.d("Attempting to show bottom sheet, showBottomSheet: $showBottomSheet")
+        if (showBottomSheet) {
+            ModalBottomSheet(
+                onDismissRequest = { 
+                    Timber.d("Bottom sheet dismissed")
+                    showBottomSheet = false 
+                },
+                sheetState = bottomSheetState,
+            ) {
+                BottomSheetContent(
+                    state = state,
+                    onSave = {
+                        // We don't close immediately, we'll let the LaunchedEffect do it after success
+                    }
+                )
+            }
         }
     }
 

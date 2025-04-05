@@ -24,6 +24,7 @@ import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
 import io.element.android.features.logout.api.LogoutUseCase
 import io.element.android.features.securebackup.impl.setup.SecureBackupSetupPresenter
+import io.element.android.features.securebackup.impl.setup.SecureBackupSetupState
 import io.element.android.libraries.architecture.AsyncAction
 import io.element.android.libraries.architecture.AsyncData
 import io.element.android.libraries.architecture.Presenter
@@ -97,7 +98,9 @@ class VerifySelfSessionPresenter @AssistedInject constructor(
                         SessionVerifiedStatus.Unknown -> VerifySelfSessionState.Step.Loading
                         SessionVerifiedStatus.NotVerified -> {
                             stateAndDispatch.state.value.toVerificationStep(
-                                canEnterRecoveryKey = recoveryState == RecoveryState.INCOMPLETE
+                                canEnterRecoveryKey = recoveryState == RecoveryState.INCOMPLETE,
+                                recoveryState = recoveryState,
+                                secureBackupState = secureBackupState
                             )
                         }
                         SessionVerifiedStatus.Verified -> {
@@ -156,9 +159,11 @@ class VerifySelfSessionPresenter @AssistedInject constructor(
     }
 
     private fun StateMachineState?.toVerificationStep(
-        canEnterRecoveryKey: Boolean
-    ): VerifySelfSessionState.Step =
-        when (val machineState = this) {
+        canEnterRecoveryKey: Boolean,
+        recoveryState: RecoveryState,
+        secureBackupState: SecureBackupSetupState
+    ): VerifySelfSessionState.Step {
+        return when (val machineState = this) {
             StateMachineState.Initial, null -> {
                 VerifySelfSessionState.Step.Initial(
                     canEnterRecoveryKey = canEnterRecoveryKey,
@@ -174,15 +179,22 @@ class VerifySelfSessionPresenter @AssistedInject constructor(
             StateMachineState.Canceling -> {
                 VerifySelfSessionState.Step.AwaitingOtherDeviceResponse
             }
-
             StateMachineState.VerificationRequestAccepted -> {
                 VerifySelfSessionState.Step.Ready
             }
-
             StateMachineState.Canceled -> {
-                VerifySelfSessionState.Step.Canceled
+                // When verification is canceled, check if we need recovery key setup
+                when (recoveryState) {
+                    RecoveryState.ENABLED -> VerifySelfSessionState.Step.Canceled
+                    RecoveryState.INCOMPLETE -> {
+                        // Transition to recovery key setup
+                        VerifySelfSessionState.Step.SkippedWithRecoveryKeySetup(
+                            secureBackupState = secureBackupState
+                        )
+                    }
+                    else -> VerifySelfSessionState.Step.Canceled
+                }
             }
-
             is StateMachineState.Verifying -> {
                 val async = when (machineState) {
                     is StateMachineState.Verifying.Replying -> AsyncData.Loading()
@@ -190,11 +202,11 @@ class VerifySelfSessionPresenter @AssistedInject constructor(
                 }
                 VerifySelfSessionState.Step.Verifying(machineState.data, async)
             }
-
             StateMachineState.Completed -> {
                 VerifySelfSessionState.Step.Completed
             }
         }
+    }
 
     private fun CoroutineScope.observeVerificationService() {
         sessionVerificationService.verificationFlowState
