@@ -145,6 +145,8 @@ class VerifySelfSessionPresenter @AssistedInject constructor(
                     // Check if we need to setup recovery key after skipping
                     if (recoveryState == RecoveryState.INCOMPLETE) {
                         encryptionService.enableRecovery(waitForBackupsToUpload = false)
+                        // Force transition to recovery key setup
+                        stateAndDispatch.dispatchAction(StateMachineEvent.Cancel)
                     }
                 }
             }
