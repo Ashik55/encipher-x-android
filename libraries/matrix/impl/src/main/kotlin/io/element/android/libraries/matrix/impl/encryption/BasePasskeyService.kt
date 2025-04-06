@@ -10,11 +10,36 @@ import io.element.android.libraries.network.RetrofitFactory
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.json.Json
-import okhttp3.MediaType.Companion.toMediaType
-import okhttp3.OkHttpClient
-import okhttp3.Request
-import okhttp3.RequestBody.Companion.toRequestBody
+import retrofit2.Response
+import retrofit2.http.Body
+import retrofit2.http.GET
+import retrofit2.http.POST
+import retrofit2.http.Path
+import retrofit2.http.Query
 import timber.log.Timber
+
+/**
+ * Retrofit API interface for passkey operations
+ */
+interface PasskeyApi {
+    @POST("_matrix/client/v3/auth/passkey/{userId}")
+    suspend fun savePasskey(
+        @Path("userId") userId: String,
+        @Body request: SavePasskeyRequest
+    ): Response<SavePasskeyResponse>
+    
+    @GET("_matrix/client/v3/auth/passkey/{userId}")
+    suspend fun retrievePasskey(
+        @Path("userId") userId: String,
+        @Query("passphrase") passphrase: String
+    ): Response<PasskeyResponse>
+    
+    @POST("_matrix/client/v3/auth/check_passkey/{userId}")
+    suspend fun checkPasskey(
+        @Path("userId") userId: String,
+        @Body request: CheckPasskeyRequest
+    ): Response<CheckPasskeyResponse>
+}
 
 /**
  * Base implementation of [PasskeyService] that contains common functionality.
@@ -30,8 +55,11 @@ abstract class BasePasskeyService(
     // JSON serializer/deserializer
     protected val json = Json { ignoreUnknownKeys = true }
     
-    // HTTP client for direct API calls
-    protected val client by lazy { OkHttpClient() }
+    // Retrofit API interface
+    protected val api: PasskeyApi by lazy {
+        val retrofit = retrofitFactory.create(baseUrl)
+        retrofit.create(PasskeyApi::class.java)
+    }
 
     // In-memory cache for fallbacks
     protected val passkeyStore = mutableMapOf<String, String>()
@@ -60,41 +88,25 @@ abstract class BasePasskeyService(
             }
             
             try {
-                // Prepare API request based on the specific endpoint
+                // Prepare API request
                 val requestBody = SavePasskeyRequest(passkey = encryptedPasskey, passphrase = passphrase)
-                val jsonBody = json.encodeToString(SavePasskeyRequest.serializer(), requestBody)
-                Timber.tag("PasskeyEncryption").d("Request JSON length: ${jsonBody.length}")
                 
-                val url = "$baseUrl/_matrix/client/v3/auth/passkey/$userId"
-                Timber.d("Making POST request to: $url")
+                // Make API call using Retrofit
+                val response = api.savePasskey(userId, requestBody)
                 
-                val request = Request.Builder()
-                    .url(url)
-                    .post(jsonBody.toRequestBody("application/json".toMediaType()))
-                    .header("Content-Type", "application/json")
-                    .build()
-                
-                val response = client.newCall(request).execute()
-                
-                Timber.d("Save API response code: ${response.code}")
+                Timber.d("Save API response code: ${response.code()}")
                 
                 if (!response.isSuccessful) {
-                    val errorBody = response.body?.string() ?: "Unknown error"
-                    Timber.e("API call failed with code ${response.code}: $errorBody")
-                    throw Exception("Failed to save passkey: HTTP ${response.code} - $errorBody")
+                    val errorBody = response.errorBody()?.string() ?: "Unknown error"
+                    Timber.e("API call failed with code ${response.code()}: $errorBody")
+                    throw Exception("Failed to save passkey: HTTP ${response.code()} - $errorBody")
                 }
                 
-                val responseBody = response.body?.string()
-                if (responseBody != null) {
-                    try {
-                        // Parse the response to get full details including encryption info
-                        val saveResponse = json.decodeFromString(SavePasskeyResponse.serializer(), responseBody)
-                        Timber.tag("PasskeyEncryption").d("Server response encrypted passkey length: ${saveResponse.encryptedPasskey.length}, encryptedPasskey: ${saveResponse.encryptedPasskey}")
-                        // Store the encrypted passkey in memory as fallback
-                        passkeyStore[passphrase] = saveResponse.encryptedPasskey
-                    } catch (e: Exception) {
-                        Timber.w(e, "Failed to parse save response details: ${e.message}")
-                    }
+                val saveResponse = response.body()
+                if (saveResponse != null) {
+                    Timber.tag("PasskeyEncryption").d("Server response encrypted passkey length: ${saveResponse.encryptedPasskey.length}, encryptedPasskey: ${saveResponse.encryptedPasskey}")
+                    // Store the encrypted passkey in memory as fallback
+                    passkeyStore[passphrase] = saveResponse.encryptedPasskey
                 }
                 
                 Timber.d("Successfully saved passkey to API")
@@ -116,71 +128,53 @@ abstract class BasePasskeyService(
             Timber.tag("PasskeyEncryption").d("Retrieving with passphrase length: ${passphrase.length}, passphrase: $passphrase")
             
             try {
-                // Build the URL with query parameter
-                val url = "$baseUrl/_matrix/client/v3/auth/passkey/$userId?passphrase=$passphrase"
-                Timber.d("Making GET request to: $url")
+                // Make API call using Retrofit
+                val response = api.retrievePasskey(userId, passphrase)
                 
-                val request = Request.Builder()
-                    .url(url)
-                    .header("Accept", "application/json")
-                    .build()
-                
-                val response = client.newCall(request).execute()
-                
-                Timber.d("Retrieve API response code: ${response.code}")
+                Timber.d("Retrieve API response code: ${response.code()}")
                 
                 if (!response.isSuccessful) {
-                    val errorBody = response.body?.string() ?: "Unknown error"
-                    Timber.e("API call failed with code ${response.code}: $errorBody")
+                    val errorBody = response.errorBody()?.string() ?: "Unknown error"
+                    Timber.e("API call failed with code ${response.code()}: $errorBody")
                     
                     // Provide more specific error messages based on HTTP status
-                    when (response.code) {
+                    when (response.code()) {
                         401, 403 -> throw IllegalArgumentException("Invalid passphrase. Please check and try again.")
                         404 -> throw IllegalArgumentException("No recovery key found for this account.")
-                        else -> throw Exception("Failed to retrieve passkey: HTTP ${response.code} - $errorBody")
+                        else -> throw Exception("Failed to retrieve passkey: HTTP ${response.code()} - $errorBody")
                     }
                 }
                 
-                val responseBody = response.body?.string()
-                
-                if (responseBody == null) {
+                val passkeyResponse = response.body()
+                if (passkeyResponse == null) {
                     Timber.e("Empty response body")
                     throw Exception("Empty response body")
                 }
                 
-                Timber.d("API response body length: ${responseBody.length} characters")
+                Timber.tag("PasskeyEncryption").d("Retrieved encrypted passkey length: ${passkeyResponse.passkey.length}, passkey: ${passkeyResponse.passkey}")
                 
+                // Decrypt the passkey using passphrase as salt
+                val decryptedPasskey = PasskeyEncryption.decrypt(passkeyResponse.passkey, passphrase)
+                Timber.tag("PasskeyEncryption").d("Decrypted passkey length: ${decryptedPasskey.length}, decryptedPasskey: $decryptedPasskey")
+                
+                // Verify the decrypted passkey is valid
                 try {
-                    // Parse the response to get the passkey
-                    val passkeyResponse = json.decodeFromString(PasskeyResponse.serializer(), responseBody)
-                    Timber.tag("PasskeyEncryption").d("Retrieved encrypted passkey length: ${passkeyResponse.passkey.length}, passkey: ${passkeyResponse.passkey}")
-                    
-                    // Decrypt the passkey using passphrase as salt
-                    val decryptedPasskey = PasskeyEncryption.decrypt(passkeyResponse.passkey, passphrase)
-                    Timber.tag("PasskeyEncryption").d("Decrypted passkey length: ${decryptedPasskey.length}, decryptedPasskey: $decryptedPasskey")
-                    
-                    // Verify the decrypted passkey is valid
-                    try {
-                        // Try to decrypt it again to verify
-                        val verifyEncrypted = PasskeyEncryption.encrypt(decryptedPasskey, passphrase)
-                        val verifyDecrypted = PasskeyEncryption.decrypt(verifyEncrypted, passphrase)
-                        Timber.tag("PasskeyEncryption").d("Verification - Retrieved matches re-encrypted/decrypted: ${decryptedPasskey == verifyDecrypted}")
-                        if (decryptedPasskey != verifyDecrypted) {
-                            Timber.tag("PasskeyEncryption").e("CRITICAL: Retrieved passkey verification failed!")
-                            Timber.tag("PasskeyEncryption").e("Retrieved: ${decryptedPasskey.take(20)}...")
-                            Timber.tag("PasskeyEncryption").e("Re-verified: ${verifyDecrypted.take(20)}...")
-                        }
-                    } catch (e: Exception) {
-                        Timber.tag("PasskeyEncryption").e(e, "Failed to verify retrieved passkey")
+                    // Try to decrypt it again to verify
+                    val verifyEncrypted = PasskeyEncryption.encrypt(decryptedPasskey, passphrase)
+                    val verifyDecrypted = PasskeyEncryption.decrypt(verifyEncrypted, passphrase)
+                    Timber.tag("PasskeyEncryption").d("Verification - Retrieved matches re-encrypted/decrypted: ${decryptedPasskey == verifyDecrypted}")
+                    if (decryptedPasskey != verifyDecrypted) {
+                        Timber.tag("PasskeyEncryption").e("CRITICAL: Retrieved passkey verification failed!")
+                        Timber.tag("PasskeyEncryption").e("Retrieved: ${decryptedPasskey.take(20)}...")
+                        Timber.tag("PasskeyEncryption").e("Re-verified: ${verifyDecrypted.take(20)}...")
                     }
-                    
-                    // Store the encrypted passkey in memory as fallback
-                    passkeyStore[passphrase] = passkeyResponse.passkey
-                    decryptedPasskey
                 } catch (e: Exception) {
-                    Timber.e(e, "Failed to parse API response: ${e.message}")
-                    throw Exception("Failed to parse passkey response: ${e.message}", e)
+                    Timber.tag("PasskeyEncryption").e(e, "Failed to verify retrieved passkey")
                 }
+                
+                // Store the encrypted passkey in memory as fallback
+                passkeyStore[passphrase] = passkeyResponse.passkey
+                decryptedPasskey
             } catch (e: Exception) {
                 Timber.w(e, "API call failed, checking in-memory storage: ${e.message}")
                 // Check in-memory storage if API call fails
@@ -207,55 +201,38 @@ abstract class BasePasskeyService(
             Timber.d("${this.javaClass.simpleName}: Checking for passkey existence for user: $userId")
             
             try {
-                // Construct the URL for checking passkey existence
-                val url = "$baseUrl/_matrix/client/v3/auth/check_passkey/$userId"
-                
+                // Prepare API request
                 val requestBody = CheckPasskeyRequest(passphrase = passphrase)
-                val jsonBody = json.encodeToString(CheckPasskeyRequest.serializer(), requestBody)
                 
-                val request = Request.Builder()
-                    .url(url)
-                    .post(jsonBody.toRequestBody("application/json".toMediaType()))
-                    .header("Content-Type", "application/json")
-                    .header("Accept", "application/json")
-                    .build()
+                // Make API call using Retrofit
+                val response = api.checkPasskey(userId, requestBody)
                 
-                val response = client.newCall(request).execute()
-                
-                Timber.d("Check passkey API response code: ${response.code}")
+                Timber.d("Check passkey API response code: ${response.code()}")
                 
                 if (!response.isSuccessful) {
-                    val errorBody = response.body?.string() ?: "Unknown error"
-                    Timber.e("API call failed with code ${response.code}: $errorBody")
+                    val errorBody = response.errorBody()?.string() ?: "Unknown error"
+                    Timber.e("API call failed with code ${response.code()}: $errorBody")
                     
                     // For 404 errors, we can interpret that as "no passkey exists"
-                    if (response.code == 404) {
+                    if (response.code() == 404) {
                         return@runCatching false
                     }
                     
-                    throw Exception("Failed to check passkey: HTTP ${response.code} - $errorBody")
+                    throw Exception("Failed to check passkey: HTTP ${response.code()} - $errorBody")
                 }
                 
-                val responseBody = response.body?.string()
-                
-                if (responseBody == null) {
+                val checkResponse = response.body()
+                if (checkResponse == null) {
                     Timber.e("Empty response body")
                     throw Exception("Empty response body")
                 }
                 
-                try {
-                    // Parse the response to get the hasPasskey value
-                    val checkResponse = json.decodeFromString(CheckPasskeyResponse.serializer(), responseBody)
-                    Timber.d("User ${checkResponse.userId} has passkey: ${checkResponse.hasPasskey}")
-                    if (checkResponse.hasPasskey) {
-                        // Store in memory for fallback
-                        passkeyStore[passphrase] = "has_passkey"
-                    }
-                    checkResponse.hasPasskey
-                } catch (e: Exception) {
-                    Timber.e(e, "Failed to parse API response: ${e.message}")
-                    throw Exception("Failed to parse check passkey response: ${e.message}", e)
+                Timber.d("User ${checkResponse.userId} has passkey: ${checkResponse.hasPasskey}")
+                if (checkResponse.hasPasskey) {
+                    // Store in memory for fallback
+                    passkeyStore[passphrase] = "has_passkey"
                 }
+                checkResponse.hasPasskey
             } catch (e: Exception) {
                 Timber.w(e, "API call failed, checking in-memory storage: ${e.message}")
                 // Check in-memory storage if API call fails
