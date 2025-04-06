@@ -12,6 +12,7 @@ import androidx.compose.animation.EnterTransition
 import androidx.compose.animation.ExitTransition
 import androidx.compose.animation.core.MutableTransitionState
 import androidx.compose.animation.core.spring
+import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInVertically
@@ -102,8 +103,8 @@ fun rememberAsyncIndicatorState(): AsyncIndicatorState {
 fun AsyncIndicatorHost(
     modifier: Modifier = Modifier,
     state: AsyncIndicatorState = rememberAsyncIndicatorState(),
-    enterTransition: EnterTransition = fadeIn(spring(stiffness = 500F)) + slideInVertically(),
-    exitTransition: ExitTransition = fadeOut(spring(stiffness = 500F)) + slideOutVertically(),
+    enterTransition: EnterTransition = fadeIn(animationSpec = tween(0)),
+    exitTransition: ExitTransition = fadeOut(animationSpec = tween(0)),
 ) {
     val coroutineScope = rememberCoroutineScope()
     Box(

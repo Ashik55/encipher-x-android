@@ -9,6 +9,7 @@ package io.element.android.features.networkmonitor.api.ui
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.MutableTransitionState
+import androidx.compose.animation.core.tween
 import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -35,8 +36,8 @@ fun ConnectivityIndicatorView(
     // Display the network indicator with an animation
     AnimatedVisibility(
         visibleState = isIndicatorVisible,
-        enter = fadeIn() + expandVertically(),
-        exit = fadeOut() + shrinkVertically(),
+        enter = fadeIn(animationSpec = tween(0)) + expandVertically(animationSpec = tween(0)),
+        exit = fadeOut(animationSpec = tween(0)) + shrinkVertically(animationSpec = tween(0)),
     ) {
         Indicator()
     }
@@ -44,8 +45,8 @@ fun ConnectivityIndicatorView(
     // Show missing status bar padding when the indicator is not visible
     AnimatedVisibility(
         visibleState = isStatusBarPaddingVisible,
-        enter = fadeIn() + expandVertically(),
-        exit = fadeOut() + shrinkVertically(),
+        enter = fadeIn(animationSpec = tween(0)) + expandVertically(animationSpec = tween(0)),
+        exit = fadeOut(animationSpec = tween(0)) + shrinkVertically(animationSpec = tween(0)),
     ) {
         StatusBarPaddingSpacer()
     }

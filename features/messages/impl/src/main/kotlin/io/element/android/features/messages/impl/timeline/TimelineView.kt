@@ -343,8 +343,8 @@ private fun JumpToBottomButton(
     AnimatedVisibility(
         modifier = modifier,
         visible = isVisible,
-        enter = scaleIn(animationSpec = tween(100)),
-        exit = scaleOut(animationSpec = tween(100)),
+        enter = scaleIn(animationSpec = tween(0)),
+        exit = scaleOut(animationSpec = tween(0)),
     ) {
         FloatingActionButton(
             onClick = onClick,
