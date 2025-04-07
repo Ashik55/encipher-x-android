@@ -279,6 +279,7 @@ dependencies {
     implementation(libs.serialization.json)
 
     implementation(libs.matrix.emojibase.bindings)
+    implementation(libs.converter.gson)
 
     // Jitsi Meet SDK
     implementation("org.jitsi.react:jitsi-meet-sdk:0.0.0") {

@@ -30,11 +30,15 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -60,6 +64,8 @@ import io.element.android.libraries.architecture.bindings
 import io.element.android.libraries.core.log.logger.LoggerTag
 import io.element.android.libraries.designsystem.theme.ElementThemeApp
 import io.element.android.libraries.designsystem.theme.components.CircularProgressIndicator
+import io.element.android.libraries.matrix.impl.call.model.CallRequestBody
+import io.element.android.libraries.matrix.impl.call.services.CallApiService
 import io.element.android.libraries.preferences.api.store.AppPreferencesStore
 import org.jitsi.meet.sdk.JitsiMeetActivity
 import org.jitsi.meet.sdk.JitsiMeetConferenceOptions
@@ -74,7 +80,7 @@ class ElementCallActivity :
     AppCompatActivity(),
     CallScreenNavigator,
     PipView {
-    
+
     private val broadcastReceiver = object : android.content.BroadcastReceiver() {
         override fun onReceive(context: Context, intent: Intent) {
             onBroadcastReceived(intent)
@@ -85,6 +91,8 @@ class ElementCallActivity :
     @Inject lateinit var appPreferencesStore: AppPreferencesStore
     @Inject lateinit var enterpriseService: EnterpriseService
     @Inject lateinit var pictureInPicturePresenter: PictureInPicturePresenter
+
+    @Inject lateinit var callApiService: CallApiService
 
     private lateinit var presenter: Presenter<CallScreenState>
 
@@ -102,6 +110,8 @@ class ElementCallActivity :
     private val webViewTarget = mutableStateOf<CallType?>(null)
 
     private var eventSink: ((CallScreenEvents) -> Unit)? = null
+
+    private var isAudioCall: Boolean? = null
 
 //    @RequiresApi(Build.VERSION_CODES.S)
 //    private val requiredPermissions = arrayOf(
@@ -126,11 +136,13 @@ class ElementCallActivity :
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
+        isAudioCall = intent?.extras?.get(DefaultElementCallEntryPoint.IS_AUDIO_CALL) as? Boolean
+        Timber.tag("isAudioCall ==>>>").d(isAudioCall.toString())
         // Request permissions
 //        permissionLauncher.launch(requiredPermissions)
 
         applicationContext.bindings<CallBindings>().inject(this)
-        
+
         // Register for broadcast messages
         registerForBroadcastMessages()
 
@@ -157,6 +169,27 @@ class ElementCallActivity :
         audioManager = getSystemService(AUDIO_SERVICE) as AudioManager
 
         setContent {
+            val showCallErrorDialog = remember { mutableStateOf(false) }
+
+//            // Show the error dialog when showErrorDialog is true
+//            if (showCallErrorDialog.value) {
+//                AlertDialog(
+//                    onDismissRequest = { showCallErrorDialog.value = false }, // Close dialog on dismiss
+//                    title = { Text("Unable to Connect Call") },
+//                    text = { Text("The calling protocol is not available. Please try again later.") },
+//                    confirmButton = {
+//                        TextButton(
+//                            onClick = {
+//                                showCallErrorDialog.value = false // Close the dialog
+//                                // Optionally navigate back here or perform other actions
+//                            }
+//                        ) {
+//                            Text("OK")
+//                        }
+//                    }
+//                )
+//            }
+
 //            val pipState = pictureInPicturePresenter.present()
 //            ListenToAndroidEvents(pipState)
             ElementThemeApp(
@@ -175,13 +208,59 @@ class ElementCallActivity :
                 LaunchedEffect(state.urlState) {
                     if (state.urlState is AsyncData.Success) {
                         val url = state.urlState.data
-                        val (roomId, displayName) = extractRoomIdAndDisplayName(url)
+                        val (roomId, displayName, userId) = extractRoomIdAndDisplayName(url)
+                        println("RoomName URL ==>> $roomId $displayName $userId")
 
-                        println("RoomName URL ==>> $roomId $displayName")
 
-                        if (roomId?.isNotBlank() == true) {
-                            joinJitsiMeeting(this@ElementCallActivity, roomId, displayName ?: "Anonymous")
+                        if (isAudioCall != null) {
+                            println("Creating call for primary user==>")
+                            try {
+                                val response = callApiService.createCall(
+                                    userId = userId,
+                                    body = CallRequestBody(room_id = roomId, call_type = if (isAudioCall == true) "audio" else "video")
+                                )
+                                if (response.isSuccessful) {
+                                    val data = response.body()
+                                    Timber.tag("response ==>>>").d(data.toString())
+                                    println("Call Created==>: $data")
+                                    // Update state or navigate to call screen
+
+                                    if (roomId?.isNotBlank() == true) {
+                                        joinJitsiMeeting(this@ElementCallActivity, roomId, displayName ?: "Anonymous", isAudioCall == true)
+                                    }
+                                } else {
+                                    println("Create call failed==>: ${response.errorBody()}")
+                                }
+                            } catch (e: Exception) {
+                                println("Exception in createCall==>: ${e.localizedMessage}")
+                            }
+                        } else {
+                            println("get call details==>")
+                            try {
+                                val response = callApiService.getCallDetails(
+                                    userId = userId,
+                                    roomId = roomId
+                                )
+                                if (response.isSuccessful) {
+                                    val firstCall = response.body()?.calls?.first()
+                                    Timber.tag("response ==>>>").d(firstCall.toString())
+
+                                    if (roomId?.isNotBlank() == true && firstCall != null) {
+                                        joinJitsiMeeting(this@ElementCallActivity, roomId, displayName ?: "Anonymous", firstCall?.call_type == "audio")
+                                    }
+
+                                    // Update state or navigate to call screen
+                                } else {
+                                    println("Create call failed==>: ${response.errorBody()}")
+                                }
+                            } catch (e: Exception) {
+                                println("Exception in createCall==>: ${e.localizedMessage}")
+                            }
                         }
+
+//                        if (roomId?.isNotBlank() == true) {
+//                            joinJitsiMeeting(this@ElementCallActivity, roomId, displayName ?: "Anonymous")
+//                        }
                     }
                 }
 
@@ -209,7 +288,8 @@ class ElementCallActivity :
         }
     }
 
-    fun extractRoomIdAndDisplayName(callUrl: String): Pair<String?, String?> {
+    fun extractRoomIdAndDisplayName(callUrl: String): Triple<String?, String?, String?> {
+
         val uri = Uri.parse(callUrl)
         val fragment = uri.fragment // Extract the fragment part after '#?'
 
@@ -218,14 +298,17 @@ class ElementCallActivity :
             key to Uri.decode(value) // Decode the URL-encoded value
         }
 
+        Timber.tag("callUrl ==>>>").d(callUrl)
+        Timber.tag("params ==>>>").d(params.toString())
         val roomId = params?.get("roomId")
         val displayName = params?.get("displayName")
+        val userId = params?.get("?userId")
 
-        return Pair(roomId, displayName)
+        return Triple(roomId, displayName, userId)
     }
 
     // Function to launch Jitsi Meet
-    private fun joinJitsiMeeting(context: Context, roomName: String, displayName: String) {
+    private fun joinJitsiMeeting(context: Context, roomName: String, displayName: String, isAudioCall: Boolean) {
         try {
             val jitsiMeetUserInfo = JitsiMeetUserInfo().apply {
                 this.displayName = displayName
@@ -234,14 +317,13 @@ class ElementCallActivity :
             val options = JitsiMeetConferenceOptions.Builder()
                 .setServerURL(URL("https://meet.enciph-er.com/"))
                 .setRoom(roomName)
-                .setAudioOnly(true)
+                .setAudioOnly(isAudioCall)
                 .setUserInfo(jitsiMeetUserInfo)
                 .setFeatureFlag("welcomepage.enabled", false)
                 .setFeatureFlag("prejoinpage.enabled", false)
                 .setFeatureFlag("toolbox.alwaysVisible", false)
                 .setFeatureFlag("reactions.enabled", false)
                 .setFeatureFlag("chat.enabled", false)
-//                .setFeatureFlag("call-integration.enabled", true)
                 .build()
 
             JitsiMeetActivity.launch(context, options)
@@ -326,9 +408,6 @@ class ElementCallActivity :
 //            null // explicitly treat as null when not present
 //        }
 
-
-        val isAudioCall = intent?.extras?.get(DefaultElementCallEntryPoint.IS_AUDIO_CALL) as? Boolean
-
 //        val extras = intent?.extras
 //        if (extras != null) {
 //            for (key in extras.keySet()) {
@@ -338,8 +417,6 @@ class ElementCallActivity :
 //        } else {
 //            Timber.tag("AUDIO_CALL INTENT_EXTRA").d("No extras found in intent")
 //        }
-        Timber.tag("AUDIO_CALL ==>>>").d(isAudioCall.toString())
-
 
         val currentCallType = webViewTarget.value
 
@@ -352,7 +429,7 @@ class ElementCallActivity :
                 webViewTarget.value = callType
                 presenter = presenterFactory.create(
                     callType,
-                    isAudioCall ?: false,
+                    false,
                     this
                 )
             }

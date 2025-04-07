@@ -4,6 +4,7 @@
 [versions]
 # Project
 android_gradle_plugin = "8.8.1"
+converterGson = "2.11.0"
 kotlin = "2.1.10"
 kotlinpoet = "2.0.0"
 ksp = "2.1.10-1.0.30"
@@ -71,6 +72,7 @@ compose_compiler_plugin = { module = "org.jetbrains.kotlin:compose-compiler-grad
 # https://developer.android.com/studio/write/java8-support#library-desugaring-versions
 android_desugar = "com.android.tools:desugar_jdk_libs:2.1.4"
 anvil_gradle_plugin = { module = "dev.zacsweers.anvil:gradle-plugin", version.ref = "anvil" }
+converter_gson = { module = "com.squareup.retrofit2:converter-gson", version.ref = "converterGson" }
 kotlin_gradle_plugin = { module = "org.jetbrains.kotlin:kotlin-gradle-plugin", version.ref = "kotlin" }
 kotlinpoet = { module = "com.squareup:kotlinpoet", version.ref = "kotlinpoet" }
 kotlinpoet-ksp = { module = "com.squareup:kotlinpoet-ksp", version.ref = "kotlinpoet" }
