@@ -320,10 +320,26 @@ class ElementCallActivity :
                 ?: intent.dataString?.let(::parseUrl)?.let(::ExternalUrl)
         }
 
-        val isAudioCall = intent?.getBooleanExtra(DefaultElementCallEntryPoint.IS_AUDIO_CALL, false) ?: false
+//        val isAudioCall = if (intent?.hasExtra(DefaultElementCallEntryPoint.IS_AUDIO_CALL) == true) {
+//            intent.getBooleanExtra(DefaultElementCallEntryPoint.IS_AUDIO_CALL, false)
+//        } else {
+//            null // explicitly treat as null when not present
+//        }
 
+
+        val isAudioCall = intent?.extras?.get(DefaultElementCallEntryPoint.IS_AUDIO_CALL) as? Boolean
+
+//        val extras = intent?.extras
+//        if (extras != null) {
+//            for (key in extras.keySet()) {
+//                val value = extras.get(key)
+//                Timber.tag("AUDIO_CALL INTENT_EXTRA").d("$key: $value")
+//            }
+//        } else {
+//            Timber.tag("AUDIO_CALL INTENT_EXTRA").d("No extras found in intent")
+//        }
         Timber.tag("AUDIO_CALL ==>>>").d(isAudioCall.toString())
-        print(isAudioCall)
+
 
         val currentCallType = webViewTarget.value
 
@@ -336,7 +352,7 @@ class ElementCallActivity :
                 webViewTarget.value = callType
                 presenter = presenterFactory.create(
                     callType,
-                    isAudioCall,
+                    isAudioCall ?: false,
                     this
                 )
             }

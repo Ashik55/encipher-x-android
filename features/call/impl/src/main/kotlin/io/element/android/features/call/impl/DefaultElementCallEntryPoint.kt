@@ -34,7 +34,7 @@ class DefaultElementCallEntryPoint @Inject constructor(
         const val REQUEST_CODE = 2255
     }
 
-    override fun startCall(callType: CallType, isAudioCall: Boolean) {
+    override fun startCall(callType: CallType, isAudioCall: Boolean?) {
         Timber.tag(TAG).i("Starting call of type: $callType")
         context.startActivity(IntentProvider.createIntent(context, callType, isAudioCall))
     }

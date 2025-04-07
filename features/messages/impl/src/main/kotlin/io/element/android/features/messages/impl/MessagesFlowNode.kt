@@ -240,7 +240,7 @@ class MessagesFlowNode @AssistedInject constructor(
                         elementCallEntryPoint.startCall(callType)
                     }
 
-                    override fun onAudioJoinCallClick(roomId: RoomId, isAudio: Boolean) {
+                    override fun onAudioJoinCallClick(roomId: RoomId) {
                         val callType = CallType.RoomCall(
                             sessionId = matrixClient.sessionId,
                             roomId = roomId,
@@ -255,7 +255,7 @@ class MessagesFlowNode @AssistedInject constructor(
                             roomId = roomId,
                         )
                         analyticsService.captureInteraction(Interaction.Name.MobileRoomCallButton)
-                        elementCallEntryPoint.startCall(callType)
+                        elementCallEntryPoint.startCall(callType, false)
                     }
 
                     override fun onViewAllPinnedEvents() {

@@ -525,15 +525,19 @@ private fun MessagesViewTopBar(
             )
         }
     }, actions = {
-//        CallMenuItem(
-//            roomCallState = roomCallState,
-//            onJoinCallClick = onJoinCallClick,
-//        )
+        CallMenuItem(
+            roomCallState = roomCallState,
+            onJoinCallClick = onVideoJoinCallClick,
+        )
         AudioCallMenuItem(
             roomCallState = roomCallState,
             onJoinCallClick = onAudioJoinCallClick,
         )
         Spacer(Modifier.width(8.dp))
+        AudioCallMenuItem(
+            roomCallState = roomCallState,
+            onJoinCallClick = onJoinCallClick,
+        )
     }, windowInsets = WindowInsets(0.dp)
     )
 }

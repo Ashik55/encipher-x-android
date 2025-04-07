@@ -26,7 +26,7 @@ class FakeElementCallEntryPoint(
         String?,
     ) -> Unit = { _, _, _, _, _, _, _, _ -> lambdaError() }
 ) : ElementCallEntryPoint {
-    override fun startCall(callType: CallType, isAudioCall: Boolean) {
+    override fun startCall(callType: CallType, isAudioCall: Boolean?) {
         startCallResult(callType)
     }
 

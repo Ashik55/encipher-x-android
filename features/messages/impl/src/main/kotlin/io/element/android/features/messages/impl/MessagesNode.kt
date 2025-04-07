@@ -101,7 +101,7 @@ class MessagesNode @AssistedInject constructor(
         fun onCreatePollClick()
         fun onEditPollClick(eventId: EventId)
         fun onJoinCallClick(roomId: RoomId)
-        fun onAudioJoinCallClick(roomId: RoomId, isAudio: Boolean)
+        fun onAudioJoinCallClick(roomId: RoomId)
         fun onVideoJoinCallClick(roomId: RoomId)
         fun onViewAllPinnedEvents()
         fun onViewKnockRequests()
@@ -218,11 +218,11 @@ class MessagesNode @AssistedInject constructor(
     }
 
     private fun onAudioJoinCallClick() {
-        callbacks.forEach { it.onAudioJoinCallClick(room.roomId, true) }
+        callbacks.forEach { it.onAudioJoinCallClick(room.roomId ) }
     }
 
     private fun onVideoJoinCallClick() {
-        callbacks.forEach { it.onVideoJoinCallClick(room.roomId) }
+        callbacks.forEach { it.onVideoJoinCallClick(room.roomId ) }
     }
 
     private fun onViewKnockRequestsClick() {
