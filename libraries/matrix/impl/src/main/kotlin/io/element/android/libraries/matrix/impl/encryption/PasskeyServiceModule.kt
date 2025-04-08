@@ -8,30 +8,17 @@
 package io.element.android.libraries.matrix.impl.encryption
 
 import com.squareup.anvil.annotations.ContributesTo
-import dagger.Binds
 import dagger.Module
 import dagger.Provides
 import io.element.android.libraries.di.SessionScope
 import io.element.android.libraries.matrix.api.MatrixClient
 import io.element.android.libraries.matrix.api.encryption.PasskeyService
-import io.element.android.libraries.network.RetrofitFactory
 import javax.inject.Inject
 
 @Module
 @ContributesTo(SessionScope::class)
 abstract class PasskeyServiceModule {
-    @Binds
-    abstract fun bindPasskeyService(implementation: ProductionPasskeyService): PasskeyService
-
     companion object {
-        @Provides
-        fun providePasskeyServiceFactory(
-            retrofitFactory: RetrofitFactory,
-            matrixClient: MatrixClient
-        ): PasskeyServiceFactory {
-            return DefaultPasskeyServiceFactory(retrofitFactory, matrixClient)
-        }
-        
         @Provides
         fun providePasskeyService(
             factory: PasskeyServiceFactory,
@@ -41,4 +28,4 @@ abstract class PasskeyServiceModule {
             return factory.create(matrixClient.sessionId.value)
         }
     }
-} 
+}

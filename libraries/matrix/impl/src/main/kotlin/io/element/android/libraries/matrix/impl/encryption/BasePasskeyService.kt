@@ -6,40 +6,13 @@ import io.element.android.libraries.matrix.impl.encryption.models.CheckPasskeyRe
 import io.element.android.libraries.matrix.impl.encryption.models.PasskeyResponse
 import io.element.android.libraries.matrix.impl.encryption.models.SavePasskeyRequest
 import io.element.android.libraries.matrix.impl.encryption.models.SavePasskeyResponse
+import io.element.android.libraries.matrix.impl.encryption.services.PasskeyApiService
 import io.element.android.libraries.network.RetrofitFactory
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.json.Json
 import retrofit2.Response
-import retrofit2.http.Body
-import retrofit2.http.GET
-import retrofit2.http.POST
-import retrofit2.http.Path
-import retrofit2.http.Query
 import timber.log.Timber
-
-/**
- * Retrofit API interface for passkey operations
- */
-interface PasskeyApi {
-    @POST("_matrix/client/v3/auth/passkey/{userId}")
-    suspend fun savePasskey(
-        @Path("userId") userId: String,
-        @Body request: SavePasskeyRequest
-    ): Response<SavePasskeyResponse>
-    
-    @GET("_matrix/client/v3/auth/passkey/{userId}")
-    suspend fun retrievePasskey(
-        @Path("userId") userId: String,
-        @Query("passphrase") passphrase: String
-    ): Response<PasskeyResponse>
-    
-    @POST("_matrix/client/v3/auth/check_passkey/{userId}")
-    suspend fun checkPasskey(
-        @Path("userId") userId: String,
-        @Body request: CheckPasskeyRequest
-    ): Response<CheckPasskeyResponse>
-}
 
 /**
  * Base implementation of [PasskeyService] that contains common functionality.
@@ -56,9 +29,9 @@ abstract class BasePasskeyService(
     protected val json = Json { ignoreUnknownKeys = true }
     
     // Retrofit API interface
-    protected val api: PasskeyApi by lazy {
+    protected val api: PasskeyApiService by lazy {
         val retrofit = retrofitFactory.create(baseUrl)
-        retrofit.create(PasskeyApi::class.java)
+        retrofit.create(PasskeyApiService::class.java)
     }
 
     // In-memory cache for fallbacks

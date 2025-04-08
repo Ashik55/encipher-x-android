@@ -13,38 +13,40 @@ import dagger.Provides
 import io.element.android.libraries.di.AppScope
 import io.element.android.libraries.di.SingleIn
 import io.element.android.libraries.matrix.api.encryption.PasskeyService
+import io.element.android.libraries.matrix.impl.encryption.services.PasskeyApiService
 import io.element.android.libraries.network.RetrofitFactory
+import retrofit2.Retrofit
+import retrofit2.converter.gson.GsonConverterFactory
 import javax.inject.Inject
 import timber.log.Timber
 
-/**
- * Provides a factory for creating PasskeyService instances at app scope.
- */
-@ContributesTo(AppScope::class)
 @Module
-class AppPasskeyModule @Inject constructor() {
-    
+@ContributesTo(AppScope::class)
+class AppEncryptionModule @Inject constructor() {
+
+    @Provides
+    @SingleIn(AppScope::class)
+    fun providePasskeyApiService(): PasskeyApiService =
+        Retrofit.Builder()
+            .run {
+                addConverterFactory(GsonConverterFactory.create())
+                baseUrl("https://dev.enciph-er.com/")
+                build()
+            }.create(PasskeyApiService::class.java)
+            
     @Provides
     @SingleIn(AppScope::class)
     fun providePasskeyServiceFactory(
         retrofitFactory: RetrofitFactory
     ): PasskeyServiceFactory {
         Timber.d("Creating PasskeyServiceFactory in AppScope")
-        return AppScopePasskeyServiceFactory(retrofitFactory)
+        return DefaultPasskeyServiceFactory(retrofitFactory)
     }
     
-    /**
-     * App-scoped implementation of PasskeyServiceFactory that doesn't require MatrixClient.
-     */
-    private class AppScopePasskeyServiceFactory(
-        private val retrofitFactory: RetrofitFactory
-    ) : PasskeyServiceFactory {
-        override fun create(userId: String): PasskeyService {
-            Timber.d("Creating PasskeyService with user ID: $userId")
-            return ProductionPasskeyService(
-                retrofitFactory = retrofitFactory,
-                userId = userId
-            )
-        }
+    @Provides
+    @SingleIn(AppScope::class)
+    fun provideNoOpPasskeyService(): PasskeyService {
+        Timber.d("Creating NoOpPasskeyService in AppScope")
+        return NoOpPasskeyService()
     }
-} 
+}

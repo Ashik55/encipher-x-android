@@ -7,12 +7,8 @@
 
 package io.element.android.libraries.matrix.impl.encryption
 
-import com.squareup.anvil.annotations.ContributesBinding
-import io.element.android.libraries.di.SessionScope
-import io.element.android.libraries.matrix.api.MatrixClient
 import io.element.android.libraries.matrix.api.encryption.PasskeyService
 import io.element.android.libraries.network.RetrofitFactory
-import javax.inject.Inject
 import timber.log.Timber
 
 /**
@@ -31,14 +27,12 @@ interface PasskeyServiceFactory {
 /**
  * Implementation of PasskeyServiceFactory that creates PasskeyService instances.
  */
-@ContributesBinding(SessionScope::class, boundType = PasskeyServiceFactory::class)
-class DefaultPasskeyServiceFactory @Inject constructor(
-    private val retrofitFactory: RetrofitFactory,
-    private val matrixClient: MatrixClient
+class DefaultPasskeyServiceFactory(
+    private val retrofitFactory: RetrofitFactory
 ) : PasskeyServiceFactory {
     override fun create(userId: String): PasskeyService {
         Timber.d("Creating PasskeyService for user: $userId")
-        return ProductionPasskeyService(
+        return DefaultPasskeyService(
             retrofitFactory = retrofitFactory,
             userId = userId
         )
