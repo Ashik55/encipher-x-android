@@ -79,11 +79,11 @@ fun OnBoardingView(
 
     val anchors = (0 until 4).associateBy { -screenWidthPx * it }
 
-    LaunchedEffect(enableAutoProgress, swipeableState) {
+    LaunchedEffect(enableAutoProgress, swipeableState, state.currentPage) {
         if (enableAutoProgress) {
             while (true) {
                 delay(autoProgressDuration)
-                val nextPage = (swipeableState.currentValue + 1) % 4
+                val nextPage = (state.currentPage + 1) % 4
                 swipeableState.animateTo(nextPage)
                 onPageChange(nextPage)
             }
@@ -266,3 +266,4 @@ internal fun OnBoardingViewPreview(
         onPageChange = {}
     )
 }
+
