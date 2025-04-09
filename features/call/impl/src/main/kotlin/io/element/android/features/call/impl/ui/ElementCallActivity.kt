@@ -315,7 +315,7 @@ class ElementCallActivity :
             }
 
             val options = JitsiMeetConferenceOptions.Builder()
-                .setServerURL(URL("https://meet.enciph-er.com/"))
+                .setServerURL(URL("https://meet.prod.enciph-er.com/"))
                 .setRoom(roomName)
                 .setAudioOnly(isAudioCall)
                 .setUserInfo(jitsiMeetUserInfo)
