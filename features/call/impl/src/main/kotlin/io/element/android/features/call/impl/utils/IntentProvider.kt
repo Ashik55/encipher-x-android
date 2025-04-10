@@ -22,7 +22,7 @@ internal object IntentProvider {
         addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_NO_USER_ACTION)
     }
 
-    fun getPendingIntent(context: Context, callType: CallType, isAudioCall: Boolean = false): PendingIntent {
+    fun getPendingIntent(context: Context, callType: CallType, isAudioCall: Boolean? = null): PendingIntent {
         return PendingIntentCompat.getActivity(
             context,
             DefaultElementCallEntryPoint.REQUEST_CODE,

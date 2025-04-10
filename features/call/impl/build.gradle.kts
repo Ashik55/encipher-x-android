@@ -23,6 +23,13 @@ android {
     testOptions {
         unitTests.isIncludeAndroidResources = true
     }
+    
+    // Add consumer ProGuard rules to prevent Retrofit issues in release builds
+    buildTypes {
+        release {
+            consumerProguardFiles("consumer-rules.pro")
+        }
+    }
 }
 
 setupAnvil()

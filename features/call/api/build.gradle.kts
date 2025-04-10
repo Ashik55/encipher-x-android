@@ -8,6 +8,7 @@
 plugins {
     id("io.element.android-library")
     id("kotlin-parcelize")
+    alias(libs.plugins.kotlin.serialization)
 }
 
 android {
@@ -19,4 +20,10 @@ dependencies {
     implementation(projects.libraries.architecture)
     implementation(projects.libraries.core)
     implementation(projects.libraries.matrix.api)
+    
+    // Add Retrofit dependencies
+    implementation(platform(libs.network.retrofit.bom))
+    implementation(libs.network.retrofit)
+    implementation(libs.network.retrofit.converter.serialization)
+    implementation(libs.serialization.json)
 }
