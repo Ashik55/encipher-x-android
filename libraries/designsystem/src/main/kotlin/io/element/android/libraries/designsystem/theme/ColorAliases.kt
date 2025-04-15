@@ -32,7 +32,7 @@ fun ElementTheme.roomListRoomMessage() = colors.textSecondary
 fun ElementTheme.roomListRoomMessageDate() = colors.textSecondary
 
 val SemanticColors.unreadIndicator
-    get() = iconAccentTertiary
+    get() = Color(0xFF0A8741)
 
 val SemanticColors.placeholderBackground
     get() = bgSubtleSecondary
