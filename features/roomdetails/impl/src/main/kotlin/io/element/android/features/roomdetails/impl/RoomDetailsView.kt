@@ -117,7 +117,8 @@ fun RoomDetailsView(
     openPollHistory: () -> Unit,
     openMediaGallery: () -> Unit,
     openAdminSettings: () -> Unit,
-    onJoinCallClick: () -> Unit,
+    onAudioCallClick: () -> Unit,
+    onVideoCallClick: () -> Unit,
     onPinnedMessagesClick: () -> Unit,
     onKnockRequestsClick: () -> Unit,
     onSecurityAndPrivacyClick: () -> Unit,
@@ -185,7 +186,8 @@ fun RoomDetailsView(
                     state = state,
 //                onShareRoom = onShareRoom,
                     onInvitePeople = invitePeople,
-                    onCall = onJoinCallClick,
+                    onAudioCallClick = onAudioCallClick,
+                    onVideoCallClick = onVideoCallClick,
                 )
                 Spacer(Modifier.height(12.dp))
 
@@ -388,7 +390,8 @@ private fun MainActionsSection(
     state: RoomDetailsState,
 //    onShareRoom: () -> Unit,
     onInvitePeople: () -> Unit,
-    onCall: () -> Unit,
+    onAudioCallClick: () -> Unit,
+    onVideoCallClick: () -> Unit,
 ) {
     Row(
         modifier = Modifier
@@ -417,11 +420,18 @@ private fun MainActionsSection(
             }
         }
         if (state.roomCallState.hasPermissionToJoin()) {
-            // TODO Improve the view depending on all the cases here?
+            // Audio call button
             MainActionButton(
-                title = stringResource(CommonStrings.action_call),
+                title = stringResource(CommonStrings.action_audio_call),
+                imageVector = CompoundIcons.VoiceCall(),
+                onClick = onAudioCallClick,
+            )
+            
+            // Video call button
+            MainActionButton(
+                title = stringResource(CommonStrings.action_video_call),
                 imageVector = CompoundIcons.VideoCall(),
-                onClick = onCall,
+                onClick = onVideoCallClick,
             )
         }
         if (state.roomType is RoomDetailsType.Room) {
@@ -440,12 +450,15 @@ private fun MainActionsSection(
 //            )
         }
     }
-}@Composable
+}
+
+@Composable
 private fun CustomMainActionsSection(
     state: RoomDetailsState,
 //    onShareRoom: () -> Unit,
     onInvitePeople: () -> Unit,
-    onCall: () -> Unit,
+    onAudioCallClick: () -> Unit,
+    onVideoCallClick: () -> Unit,
 ) {
     Row(
         modifier = Modifier
@@ -475,11 +488,18 @@ private fun CustomMainActionsSection(
             }
         }
         if (state.roomCallState.hasPermissionToJoin()) {
-            // TODO Improve the view depending on all the cases here?
+            // Audio call button
             CustomMainActionButton(
-                title = stringResource(CommonStrings.action_call),
-                imageVector = ImageVector.vectorResource(id =  io.element.android.libraries.designsystem.R.drawable.ic_call),
-                onClick = onCall,
+                title = stringResource(CommonStrings.action_audio_call),
+                imageVector = ImageVector.vectorResource(id = io.element.android.libraries.designsystem.R.drawable.ic_call),
+                onClick = onAudioCallClick,
+            )
+            
+            // Video call button
+            CustomMainActionButton(
+                title = stringResource(CommonStrings.action_video_call),
+                imageVector = ImageVector.vectorResource(id = R.drawable.ic_video_call),
+                onClick = onVideoCallClick,
             )
         }
         if (state.roomType is RoomDetailsType.Room) {
@@ -1003,7 +1023,8 @@ private fun ContentToPreview(state: RoomDetailsState) {
         openPollHistory = {},
         openMediaGallery = {},
         openAdminSettings = {},
-        onJoinCallClick = {},
+        onAudioCallClick = {},
+        onVideoCallClick = {},
         onPinnedMessagesClick = {},
         onKnockRequestsClick = {},
         onSecurityAndPrivacyClick = {},

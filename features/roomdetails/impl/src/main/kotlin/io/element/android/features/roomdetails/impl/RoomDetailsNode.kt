@@ -51,6 +51,8 @@ class RoomDetailsNode @AssistedInject constructor(
         fun openKnockRequestsList()
         fun openSecurityAndPrivacy()
         fun onJoinCall()
+        fun onAudioCall()
+        fun onVideoCall()
     }
 
     private val callbacks = plugins<Callback>()
@@ -85,6 +87,14 @@ class RoomDetailsNode @AssistedInject constructor(
 
     private fun onJoinCall() {
         callbacks.forEach { it.onJoinCall() }
+    }
+
+    private fun onAudioCall() {
+        callbacks.forEach { it.onAudioCall() }
+    }
+
+    private fun onVideoCall() {
+        callbacks.forEach { it.onVideoCall() }
     }
 
 //    private fun CoroutineScope.onShareRoom(context: Context) = launch {
@@ -155,7 +165,8 @@ class RoomDetailsNode @AssistedInject constructor(
             openPollHistory = ::openPollHistory,
             openMediaGallery = ::openMediaGallery,
             openAdminSettings = this::openAdminSettings,
-            onJoinCallClick = ::onJoinCall,
+            onAudioCallClick = ::onAudioCall,
+            onVideoCallClick = ::onVideoCall,
             onPinnedMessagesClick = ::openPinnedMessages,
             onKnockRequestsClick = ::openKnockRequestsLists,
             onSecurityAndPrivacyClick = ::openSecurityAndPrivacy

@@ -176,6 +176,24 @@ class RoomDetailsFlowNode @AssistedInject constructor(
                         analyticsService.captureInteraction(Interaction.Name.MobileRoomCallButton)
                         elementCallEntryPoint.startCall(inputs)
                     }
+                    
+                    override fun onAudioCall() {
+                        val inputs = CallType.RoomCall(
+                            sessionId = room.sessionId,
+                            roomId = room.roomId,
+                        )
+                        analyticsService.captureInteraction(Interaction.Name.MobileRoomCallButton)
+                        elementCallEntryPoint.startCall(inputs, true)
+                    }
+                    
+                    override fun onVideoCall() {
+                        val inputs = CallType.RoomCall(
+                            sessionId = room.sessionId,
+                            roomId = room.roomId,
+                        )
+                        analyticsService.captureInteraction(Interaction.Name.MobileRoomCallButton)
+                        elementCallEntryPoint.startCall(inputs, false)
+                    }
                 }
                 createNode<RoomDetailsNode>(buildContext, listOf(roomDetailsCallback))
             }
