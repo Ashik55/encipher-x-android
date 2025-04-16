@@ -196,14 +196,30 @@ class RoomDetailsPresenter @Inject constructor(
         dmMember: RoomMember?,
         currentMember: RoomMember?,
     ): RoomDetailsType = remember(dmMember, currentMember) {
-        if (dmMember != null && currentMember != null) {
-            RoomDetailsType.Dm(
-                me = currentMember,
-                otherMember = dmMember,
-            )
-        } else {
-            RoomDetailsType.Room
+        // Check if we have current member and the room has 2 or fewer members
+        // Always treat rooms with 2 or fewer members as DMs regardless of isDirect property
+        if (currentMember != null && room.activeMemberCount <= 2) {
+            // For rooms with 2 or fewer members, always treat as DM
+            // If dmMember is null but there are only 2 members, attempt to find the other member
+            val otherMember = dmMember ?: when (val membersState = room.membersStateFlow.value) {
+                is MatrixRoomMembersState.Ready -> {
+                    membersState.roomMembers
+                        .filter { member -> member.membership.isActive() }
+                        .find { member -> member.userId != room.sessionId }
+                }
+                else -> null
+            }
+
+            if (otherMember != null) {
+                return@remember RoomDetailsType.Dm(
+                    me = currentMember,
+                    otherMember = otherMember,
+                )
+            }
         }
+        
+        // For rooms with more than 2 members or if we couldn't find the other member
+        RoomDetailsType.Room
     }
 
     @Composable
