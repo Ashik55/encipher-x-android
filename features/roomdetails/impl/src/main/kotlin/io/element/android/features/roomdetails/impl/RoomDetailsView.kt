@@ -467,56 +467,103 @@ private fun CustomMainActionsSection(
         horizontalArrangement = Arrangement.SpaceEvenly,
     ) {
         val roomNotificationSettings = state.roomNotificationSettings
-        if (state.canShowNotificationSettings && roomNotificationSettings != null) {
-            if (roomNotificationSettings.mode == RoomNotificationMode.MUTE) {
-                CustomMainActionButton(
-                    title = stringResource(CommonStrings.common_unmute),
-                    tintColor = Color(0xFF0A8741),
-                    imageVector = ImageVector.vectorResource(id =  R.drawable.ic_notifications_off),
-                    onClick = {
-                        state.eventSink(RoomDetailsEvent.UnmuteNotification)
-                    },
-                )
-            } else {
-                CustomMainActionButton(
-                    title = stringResource(CommonStrings.common_mute),
-                    imageVector = ImageVector.vectorResource(id =  R.drawable.ic_unmute),
-                    onClick = {
-                        state.eventSink(RoomDetailsEvent.MuteNotification)
-                    },
-                )
-            }
-        }
-        if (state.roomCallState.hasPermissionToJoin()) {
-            // Audio call button
-            CustomMainActionButton(
-                title = stringResource(CommonStrings.action_audio_call),
-                imageVector = ImageVector.vectorResource(id = io.element.android.libraries.designsystem.R.drawable.ic_call),
-                onClick = onAudioCallClick,
-            )
-            
-            // Video call button
-            CustomMainActionButton(
-                title = stringResource(CommonStrings.action_video_call),
-                imageVector = ImageVector.vectorResource(id = R.drawable.ic_video_call),
-                onClick = onVideoCallClick,
-            )
-        }
         if (state.roomType is RoomDetailsType.Room) {
+            // For Room view (not DM), rearrange buttons
+            // First row: mute/unmute and invite
+            if (state.canShowNotificationSettings && roomNotificationSettings != null) {
+                if (roomNotificationSettings.mode == RoomNotificationMode.MUTE) {
+                    CustomMainActionButton(
+                        title = stringResource(CommonStrings.common_unmute),
+                        tintColor = Color(0xFF0A8741),
+                        imageVector = ImageVector.vectorResource(id = R.drawable.ic_notifications_off),
+                        onClick = {
+                            state.eventSink(RoomDetailsEvent.UnmuteNotification)
+                        },
+                    )
+                } else {
+                    CustomMainActionButton(
+                        title = stringResource(CommonStrings.common_mute),
+                        imageVector = ImageVector.vectorResource(id = R.drawable.ic_unmute),
+                        onClick = {
+                            state.eventSink(RoomDetailsEvent.MuteNotification)
+                        },
+                    )
+                }
+            }
+            
             if (state.canInvite) {
                 CustomMainActionButton(
                     title = stringResource(CommonStrings.action_invite),
-                    imageVector = ImageVector.vectorResource(id =  R.drawable.ic_user_add),
+                    imageVector = ImageVector.vectorResource(id = R.drawable.ic_user_add),
                     onClick = onInvitePeople,
                 )
             }
-            // Share CTA should be hidden for DMs
-//            MainActionButton(
-//                title = stringResource(CommonStrings.action_share),
-//                imageVector = CompoundIcons.ShareAndroid(),
-//                onClick = onShareRoom
-//            )
+            
+            // Second row will be handled by Column layout below
+        } else {
+            // For DM view, keep current design
+            if (state.canShowNotificationSettings && roomNotificationSettings != null) {
+                if (roomNotificationSettings.mode == RoomNotificationMode.MUTE) {
+                    CustomMainActionButton(
+                        title = stringResource(CommonStrings.common_unmute),
+                        tintColor = Color(0xFF0A8741),
+                        imageVector = ImageVector.vectorResource(id = R.drawable.ic_notifications_off),
+                        onClick = {
+                            state.eventSink(RoomDetailsEvent.UnmuteNotification)
+                        },
+                    )
+                } else {
+                    CustomMainActionButton(
+                        title = stringResource(CommonStrings.common_mute),
+                        imageVector = ImageVector.vectorResource(id = R.drawable.ic_unmute),
+                        onClick = {
+                            state.eventSink(RoomDetailsEvent.MuteNotification)
+                        },
+                    )
+                }
+            }
+            
+            if (state.roomCallState.hasPermissionToJoin()) {
+                // Audio call button
+                CustomMainActionButton(
+                    title = stringResource(CommonStrings.action_audio_call),
+                    imageVector = ImageVector.vectorResource(id = io.element.android.libraries.designsystem.R.drawable.ic_call),
+                    onClick = onAudioCallClick,
+                )
+                
+                // Video call button
+                CustomMainActionButton(
+                    title = stringResource(CommonStrings.action_video_call),
+                    imageVector = ImageVector.vectorResource(id = R.drawable.ic_video_call),
+                    onClick = onVideoCallClick,
+                )
+            }
         }
+    }
+    
+    // For Room view (not DM), add audio/video call buttons below
+    if (state.roomType is RoomDetailsType.Room && state.roomCallState.hasPermissionToJoin()) {
+//        Spacer(modifier = Modifier.height(16.dp))
+//        Row(
+//            modifier = Modifier
+//                .fillMaxWidth()
+//                .padding(horizontal = 16.dp),
+//            horizontalArrangement = Arrangement.SpaceEvenly,
+//        ) {
+//            // Audio call button
+//            CustomMainActionButton(
+//                title = stringResource(CommonStrings.action_audio_call),
+//                imageVector = ImageVector.vectorResource(id = io.element.android.libraries.designsystem.R.drawable.ic_call),
+//                onClick = onAudioCallClick,
+//            )
+//            
+//            // Video call button
+//            CustomMainActionButton(
+//                title = stringResource(CommonStrings.action_video_call),
+//                imageVector = ImageVector.vectorResource(id = R.drawable.ic_video_call),
+//                onClick = onVideoCallClick,
+//            )
+//        }
     }
 }
 
