@@ -31,6 +31,7 @@ class CallsHistoryPresenter @Inject constructor(
     override fun present(): CallsHistoryState {
         val callsList = remember { MutableStateFlow<AsyncData<List<Call>>>(AsyncData.Loading()) }
         val favorites = remember { MutableStateFlow<List<Call>>(emptyList()) }
+        val currentUserId = remember { MutableStateFlow<String?>(null) }
         
         var retryCount by remember { mutableStateOf(0) }
         
@@ -38,11 +39,15 @@ class CallsHistoryPresenter @Inject constructor(
             // Get the active session ID from the holder using the suspend function
             val sessionId = activeSessionIdHolder.getActiveSessionId()
             loadCallHistory(callsList, sessionId)
+            
+            // Store the user ID for determining outgoing calls
+            currentUserId.value = sessionId?.value
         }
         
         return object : CallsHistoryState {
             override val callsList: StateFlow<AsyncData<List<Call>>> = callsList
             override val favorites: StateFlow<List<Call>> = favorites
+            override val currentUserId: StateFlow<String?> = currentUserId
         }
     }
     

@@ -65,6 +65,7 @@ fun CallsHistoryView(
     modifier: Modifier = Modifier
 ) {
     val callsListState by state.callsList.collectAsState()
+    val currentUserId by state.currentUserId.collectAsState()
     
     ElementScaffold(
         modifier = modifier,
@@ -185,6 +186,7 @@ fun CallsHistoryView(
                             items(calls) { call ->
                                 CallItem(
                                     call = call,
+                                    currentUserId = currentUserId,
                                     onItemClick = { /* Handle call click */ },
                                     onInfoClick = { call.room_id?.let { onRoomDetailsClick(it) } }
                                 )
@@ -212,6 +214,7 @@ fun CallsHistoryView(
 @Composable
 fun CallItem(
     call: Call,
+    currentUserId: String?,
     onItemClick: () -> Unit,
     onInfoClick: () -> Unit,
     modifier: Modifier = Modifier
@@ -262,17 +265,15 @@ fun CallItem(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 // Call type icon (outgoing, incoming)
-                val (icon, contentDescription) = when {
-                    call.caller_user_id?.contains("@ben5") == true -> {
-                        if (call.call_type == "video") {
-                            Pair(DSR.drawable.ic_video_call_outgoing, "Outgoing video call")
-                        } else {
-                            Pair(DSR.drawable.ic_call_outgoing, "Outgoing call")
-                        }
+                val isOutgoingCall = currentUserId?.isNotEmpty() == true && call.caller_user_id == currentUserId
+                val (icon, contentDescription) = if (isOutgoingCall) {
+                    if (call.call_type == "video") {
+                        Pair(DSR.drawable.ic_video_call_outgoing, "Outgoing video call")
+                    } else {
+                        Pair(DSR.drawable.ic_call_outgoing, "Outgoing call")
                     }
-                    else -> {
-                        Pair(DSR.drawable.ic_call_incoming, "Incoming call")
-                    }
+                } else {
+                    Pair(DSR.drawable.ic_call_incoming, "Incoming call")
                 }
                 
                 Icon(
@@ -432,6 +433,7 @@ internal fun CallsHistoryViewPreview() = ElementPreview {
             )
         )))
         override val favorites = MutableStateFlow<List<Call>>(emptyList())
+        override val currentUserId = MutableStateFlow("@ben5:dev.enciph-er.com")
     }
     
     CallsHistoryView(

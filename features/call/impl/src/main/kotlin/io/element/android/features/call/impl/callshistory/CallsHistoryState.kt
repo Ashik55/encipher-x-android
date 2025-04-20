@@ -13,4 +13,5 @@ import kotlinx.coroutines.flow.StateFlow
 interface CallsHistoryState {
     val callsList: StateFlow<AsyncData<List<Call>>>
     val favorites: StateFlow<List<Call>>
+    val currentUserId: StateFlow<String?>
 }
