@@ -75,7 +75,7 @@ fun CallsHistoryView(
     modifier: Modifier = Modifier
 ) {
     val callsList by state.callsList.collectAsState()
-    val favorites by state.favorites.collectAsState()
+//    val favorites by state.favorites.collectAsState()
     
     ElementScaffold(
         modifier = modifier,
@@ -127,26 +127,26 @@ fun CallsHistoryView(
             )
             
             // Favorites section
-            if (favorites.isNotEmpty()) {
-                Text(
-                    text = "Favorites",
-                    style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.Bold,
-                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
-                )
-                
-                LazyColumn {
-                    items(favorites) { favorite ->
-                        CallItem(
-                            call = favorite,
-                            onItemClick = { /* Handle favorite call click */ },
-                            onInfoClick = { favorite.room_id?.let { onRoomDetailsClick(it) } }
-                        )
-                    }
-                }
-                
-                HorizontalDivider()
-            }
+//            if (favorites.isNotEmpty()) {
+//                Text(
+//                    text = "Favorites",
+//                    style = MaterialTheme.typography.titleMedium,
+//                    fontWeight = FontWeight.Bold,
+//                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
+//                )
+//
+//                LazyColumn {
+//                    items(favorites) { favorite ->
+//                        CallItem(
+//                            call = favorite,
+//                            onItemClick = { /* Handle favorite call click */ },
+//                            onInfoClick = { favorite.room_id?.let { onRoomDetailsClick(it) } }
+//                        )
+//                    }
+//                }
+//
+//                HorizontalDivider()
+//            }
             
             // Recent calls section
             Text(
