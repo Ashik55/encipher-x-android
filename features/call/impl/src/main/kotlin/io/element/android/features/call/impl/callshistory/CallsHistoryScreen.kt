@@ -36,8 +36,16 @@ class CallsHistoryScreen @AssistedInject constructor(
     }
     
     private fun onBottomNavigationRouteSelected(route: BottomNavRoute) {
-        // This is a placeholder implementation 
-        // In a real implementation, you would handle navigation between tabs
+        when (route) {
+            BottomNavRoute.Home -> navigateTo(route)
+            BottomNavRoute.Settings -> navigateTo(route)
+            BottomNavRoute.Calls -> {} // Already on calls screen, do nothing
+        }
+    }
+    
+    private fun navigateTo(route: BottomNavRoute) {
+        // We should use the existing navigation system here
+        // For now, this is just a placeholder
     }
 
     @Composable
@@ -47,7 +55,6 @@ class CallsHistoryScreen @AssistedInject constructor(
             state = state,
             onRoomDetailsClick = { roomId ->
                 // Navigate to room details or handle click
-                // navigator.navigateToRoomDetails(roomId)
             },
             currentRoute = BottomNavRoute.Calls,
             onRouteSelect = ::onBottomNavigationRouteSelected,

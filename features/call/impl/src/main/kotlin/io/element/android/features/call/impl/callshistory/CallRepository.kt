@@ -1,0 +1,63 @@
+/*
+ * Copyright 2025 New Vector Ltd.
+ *
+ * SPDX-License-Identifier: AGPL-3.0-only OR LicenseRef-Element-Commercial
+ * Please see LICENSE files in the repository root for full details.
+ */
+
+package io.element.android.features.call.impl.callshistory
+
+import io.element.android.libraries.matrix.api.MatrixClient
+import io.element.android.libraries.matrix.api.MatrixClientProvider
+import io.element.android.libraries.matrix.api.core.SessionId
+import io.element.android.libraries.matrix.impl.call.model.Call as MatrixCall
+import io.element.android.libraries.matrix.impl.call.services.CallApiService
+import javax.inject.Inject
+import com.squareup.anvil.annotations.ContributesBinding
+import io.element.android.libraries.di.AppScope
+import io.element.android.libraries.di.SingleIn
+import retrofit2.Response
+import timber.log.Timber
+
+interface CallRepository {
+    /**
+     * Get call details for a specific user.
+     *
+     * @param sessionId The session ID to use
+     * @param userId The user ID to get call history for
+     * @param roomId Optional room ID to filter calls
+     * @return API response containing call details
+     */
+    suspend fun getCallDetails(sessionId: SessionId, userId: String, roomId: String? = null): Result<List<Call>>
+}
+
+@SingleIn(AppScope::class)
+@ContributesBinding(AppScope::class)
+class DefaultCallRepository @Inject constructor(
+    private val matrixCallApiService: CallApiService,
+    private val matrixClientProvider: MatrixClientProvider
+) : CallRepository {
+    override suspend fun getCallDetails(sessionId: SessionId, userId: String, roomId: String?): Result<List<Call>> = runCatching {
+        Timber.d("Fetching calls for user: $userId, room: $roomId")
+        
+        val response = matrixCallApiService.getCallDetails(userId, roomId)
+        
+        if (response.isSuccessful) {
+            val callsResponse = response.body()
+            val calls = callsResponse?.calls?.filterNotNull() ?: emptyList()
+            calls.map { it.toCall() }
+        } else {
+            Timber.e("Failed to fetch calls: ${response.code()} ${response.message()}")
+            throw Exception("Failed to fetch calls: ${response.code()} ${response.message()}")
+        }
+    }
+    
+    private fun MatrixCall.toCall() = Call(
+        call_id = call_id?.toLong(),
+        call_type = call_type,
+        caller_user_id = caller_user_id,
+        room_id = room_id,
+        created_ts = created_ts,
+        ended_ts = ended_ts
+    )
+}

@@ -14,19 +14,16 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
@@ -36,34 +33,27 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import io.element.android.compound.theme.ElementTheme
-import io.element.android.features.call.impl.R
+import io.element.android.libraries.architecture.AsyncData
 import io.element.android.libraries.designsystem.components.avatar.Avatar
 import io.element.android.libraries.designsystem.components.avatar.AvatarData
 import io.element.android.libraries.designsystem.components.avatar.AvatarSize
-import io.element.android.libraries.designsystem.components.button.BackButton
-import io.element.android.libraries.designsystem.components.list.ListItemContent
 import io.element.android.libraries.designsystem.components.navbar.BottomNavBar
 import io.element.android.libraries.designsystem.components.navbar.BottomNavRoute
 import io.element.android.libraries.designsystem.preview.ElementPreview
 import io.element.android.libraries.designsystem.preview.PreviewsDayNight
+import io.element.android.libraries.designsystem.theme.components.Button
+import io.element.android.libraries.designsystem.theme.components.ButtonSize
 import io.element.android.libraries.designsystem.theme.components.HorizontalDivider
 import io.element.android.libraries.designsystem.theme.components.Scaffold as ElementScaffold
 import io.element.android.libraries.designsystem.R as DSR
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
-import java.text.SimpleDateFormat
-import java.util.Date
-import java.util.Locale
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -74,8 +64,7 @@ fun CallsHistoryView(
     onRouteSelect: (BottomNavRoute) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val callsList by state.callsList.collectAsState()
-//    val favorites by state.favorites.collectAsState()
+    val callsListState by state.callsList.collectAsState()
     
     ElementScaffold(
         modifier = modifier,
@@ -126,28 +115,6 @@ fun CallsHistoryView(
                     .padding(horizontal = 16.dp, vertical = 8.dp)
             )
             
-            // Favorites section
-//            if (favorites.isNotEmpty()) {
-//                Text(
-//                    text = "Favorites",
-//                    style = MaterialTheme.typography.titleMedium,
-//                    fontWeight = FontWeight.Bold,
-//                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
-//                )
-//
-//                LazyColumn {
-//                    items(favorites) { favorite ->
-//                        CallItem(
-//                            call = favorite,
-//                            onItemClick = { /* Handle favorite call click */ },
-//                            onInfoClick = { favorite.room_id?.let { onRoomDetailsClick(it) } }
-//                        )
-//                    }
-//                }
-//
-//                HorizontalDivider()
-//            }
-            
             // Recent calls section
             Text(
                 text = "Recent",
@@ -156,13 +123,86 @@ fun CallsHistoryView(
                 modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
             )
             
-            LazyColumn {
-                items(callsList) { call ->
-                    CallItem(
-                        call = call,
-                        onItemClick = { /* Handle call click */ },
-                        onInfoClick = { call.room_id?.let { onRoomDetailsClick(it) } }
-                    )
+            when (callsListState) {
+                is AsyncData.Loading -> {
+                    // Show loading state
+                    Box(
+                        contentAlignment = Alignment.Center,
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(16.dp)
+                    ) {
+                        CircularProgressIndicator()
+                    }
+                }
+                
+                is AsyncData.Failure -> {
+                    // Show error state with retry button
+                    val error = (callsListState as AsyncData.Failure)
+                    Box(
+                        contentAlignment = Alignment.Center,
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(16.dp)
+                    ) {
+                        Column(
+                            horizontalAlignment = Alignment.CenterHorizontally
+                        ) {
+                            Text(
+                                text = error.error.message ?: "Unknown error occurred",
+                                style = MaterialTheme.typography.bodyLarge,
+                                color = MaterialTheme.colorScheme.error
+                            )
+                            Spacer(modifier = Modifier.padding(8.dp))
+                            Button(
+                                text = "Retry",
+                                onClick = { /* Trigger retry */ },
+                                size = ButtonSize.Medium
+                            )
+                        }
+                    }
+                }
+                
+                is AsyncData.Success -> {
+                    // Show call list
+                    val calls = (callsListState as AsyncData.Success<List<Call>>).data
+                    if (calls.isEmpty()) {
+                        // Empty state
+                        Box(
+                            contentAlignment = Alignment.Center,
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .padding(16.dp)
+                        ) {
+                            Text(
+                                text = "No calls in your history",
+                                style = MaterialTheme.typography.bodyLarge,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
+                    } else {
+                        LazyColumn {
+                            items(calls) { call ->
+                                CallItem(
+                                    call = call,
+                                    onItemClick = { /* Handle call click */ },
+                                    onInfoClick = { call.room_id?.let { onRoomDetailsClick(it) } }
+                                )
+                            }
+                        }
+                    }
+                }
+                
+                AsyncData.Uninitialized -> {
+                    // Handle uninitialized state (this could be similar to loading or empty state)
+                    Box(
+                        contentAlignment = Alignment.Center,
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(16.dp)
+                    ) {
+                        CircularProgressIndicator()
+                    }
                 }
             }
         }
@@ -271,16 +311,9 @@ fun CallItem(
 private fun extractNameFromUserId(userId: String?): String {
     if (userId.isNullOrEmpty()) return "Unknown"
     
-    // Example: "@ben5:dev.enciph-er.com" -> "Ben 5"
     val username = userId.substringAfter("@").substringBefore(":")
     
-    return when {
-        username.contains("ben") -> "Sabbir"
-        username.contains("rahat") -> "Rahat"
-        username.contains("zobayer") -> "Zobayer Bhai PLX"
-        username.contains("hasib") -> "Hasib Bhai PLX"
-        else -> username.replaceFirstChar { it.uppercase() }
-    }
+    return username.replaceFirstChar { it.uppercase() }
 }
 
 private fun formatDate(timestamp: String?): String {
@@ -292,27 +325,25 @@ private fun formatDate(timestamp: String?): String {
 @PreviewsDayNight
 @Composable
 internal fun CallsHistoryViewPreview() = ElementPreview {
-    val dummyCalls = listOf(
-        Call(
-            call_id = 1,
-            call_type = "audio",
-            caller_user_id = "@ben5:dev.enciph-er.com",
-            created_ts = "2025-04-15T09:56:12.505007",
-            ended_ts = null,
-            room_id = "!OWEQCyKsMRmxkMVFDT:dev.enciph-er.com"
-        ),
-        Call(
-            call_id = 2,
-            call_type = "video",
-            caller_user_id = "@john:dev.enciph-er.com",
-            created_ts = "2025-04-14T08:30:00.000000",
-            ended_ts = "2025-04-14T08:35:00.000000",
-            room_id = "!ABCDEFGHIjklmnop:dev.enciph-er.com"
-        )
-    )
-    
     val previewState = object : CallsHistoryState {
-        override val callsList = MutableStateFlow(dummyCalls)
+        override val callsList = MutableStateFlow(AsyncData.Success(listOf(
+            Call(
+                call_id = 1,
+                call_type = "audio",
+                caller_user_id = "@ben5:dev.enciph-er.com",
+                created_ts = "2025-04-15T09:56:12.505007",
+                ended_ts = null,
+                room_id = "!OWEQCyKsMRmxkMVFDT:dev.enciph-er.com"
+            ),
+            Call(
+                call_id = 2,
+                call_type = "video",
+                caller_user_id = "@john:dev.enciph-er.com",
+                created_ts = "2025-04-14T08:30:00.000000",
+                ended_ts = "2025-04-14T08:35:00.000000",
+                room_id = "!ABCDEFGHIjklmnop:dev.enciph-er.com"
+            )
+        )))
         override val favorites = MutableStateFlow<List<Call>>(emptyList())
     }
     
