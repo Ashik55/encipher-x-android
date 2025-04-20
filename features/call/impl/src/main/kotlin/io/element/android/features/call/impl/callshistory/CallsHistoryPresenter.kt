@@ -55,10 +55,8 @@ class CallsHistoryPresenter @Inject constructor(
         callsListState.value = AsyncData.Loading()
         
         try {
-            // For now, using a hardcoded userId, but in a production app this should come from session data
-            // The important part is we're using the repository now instead of hardcoded data
-            val userId = "@ben5:dev.enciph-er.com"
-            val result = callRepository.getCallDetails(sessionId, userId)
+            // Get the current user ID from the session
+            val result = callRepository.getCallDetails(sessionId, sessionId.value)
             
             result.fold(
                 onSuccess = { calls ->
