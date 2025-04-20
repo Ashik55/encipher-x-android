@@ -61,4 +61,6 @@ enum class AvatarSize(val dp: Dp) {
     MediaSender(32.dp),
 
     DmCreationConfirmation(64.dp),
+    
+    CallList(48.dp),
 }

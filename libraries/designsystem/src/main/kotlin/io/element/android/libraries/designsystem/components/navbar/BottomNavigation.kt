@@ -26,6 +26,7 @@ import io.element.android.libraries.designsystem.theme.components.Icon
 
 enum class BottomNavRoute {
     Home,
+    Calls,
     Settings
 }
 
@@ -63,8 +64,9 @@ fun BottomNavBar(
                     icon = {
                         Icon(
                             imageVector = when (route) {
-                                BottomNavRoute.Home -> ImageVector.vectorResource(id = R.drawable.ic_home_nav)
-                                BottomNavRoute.Settings -> ImageVector.vectorResource(id = R.drawable.ic_settings_nav)
+                                BottomNavRoute.Home -> ImageVector.vectorResource(id = if (selected) R.drawable.ic_home_nav_filled else R.drawable.ic_home_nav)
+                                BottomNavRoute.Calls -> ImageVector.vectorResource(id = if (selected) R.drawable.ic_calls_nav_filled else R.drawable.ic_calls_nav)
+                                BottomNavRoute.Settings -> ImageVector.vectorResource(id = if (selected) R.drawable.ic_settings_nav_filled else R.drawable.ic_settings_nav)
                             },
                             contentDescription = route.name,
                             tint = if (selected) selectedColor else Color.Gray,

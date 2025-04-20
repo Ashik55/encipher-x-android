@@ -1,0 +1,20 @@
+/*
+ * Copyright 2025 New Vector Ltd.
+ *
+ * SPDX-License-Identifier: AGPL-3.0-only OR LicenseRef-Element-Commercial
+ * Please see LICENSE files in the repository root for full details.
+ */
+
+package io.element.android.features.call.impl.callshistory
+
+/**
+ * Model class representing a call in the call history.
+ */
+data class Call(
+    val call_id: Long? = null,
+    val call_type: String? = null,
+    val caller_user_id: String? = null,
+    val created_ts: String? = null,
+    val ended_ts: String? = null,
+    val room_id: String? = null,
+)

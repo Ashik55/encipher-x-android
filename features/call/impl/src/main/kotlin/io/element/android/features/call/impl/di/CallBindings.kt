@@ -8,6 +8,7 @@
 package io.element.android.features.call.impl.di
 
 import com.squareup.anvil.annotations.ContributesTo
+import io.element.android.features.call.impl.callshistory.CallsHistoryScreen
 import io.element.android.features.call.impl.receivers.DeclineCallBroadcastReceiver
 import io.element.android.features.call.impl.ui.ElementCallActivity
 import io.element.android.features.call.impl.ui.IncomingCallActivity
@@ -18,4 +19,5 @@ interface CallBindings {
     fun inject(callActivity: ElementCallActivity)
     fun inject(callActivity: IncomingCallActivity)
     fun inject(declineCallBroadcastReceiver: DeclineCallBroadcastReceiver)
+    fun inject(callsHistoryScreen: CallsHistoryScreen)
 }

@@ -99,6 +99,8 @@ import kotlinx.parcelize.Parcelize
 import timber.log.Timber
 import java.util.Optional
 import java.util.UUID
+import io.element.android.features.call.impl.callshistory.CallsHistoryNode
+
 
 private const val TAG = "LoggedInFlowNode"
 
@@ -148,9 +150,13 @@ class LoggedInFlowNode @AssistedInject constructor(
 
     private val verificationListener = object : SessionVerificationServiceListener {
         override fun onIncomingSessionRequest(sessionVerificationRequestDetails: SessionVerificationRequestDetails) {
-            backstack.singleTop(NavTarget.IncomingVerificationRequest(sessionVerificationRequestDetails))
+            if (backstack.elements.value.none { it.key.navTarget is NavTarget.IncomingVerificationRequest }) {
+                safeSingleTop(NavTarget.IncomingVerificationRequest(sessionVerificationRequestDetails))
+            }
         }
     }
+
+    private val navigationJobs = mutableListOf<kotlinx.coroutines.Job>()
 
     override fun onBuilt() {
         super.onBuilt()
@@ -158,22 +164,33 @@ class LoggedInFlowNode @AssistedInject constructor(
         lifecycle.subscribe(
             onCreate = {
                 appNavigationStateService.onNavigateToSession(id, matrixClient.sessionId)
-                // TODO We do not support Space yet, so directly navigate to main space
                 appNavigationStateService.onNavigateToSpace(id, MAIN_SPACE)
                 loggedInFlowProcessor.observeEvents(coroutineScope)
                 matrixClient.sessionVerificationService().setListener(verificationListener)
 
-                ftueService.state
+                val ftueJob = ftueService.state
                     .onEach { ftueState ->
                         when (ftueState) {
-                            is FtueState.Unknown -> Unit // Nothing to do
-                            is FtueState.Incomplete -> backstack.safeRoot(NavTarget.Ftue)
-                            is FtueState.Complete -> backstack.safeRoot(NavTarget.RoomList)
+                            is FtueState.Unknown -> Unit
+                            is FtueState.Incomplete -> {
+                                if (backstack.elements.value.none { it.key.navTarget is NavTarget.Ftue }) {
+                                    backstack.safeRoot(NavTarget.Ftue)
+                                }
+                            }
+                            is FtueState.Complete -> {
+                                if (backstack.elements.value.none { it.key.navTarget is NavTarget.RoomList }) {
+                                    backstack.safeRoot(NavTarget.RoomList)
+                                }
+                            }
                         }
                     }
                     .launchIn(lifecycleScope)
+                navigationJobs.add(ftueJob)
             },
             onDestroy = {
+                navigationJobs.forEach { it.cancel() }
+                navigationJobs.clear()
+                
                 appNavigationStateService.onLeavingSpace(id)
                 appNavigationStateService.onLeavingSession(id)
                 loggedInFlowProcessor.stopObserving()
@@ -206,6 +223,9 @@ class LoggedInFlowNode @AssistedInject constructor(
             val initialElement: RoomNavigationTarget = RoomNavigationTarget.Messages(),
             val targetId: UUID = UUID.randomUUID(),
         ) : NavTarget
+
+        @Parcelize
+        data object Calls : NavTarget
 
         @Parcelize
         data class UserProfile(
@@ -248,113 +268,107 @@ class LoggedInFlowNode @AssistedInject constructor(
             NavTarget.LoggedInPermanent -> {
                 val callback = object : LoggedInNode.Callback {
                     override fun navigateToNotificationTroubleshoot() {
-                        backstack.push(NavTarget.Settings(PreferencesEntryPoint.InitialTarget.NotificationTroubleshoot))
+                        safePush(NavTarget.Settings(PreferencesEntryPoint.InitialTarget.NotificationSettings))
                     }
                 }
                 createNode<LoggedInNode>(buildContext, listOf(callback))
             }
             NavTarget.RoomList -> {
-                val callback = object : RoomListEntryPoint.Callback {
-                    override fun onRoomClick(roomId: RoomId) {
-                        backstack.push(NavTarget.Room(roomId.toRoomIdOrAlias()))
-                    }
-
-                    override fun onSettingsClick() {
-                        backstack.push(NavTarget.Settings())
-                    }
-
-                    override fun onCreateRoomClick() {
-                        backstack.push(NavTarget.CreateRoom)
-                    }
-
-                    override fun onSetUpRecoveryClick() {
-                        backstack.push(NavTarget.SecureBackup(initialElement = SecureBackupEntryPoint.InitialTarget.Root))
-                    }
-
-                    override fun onSessionConfirmRecoveryKeyClick() {
-                        backstack.push(NavTarget.SecureBackup(initialElement = SecureBackupEntryPoint.InitialTarget.EnterRecoveryKey))
-                    }
-
-                    override fun onRoomSettingsClick(roomId: RoomId) {
-                        backstack.push(NavTarget.Room(roomId.toRoomIdOrAlias(), initialElement = RoomNavigationTarget.Details))
-                    }
-
-                    override fun onReportBugClick() {
-                        plugins<Callback>().forEach { it.onOpenBugReport() }
-                    }
-
-                    override fun onRoomDirectorySearchClick() {
-                        Timber.tag("$TAG:RoomList").d("Room directory search clicked")
-                        backstack.push(NavTarget.RoomDirectorySearch)
-                    }
-
-                    override fun onLogoutForNativeSlidingSyncMigrationNeeded() {
-                        backstack.push(NavTarget.LogoutForNativeSlidingSyncMigrationNeeded)
-                    }
-                }
-                roomListEntryPoint
-                    .nodeBuilder(this, buildContext)
-                    .callback(callback)
+                roomListEntryPoint.nodeBuilder(this, buildContext)
+                    .callback(object : RoomListEntryPoint.Callback {
+                        override fun onRoomClick(roomId: RoomId) {
+                            safePush(NavTarget.Room(roomId.toRoomIdOrAlias()))
+                        }
+                        
+                        override fun onSettingsClick() {
+                            safePush(NavTarget.Settings())
+                        }
+                        
+                        override fun onCreateRoomClick() {
+                            safePush(NavTarget.CreateRoom)
+                        }
+                        
+                        override fun onSetUpRecoveryClick() {
+                            safePush(NavTarget.SecureBackup())
+                        }
+                        
+                        override fun onSessionConfirmRecoveryKeyClick() {
+                            safePush(NavTarget.SecureBackup(SecureBackupEntryPoint.InitialTarget.EnterRecoveryKey))
+                        }
+                        
+                        override fun onRoomSettingsClick(roomId: RoomId) {
+                            safePush(NavTarget.Room(roomId.toRoomIdOrAlias(), initialElement = RoomNavigationTarget.Details))
+                        }
+                        
+                        override fun onReportBugClick() {
+                            plugins<Callback>().forEach { it.onOpenBugReport() }
+                        }
+                        
+                        override fun onRoomDirectorySearchClick() {
+                            safePush(NavTarget.RoomDirectorySearch)
+                        }
+                        
+                        override fun onLogoutForNativeSlidingSyncMigrationNeeded() {
+                            safePush(NavTarget.LogoutForNativeSlidingSyncMigrationNeeded)
+                        }
+                    })
                     .build()
             }
             is NavTarget.Room -> {
-                val callback = object : JoinedRoomLoadedFlowNode.Callback {
-                    override fun onOpenRoom(roomId: RoomId) {
-                        backstack.push(NavTarget.Room(roomId.toRoomIdOrAlias()))
-                    }
-
-                    override fun onForwardedToSingleRoom(roomId: RoomId) {
-                        coroutineScope.launch { attachRoom(roomId.toRoomIdOrAlias(), clearBackstack = false) }
-                    }
-
-                    override fun onPermalinkClick(data: PermalinkData, pushToBackstack: Boolean) {
-                        when (data) {
-                            is PermalinkData.UserLink -> {
-                                // Should not happen (handled by MessagesNode)
-                                Timber.e("User link clicked: ${data.userId}.")
-                            }
-                            is PermalinkData.RoomLink -> {
-                                val target = NavTarget.Room(
-                                    roomIdOrAlias = data.roomIdOrAlias,
-                                    serverNames = data.viaParameters,
-                                    trigger = JoinedRoom.Trigger.Timeline,
-                                    initialElement = RoomNavigationTarget.Messages(data.eventId),
-                                )
-                                if (pushToBackstack) {
-                                    backstack.push(target)
-                                } else {
-                                    backstack.replace(target)
-                                }
-                            }
-                            is PermalinkData.FallbackLink,
-                            is PermalinkData.RoomEmailInviteLink -> {
-                                // Should not happen (handled by MessagesNode)
-                            }
-                        }
-                    }
-
-                    override fun onOpenGlobalNotificationSettings() {
-                        backstack.push(NavTarget.Settings(PreferencesEntryPoint.InitialTarget.NotificationSettings))
-                    }
-                }
                 val inputs = RoomFlowNode.Inputs(
                     roomIdOrAlias = navTarget.roomIdOrAlias,
-                    roomDescription = Optional.ofNullable(navTarget.roomDescription),
-                    serverNames = navTarget.serverNames,
-                    trigger = Optional.ofNullable(navTarget.trigger),
-                    initialElement = navTarget.initialElement
+                    roomDescription = Optional.empty(),
+                    serverNames = emptyList(),
+                    trigger = Optional.empty(),
+                    initialElement = RoomNavigationTarget.Messages()
                 )
-                createNode<RoomFlowNode>(buildContext, plugins = listOf(inputs, callback))
-            }
-            is NavTarget.UserProfile -> {
-                val callback = object : UserProfileEntryPoint.Callback {
+                val callback = object : JoinedRoomLoadedFlowNode.Callback {
                     override fun onOpenRoom(roomId: RoomId) {
-                        backstack.push(NavTarget.Room(roomId.toRoomIdOrAlias()))
+                        safePush(NavTarget.Room(roomId.toRoomIdOrAlias()))
+                    }
+                    
+                    override fun onPermalinkClick(data: PermalinkData, pushToBackstack: Boolean) {
+                        if (pushToBackstack) {
+                            handlePermalink(data, true)
+                        } else {
+                            handlePermalink(data, false)
+                        }
+                    }
+                    
+                    override fun onForwardedToSingleRoom(roomId: RoomId) {
+                        safePush(NavTarget.Room(roomId.toRoomIdOrAlias()))
+                    }
+                    
+                    override fun onOpenGlobalNotificationSettings() {
+                        safePush(NavTarget.Settings(PreferencesEntryPoint.InitialTarget.NotificationSettings))
                     }
                 }
+                createNode<RoomFlowNode>(buildContext, listOf(inputs, callback))
+            }
+            NavTarget.Calls -> {
+                val callback = object : CallsHistoryNode.Callback {
+                    override fun onRoomDetailsClick(roomId: RoomId) {
+                        safePush(NavTarget.Room(roomId.toRoomIdOrAlias()))
+                    }
+                    
+                    override fun onHomeClick() {
+                        safePush(NavTarget.RoomList)
+                    }
+                    
+                    override fun onSettingsClick() {
+                        safePush(NavTarget.Settings())
+                    }
+                }
+                createNode<CallsHistoryNode>(buildContext, plugins = listOf(callback))
+            }
+            is NavTarget.UserProfile -> {
                 userProfileEntryPoint.nodeBuilder(this, buildContext)
                     .params(UserProfileEntryPoint.Params(userId = navTarget.userId))
-                    .callback(callback)
+                    .callback(object : UserProfileEntryPoint.Callback {
+                        override fun onOpenRoom(roomId: RoomId) {
+                            safePush(NavTarget.Room(roomId.toRoomIdOrAlias()))
+                        }
+                    })
                     .build()
             }
             is NavTarget.Settings -> {
@@ -367,28 +381,27 @@ class LoggedInFlowNode @AssistedInject constructor(
                     }
 
                     override fun onSecureBackupClick() {
-                        backstack.push(NavTarget.SecureBackup())
+                        safePush(NavTarget.SecureBackup())
                     }
 
                     override fun onOpenRoomNotificationSettings(roomId: RoomId) {
-                        backstack.push(NavTarget.Room(roomId.toRoomIdOrAlias(), initialElement = RoomNavigationTarget.NotificationSettings))
+                        safePush(NavTarget.Room(roomId.toRoomIdOrAlias(), initialElement = RoomNavigationTarget.NotificationSettings))
                     }
 
-                    // Add the missing callback implementations
                     override fun onScreenLockClick() {
-                        backstack.push(NavTarget.Settings(PreferencesEntryPoint.InitialTarget.ScreenLock))
+                        safePush(NavTarget.Settings(PreferencesEntryPoint.InitialTarget.ScreenLock))
                     }
 
                     override fun onAdvancedSettingsClick() {
-                        backstack.push(NavTarget.Settings(PreferencesEntryPoint.InitialTarget.AdvancedSettings))
+                        safePush(NavTarget.Settings(PreferencesEntryPoint.InitialTarget.AdvancedSettings))
                     }
 
                     override fun onSignOutClick() {
-                        backstack.push(NavTarget.Settings(PreferencesEntryPoint.InitialTarget.SignOut))
+                        safePush(NavTarget.Settings(PreferencesEntryPoint.InitialTarget.SignOut))
                     }
 
                     override fun onDeactivateAccountClick() {
-                        backstack.push(NavTarget.Settings(PreferencesEntryPoint.InitialTarget.DeactivateAccount))
+                        safePush(NavTarget.Settings(PreferencesEntryPoint.InitialTarget.DeactivateAccount))
                     }
                 }
                 val inputs = PreferencesEntryPoint.Params(navTarget.initialElement)
@@ -447,7 +460,7 @@ class LoggedInFlowNode @AssistedInject constructor(
                             navigateUp()
                             if (roomIds.size == 1) {
                                 val targetRoomId = roomIds.first()
-                                backstack.push(NavTarget.Room(targetRoomId.toRoomIdOrAlias()))
+                                safePush(NavTarget.Room(targetRoomId.toRoomIdOrAlias()))
                             }
                         }
                     })
@@ -457,7 +470,7 @@ class LoggedInFlowNode @AssistedInject constructor(
             is NavTarget.LogoutForNativeSlidingSyncMigrationNeeded -> {
                 val callback = object : LogoutEntryPoint.Callback {
                     override fun onChangeRecoveryKeyClick() {
-                        backstack.push(NavTarget.SecureBackup())
+                        safePush(NavTarget.SecureBackup())
                     }
                 }
 
@@ -506,7 +519,7 @@ class LoggedInFlowNode @AssistedInject constructor(
             navTarget is NavTarget.RoomList
         }
         attachChild<Node> {
-            backstack.push(
+            safePush(
                 NavTarget.UserProfile(
                     userId = userId,
                 )
@@ -519,7 +532,7 @@ class LoggedInFlowNode @AssistedInject constructor(
             navTarget is NavTarget.RoomList
         }
         attachChild<Node> {
-            backstack.push(
+            safePush(
                 NavTarget.IncomingShare(intent)
             )
         }
@@ -535,7 +548,11 @@ class LoggedInFlowNode @AssistedInject constructor(
         BackHandler(
             enabled = activeNavTarget == NavTarget.RoomList
         ) {
-            activity?.finish()
+            activity?.let {
+                if (!it.isFinishing) {
+                    it.finish()
+                }
+            }
         }
 
         LaunchedEffect(activeNavTarget) {
@@ -546,12 +563,14 @@ class LoggedInFlowNode @AssistedInject constructor(
 
         val shouldShowBottomBar = when (activeNavTarget) {
             is NavTarget.RoomList -> true
+            is NavTarget.Calls -> true
             is NavTarget.Settings -> isSettingsRootVisible
             else -> false
         }
 
         val currentRoute = when (activeNavTarget) {
             is NavTarget.RoomList -> BottomNavRoute.Home
+            is NavTarget.Calls -> BottomNavRoute.Calls
             is NavTarget.Settings -> BottomNavRoute.Settings
             else -> BottomNavRoute.Home
         }
@@ -562,9 +581,12 @@ class LoggedInFlowNode @AssistedInject constructor(
                     BottomNavBar(
                         currentRoute = currentRoute,
                         onRouteSelect = { route ->
-                            when (route) {
-                                BottomNavRoute.Home -> backstack.push(NavTarget.RoomList)
-                                BottomNavRoute.Settings -> backstack.push(NavTarget.Settings())
+                            if (currentRoute != route) {
+                                when (route) {
+                                    BottomNavRoute.Home -> safeReplace(NavTarget.RoomList)
+                                    BottomNavRoute.Calls -> safeReplace(NavTarget.Calls)
+                                    BottomNavRoute.Settings -> safeReplace(NavTarget.Settings())
+                                }
                             }
                         }
                     )
@@ -586,6 +608,69 @@ class LoggedInFlowNode @AssistedInject constructor(
         @Assisted buildContext: BuildContext,
         @Assisted plugins: List<Plugin>,
     ) : Node(buildContext, plugins = plugins)
+
+    private fun safePush(navTarget: NavTarget) {
+        if (backstack.elements.value.none { it.key.navTarget == navTarget }) {
+            Timber.tag(TAG).d("Pushing navigation target: $navTarget")
+            backstack.push(navTarget)
+        } else {
+            Timber.tag(TAG).d("Navigation target already exists, ignoring: $navTarget")
+        }
+    }
+    
+    private fun safeReplace(navTarget: NavTarget) {
+        // This method properly handles bottom navigation by replacing the current screen
+        Timber.tag(TAG).d("Replacing navigation target with: $navTarget")
+        backstack.replace(navTarget)
+    }
+
+    private fun safeSingleTop(navTarget: NavTarget) {
+        if (backstack.elements.value.none { it.key.navTarget == navTarget }) {
+            Timber.tag(TAG).d("Single top navigation target: $navTarget")
+            backstack.singleTop(navTarget)
+        } else {
+            Timber.tag(TAG).d("Navigation target already exists, ignoring singleTop: $navTarget")
+        }
+    }
+
+    /**
+     * Safely handles permalink navigation
+     */
+    private fun handlePermalink(data: PermalinkData, pushToBackstack: Boolean) {
+        Timber.tag(TAG).d("Handling permalink: $data, pushToBackstack: $pushToBackstack")
+        if (!pushToBackstack) return
+        
+        when (data) {
+            is PermalinkData.RoomLink -> {
+                val navTarget = NavTarget.Room(
+                    roomIdOrAlias = data.roomIdOrAlias,
+                    serverNames = data.viaParameters
+                )
+                safePush(navTarget)
+            }
+            is PermalinkData.UserLink -> {
+                val navTarget = NavTarget.UserProfile(userId = data.userId)
+                safePush(navTarget)
+            }
+            else -> {
+                Timber.w("Unsupported permalink type: $data")
+            }
+        }
+    }
+
+    internal fun handleMatrixToLink(target: PermalinkData) {
+        when (target) {
+            is PermalinkData.RoomLink -> {
+                safePush(NavTarget.Room(
+                    roomIdOrAlias = target.roomIdOrAlias,
+                    serverNames = target.viaParameters
+                ))
+            }
+            else -> {
+                handlePermalink(target, true)
+            }
+        }
+    }
 }
 
 @Parcelize
@@ -597,7 +682,6 @@ private class AttachRoomOperation(
 
     override fun invoke(elements: BackStackElements<LoggedInFlowNode.NavTarget>): BackStackElements<LoggedInFlowNode.NavTarget> {
         return if (clearBackstack) {
-            // Makes sure the room list target is alone in the backstack and stashed
             elements.mapNotNull { element ->
                 if (element.key.navTarget == LoggedInFlowNode.NavTarget.RoomList) {
                     element.transitionTo(STASHED, this)

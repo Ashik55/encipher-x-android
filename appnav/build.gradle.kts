@@ -22,6 +22,7 @@ android {
 setupAnvil()
 
 dependencies {
+    implementation(project(":features:call:impl"))
     allFeaturesApi(project)
 
     implementation(projects.libraries.core)
