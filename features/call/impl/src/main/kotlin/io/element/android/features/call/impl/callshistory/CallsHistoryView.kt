@@ -308,7 +308,7 @@ fun CallItem(
                     imageVector = ImageVector.vectorResource(id = icon),
                     contentDescription = contentDescription,
                     modifier = Modifier.size(16.dp),
-                    tint = if (call.ended_ts == null) ElementTheme.colors.iconPrimary else Color.Red
+                    tint = if (call.ended_ts == null) Color(0xFF0A8741) else Color.Red
                 )
                 
                 Spacer(modifier = Modifier.width(4.dp))
