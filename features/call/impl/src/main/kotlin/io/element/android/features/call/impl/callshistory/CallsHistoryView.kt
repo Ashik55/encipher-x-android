@@ -285,7 +285,11 @@ fun CallItem(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
-                    text = if(call.room_name == null) getDisplayNamesString(call.receiver_display_names) else call.room_name!!,
+                    text = if(call.is_caller == true){
+                        if(call.room_name == null) getDisplayNamesString(call.receiver_display_names) else call.room_name
+                    } else {
+                        if(call.room_name == null) call.caller_display_name.toString() else call.room_name
+                    },
                     style = MaterialTheme.typography.titleMedium,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
