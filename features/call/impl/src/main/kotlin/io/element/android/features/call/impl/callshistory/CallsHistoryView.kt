@@ -232,9 +232,18 @@ fun CallItem(
         // Avatar
         Avatar(
             avatarData = AvatarData(
-                id = call.caller_user_id ?: "",
-                name = if(call.room_name == null) getDisplayNamesString(call.receiver_display_names) else call.room_name,
-                url = null,
+                id =  if(call.room_name == null) call.receiver_user_ids.toString() else " ",
+                name = if(call.is_caller == true){
+                    if(call.room_name == null) getDisplayNamesString(call.receiver_display_names) else call.room_name
+                } else {
+                    if(call.room_name == null) call.caller_display_name.toString() else call.room_name
+                },
+
+                url = if(call.is_caller == true){
+                    if(call.room_avatar == null) getDisplayNamesString(call.receiver_avatars) else call.room_avatar
+                } else {
+                    if(call.room_avatar == null) (call.caller_avatar) else call.room_avatar
+                },
                 size = AvatarSize.CallList
             )
         )
@@ -248,7 +257,11 @@ fun CallItem(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
-                    text = if(call.room_name == null) getDisplayNamesString(call.receiver_display_names) else call.room_name,
+                    text = if(call.is_caller == true){
+                        if(call.room_name == null) getDisplayNamesString(call.receiver_display_names) else call.room_name
+                    } else {
+                        if(call.room_name == null) call.caller_display_name.toString() else call.room_name
+                    },
                     style = MaterialTheme.typography.titleMedium,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
