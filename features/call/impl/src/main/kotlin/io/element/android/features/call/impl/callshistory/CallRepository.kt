@@ -58,6 +58,14 @@ class DefaultCallRepository @Inject constructor(
         caller_user_id = caller_user_id,
         room_id = room_id,
         created_ts = created_ts,
-        ended_ts = ended_ts
+        ended_ts = ended_ts,
+        caller_display_name = caller_display_name,
+        room_name = room_name,
+        room_avatar = room_avatar,
+        caller_avatar = caller_avatar,
+        is_caller = is_caller,
+        receiver_user_ids = receiver_user_ids,
+        receiver_display_names = receiver_display_names,
+        receiver_avatars = receiver_avatars
     )
 }

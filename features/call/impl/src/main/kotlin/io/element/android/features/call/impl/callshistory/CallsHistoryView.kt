@@ -233,7 +233,7 @@ fun CallItem(
         Avatar(
             avatarData = AvatarData(
                 id = call.caller_user_id ?: "",
-                name = extractNameFromUserId(call.caller_user_id),
+                name = if(call.room_name == null) call.receiver_display_names?.values.toString() else call.room_name,
                 url = null,
                 size = AvatarSize.CallList
             )
@@ -248,7 +248,7 @@ fun CallItem(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
-                    text = extractNameFromUserId(call.caller_user_id),
+                    text = if(call.room_name == null) call.receiver_display_names?.values.toString() else call.room_name,
                     style = MaterialTheme.typography.titleMedium,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
