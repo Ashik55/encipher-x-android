@@ -233,7 +233,7 @@ fun CallItem(
         Avatar(
             avatarData = AvatarData(
                 id = call.caller_user_id ?: "",
-                name = if(call.room_name == null) call.receiver_display_names?.values.toString() else call.room_name,
+                name = if(call.room_name == null) getDisplayNamesString(call.receiver_display_names) else call.room_name,
                 url = null,
                 size = AvatarSize.CallList
             )
@@ -248,7 +248,7 @@ fun CallItem(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
-                    text = if(call.room_name == null) call.receiver_display_names?.values.toString() else call.room_name,
+                    text = if(call.room_name == null) getDisplayNamesString(call.receiver_display_names) else call.room_name,
                     style = MaterialTheme.typography.titleMedium,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
@@ -310,6 +310,15 @@ fun CallItem(
         modifier = Modifier.padding(start = 72.dp),
         color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f)
     )
+}
+
+/**
+ * Helper function to convert receiver display names map to a readable string
+ */
+private fun getDisplayNamesString(displayNames: Map<String, String>?): String {
+    if (displayNames.isNullOrEmpty()) return "Unknown"
+    
+    return displayNames.values.joinToString(", ")
 }
 
 private fun extractNameFromUserId(userId: String?): String {
