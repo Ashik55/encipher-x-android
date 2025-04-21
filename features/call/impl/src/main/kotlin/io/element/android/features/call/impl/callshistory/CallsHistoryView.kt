@@ -87,124 +87,127 @@ fun CallsHistoryView(
             )
         }
     ) { paddingValues ->
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(paddingValues)
-        ) {
-            // Search bar
-            TextField(
-                value = "",
-                onValueChange = {},
-                placeholder = { Text("Search") },
-                colors = TextFieldDefaults.colors(
-                    focusedContainerColor = ElementTheme.colors.bgSubtleSecondary,
-                    unfocusedContainerColor = ElementTheme.colors.bgSubtleSecondary,
-                    disabledContainerColor = ElementTheme.colors.bgSubtleSecondary,
-                    focusedIndicatorColor = Color.Transparent,
-                    unfocusedIndicatorColor = Color.Transparent,
-                ),
-                shape = MaterialTheme.shapes.medium,
-                leadingIcon = {
-                    Icon(
-                        imageVector = ImageVector.vectorResource(id = DSR.drawable.ic_search),
-                        contentDescription = "Search"
-                    )
-                },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 16.dp, vertical = 8.dp)
-            )
+        when (callsListState) {
+            is AsyncData.Loading -> {
+                // Show loading state
+                Box(
+                    contentAlignment = Alignment.Center,
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(paddingValues)
+                ) {
+                    CircularProgressIndicator()
+                }
+            }
             
-            // Recent calls section
-            Text(
-                text = "Recent",
-                style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.Bold,
-                modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
-            )
+            is AsyncData.Failure -> {
+                // Show error state with retry button
+                val error = (callsListState as AsyncData.Failure)
+                Box(
+                    contentAlignment = Alignment.Center,
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(paddingValues)
+                ) {
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        Text(
+                            text = error.error.message ?: "Unknown error occurred",
+                            style = MaterialTheme.typography.bodyLarge,
+                            color = MaterialTheme.colorScheme.error
+                        )
+                        Spacer(modifier = Modifier.padding(8.dp))
+                        Button(
+                            text = "Retry",
+                            onClick = { /* Trigger retry */ },
+                            size = ButtonSize.Medium
+                        )
+                    }
+                }
+            }
             
-            when (callsListState) {
-                is AsyncData.Loading -> {
-                    // Show loading state
+            is AsyncData.Success -> {
+                // Show call list
+                val calls = (callsListState as AsyncData.Success<List<Call>>).data
+                if (calls.isEmpty()) {
+                    // Empty state
                     Box(
                         contentAlignment = Alignment.Center,
                         modifier = Modifier
                             .fillMaxSize()
-                            .padding(16.dp)
+                            .padding(paddingValues)
                     ) {
-                        CircularProgressIndicator()
+                        Text(
+                            text = "No calls in your history",
+                            style = MaterialTheme.typography.bodyLarge,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
                     }
-                }
-                
-                is AsyncData.Failure -> {
-                    // Show error state with retry button
-                    val error = (callsListState as AsyncData.Failure)
-                    Box(
-                        contentAlignment = Alignment.Center,
+                } else {
+                    LazyColumn(
                         modifier = Modifier
                             .fillMaxSize()
-                            .padding(16.dp)
+                            .padding(paddingValues)
                     ) {
-                        Column(
-                            horizontalAlignment = Alignment.CenterHorizontally
-                        ) {
+                        // Search bar as the first item in LazyColumn (scrollable)
+                        item {
+                            TextField(
+                                value = "",
+                                onValueChange = {},
+                                placeholder = { Text("Search") },
+                                colors = TextFieldDefaults.colors(
+                                    focusedContainerColor = ElementTheme.colors.bgSubtleSecondary,
+                                    unfocusedContainerColor = ElementTheme.colors.bgSubtleSecondary,
+                                    disabledContainerColor = ElementTheme.colors.bgSubtleSecondary,
+                                    focusedIndicatorColor = Color.Transparent,
+                                    unfocusedIndicatorColor = Color.Transparent,
+                                ),
+                                shape = MaterialTheme.shapes.medium,
+                                leadingIcon = {
+                                    Icon(
+                                        imageVector = ImageVector.vectorResource(id = DSR.drawable.ic_search),
+                                        contentDescription = "Search"
+                                    )
+                                },
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(horizontal = 16.dp, vertical = 8.dp)
+                            )
+                        }
+                        
+                        // Recent calls section header
+                        item {
                             Text(
-                                text = error.error.message ?: "Unknown error occurred",
-                                style = MaterialTheme.typography.bodyLarge,
-                                color = MaterialTheme.colorScheme.error
+                                text = "Recent",
+                                style = MaterialTheme.typography.titleMedium,
+                                fontWeight = FontWeight.Bold,
+                                modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
                             )
-                            Spacer(modifier = Modifier.padding(8.dp))
-                            Button(
-                                text = "Retry",
-                                onClick = { /* Trigger retry */ },
-                                size = ButtonSize.Medium
+                        }
+                        
+                        // Call items
+                        items(calls) { call ->
+                            CallItem(
+                                call = call,
+                                currentUserId = currentUserId,
+                                onItemClick = { /* Handle call click */ },
+                                onInfoClick = { call.room_id?.let { onRoomDetailsClick(it) } }
                             )
                         }
                     }
                 }
-                
-                is AsyncData.Success -> {
-                    // Show call list
-                    val calls = (callsListState as AsyncData.Success<List<Call>>).data
-                    if (calls.isEmpty()) {
-                        // Empty state
-                        Box(
-                            contentAlignment = Alignment.Center,
-                            modifier = Modifier
-                                .fillMaxSize()
-                                .padding(16.dp)
-                        ) {
-                            Text(
-                                text = "No calls in your history",
-                                style = MaterialTheme.typography.bodyLarge,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant
-                            )
-                        }
-                    } else {
-                        LazyColumn {
-                            items(calls) { call ->
-                                CallItem(
-                                    call = call,
-                                    currentUserId = currentUserId,
-                                    onItemClick = { /* Handle call click */ },
-                                    onInfoClick = { call.room_id?.let { onRoomDetailsClick(it) } }
-                                )
-                            }
-                        }
-                    }
-                }
-                
-                AsyncData.Uninitialized -> {
-                    // Handle uninitialized state (this could be similar to loading or empty state)
-                    Box(
-                        contentAlignment = Alignment.Center,
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .padding(16.dp)
-                    ) {
-                        CircularProgressIndicator()
-                    }
+            }
+            
+            AsyncData.Uninitialized -> {
+                // Handle uninitialized state (this could be similar to loading or empty state)
+                Box(
+                    contentAlignment = Alignment.Center,
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(paddingValues)
+                ) {
+                    CircularProgressIndicator()
                 }
             }
         }
