@@ -7,6 +7,7 @@
 
 package io.element.android.features.call.impl.callshistory
 
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -31,6 +32,9 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -66,17 +70,58 @@ fun CallsHistoryView(
 ) {
     val callsListState by state.callsList.collectAsState()
     val currentUserId by state.currentUserId.collectAsState()
+    var isSearchActive by remember { mutableStateOf(false) }
+    var searchQuery by remember { mutableStateOf("") }
     
     ElementScaffold(
         modifier = modifier,
         topBar = {
             TopAppBar(
                 title = {
-                    Text(
-                        text = "Calls",
-                        style = MaterialTheme.typography.headlineMedium,
-                        fontWeight = FontWeight.Bold,
-                    )
+                    AnimatedVisibility(visible = !isSearchActive) {
+                        Text(
+                            text = "Calls",
+                            style = MaterialTheme.typography.headlineMedium,
+                            fontWeight = FontWeight.Bold,
+                        )
+                    }
+                    AnimatedVisibility(visible = isSearchActive) {
+                        TextField(
+                            value = searchQuery,
+                            onValueChange = { searchQuery = it },
+                            placeholder = { Text("Search") },
+                            colors = TextFieldDefaults.colors(
+                                focusedContainerColor = Color.Transparent,
+                                unfocusedContainerColor = Color.Transparent,
+                                disabledContainerColor = Color.Transparent,
+                                focusedIndicatorColor = Color.Transparent,
+                                unfocusedIndicatorColor = Color.Transparent,
+                            ),
+                            leadingIcon = {
+                                IconButton(onClick = { 
+                                    isSearchActive = false
+                                    searchQuery = ""
+                                }) {
+                                    Icon(
+                                        imageVector = ImageVector.vectorResource(id = DSR.drawable.ic_call_incoming),
+                                        contentDescription = "Back"
+                                    )
+                                }
+                            },
+                            modifier = Modifier.fillMaxWidth()
+                        )
+                    }
+                },
+                actions = {
+                    // Only show search icon when not in search mode
+                    if (!isSearchActive) {
+                        IconButton(onClick = { isSearchActive = true }) {
+                            Icon(
+                                imageVector = ImageVector.vectorResource(id = DSR.drawable.ic_search),
+                                contentDescription = "Search"
+                            )
+                        }
+                    }
                 }
             )
         },
@@ -89,7 +134,6 @@ fun CallsHistoryView(
     ) { paddingValues ->
         when (callsListState) {
             is AsyncData.Loading -> {
-                // Show loading state
                 Box(
                     contentAlignment = Alignment.Center,
                     modifier = Modifier
@@ -101,7 +145,6 @@ fun CallsHistoryView(
             }
             
             is AsyncData.Failure -> {
-                // Show error state with retry button
                 val error = (callsListState as AsyncData.Failure)
                 Box(
                     contentAlignment = Alignment.Center,
@@ -128,10 +171,22 @@ fun CallsHistoryView(
             }
             
             is AsyncData.Success -> {
-                // Show call list
                 val calls = (callsListState as AsyncData.Success<List<Call>>).data
-                if (calls.isEmpty()) {
-                    // Empty state
+                val filteredCalls = if (searchQuery.isNotEmpty()) {
+                    calls.filter { call ->
+                        val roomName = call.room_name ?: ""
+                        val callerName = call.caller_display_name ?: ""
+                        val receiverNames = getDisplayNamesString(call.receiver_display_names)
+                        
+                        roomName.contains(searchQuery, ignoreCase = true) || 
+                        callerName.contains(searchQuery, ignoreCase = true) ||
+                        receiverNames.contains(searchQuery, ignoreCase = true)
+                    }
+                } else {
+                    calls
+                }
+                
+                if (filteredCalls.isEmpty()) {
                     Box(
                         contentAlignment = Alignment.Center,
                         modifier = Modifier
@@ -139,7 +194,7 @@ fun CallsHistoryView(
                             .padding(paddingValues)
                     ) {
                         Text(
-                            text = "No calls in your history",
+                            text = if (searchQuery.isNotEmpty()) "No matching results found" else "No calls in your history",
                             style = MaterialTheme.typography.bodyLarge,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
@@ -150,49 +205,24 @@ fun CallsHistoryView(
                             .fillMaxSize()
                             .padding(paddingValues)
                     ) {
-                        // Search bar as the first item in LazyColumn (scrollable)
-                        item {
-                            TextField(
-                                value = "",
-                                onValueChange = {},
-                                placeholder = { Text("Search") },
-                                colors = TextFieldDefaults.colors(
-                                    focusedContainerColor = ElementTheme.colors.bgSubtleSecondary,
-                                    unfocusedContainerColor = ElementTheme.colors.bgSubtleSecondary,
-                                    disabledContainerColor = ElementTheme.colors.bgSubtleSecondary,
-                                    focusedIndicatorColor = Color.Transparent,
-                                    unfocusedIndicatorColor = Color.Transparent,
-                                ),
-                                shape = MaterialTheme.shapes.medium,
-                                leadingIcon = {
-                                    Icon(
-                                        imageVector = ImageVector.vectorResource(id = DSR.drawable.ic_search),
-                                        contentDescription = "Search"
-                                    )
-                                },
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(horizontal = 16.dp, vertical = 8.dp)
-                            )
-                        }
-                        
-                        // Recent calls section header
-                        item {
-                            Text(
-                                text = "Recent",
-                                style = MaterialTheme.typography.titleMedium,
-                                fontWeight = FontWeight.Bold,
-                                modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
-                            )
+                        // Recent calls section header (only when not searching)
+                        if (searchQuery.isEmpty()) {
+                            item {
+                                Text(
+                                    text = "Recent",
+                                    style = MaterialTheme.typography.titleMedium,
+                                    fontWeight = FontWeight.Bold,
+                                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
+                                )
+                            }
                         }
                         
                         // Call items
-                        items(calls) { call ->
+                        items(filteredCalls) { call ->
                             CallItem(
                                 call = call,
                                 currentUserId = currentUserId,
-                                onItemClick = { /* Handle call click */ },
-                                onInfoClick = { call.room_id?.let { onRoomDetailsClick(it) } }
+                                onItemClick = { call.room_id?.let { onRoomDetailsClick(it) } }
                             )
                         }
                     }
@@ -200,7 +230,6 @@ fun CallsHistoryView(
             }
             
             AsyncData.Uninitialized -> {
-                // Handle uninitialized state (this could be similar to loading or empty state)
                 Box(
                     contentAlignment = Alignment.Center,
                     modifier = Modifier
@@ -219,7 +248,6 @@ fun CallItem(
     call: Call,
     currentUserId: String?,
     onItemClick: () -> Unit,
-    onInfoClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     Row(
@@ -257,23 +285,11 @@ fun CallItem(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
-                    text = if(call.is_caller == true){
-                        if(call.room_name == null) getDisplayNamesString(call.receiver_display_names) else call.room_name
-                    } else {
-                        if(call.room_name == null) call.caller_display_name.toString() else call.room_name
-                    },
+                    text = if(call.room_name == null) getDisplayNamesString(call.receiver_display_names) else call.room_name!!,
                     style = MaterialTheme.typography.titleMedium,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
                     modifier = Modifier.weight(1f)
-                )
-                
-                Spacer(modifier = Modifier.width(4.dp))
-                
-                Text(
-                    text = formatDate(call.created_ts),
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
             
@@ -281,9 +297,9 @@ fun CallItem(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 // Call type icon (outgoing, incoming)
-                val isOutgoingCall = call.is_caller == true
+                val isOutgoingCall = currentUserId?.isNotEmpty() == true && call.caller_user_id == currentUserId
                 val (icon, contentDescription) = if (isOutgoingCall) {
-                        Pair(DSR.drawable.ic_call_outgoing, "Outgoing call")
+                    Pair(DSR.drawable.ic_call_outgoing, "Outgoing call")
                 } else {
                     Pair(DSR.drawable.ic_call_incoming, "Incoming call")
                 }
@@ -297,22 +313,28 @@ fun CallItem(
                 
                 Spacer(modifier = Modifier.width(4.dp))
                 
+                // Show date here instead of call type text
                 Text(
-                    text = if (call.call_type == "audio") "Audio" else "Video",
+                    text = formatDate(call.created_ts),
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
         }
         
-        // Info button
-        IconButton(onClick = onInfoClick) {
-            Icon(
-                imageVector = ImageVector.vectorResource(id = DSR.drawable.ic_info_circle),
-                contentDescription = "Call Info",
-                tint = MaterialTheme.colorScheme.onSurfaceVariant
-            )
+        // Call type indicator icon (audio/video)
+        val callTypeIcon = if (call.call_type == "audio") {
+            DSR.drawable.ic_calls_nav
+        } else {
+            DSR.drawable.ic_video_call_outgoing
         }
+        
+        Icon(
+            imageVector = ImageVector.vectorResource(id = callTypeIcon),
+            contentDescription = if (call.call_type == "audio") "Audio call" else "Video call",
+            tint = MaterialTheme.colorScheme.onSurfaceVariant,
+            modifier = Modifier.padding(end = 8.dp).size(24.dp)
+        )
     }
     
     HorizontalDivider(
@@ -442,7 +464,11 @@ internal fun CallsHistoryViewPreview() = ElementPreview {
                 caller_user_id = "@ben5:dev.enciph-er.com",
                 created_ts = "2025-04-15T09:56:12.505007",
                 ended_ts = null,
-                room_id = "!OWEQCyKsMRmxkMVFDT:dev.enciph-er.com"
+                room_id = "!OWEQCyKsMRmxkMVFDT:dev.enciph-er.com",
+                caller_display_name = "Ben 5",
+                room_name = null,
+                is_caller = true,
+                receiver_display_names = mapOf("@ben12:dev.enciph-er.com" to "Ben 12")
             ),
             Call(
                 call_id = 2,
@@ -450,7 +476,9 @@ internal fun CallsHistoryViewPreview() = ElementPreview {
                 caller_user_id = "@john:dev.enciph-er.com",
                 created_ts = "2025-04-14T08:30:00.000000",
                 ended_ts = "2025-04-14T08:35:00.000000",
-                room_id = "!ABCDEFGHIjklmnop:dev.enciph-er.com"
+                room_id = "!ABCDEFGHIjklmnop:dev.enciph-er.com",
+                room_name = "Team Meeting",
+                caller_display_name = "John"
             )
         )))
         override val favorites = MutableStateFlow<List<Call>>(emptyList())
