@@ -268,13 +268,9 @@ fun CallItem(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 // Call type icon (outgoing, incoming)
-                val isOutgoingCall = currentUserId?.isNotEmpty() == true && call.caller_user_id == currentUserId
+                val isOutgoingCall = call.is_caller == true
                 val (icon, contentDescription) = if (isOutgoingCall) {
-                    if (call.call_type == "video") {
-                        Pair(DSR.drawable.ic_video_call_outgoing, "Outgoing video call")
-                    } else {
                         Pair(DSR.drawable.ic_call_outgoing, "Outgoing call")
-                    }
                 } else {
                     Pair(DSR.drawable.ic_call_incoming, "Incoming call")
                 }
