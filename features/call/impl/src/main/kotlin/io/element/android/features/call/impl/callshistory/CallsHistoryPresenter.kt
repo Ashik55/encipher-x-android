@@ -78,4 +78,9 @@ class CallsHistoryPresenter @Inject constructor(
             callsListState.value = AsyncData.Failure(e)
         }
     }
+
+    // Function to get the active session ID for call initiation
+    fun getActiveSessionId(): SessionId? {
+        return activeSessionIdHolder.getActiveSessionIdSync()
+    }
 }

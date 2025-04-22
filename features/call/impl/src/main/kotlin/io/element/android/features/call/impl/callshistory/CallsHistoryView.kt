@@ -85,6 +85,7 @@ fun CallsHistoryView(
     onRoomDetailsClick: (roomId: String) -> Unit,
     currentRoute: BottomNavRoute,
     onRouteSelect: (BottomNavRoute) -> Unit,
+    onStartCall: (roomId: String, isAudioCall: Boolean) -> Unit = { _, _ -> },
     modifier: Modifier = Modifier
 ) {
     val callsListState by state.callsList.collectAsState()
@@ -302,7 +303,8 @@ fun CallsHistoryView(
                             CallItem(
                                 call = call,
                                 currentUserId = currentUserId,
-                                onItemClick = { call.room_id?.let { onRoomDetailsClick(it) } }
+                                onItemClick = { call.room_id?.let { onRoomDetailsClick(it) } },
+                                onStartCall = onStartCall
                             )
                         }
                     }
@@ -328,6 +330,7 @@ fun CallItem(
     call: Call,
     currentUserId: String?,
     onItemClick: () -> Unit,
+    onStartCall: (roomId: String, isAudioCall: Boolean) -> Unit = { _, _ -> },
     modifier: Modifier = Modifier
 ) {
     Row(
@@ -365,7 +368,11 @@ fun CallItem(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
-                    text = if(call.room_name == null) getDisplayNamesString(call.receiver_display_names) else call.room_name!!,
+                    text = if(call.is_caller == true){
+                        if(call.room_name == null) getDisplayNamesString(call.receiver_display_names) else call.room_name
+                    } else {
+                        if(call.room_name == null) call.caller_display_name.toString() else call.room_name
+                    },
                     style = MaterialTheme.typography.titleMedium,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
@@ -413,7 +420,10 @@ fun CallItem(
             imageVector = ImageVector.vectorResource(id = callTypeIcon),
             contentDescription = if (call.call_type == "audio") "Audio call" else "Video call",
             tint = MaterialTheme.colorScheme.onSurfaceVariant,
-            modifier = Modifier.padding(end = 8.dp).size(24.dp)
+            modifier = Modifier
+                .padding(end = 8.dp)
+                .size(24.dp)
+                .clickable { onStartCall(call.room_id ?: "", call.call_type == "audio") }
         )
     }
     

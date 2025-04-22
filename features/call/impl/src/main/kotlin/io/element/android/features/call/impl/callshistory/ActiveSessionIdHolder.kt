@@ -12,6 +12,7 @@ import io.element.android.libraries.di.AppScope
 import io.element.android.libraries.di.SingleIn
 import io.element.android.libraries.matrix.api.auth.MatrixAuthenticationService
 import io.element.android.libraries.matrix.api.core.SessionId
+import kotlinx.coroutines.runBlocking
 import javax.inject.Inject
 
 /**
@@ -22,6 +23,12 @@ interface ActiveSessionIdHolder {
      * Get the active session ID, or null if there is none.
      */
     suspend fun getActiveSessionId(): SessionId?
+    
+    /**
+     * Get the active session ID synchronously, or null if there is none.
+     * Note: This blocks the current thread, use with caution.
+     */
+    fun getActiveSessionIdSync(): SessionId?
 }
 
 /**
@@ -34,5 +41,9 @@ class DefaultActiveSessionIdHolder @Inject constructor(
 ) : ActiveSessionIdHolder {
     override suspend fun getActiveSessionId(): SessionId? {
         return authenticationService.getLatestSessionId()
+    }
+    
+    override fun getActiveSessionIdSync(): SessionId? {
+        return runBlocking { authenticationService.getLatestSessionId() }
     }
 }

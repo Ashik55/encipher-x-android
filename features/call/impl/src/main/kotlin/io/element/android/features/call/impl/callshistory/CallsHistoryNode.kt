@@ -16,6 +16,7 @@ import com.bumble.appyx.core.plugin.plugins
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedInject
 import io.element.android.anvilannotations.ContributesNode
+import io.element.android.features.call.api.ElementCallEntryPoint
 import io.element.android.libraries.designsystem.components.navbar.BottomNavRoute
 import io.element.android.libraries.di.SessionScope
 import io.element.android.libraries.matrix.api.core.RoomId
@@ -24,7 +25,8 @@ import io.element.android.libraries.matrix.api.core.RoomId
 class CallsHistoryNode @AssistedInject constructor(
     @Assisted buildContext: BuildContext,
     @Assisted plugins: List<Plugin>,
-    private val presenter: CallsHistoryPresenter
+    private val presenter: CallsHistoryPresenter,
+    private val elementCallEntryPoint: ElementCallEntryPoint,
 ) : Node(buildContext, plugins = plugins) {
     
     interface Callback : Plugin {
@@ -59,6 +61,17 @@ class CallsHistoryNode @AssistedInject constructor(
             onRoomDetailsClick = ::onRoomDetailsClick,
             currentRoute = BottomNavRoute.Calls,
             onRouteSelect = ::onBottomNavigationRouteSelected,
+            onStartCall = { roomId, isAudioCall ->
+                val sessionId = presenter.getActiveSessionId()
+                // Only initiate the call if we have a valid session ID
+                if (sessionId != null) {
+                    val callType = io.element.android.features.call.api.CallType.RoomCall(
+                        sessionId = sessionId,
+                        roomId = RoomId(roomId)
+                    )
+                    elementCallEntryPoint.startCall(callType, isAudioCall)
+                }
+            },
             modifier = modifier
         )
     }
