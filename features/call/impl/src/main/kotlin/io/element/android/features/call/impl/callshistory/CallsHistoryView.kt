@@ -8,6 +8,7 @@
 package io.element.android.features.call.impl.callshistory
 
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -17,9 +18,12 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -37,13 +41,16 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import io.element.android.compound.theme.ElementTheme
+import io.element.android.compound.tokens.generated.CompoundIcons
 import io.element.android.libraries.architecture.AsyncData
 import io.element.android.libraries.designsystem.components.avatar.Avatar
 import io.element.android.libraries.designsystem.components.avatar.AvatarData
@@ -54,6 +61,7 @@ import io.element.android.libraries.designsystem.preview.ElementPreview
 import io.element.android.libraries.designsystem.preview.PreviewsDayNight
 import io.element.android.libraries.designsystem.theme.components.Button
 import io.element.android.libraries.designsystem.theme.components.ButtonSize
+import io.element.android.libraries.designsystem.theme.components.CustomProgressIndicator
 import io.element.android.libraries.designsystem.theme.components.HorizontalDivider
 import io.element.android.libraries.designsystem.theme.components.Scaffold as ElementScaffold
 import io.element.android.libraries.designsystem.R as DSR
@@ -76,54 +84,92 @@ fun CallsHistoryView(
     ElementScaffold(
         modifier = modifier,
         topBar = {
-            TopAppBar(
-                title = {
-                    AnimatedVisibility(visible = !isSearchActive) {
+            if (isSearchActive) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .statusBarsPadding()
+                        .padding(vertical = 4.dp, horizontal = 16.dp)
+                ) {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clip(RoundedCornerShape(32.dp))
+                            .background(Color(0xFFF3F3F3))
+                            .padding(horizontal = 8.dp, vertical = 4.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        IconButton(
+                            onClick = { 
+                                isSearchActive = false
+                                searchQuery = ""
+                            }
+                        ) {
+                            Icon(
+                                imageVector = CompoundIcons.ArrowLeft(),
+                                contentDescription = "Back",
+                                tint = Color.Gray
+                            )
+                        }
+                        
+                        BasicTextField(
+                            value = searchQuery,
+                            onValueChange = { searchQuery = it },
+                            modifier = Modifier
+                                .weight(1f)
+                                .padding(vertical = 4.dp),
+                            textStyle = MaterialTheme.typography.bodyLarge.copy(
+                                color = MaterialTheme.colorScheme.onSurface
+                            ),
+                            decorationBox = { innerTextField ->
+                                Box {
+                                    if (searchQuery.isEmpty()) {
+                                        Text(
+                                            text = "Search...",
+                                            style = MaterialTheme.typography.bodyLarge,
+                                            color = Color.Gray
+                                        )
+                                    }
+                                    innerTextField()
+                                }
+                            },
+                            singleLine = true,
+                            cursorBrush = SolidColor(MaterialTheme.colorScheme.primary)
+                        )
+                        
+                        // Clear button when there's text
+                        AnimatedVisibility(visible = searchQuery.isNotEmpty()) {
+                            IconButton(
+                                onClick = { searchQuery = "" }
+                            ) {
+                                Icon(
+                                    imageVector = CompoundIcons.Close(),
+                                    contentDescription = "Clear search",
+                                    tint = Color.Gray
+                                )
+                            }
+                        }
+                    }
+                }
+            } else {
+                TopAppBar(
+                    title = {
                         Text(
                             text = "Calls",
                             style = MaterialTheme.typography.headlineMedium,
                             fontWeight = FontWeight.Bold,
                         )
-                    }
-                    AnimatedVisibility(visible = isSearchActive) {
-                        TextField(
-                            value = searchQuery,
-                            onValueChange = { searchQuery = it },
-                            placeholder = { Text("Search") },
-                            colors = TextFieldDefaults.colors(
-                                focusedContainerColor = Color.Transparent,
-                                unfocusedContainerColor = Color.Transparent,
-                                disabledContainerColor = Color.Transparent,
-                                focusedIndicatorColor = Color.Transparent,
-                                unfocusedIndicatorColor = Color.Transparent,
-                            ),
-                            leadingIcon = {
-                                IconButton(onClick = { 
-                                    isSearchActive = false
-                                    searchQuery = ""
-                                }) {
-                                    Icon(
-                                        imageVector = ImageVector.vectorResource(id = DSR.drawable.ic_call_incoming),
-                                        contentDescription = "Back"
-                                    )
-                                }
-                            },
-                            modifier = Modifier.fillMaxWidth()
-                        )
-                    }
-                },
-                actions = {
-                    // Only show search icon when not in search mode
-                    if (!isSearchActive) {
+                    },
+                    actions = {
                         IconButton(onClick = { isSearchActive = true }) {
                             Icon(
-                                imageVector = ImageVector.vectorResource(id = DSR.drawable.ic_search),
+                                imageVector = CompoundIcons.Search(),
                                 contentDescription = "Search"
                             )
                         }
                     }
-                }
-            )
+                )
+            }
         },
         bottomBar = {
             BottomNavBar(
@@ -140,7 +186,7 @@ fun CallsHistoryView(
                         .fillMaxSize()
                         .padding(paddingValues)
                 ) {
-                    CircularProgressIndicator()
+                    CustomProgressIndicator()
                 }
             }
             
@@ -236,7 +282,7 @@ fun CallsHistoryView(
                         .fillMaxSize()
                         .padding(paddingValues)
                 ) {
-                    CircularProgressIndicator()
+                    CustomProgressIndicator()
                 }
             }
         }
@@ -285,11 +331,7 @@ fun CallItem(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
-                    text = if(call.is_caller == true){
-                        if(call.room_name == null) getDisplayNamesString(call.receiver_display_names) else call.room_name
-                    } else {
-                        if(call.room_name == null) call.caller_display_name.toString() else call.room_name
-                    },
+                    text = if(call.room_name == null) getDisplayNamesString(call.receiver_display_names) else call.room_name!!,
                     style = MaterialTheme.typography.titleMedium,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
@@ -328,13 +370,13 @@ fun CallItem(
         
         // Call type indicator icon (audio/video)
         val callTypeIcon = if (call.call_type == "audio") {
-            DSR.drawable.ic_calls_nav
+            CompoundIcons.VoiceCall()
         } else {
-            DSR.drawable.ic_video_call_outgoing
+            CompoundIcons.VideoCall()
         }
         
         Icon(
-            imageVector = ImageVector.vectorResource(id = callTypeIcon),
+            imageVector = callTypeIcon,
             contentDescription = if (call.call_type == "audio") "Audio call" else "Video call",
             tint = MaterialTheme.colorScheme.onSurfaceVariant,
             modifier = Modifier.padding(end = 8.dp).size(24.dp)
