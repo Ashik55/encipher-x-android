@@ -370,13 +370,13 @@ fun CallItem(
         
         // Call type indicator icon (audio/video)
         val callTypeIcon = if (call.call_type == "audio") {
-            CompoundIcons.VoiceCall()
+            DSR.drawable.ic_call
         } else {
-            CompoundIcons.VideoCall()
+            DSR.drawable.ic_video_call
         }
         
         Icon(
-            imageVector = callTypeIcon,
+            imageVector = ImageVector.vectorResource(id = callTypeIcon),
             contentDescription = if (call.call_type == "audio") "Audio call" else "Video call",
             tint = MaterialTheme.colorScheme.onSurfaceVariant,
             modifier = Modifier.padding(end = 8.dp).size(24.dp)
