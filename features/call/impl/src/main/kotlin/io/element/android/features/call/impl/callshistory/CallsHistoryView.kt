@@ -24,6 +24,8 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -34,19 +36,28 @@ import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import io.element.android.compound.theme.ElementTheme
@@ -67,7 +78,7 @@ import io.element.android.libraries.designsystem.theme.components.Scaffold as El
 import io.element.android.libraries.designsystem.R as DSR
 import kotlinx.coroutines.flow.MutableStateFlow
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalComposeUiApi::class)
 @Composable
 fun CallsHistoryView(
     state: CallsHistoryState,
@@ -80,6 +91,19 @@ fun CallsHistoryView(
     val currentUserId by state.currentUserId.collectAsState()
     var isSearchActive by remember { mutableStateOf(false) }
     var searchQuery by remember { mutableStateOf("") }
+    val focusRequester = remember { FocusRequester() }
+    val keyboardController = LocalSoftwareKeyboardController.current
+    val focusManager = LocalFocusManager.current
+
+    LaunchedEffect(isSearchActive) {
+        if (isSearchActive) {
+            focusRequester.requestFocus()
+            keyboardController?.show()
+        } else {
+            focusManager.clearFocus()
+            keyboardController?.hide()
+        }
+    }
     
     ElementScaffold(
         modifier = modifier,
@@ -95,7 +119,7 @@ fun CallsHistoryView(
                         modifier = Modifier
                             .fillMaxWidth()
                             .clip(RoundedCornerShape(32.dp))
-                            .background(Color(0xFFF3F3F3))
+                            .background(MaterialTheme.colorScheme.surfaceVariant)
                             .padding(horizontal = 8.dp, vertical = 4.dp),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
@@ -108,7 +132,7 @@ fun CallsHistoryView(
                             Icon(
                                 imageVector = CompoundIcons.ArrowLeft(),
                                 contentDescription = "Back",
-                                tint = Color.Gray
+                                tint = MaterialTheme.colorScheme.onSurfaceVariant
                             )
                         }
                         
@@ -117,7 +141,8 @@ fun CallsHistoryView(
                             onValueChange = { searchQuery = it },
                             modifier = Modifier
                                 .weight(1f)
-                                .padding(vertical = 4.dp),
+                                .padding(vertical = 4.dp)
+                                .focusRequester(focusRequester),
                             textStyle = MaterialTheme.typography.bodyLarge.copy(
                                 color = MaterialTheme.colorScheme.onSurface
                             ),
@@ -127,14 +152,23 @@ fun CallsHistoryView(
                                         Text(
                                             text = "Search...",
                                             style = MaterialTheme.typography.bodyLarge,
-                                            color = Color.Gray
+                                            color = MaterialTheme.colorScheme.onSurfaceVariant
                                         )
                                     }
                                     innerTextField()
                                 }
                             },
                             singleLine = true,
-                            cursorBrush = SolidColor(MaterialTheme.colorScheme.primary)
+                            cursorBrush = SolidColor(MaterialTheme.colorScheme.primary),
+                            keyboardOptions = KeyboardOptions.Default.copy(
+                                imeAction = ImeAction.Search
+                            ),
+                            keyboardActions = KeyboardActions(
+                                onSearch = {
+                                    focusManager.clearFocus()
+                                    keyboardController?.hide()
+                                }
+                            )
                         )
                         
                         // Clear button when there's text
@@ -145,7 +179,7 @@ fun CallsHistoryView(
                                 Icon(
                                     imageVector = CompoundIcons.Close(),
                                     contentDescription = "Clear search",
-                                    tint = Color.Gray
+                                    tint = MaterialTheme.colorScheme.onSurfaceVariant
                                 )
                             }
                         }
@@ -220,13 +254,13 @@ fun CallsHistoryView(
                 val calls = (callsListState as AsyncData.Success<List<Call>>).data
                 val filteredCalls = if (searchQuery.isNotEmpty()) {
                     calls.filter { call ->
-                        val roomName = call.room_name ?: ""
-                        val callerName = call.caller_display_name ?: ""
-                        val receiverNames = getDisplayNamesString(call.receiver_display_names)
+                        val name = if(call.is_caller == true){
+                            if(call.room_name == null) getDisplayNamesString(call.receiver_display_names) else call.room_name
+                        } else {
+                            if(call.room_name == null) call.caller_display_name.toString() else call.room_name
+                        }
                         
-                        roomName.contains(searchQuery, ignoreCase = true) || 
-                        callerName.contains(searchQuery, ignoreCase = true) ||
-                        receiverNames.contains(searchQuery, ignoreCase = true)
+                        name.contains(searchQuery, ignoreCase = true)
                     }
                 } else {
                     calls
