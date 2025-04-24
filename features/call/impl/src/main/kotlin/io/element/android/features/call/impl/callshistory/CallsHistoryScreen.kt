@@ -18,8 +18,33 @@ import io.element.android.libraries.architecture.NodeInputs
 import io.element.android.libraries.architecture.inputs
 import io.element.android.libraries.designsystem.components.navbar.BottomNavRoute
 import io.element.android.libraries.di.AppScope
+import io.element.android.features.call.impl.callshistory.details.CallDetailsScreen
 
 object CallsHistoryEntryPoint : NodeInputs
+
+@Composable
+fun CallsHistoryScreen(
+    presenter: CallsHistoryPresenter,
+    onRoomDetailsClick: (roomId: String) -> Unit,
+    currentRoute: BottomNavRoute,
+    onRouteSelect: (BottomNavRoute) -> Unit,
+    onStartCall: (roomId: String, isAudioCall: Boolean) -> Unit,
+    onCallDetailsClick: (call: Call) -> Unit,
+    modifier: androidx.compose.ui.Modifier = androidx.compose.ui.Modifier
+) {
+    // Call the @Composable present() function directly from this @Composable context
+    val state = presenter.present()
+
+    CallsHistoryView(
+        state = state,
+        onRoomDetailsClick = onRoomDetailsClick,
+        currentRoute = currentRoute,
+        onRouteSelect = onRouteSelect,
+        onStartCall = onStartCall,
+        onCallDetailsClick = onCallDetailsClick,
+        modifier = modifier
+    )
+}
 
 @ContributesNode(AppScope::class)
 class CallsHistoryScreen @AssistedInject constructor(
@@ -50,15 +75,27 @@ class CallsHistoryScreen @AssistedInject constructor(
 
     @Composable
     override fun View(modifier: androidx.compose.ui.Modifier) {
-        val state = presenter.present()
-        CallsHistoryView(
-            state = state,
+        CallsHistoryScreen(
+            presenter = presenter,
             onRoomDetailsClick = { roomId ->
                 // Navigate to room details or handle click
             },
             currentRoute = BottomNavRoute.Calls,
             onRouteSelect = ::onBottomNavigationRouteSelected,
-            modifier = modifier,
+            onStartCall = { roomId, isAudioCall ->
+                // Handle starting a call
+            },
+            onCallDetailsClick = { call ->
+                // Navigate to call details screen
+                navigateToCallDetails(call)
+            },
+            modifier = modifier
         )
+    }
+
+    private fun navigateToCallDetails(call: Call) {
+        // Navigate to the CallDetailsView
+        // This implementation depends on the navigation system you're using
+        // For example, if using Appyx, you might use a navigator to navigate to CallDetailsNode
     }
 }

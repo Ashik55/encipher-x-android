@@ -52,6 +52,7 @@ import io.element.android.appnav.loggedin.SendQueues
 import io.element.android.appnav.room.RoomFlowNode
 import io.element.android.appnav.room.RoomNavigationTarget
 import io.element.android.appnav.room.joined.JoinedRoomLoadedFlowNode
+import io.element.android.features.call.impl.callshistory.Call
 import io.element.android.features.createroom.api.CreateRoomEntryPoint
 import io.element.android.features.ftue.api.FtueEntryPoint
 import io.element.android.features.ftue.api.state.FtueService
@@ -100,7 +101,7 @@ import timber.log.Timber
 import java.util.Optional
 import java.util.UUID
 import io.element.android.features.call.impl.callshistory.CallsHistoryNode
-
+import kotlinx.parcelize.RawValue
 
 private const val TAG = "LoggedInFlowNode"
 
@@ -226,6 +227,11 @@ class LoggedInFlowNode @AssistedInject constructor(
 
         @Parcelize
         data object Calls : NavTarget
+        
+        @Parcelize
+        data class CallDetails(
+            val call: @kotlinx.parcelize.RawValue io.element.android.features.call.impl.callshistory.Call
+        ) : NavTarget
 
         @Parcelize
         data class UserProfile(
@@ -358,6 +364,11 @@ class LoggedInFlowNode @AssistedInject constructor(
                     override fun onSettingsClick() {
                         safePush(NavTarget.Settings())
                     }
+                    
+                    override fun navigateToCallDetails(call: Call) {
+                        // Navigate to the call details screen using the new CallDetails NavTarget
+                        safePush(NavTarget.CallDetails(call))
+                    }
                 }
                 createNode<CallsHistoryNode>(buildContext, plugins = listOf(callback))
             }
@@ -487,6 +498,23 @@ class LoggedInFlowNode @AssistedInject constructor(
                         }
                     })
                     .build()
+            }
+            is NavTarget.CallDetails -> {
+                val callDetailsInput = io.element.android.features.call.impl.callshistory.details.CallDetailsInput(navTarget.call)
+                val callback = object : io.element.android.features.call.impl.callshistory.details.CallDetailsScreen.Callback {
+                    override fun onBackPressed() {
+                        backstack.pop()
+                    }
+                    
+                    override fun onRoomDetailsClick(roomId: RoomId) {
+                        safePush(NavTarget.Room(roomId.toRoomIdOrAlias()))
+                    }
+                }
+                
+                createNode<io.element.android.features.call.impl.callshistory.details.CallDetailsScreen>(
+                    buildContext, 
+                    listOf(callDetailsInput, callback)
+                )
             }
         }
     }

@@ -17,9 +17,12 @@ import dagger.assisted.Assisted
 import dagger.assisted.AssistedInject
 import io.element.android.anvilannotations.ContributesNode
 import io.element.android.features.call.api.ElementCallEntryPoint
+import io.element.android.features.call.impl.callshistory.details.CallDetailsInput
+import io.element.android.features.call.impl.callshistory.details.CallDetailsScreen
 import io.element.android.libraries.designsystem.components.navbar.BottomNavRoute
 import io.element.android.libraries.di.SessionScope
 import io.element.android.libraries.matrix.api.core.RoomId
+import io.element.android.libraries.matrix.api.core.SessionId
 
 @ContributesNode(SessionScope::class)
 class CallsHistoryNode @AssistedInject constructor(
@@ -27,12 +30,14 @@ class CallsHistoryNode @AssistedInject constructor(
     @Assisted plugins: List<Plugin>,
     private val presenter: CallsHistoryPresenter,
     private val elementCallEntryPoint: ElementCallEntryPoint,
+    private val callDetailsScreenFactory: CallDetailsScreen.Factory,
 ) : Node(buildContext, plugins = plugins) {
     
     interface Callback : Plugin {
         fun onRoomDetailsClick(roomId: RoomId)
         fun onHomeClick()
         fun onSettingsClick()
+        fun navigateToCallDetails(call: Call)
     }
     
     private fun onRoomDetailsClick(roomId: String) {
@@ -50,6 +55,11 @@ class CallsHistoryNode @AssistedInject constructor(
             BottomNavRoute.Settings -> callbacks.forEach { it.onSettingsClick() }
             BottomNavRoute.Calls -> { /* Already on calls screen, do nothing */ }
         }
+    }
+    
+    private fun navigateToCallDetails(call: Call) {
+        // Delegate to the parent flow to handle the navigation
+        plugins<Callback>().forEach { it.navigateToCallDetails(call) }
     }
     
     @Composable
@@ -72,6 +82,7 @@ class CallsHistoryNode @AssistedInject constructor(
                     elementCallEntryPoint.startCall(callType, isAudioCall)
                 }
             },
+            onCallDetailsClick = ::navigateToCallDetails,
             modifier = modifier
         )
     }

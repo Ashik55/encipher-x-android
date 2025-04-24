@@ -86,6 +86,7 @@ fun CallsHistoryView(
     currentRoute: BottomNavRoute,
     onRouteSelect: (BottomNavRoute) -> Unit,
     onStartCall: (roomId: String, isAudioCall: Boolean) -> Unit = { _, _ -> },
+    onCallDetailsClick: (call: Call) -> Unit = { _ -> },
     modifier: Modifier = Modifier
 ) {
     val callsListState by state.callsList.collectAsState()
@@ -304,7 +305,8 @@ fun CallsHistoryView(
                                 call = call,
                                 currentUserId = currentUserId,
                                 onItemClick = { call.room_id?.let { onRoomDetailsClick(it) } },
-                                onStartCall = onStartCall
+                                onStartCall = onStartCall,
+                                onCallDetailsClick = onCallDetailsClick
                             )
                         }
                     }
@@ -331,12 +333,13 @@ fun CallItem(
     currentUserId: String?,
     onItemClick: () -> Unit,
     onStartCall: (roomId: String, isAudioCall: Boolean) -> Unit = { _, _ -> },
+    onCallDetailsClick: (call: Call) -> Unit = { _ -> },
     modifier: Modifier = Modifier
 ) {
     Row(
         modifier = modifier
             .fillMaxWidth()
-            .clickable(onClick = onItemClick)
+            .clickable { onCallDetailsClick(call) }  // Calling onCallDetailsClick with the call object
             .padding(horizontal = 16.dp, vertical = 8.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
