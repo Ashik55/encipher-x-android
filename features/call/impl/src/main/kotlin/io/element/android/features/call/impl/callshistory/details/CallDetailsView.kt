@@ -224,7 +224,9 @@ fun CallDetailsView(
                 ) {
                     // Message button
                     ActionButton(
-                        icon = Icons.AutoMirrored.Filled.Message,
+                        icon =  ImageVector.vectorResource(
+                            id = DSR.drawable.ic_home_nav
+                        ),
                         label = "Message",
                         onClick = onMessageClick
                     )
