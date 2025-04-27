@@ -60,6 +60,7 @@ import io.element.android.libraries.designsystem.R as DSR
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
+import java.util.TimeZone
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -437,46 +438,72 @@ private fun CallDetailItem(
 }
 
 /**
- * Format the timestamp string to a readable date/time.
+ * Format the timestamp string to a readable date/time in Bangladesh timezone (UTC+6).
  */
 private fun formatDateTime(timestamp: String?): String {
     if (timestamp.isNullOrEmpty()) return "Unknown time"
     
     try {
         // Parse the timestamp: "2025-04-15T09:56:12.505007"
-        val inputFormat = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", Locale.getDefault())
-        val date = inputFormat.parse(timestamp.substring(0, 19)) ?: return "Invalid date"
+        val inputFormat = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSSSS", Locale.getDefault())
+        inputFormat.timeZone = TimeZone.getTimeZone("UTC")
         
-        // Get current time
+        // First try to parse with milliseconds
+        val utcDate = try {
+            inputFormat.parse(timestamp)
+        } catch (e: Exception) {
+            // If that fails, try without milliseconds
+            try {
+                val simpleFormat = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", Locale.getDefault())
+                simpleFormat.timeZone = TimeZone.getTimeZone("UTC")
+                simpleFormat.parse(timestamp.substring(0, Math.min(19, timestamp.length)))
+            } catch (e2: Exception) {
+                return "Invalid date"
+            }
+        } ?: return "Invalid date"
+        
+        // Convert to Bangladesh timezone (UTC+6)
+        val bdTimeZone = TimeZone.getTimeZone("Asia/Dhaka")
+        
+        // Get current time in Bangladesh timezone
         val now = Date()
+        val bdCalendar = java.util.Calendar.getInstance(bdTimeZone)
+        bdCalendar.time = now
         
-        // Determine the format based on how old the timestamp is
-        val calendar = java.util.Calendar.getInstance()
-        calendar.time = date
-        
-        val currentCalendar = java.util.Calendar.getInstance()
-        currentCalendar.time = now
+        // Convert the timestamp to Bangladesh time
+        val timestampCalendar = java.util.Calendar.getInstance(bdTimeZone)
+        timestampCalendar.time = utcDate
         
         return when {
             // Today - show just the time
-            isSameDay(calendar, currentCalendar) -> {
-                SimpleDateFormat("h:mm a", Locale.getDefault()).format(date)
+            isSameDay(timestampCalendar, bdCalendar) -> {
+                SimpleDateFormat("h:mm a", Locale.getDefault()).apply { 
+                    timeZone = bdTimeZone 
+                }.format(utcDate)
             }
             // Yesterday
-            isYesterday(calendar, currentCalendar) -> {
-                "Yesterday, " + SimpleDateFormat("h:mm a", Locale.getDefault()).format(date)
+            isYesterday(timestampCalendar, bdCalendar) -> {
+                "Yesterday, " + SimpleDateFormat("h:mm a", Locale.getDefault()).apply {
+                    timeZone = bdTimeZone
+                }.format(utcDate)
             }
             // Within same week
-            isSameWeek(calendar, currentCalendar) -> {
-                SimpleDateFormat("EEEE, h:mm a", Locale.getDefault()).format(date)
+            isSameWeek(timestampCalendar, bdCalendar) -> {
+                SimpleDateFormat("EEEE, h:mm a", Locale.getDefault()).apply {
+                    timeZone = bdTimeZone
+                }.format(utcDate)
             }
             // Same year
-            calendar.get(java.util.Calendar.YEAR) == currentCalendar.get(java.util.Calendar.YEAR) -> {
-                SimpleDateFormat("MMM d, h:mm a", Locale.getDefault()).format(date)
+            timestampCalendar.get(java.util.Calendar.YEAR) == bdCalendar.get(java.util.Calendar.YEAR) -> {
+                SimpleDateFormat("MMM d, h:mm a", Locale.getDefault()).apply {
+                    timeZone = bdTimeZone
+                }.format(utcDate)
             }
             // Different year
             else -> {
-                SimpleDateFormat("MMM d, yyyy, h:mm a", Locale.getDefault()).format(date)
+                SimpleDateFormat("MMM d, yyyy, h:mm a", Locale.getDefault()).apply {
+                    timeZone = bdTimeZone
+                }.format(utcDate)
             }
         }
     } catch (e: Exception) {
@@ -491,9 +518,32 @@ private fun calculateDuration(startTime: String?, endTime: String?): String {
     if (startTime.isNullOrEmpty() || endTime.isNullOrEmpty()) return "Unknown duration"
     
     try {
-        val inputFormat = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", Locale.getDefault())
-        val start = inputFormat.parse(startTime.substring(0, 19)) ?: return "Invalid duration"
-        val end = inputFormat.parse(endTime.substring(0, 19)) ?: return "Invalid duration"
+        // First try to parse with milliseconds
+        val inputFormat = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSSSS", Locale.getDefault())
+        
+        val start = try {
+            inputFormat.parse(startTime)
+        } catch (e: Exception) {
+            // If that fails, try without milliseconds
+            try {
+                SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", Locale.getDefault())
+                    .parse(startTime.substring(0, Math.min(19, startTime.length)))
+            } catch (e2: Exception) {
+                return "Invalid duration"
+            }
+        } ?: return "Invalid duration"
+        
+        val end = try {
+            inputFormat.parse(endTime)
+        } catch (e: Exception) {
+            // If that fails, try without milliseconds
+            try {
+                SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", Locale.getDefault())
+                    .parse(endTime.substring(0, Math.min(19, endTime.length)))
+            } catch (e2: Exception) {
+                return "Invalid duration"
+            }
+        } ?: return "Invalid duration"
         
         val durationMillis = end.time - start.time
         val seconds = durationMillis / 1000
