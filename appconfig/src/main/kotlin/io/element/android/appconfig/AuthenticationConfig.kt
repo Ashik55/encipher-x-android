@@ -11,7 +11,10 @@ object AuthenticationConfig {
 //    const val MATRIX_ORG_URL = "https://matrix.org"
 //    const val MATRIX_ORG_URL = "https://enciph-er.com"
 //    const val MATRIX_ORG_URL = "https://new.enciph-er.com"
-    const val MATRIX_ORG_URL = "https://dev.enciph-er.com"
+//    const val MATRIX_ORG_URL = "https://dev.enciph-er.com"
+      const val MATRIX_ORG_URL = "https://prod.enciph-er.com"
+
+
 //    const val MATRIX_ORG_URL = "https://encipher-server.kainotomia.tech"
 
     /**
