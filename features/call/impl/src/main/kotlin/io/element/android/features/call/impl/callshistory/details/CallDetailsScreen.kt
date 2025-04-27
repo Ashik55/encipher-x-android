@@ -77,26 +77,40 @@ class CallDetailsScreen @AssistedInject constructor(
         call?.room_id?.let { roomId ->
             val sessionId = getActiveSessionId()
             if (sessionId != null) {
-                val callType = io.element.android.features.call.api.CallType.RoomCall(
-                    sessionId = sessionId,
-                    roomId = RoomId(roomId)
-                )
-                elementCallEntryPoint.startCall(callType, true)
+                try {
+                    val callType = io.element.android.features.call.api.CallType.RoomCall(
+                        sessionId = sessionId,
+                        roomId = RoomId(roomId)
+                    )
+                    timber.log.Timber.d("Starting audio call for room: $roomId")
+                    elementCallEntryPoint.startCall(callType, isAudioCall = true)
+                } catch (e: Exception) {
+                    timber.log.Timber.e(e, "Error starting audio call for room: $roomId")
+                }
+            } else {
+                timber.log.Timber.e("Cannot start audio call: No active session ID")
             }
-        }
+        } ?: timber.log.Timber.e("Cannot start audio call: No room ID available")
     }
     
     private fun onVideoCallClick() {
         call?.room_id?.let { roomId ->
             val sessionId = getActiveSessionId()
             if (sessionId != null) {
-                val callType = io.element.android.features.call.api.CallType.RoomCall(
-                    sessionId = sessionId,
-                    roomId = RoomId(roomId)
-                )
-                elementCallEntryPoint.startCall(callType, false)
+                try {
+                    val callType = io.element.android.features.call.api.CallType.RoomCall(
+                        sessionId = sessionId,
+                        roomId = RoomId(roomId)
+                    )
+                    timber.log.Timber.d("Starting video call for room: $roomId")
+                    elementCallEntryPoint.startCall(callType, isAudioCall = false)
+                } catch (e: Exception) {
+                    timber.log.Timber.e(e, "Error starting video call for room: $roomId")
+                }
+            } else {
+                timber.log.Timber.e("Cannot start video call: No active session ID")
             }
-        }
+        } ?: timber.log.Timber.e("Cannot start video call: No room ID available")
     }
     
     private fun getActiveSessionId(): SessionId? {
