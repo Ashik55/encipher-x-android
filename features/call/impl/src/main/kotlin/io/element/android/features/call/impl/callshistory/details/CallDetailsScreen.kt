@@ -35,6 +35,7 @@ data class CallDetailsInput(
 class CallDetailsScreen @AssistedInject constructor(
     @Assisted buildContext: BuildContext,
     @Assisted plugins: List<Plugin>,
+    private val presenter: CallDetailsPresenter,
     private val elementCallEntryPoint: ElementCallEntryPoint,
     private val activeSessionIdHolder: ActiveSessionIdHolder
 ) : Node(buildContext, plugins = plugins) {
@@ -53,6 +54,11 @@ class CallDetailsScreen @AssistedInject constructor(
     }
     
     private val call: Call? = plugins.filterIsInstance<CallDetailsInput>().firstOrNull()?.call
+    
+    init {
+        // Initialize the presenter with the call data
+        call?.let { presenter.initialize(it) }
+    }
     
     private fun onBackClick() {
         plugins<Callback>().forEach { it.onBackPressed() }
@@ -99,8 +105,14 @@ class CallDetailsScreen @AssistedInject constructor(
 
     @Composable
     override fun View(modifier: androidx.compose.ui.Modifier) {
+        // Check if we have a call to display
+        if (call == null) return
+        
+        // Get the state from the presenter (which was already initialized with the call)
+        val state = presenter.present()
+        
         CallDetailsView(
-            state = Any(), // In a real implementation, you would have a proper state object
+            state = state,
             onBackClick = ::onBackClick,
             onMessageClick = ::onMessageClick,
             onAudioCallClick = ::onAudioCallClick,

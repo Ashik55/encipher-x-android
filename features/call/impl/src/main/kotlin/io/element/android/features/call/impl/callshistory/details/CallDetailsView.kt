@@ -25,7 +25,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.automirrored.filled.Message
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -35,6 +35,8 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -44,111 +46,37 @@ import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import io.element.android.compound.theme.ElementTheme
+import io.element.android.features.call.impl.callshistory.Call
+import io.element.android.libraries.architecture.AsyncData
 import io.element.android.libraries.designsystem.components.avatar.Avatar
 import io.element.android.libraries.designsystem.components.avatar.AvatarData
 import io.element.android.libraries.designsystem.components.avatar.AvatarSize
 import io.element.android.libraries.designsystem.preview.ElementPreview
-import io.element.android.libraries.designsystem.preview.PreviewGroup
 import io.element.android.libraries.designsystem.preview.PreviewsDayNight
 import io.element.android.libraries.designsystem.theme.components.HorizontalDivider
+import io.element.android.libraries.designsystem.theme.components.CustomProgressIndicator
 import io.element.android.libraries.designsystem.R as DSR
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 
-// Define the data classes needed for static dummy data
-private data class DummyContactInfo(
-    val displayName: String,
-    val avatarUrl: String?,
-    val roomId: String,
-    val userId: String?
-)
-
-private data class DummyCall(
-    val call_id: Int,
-    val caller_user_id: String,
-    val room_id: String,
-    val call_type: String,
-    val created_ts: String,
-    val ended_ts: String?,
-    val caller_display_name: String?
-)
-
-private data class DummyCallsResponse(
-    val calls: List<DummyCall>,
-    val next_page: String?,
-    val prev_page: String?
-)
-
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CallDetailsView(
-    state: Any, // Changed from CallDetailsState to Any to avoid reference errors
+    state: CallDetailsState,
     onBackClick: () -> Unit,
     onMessageClick: () -> Unit,
     onAudioCallClick: () -> Unit,
     onVideoCallClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    // Use static dummy data instead of dynamic data
-    val contactInfo = DummyContactInfo(
-        displayName = "Ben Wilson",
-        avatarUrl = "mxc://dev.enciph-er.com/LAlzadbHFqpxvuzXpWiIWbYW",
-        roomId = "!OWEQCyKsMRmxkMVFDT:dev.enciph-er.com",
-        userId = "@benwilson:dev.enciph-er.com"
-    )
-    
-    // Dummy call history data
-    val dummyCalls = listOf(
-        DummyCall(
-            call_id = 421,
-            caller_user_id = "@friend:dev.enciph-er.com",
-            room_id = "!OWEQCyKsMRmxkMVFDT:dev.enciph-er.com",
-            call_type = "audio",
-            created_ts = "2025-04-23T08:32:21.675023",
-            ended_ts = null,
-            caller_display_name = "Friend"
-        ),
-        DummyCall(
-            call_id = 416,
-            caller_user_id = "@benwilson:dev.enciph-er.com",
-            room_id = "!OWEQCyKsMRmxkMVFDT:dev.enciph-er.com",
-            call_type = "audio",
-            created_ts = "2025-04-22T13:28:33.425072",
-            ended_ts = "2025-04-22T13:35:27.231343",
-            caller_display_name = "Ben Wilson"
-        ),
-        DummyCall(
-            call_id = 395,
-            caller_user_id = "@friend:dev.enciph-er.com",
-            room_id = "!OWEQCyKsMRmxkMVFDT:dev.enciph-er.com",
-            call_type = "video",
-            created_ts = "2025-04-19T09:51:27.231343",
-            ended_ts = "2025-04-19T10:12:43.645872",
-            caller_display_name = "Friend"
-        ),
-        DummyCall(
-            call_id = 394,
-            caller_user_id = "@benwilson:dev.enciph-er.com",
-            room_id = "!OWEQCyKsMRmxkMVFDT:dev.enciph-er.com",
-            call_type = "video",
-            created_ts = "2025-04-15T17:21:27.231343",
-            ended_ts = "2025-04-15T17:32:13.645872",
-            caller_display_name = "Ben Wilson"
-        )
-    )
-    
-    val callsResponse = DummyCallsResponse(
-        calls = dummyCalls,
-        next_page = "10",
-        prev_page = null
-    )
-    
-    // Dummy current user ID
-    val currentUserId = "@benwilson:dev.enciph-er.com"
+    val callsListState by state.callsList.collectAsState()
+    val currentUserId by state.currentUserId.collectAsState()
+    val initialCall = state.initialCall
+
+    // Extract contact info from the initial call
+    val contactInfo = extractContactInfo(initialCall, currentUserId)
     
     Scaffold(
         topBar = {
@@ -224,7 +152,7 @@ fun CallDetailsView(
                 ) {
                     // Message button
                     ActionButton(
-                        icon =  ImageVector.vectorResource(
+                        icon = ImageVector.vectorResource(
                             id = DSR.drawable.ic_home_nav
                         ),
                         label = "Message",
@@ -253,7 +181,7 @@ fun CallDetailsView(
             
             HorizontalDivider()
             
-            // Call history section - using static data directly
+            // Call history section - using dynamic data from state
             Column(modifier = Modifier.fillMaxSize()) {
                 Text(
                     text = "Call History",
@@ -262,19 +190,125 @@ fun CallDetailsView(
                     modifier = Modifier.padding(16.dp)
                 )
                 
-                LazyColumn(
-                    modifier = Modifier.fillMaxSize()
-                ) {
-                    items(callsResponse.calls) { call ->
-                        CallDetailItem(
-                            call = call,
-                            currentUserId = currentUserId,
-                            modifier = Modifier.fillMaxWidth()
-                        )
+                when (callsListState) {
+                    is AsyncData.Loading -> {
+                        Box(
+                            contentAlignment = Alignment.Center,
+                            modifier = Modifier.fillMaxSize()
+                        ) {
+                            CustomProgressIndicator()
+                        }
+                    }
+                    
+                    is AsyncData.Failure -> {
+                        val error = (callsListState as AsyncData.Failure).error
+                        Box(
+                            contentAlignment = Alignment.Center,
+                            modifier = Modifier.fillMaxSize()
+                        ) {
+                            Column(
+                                horizontalAlignment = Alignment.CenterHorizontally,
+                                modifier = Modifier.padding(16.dp)
+                            ) {
+                                Text(
+                                    text = "Failed to load calls",
+                                    style = MaterialTheme.typography.titleMedium,
+                                    color = MaterialTheme.colorScheme.error
+                                )
+                                
+                                Spacer(modifier = Modifier.height(8.dp))
+                                
+                                Text(
+                                    text = error.message ?: "Unknown error",
+                                    style = MaterialTheme.typography.bodyMedium,
+                                    textAlign = TextAlign.Center
+                                )
+                            }
+                        }
+                    }
+                    
+                    is AsyncData.Success -> {
+                        val calls = (callsListState as AsyncData.Success<List<Call>>).data
+                        if (calls.isEmpty()) {
+                            Box(
+                                contentAlignment = Alignment.Center,
+                                modifier = Modifier.fillMaxSize()
+                            ) {
+                                Text(
+                                    text = "No call history found",
+                                    style = MaterialTheme.typography.bodyLarge,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                )
+                            }
+                        } else {
+                            LazyColumn(
+                                modifier = Modifier.fillMaxSize()
+                            ) {
+                                items(calls) { call ->
+                                    CallDetailItem(
+                                        call = call,
+                                        currentUserId = currentUserId,
+                                        modifier = Modifier.fillMaxWidth()
+                                    )
+                                }
+                            }
+                        }
+                    }
+                    
+                    AsyncData.Uninitialized -> {
+                        Box(
+                            contentAlignment = Alignment.Center,
+                            modifier = Modifier.fillMaxSize()
+                        ) {
+                            CustomProgressIndicator()
+                        }
                     }
                 }
             }
         }
+    }
+}
+
+// Data class for contact information
+private data class ContactInfo(
+    val displayName: String,
+    val avatarUrl: String?,
+    val roomId: String,
+    val userId: String?
+)
+
+// Helper function to extract contact info from a call
+private fun extractContactInfo(call: Call, currentUserId: String?): ContactInfo {
+    val isOutgoingCall = currentUserId == call.caller_user_id
+    
+    return if (call.room_name != null) {
+        // This is a room call
+        ContactInfo(
+            displayName = call.room_name,
+            avatarUrl = call.room_avatar,
+            roomId = call.room_id ?: "",
+            userId = null
+        )
+    } else if (isOutgoingCall) {
+        // This is an outgoing direct call
+        val receiverName = call.receiver_display_names?.values?.joinToString(", ") ?: "Unknown"
+        val receiverId = call.receiver_user_ids?.firstOrNull()
+        val avatar = call.receiver_avatars?.values?.firstOrNull()
+        
+        ContactInfo(
+            displayName = receiverName,
+            avatarUrl = avatar,
+            roomId = call.room_id ?: "",
+            userId = receiverId
+        )
+    } else {
+        // This is an incoming direct call
+        ContactInfo(
+            displayName = call.caller_display_name ?: "Unknown",
+            avatarUrl = call.caller_avatar,
+            roomId = call.room_id ?: "",
+            userId = call.caller_user_id
+        )
     }
 }
 
@@ -317,7 +351,7 @@ private fun ActionButton(
 
 @Composable
 private fun CallDetailItem(
-    call: DummyCall,
+    call: Call,
     currentUserId: String?,
     modifier: Modifier = Modifier
 ) {
@@ -332,7 +366,7 @@ private fun CallDetailItem(
     val durationString = if (call.ended_ts != null) {
         calculateDuration(call.created_ts, call.ended_ts)
     } else {
-        "Missed call"
+        "Ongoing call"
     }
     
     Row(
@@ -375,7 +409,7 @@ private fun CallDetailItem(
                     imageVector = ImageVector.vectorResource(id = icon),
                     contentDescription = contentDescription,
                     modifier = Modifier.size(16.dp),
-                    tint = if (call.ended_ts == null) Color.Red else Color(0xFF0A8741)
+                    tint = if (call.ended_ts == null) Color(0xFF0A8741) else MaterialTheme.colorScheme.onSurfaceVariant
                 )
                 
                 Spacer(modifier = Modifier.width(4.dp))
@@ -387,7 +421,7 @@ private fun CallDetailItem(
                 )
             }
             
-            // Duration (or missed)
+            // Duration (or status)
             Text(
                 text = durationString,
                 style = MaterialTheme.typography.bodySmall,
@@ -504,8 +538,53 @@ private fun isSameWeek(cal1: java.util.Calendar, cal2: java.util.Calendar): Bool
 @PreviewsDayNight
 @Composable
 internal fun CallDetailsViewPreview() = ElementPreview {
+    val mockCall = Call(
+        call_id = 421,
+        caller_user_id = "@friend:dev.enciph-er.com",
+        room_id = "!OWEQCyKsMRmxkMVFDT:dev.enciph-er.com",
+        call_type = "audio",
+        created_ts = "2025-04-23T08:32:21.675023",
+        ended_ts = null,
+        caller_display_name = "Friend",
+        room_name = null,
+        room_avatar = null,
+        caller_avatar = "mxc://dev.enciph-er.com/vhWvelzQGRAFmvJaUYtHlZQE",
+        is_caller = false,
+        receiver_user_ids = listOf("@ben12:dev.enciph-er.com"),
+        receiver_display_names = mapOf("@ben12:dev.enciph-er.com" to "Ben 12"),
+        receiver_avatars = mapOf("@ben12:dev.enciph-er.com" to "mxc://dev.enciph-er.com/LAlzadbHFqpxvuzXpWiIWbYW")
+    )
+    
+    val mockCalls = listOf(
+        mockCall,
+        Call(
+            call_id = 416,
+            caller_user_id = "@ben12:dev.enciph-er.com",
+            room_id = "!OWEQCyKsMRmxkMVFDT:dev.enciph-er.com",
+            call_type = "audio",
+            created_ts = "2025-04-22T13:28:33.425072",
+            ended_ts = "2025-04-22T13:35:27.231343",
+            caller_display_name = "Ben 12",
+            room_name = null,
+            room_avatar = null,
+            caller_avatar = "mxc://dev.enciph-er.com/LAlzadbHFqpxvuzXpWiIWbYW",
+            is_caller = true,
+            receiver_user_ids = listOf("@friend:dev.enciph-er.com"),
+            receiver_display_names = mapOf("@friend:dev.enciph-er.com" to "Friend"),
+            receiver_avatars = mapOf("@friend:dev.enciph-er.com" to "mxc://dev.enciph-er.com/vhWvelzQGRAFmvJaUYtHlZQE")
+        )
+    )
+    
+    val mockState = object : CallDetailsState {
+        override val callsList = kotlinx.coroutines.flow.MutableStateFlow(
+            io.element.android.libraries.architecture.AsyncData.Success(mockCalls)
+        )
+        override val currentUserId = kotlinx.coroutines.flow.MutableStateFlow("@ben12:dev.enciph-er.com")
+        override val initialCall = mockCall
+    }
+    
     CallDetailsView(
-        state = Any(),
+        state = mockState,
         onBackClick = {},
         onMessageClick = {},
         onAudioCallClick = {},
