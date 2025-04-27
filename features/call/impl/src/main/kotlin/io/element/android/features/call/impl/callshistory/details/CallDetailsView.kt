@@ -438,7 +438,7 @@ private fun CallDetailItem(
 }
 
 /**
- * Format the timestamp string to a readable date/time in Bangladesh timezone (UTC+6).
+ * Format the timestamp string to a readable date/time in the device's local timezone.
  */
 private fun formatDateTime(timestamp: String?): String {
     if (timestamp.isNullOrEmpty()) return "Unknown time"
@@ -446,7 +446,7 @@ private fun formatDateTime(timestamp: String?): String {
     try {
         // Parse the timestamp: "2025-04-15T09:56:12.505007"
         val inputFormat = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSSSS", Locale.getDefault())
-        inputFormat.timeZone = TimeZone.getTimeZone("UTC")
+        inputFormat.timeZone = TimeZone.getTimeZone("UTC") // Assume input is in UTC
         
         // First try to parse with milliseconds
         val utcDate = try {
@@ -462,47 +462,47 @@ private fun formatDateTime(timestamp: String?): String {
             }
         } ?: return "Invalid date"
         
-        // Convert to Bangladesh timezone (UTC+6)
-        val bdTimeZone = TimeZone.getTimeZone("Asia/Dhaka")
+        // Use the device's local timezone
+        val deviceTimeZone = TimeZone.getDefault()
         
-        // Get current time in Bangladesh timezone
+        // Get current time in device timezone
         val now = Date()
-        val bdCalendar = java.util.Calendar.getInstance(bdTimeZone)
-        bdCalendar.time = now
+        val deviceCalendar = java.util.Calendar.getInstance(deviceTimeZone)
+        deviceCalendar.time = now
         
-        // Convert the timestamp to Bangladesh time
-        val timestampCalendar = java.util.Calendar.getInstance(bdTimeZone)
+        // Convert the timestamp to device's local time
+        val timestampCalendar = java.util.Calendar.getInstance(deviceTimeZone)
         timestampCalendar.time = utcDate
         
         return when {
             // Today - show just the time
-            isSameDay(timestampCalendar, bdCalendar) -> {
+            isSameDay(timestampCalendar, deviceCalendar) -> {
                 SimpleDateFormat("h:mm a", Locale.getDefault()).apply { 
-                    timeZone = bdTimeZone 
+                    timeZone = deviceTimeZone 
                 }.format(utcDate)
             }
             // Yesterday
-            isYesterday(timestampCalendar, bdCalendar) -> {
+            isYesterday(timestampCalendar, deviceCalendar) -> {
                 "Yesterday, " + SimpleDateFormat("h:mm a", Locale.getDefault()).apply {
-                    timeZone = bdTimeZone
+                    timeZone = deviceTimeZone
                 }.format(utcDate)
             }
             // Within same week
-            isSameWeek(timestampCalendar, bdCalendar) -> {
+            isSameWeek(timestampCalendar, deviceCalendar) -> {
                 SimpleDateFormat("EEEE, h:mm a", Locale.getDefault()).apply {
-                    timeZone = bdTimeZone
+                    timeZone = deviceTimeZone
                 }.format(utcDate)
             }
             // Same year
-            timestampCalendar.get(java.util.Calendar.YEAR) == bdCalendar.get(java.util.Calendar.YEAR) -> {
+            timestampCalendar.get(java.util.Calendar.YEAR) == deviceCalendar.get(java.util.Calendar.YEAR) -> {
                 SimpleDateFormat("MMM d, h:mm a", Locale.getDefault()).apply {
-                    timeZone = bdTimeZone
+                    timeZone = deviceTimeZone
                 }.format(utcDate)
             }
             // Different year
             else -> {
                 SimpleDateFormat("MMM d, yyyy, h:mm a", Locale.getDefault()).apply {
-                    timeZone = bdTimeZone
+                    timeZone = deviceTimeZone
                 }.format(utcDate)
             }
         }
