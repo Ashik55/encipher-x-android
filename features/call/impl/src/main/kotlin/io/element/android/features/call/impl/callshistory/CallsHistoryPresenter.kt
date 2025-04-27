@@ -9,6 +9,7 @@ package io.element.android.features.call.impl.callshistory
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -32,50 +33,138 @@ class CallsHistoryPresenter @Inject constructor(
         val callsList = remember { MutableStateFlow<AsyncData<List<Call>>>(AsyncData.Loading()) }
         val favorites = remember { MutableStateFlow<List<Call>>(emptyList()) }
         val currentUserId = remember { MutableStateFlow<String?>(null) }
+        val hasMoreToLoad = remember { MutableStateFlow(true) }
+        val isLoadingMore = remember { MutableStateFlow(false) }
         
         var retryCount by remember { mutableStateOf(0) }
+        var nextPage by remember { mutableStateOf<Int?>(null) }
+        var currentCalls by remember { mutableStateOf<List<Call>>(emptyList()) }
+        var sessionIdValue by remember { mutableStateOf<SessionId?>(null) }
+        
+        // Event to trigger loading more content
+        var loadMoreEvent by remember { mutableStateOf(0) }
         
         LaunchedEffect(retryCount) {
             // Get the active session ID from the holder using the suspend function
             val sessionId = activeSessionIdHolder.getActiveSessionId()
-            loadCallHistory(callsList, sessionId)
+            sessionIdValue = sessionId
+            loadCallHistory(
+                callsListState = callsList,
+                sessionId = sessionId,
+                page = null,
+                isInitialLoad = true,
+                onDataLoaded = { calls, nextPageToken ->
+                    currentCalls = calls
+                    nextPage = nextPageToken
+                    hasMoreToLoad.value = nextPageToken != null
+                }
+            )
             
             // Store the user ID for determining outgoing calls
             currentUserId.value = sessionId?.value
+        }
+        
+        // Handle loading more content with LaunchedEffect
+        LaunchedEffect(loadMoreEvent) {
+            if (loadMoreEvent > 0 && hasMoreToLoad.value && !isLoadingMore.value && nextPage != null) {
+                Timber.d("Starting to load next page: $nextPage, current items: ${currentCalls.size}")
+                isLoadingMore.value = true
+                
+                // Load the next page of calls
+                loadCallHistory(
+                    callsListState = callsList,
+                    sessionId = sessionIdValue,
+                    page = nextPage,
+                    isInitialLoad = false,
+                    onDataLoaded = { newCalls, nextPageToken ->
+                        // Append the new calls to the existing list
+                        val combinedList = currentCalls + newCalls
+                        Timber.d("Loaded ${newCalls.size} more items, new total: ${combinedList.size}, hasMore: ${nextPageToken != null}")
+                        currentCalls = combinedList
+                        callsList.value = AsyncData.Success(combinedList)
+                        
+                        // Update pagination state
+                        nextPage = nextPageToken
+                        hasMoreToLoad.value = nextPageToken != null
+                        isLoadingMore.value = false
+                    }
+                )
+            }
+        }
+        
+        fun handleEvents(event: CallsHistoryEvents) {
+            when (event) {
+                is CallsHistoryEvents.LoadMore -> {
+                    // Log the event to verify it's being triggered
+                    Timber.d("LoadMore event triggered in CallsHistoryPresenter")
+                    // Increment the counter to trigger the LaunchedEffect
+                    loadMoreEvent++
+                }
+            }
         }
         
         return object : CallsHistoryState {
             override val callsList: StateFlow<AsyncData<List<Call>>> = callsList
             override val favorites: StateFlow<List<Call>> = favorites
             override val currentUserId: StateFlow<String?> = currentUserId
+            override val hasMoreToLoad: StateFlow<Boolean> = hasMoreToLoad
+            override val isLoadingMore: StateFlow<Boolean> = isLoadingMore
+            override val eventSink: (CallsHistoryEvents) -> Unit = ::handleEvents
         }
     }
     
-    private suspend fun loadCallHistory(callsListState: MutableStateFlow<AsyncData<List<Call>>>, sessionId: SessionId?) {
+    private suspend fun loadCallHistory(
+        callsListState: MutableStateFlow<AsyncData<List<Call>>>,
+        sessionId: SessionId?,
+        page: Int? = null,
+        isInitialLoad: Boolean = true,
+        onDataLoaded: (List<Call>, Int?) -> Unit = { _, _ -> }
+    ) {
         if (sessionId == null) {
-            callsListState.value = AsyncData.Failure(IllegalStateException("No active session"))
+            if (isInitialLoad) {
+                callsListState.value = AsyncData.Failure(IllegalStateException("No active session"))
+            }
+            onDataLoaded(emptyList(), null)
             return
         }
         
-        callsListState.value = AsyncData.Loading()
+        if (isInitialLoad) {
+            callsListState.value = AsyncData.Loading()
+        }
         
         try {
-            // Get call history data from repository
-            val result = callRepository.getCallDetails(sessionId, sessionId.value)
+            // Get call history data from repository with pagination
+            val result = callRepository.getCallDetails(sessionId, sessionId.value, page = page)
             
             result.fold(
                 onSuccess = { paginatedResult ->
-                    Timber.d("Successfully loaded ${paginatedResult.calls.size} calls")
-                    callsListState.value = AsyncData.Success(paginatedResult.calls)
+                    Timber.d("Successfully loaded ${paginatedResult.calls.size} calls, page: $page")
+                    
+                    if (isInitialLoad) {
+                        callsListState.value = AsyncData.Success(paginatedResult.calls)
+                    }
+                    
+                    // Pass the data back to the caller
+                    onDataLoaded(paginatedResult.calls, paginatedResult.nextPage)
                 },
                 onFailure = { error ->
-                    Timber.e(error, "Error loading call history")
-                    callsListState.value = AsyncData.Failure(error)
+                    Timber.e(error, "Error loading call history, page: $page")
+                    
+                    if (isInitialLoad) {
+                        callsListState.value = AsyncData.Failure(error)
+                    }
+                    
+                    onDataLoaded(emptyList(), null)
                 }
             )
         } catch (e: Exception) {
-            Timber.e(e, "Exception loading call history")
-            callsListState.value = AsyncData.Failure(e)
+            Timber.e(e, "Exception loading call history, page: $page")
+            
+            if (isInitialLoad) {
+                callsListState.value = AsyncData.Failure(e)
+            }
+            
+            onDataLoaded(emptyList(), null)
         }
     }
 

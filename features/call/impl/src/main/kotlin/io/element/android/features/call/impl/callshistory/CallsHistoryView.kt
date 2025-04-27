@@ -22,6 +22,7 @@ import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardActions
@@ -58,6 +59,7 @@ import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import io.element.android.compound.theme.ElementTheme
@@ -77,6 +79,7 @@ import io.element.android.libraries.designsystem.theme.components.HorizontalDivi
 import io.element.android.libraries.designsystem.theme.components.Scaffold as ElementScaffold
 import io.element.android.libraries.designsystem.R as DSR
 import kotlinx.coroutines.flow.MutableStateFlow
+import timber.log.Timber
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalComposeUiApi::class)
 @Composable
@@ -91,6 +94,8 @@ fun CallsHistoryView(
 ) {
     val callsListState by state.callsList.collectAsState()
     val currentUserId by state.currentUserId.collectAsState()
+    val hasMoreToLoad by state.hasMoreToLoad.collectAsState()
+    val isLoadingMore by state.isLoadingMore.collectAsState()
     var isSearchActive by remember { mutableStateOf(false) }
     var searchQuery by remember { mutableStateOf("") }
     val focusRequester = remember { FocusRequester() }
@@ -282,34 +287,20 @@ fun CallsHistoryView(
                         )
                     }
                 } else {
-                    LazyColumn(
+                    CallHistoryList(
+                        calls = filteredCalls,
+                        currentUserId = currentUserId,
+                        hasMoreToLoad = hasMoreToLoad,
+                        isLoadingMore = isLoadingMore,
+                        onItemClick = { call -> call.room_id?.let { onRoomDetailsClick(it) } },
+                        onStartCall = onStartCall,
+                        onCallDetailsClick = onCallDetailsClick,
+                        onLoadMore = { state.eventSink(CallsHistoryEvents.LoadMore) },
+                        isSearchActive = isSearchActive,
                         modifier = Modifier
                             .fillMaxSize()
                             .padding(paddingValues)
-                    ) {
-                        // Recent calls section header (only when not searching)
-                        if (searchQuery.isEmpty()) {
-                            item {
-                                Text(
-                                    text = "Recent",
-                                    style = MaterialTheme.typography.titleMedium,
-                                    fontWeight = FontWeight.Bold,
-                                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
-                                )
-                            }
-                        }
-                        
-                        // Call items
-                        items(filteredCalls) { call ->
-                            CallItem(
-                                call = call,
-                                currentUserId = currentUserId,
-                                onItemClick = { call.room_id?.let { onRoomDetailsClick(it) } },
-                                onStartCall = onStartCall,
-                                onCallDetailsClick = onCallDetailsClick
-                            )
-                        }
-                    }
+                    )
                 }
             }
             
@@ -322,6 +313,119 @@ fun CallsHistoryView(
                 ) {
                     CustomProgressIndicator()
                 }
+            }
+        }
+    }
+}
+
+@Composable
+private fun LoadMoreButton(isLoading: Boolean, onClick: () -> Unit) {
+    Button(
+        text = "Load More",
+        showProgress = isLoading,
+        onClick = onClick,
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 16.dp, horizontal = 24.dp),
+    )
+}
+
+@Composable
+private fun CallHistoryList(
+    calls: List<Call>,
+    currentUserId: String?,
+    hasMoreToLoad: Boolean,
+    isLoadingMore: Boolean,
+    onItemClick: (Call) -> Unit,
+    onStartCall: (roomId: String, isAudioCall: Boolean) -> Unit,
+    onCallDetailsClick: (Call) -> Unit,
+    onLoadMore: () -> Unit,
+    isSearchActive: Boolean,
+    modifier: Modifier = Modifier
+) {
+    val lazyListState = rememberLazyListState()
+    
+    val onLoadMoreState = rememberUpdatedState(onLoadMore)
+    
+    // Add scroll detection for pagination using a simpler approach
+    val reachedEnd by remember {
+        derivedStateOf {
+            // Don't load more if we're searching, there are no calls, already loading, or no more data
+            if (isSearchActive || calls.isEmpty() || isLoadingMore || !hasMoreToLoad) {
+                false
+            } else {
+                // Check if we're near the end of the list
+                val lastVisibleItemIndex = lazyListState.layoutInfo.visibleItemsInfo.lastOrNull()?.index ?: 0
+                val totalItemsCount = lazyListState.layoutInfo.totalItemsCount
+                
+                lastVisibleItemIndex >= totalItemsCount - 3
+            }
+        }
+    }
+    
+    // Trigger load more when reaching the end
+    LaunchedEffect(reachedEnd) {
+        if (reachedEnd) {
+            Timber.d("End of list reached. Loading more calls.")
+            onLoadMoreState.value()
+        }
+    }
+    
+    LazyColumn(
+        state = lazyListState,
+        modifier = modifier
+    ) {
+        // Recent calls section header (only when not searching)
+        if (!isSearchActive) {
+            item {
+                Text(
+                    text = "Recent",
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.Bold,
+                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
+                )
+            }
+        }
+        
+        // Call items
+        items(calls) { call ->
+            CallItem(
+                call = call,
+                currentUserId = currentUserId,
+                onItemClick = { onItemClick(call) },
+                onStartCall = onStartCall,
+                onCallDetailsClick = onCallDetailsClick
+            )
+        }
+        
+        // Loading indicator at the bottom when loading more items
+        if (isLoadingMore) {
+            item {
+                Box(
+                    contentAlignment = Alignment.Center,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(16.dp)
+                ) {
+                    CircularProgressIndicator(
+                        modifier = Modifier.size(24.dp),
+                        color = MaterialTheme.colorScheme.primary,
+                        strokeWidth = 2.dp
+                    )
+                }
+            }
+        }
+        
+        // Show a "Load More" button as an alternative
+        if (hasMoreToLoad && !isLoadingMore && calls.isNotEmpty()) {
+            item {
+                LoadMoreButton(
+                    isLoading = isLoadingMore,
+                    onClick = {
+                        Timber.d("Loading more calls from button press")
+                        onLoadMoreState.value()
+                    }
+                )
             }
         }
     }
@@ -436,7 +540,7 @@ fun CallItem(
     )
 }
 
-/**
+/*
  * Helper function to convert receiver display names map to a readable string
  */
 private fun getDisplayNamesString(displayNames: Map<String, String>?): String {
@@ -576,6 +680,9 @@ internal fun CallsHistoryViewPreview() = ElementPreview {
         )))
         override val favorites = MutableStateFlow<List<Call>>(emptyList())
         override val currentUserId = MutableStateFlow("@ben5:dev.enciph-er.com")
+        override val hasMoreToLoad = MutableStateFlow(true)
+        override val isLoadingMore = MutableStateFlow(false)
+        override val eventSink: (CallsHistoryEvents) -> Unit = {}
     }
     
     CallsHistoryView(
