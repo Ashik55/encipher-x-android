@@ -319,18 +319,6 @@ fun CallsHistoryView(
 }
 
 @Composable
-private fun LoadMoreButton(isLoading: Boolean, onClick: () -> Unit) {
-    Button(
-        text = "Load More",
-        showProgress = isLoading,
-        onClick = onClick,
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(vertical = 16.dp, horizontal = 24.dp),
-    )
-}
-
-@Composable
 private fun CallHistoryList(
     calls: List<Call>,
     currentUserId: String?,
@@ -345,12 +333,10 @@ private fun CallHistoryList(
 ) {
     val lazyListState = rememberLazyListState()
     
-    val onLoadMoreState = rememberUpdatedState(onLoadMore)
-    
-    // Add scroll detection for pagination using a simpler approach
+    // Add scroll detection for pagination - only when not searching
     val reachedEnd by remember {
         derivedStateOf {
-            // Don't load more if we're searching, there are no calls, already loading, or no more data
+            // Don't paginate if we're searching, there are no calls, already loading, or have no more data
             if (isSearchActive || calls.isEmpty() || isLoadingMore || !hasMoreToLoad) {
                 false
             } else {
@@ -363,11 +349,11 @@ private fun CallHistoryList(
         }
     }
     
-    // Trigger load more when reaching the end
+    // Trigger load more when reaching the end - only if not in search mode
     LaunchedEffect(reachedEnd) {
         if (reachedEnd) {
             Timber.d("End of list reached. Loading more calls.")
-            onLoadMoreState.value()
+            onLoadMore()
         }
     }
     
@@ -398,8 +384,8 @@ private fun CallHistoryList(
             )
         }
         
-        // Loading indicator at the bottom when loading more items
-        if (isLoadingMore) {
+        // Loading indicator at the bottom when loading more items - only when not searching
+        if (isLoadingMore && !isSearchActive) {
             item {
                 Box(
                     contentAlignment = Alignment.Center,
@@ -413,19 +399,6 @@ private fun CallHistoryList(
                         strokeWidth = 2.dp
                     )
                 }
-            }
-        }
-        
-        // Show a "Load More" button as an alternative
-        if (hasMoreToLoad && !isLoadingMore && calls.isNotEmpty()) {
-            item {
-                LoadMoreButton(
-                    isLoading = isLoadingMore,
-                    onClick = {
-                        Timber.d("Loading more calls from button press")
-                        onLoadMoreState.value()
-                    }
-                )
             }
         }
     }
