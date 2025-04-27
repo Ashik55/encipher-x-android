@@ -21,7 +21,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
@@ -35,8 +36,11 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -74,6 +78,8 @@ fun CallDetailsView(
 ) {
     val callsListState by state.callsList.collectAsState()
     val currentUserId by state.currentUserId.collectAsState()
+    val hasMoreToLoad by state.hasMoreToLoad.collectAsState()
+    val isLoadingMore by state.isLoadingMore.collectAsState()
     val initialCall = state.initialCall
 
     // Extract contact info from the initial call
@@ -242,17 +248,14 @@ fun CallDetailsView(
                                 )
                             }
                         } else {
-                            LazyColumn(
+                            CallHistoryList(
+                                calls = calls,
+                                currentUserId = currentUserId,
+                                hasMoreToLoad = hasMoreToLoad,
+                                isLoadingMore = isLoadingMore,
+                                onLoadMore = { state.eventSink(CallDetailsEvents.LoadMore) },
                                 modifier = Modifier.fillMaxSize()
-                            ) {
-                                items(calls) { call ->
-                                    CallDetailItem(
-                                        call = call,
-                                        currentUserId = currentUserId,
-                                        modifier = Modifier.fillMaxWidth()
-                                    )
-                                }
-                            }
+                            )
                         }
                     }
                     
@@ -264,6 +267,68 @@ fun CallDetailsView(
                             CustomProgressIndicator()
                         }
                     }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun CallHistoryList(
+    calls: List<Call>,
+    currentUserId: String?,
+    hasMoreToLoad: Boolean,
+    isLoadingMore: Boolean,
+    onLoadMore: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    val lazyListState = rememberLazyListState()
+    
+    // Check if we should trigger loading more data
+    val shouldLoadMore by remember {
+        derivedStateOf {
+            val lastVisibleItem = lazyListState.layoutInfo.visibleItemsInfo.lastOrNull()
+            val lastItemIndex = lastVisibleItem?.index ?: 0
+            val totalItemsCount = calls.size
+            
+            // If we're close to the end of the list and there's more data to load
+            hasMoreToLoad && lastItemIndex >= totalItemsCount - 3
+        }
+    }
+    
+    // Trigger the load more event when we're close to the end of the list
+    LaunchedEffect(shouldLoadMore) {
+        if (shouldLoadMore && !isLoadingMore) {
+            onLoadMore()
+        }
+    }
+    
+    LazyColumn(
+        state = lazyListState,
+        modifier = modifier
+    ) {
+        itemsIndexed(calls) { _, call ->
+            CallDetailItem(
+                call = call,
+                currentUserId = currentUserId,
+                modifier = Modifier.fillMaxWidth()
+            )
+        }
+        
+        // Loading indicator at the bottom when loading more items
+        if (isLoadingMore) {
+            item {
+                Box(
+                    contentAlignment = Alignment.Center,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(16.dp)
+                ) {
+                    CircularProgressIndicator(
+                        modifier = Modifier.size(24.dp),
+                        color = MaterialTheme.colorScheme.primary,
+                        strokeWidth = 2.dp
+                    )
                 }
             }
         }
@@ -630,7 +695,10 @@ internal fun CallDetailsViewPreview() = ElementPreview {
             io.element.android.libraries.architecture.AsyncData.Success(mockCalls)
         )
         override val currentUserId = kotlinx.coroutines.flow.MutableStateFlow("@ben12:dev.enciph-er.com")
+        override val hasMoreToLoad = kotlinx.coroutines.flow.MutableStateFlow(false)
+        override val isLoadingMore = kotlinx.coroutines.flow.MutableStateFlow(false)
         override val initialCall = mockCall
+        override val eventSink: (CallDetailsEvents) -> Unit = {}
     }
     
     CallDetailsView(

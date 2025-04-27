@@ -29,4 +29,29 @@ interface CallDetailsState {
      * The initial call that was used to navigate to this screen.
      */
     val initialCall: Call
+    
+    /**
+     * Whether there's more data to load (for pagination).
+     */
+    val hasMoreToLoad: StateFlow<Boolean>
+    
+    /**
+     * Whether we're currently loading the next page.
+     */
+    val isLoadingMore: StateFlow<Boolean>
+    
+    /**
+     * Event sink for the CallDetailsView.
+     */
+    val eventSink: (CallDetailsEvents) -> Unit
+}
+
+/**
+ * Events for the call details screen.
+ */
+sealed interface CallDetailsEvents {
+    /**
+     * Request to load the next page of calls.
+     */
+    data object LoadMore : CallDetailsEvents
 }

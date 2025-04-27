@@ -60,13 +60,13 @@ class CallsHistoryPresenter @Inject constructor(
         callsListState.value = AsyncData.Loading()
         
         try {
-            // Get the current user ID from the session
+            // Get call history data from repository
             val result = callRepository.getCallDetails(sessionId, sessionId.value)
             
             result.fold(
-                onSuccess = { calls ->
-                    Timber.d("Successfully loaded ${calls.size} calls")
-                    callsListState.value = AsyncData.Success(calls)
+                onSuccess = { paginatedResult ->
+                    Timber.d("Successfully loaded ${paginatedResult.calls.size} calls")
+                    callsListState.value = AsyncData.Success(paginatedResult.calls)
                 },
                 onFailure = { error ->
                     Timber.e(error, "Error loading call history")

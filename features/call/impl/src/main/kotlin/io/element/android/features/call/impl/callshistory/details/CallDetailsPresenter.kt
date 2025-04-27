@@ -43,25 +43,83 @@ class CallDetailsPresenter @Inject constructor(
     override fun present(): CallDetailsState {
         val callsList = remember { MutableStateFlow<AsyncData<List<Call>>>(AsyncData.Loading()) }
         val currentUserId = remember { MutableStateFlow<String?>(null) }
+        val hasMoreToLoad = remember { MutableStateFlow(true) }
+        val isLoadingMore = remember { MutableStateFlow(false) }
         
+        var nextPage by remember { mutableStateOf<Int?>(null) }
+        var currentCalls by remember { mutableStateOf<List<Call>>(emptyList()) }
         var retryCount by remember { mutableStateOf(0) }
+        var sessionIdValue by remember { mutableStateOf<SessionId?>(null) }
         
         // Get the initial call or use a placeholder if not set
         val callToUse = initialCall ?: createPlaceholderCall()
+
+        // Event to trigger loading more content
+        var loadMoreEvent by remember { mutableStateOf(0) }
         
         LaunchedEffect(retryCount) {
             // Get the active session ID from the holder using the suspend function
             val sessionId = activeSessionIdHolder.getActiveSessionId()
+            sessionIdValue = sessionId
             
             // Store the user ID for determining outgoing calls
             currentUserId.value = sessionId?.value
             
             // Load call history for this specific room
             callToUse.room_id?.let { roomId ->
-                loadCallDetailsForRoom(callsList, sessionId, roomId)
+                loadCallDetailsForRoom(
+                    callsListState = callsList,
+                    sessionId = sessionId,
+                    roomId = roomId,
+                    page = null,
+                    isInitialLoad = true,
+                    onDataLoaded = { calls, nextPageToken ->
+                        currentCalls = calls
+                        nextPage = nextPageToken
+                        hasMoreToLoad.value = nextPageToken != null
+                    }
+                )
             } ?: run {
                 // If there's no room ID, just show this call
                 callsList.value = AsyncData.Success(listOf(callToUse))
+                hasMoreToLoad.value = false
+            }
+        }
+
+        // Handle loading more content with LaunchedEffect
+        LaunchedEffect(loadMoreEvent) {
+            if (loadMoreEvent > 0 && hasMoreToLoad.value && !isLoadingMore.value && nextPage != null && callToUse.room_id != null) {
+                isLoadingMore.value = true
+                
+                // Load the next page of calls
+                callToUse.room_id?.let { roomId ->
+                    loadCallDetailsForRoom(
+                        callsListState = callsList,
+                        sessionId = sessionIdValue,
+                        roomId = roomId,
+                        page = nextPage,
+                        isInitialLoad = false,
+                        onDataLoaded = { newCalls, nextPageToken ->
+                            // Append the new calls to the existing list
+                            currentCalls = currentCalls + newCalls
+                            callsList.value = AsyncData.Success(currentCalls)
+                            
+                            // Update pagination state
+                            nextPage = nextPageToken
+                            hasMoreToLoad.value = nextPageToken != null
+                            isLoadingMore.value = false
+                        }
+                    )
+                }
+            }
+        }
+        
+        fun handleEvents(event: CallDetailsEvents) {
+            when (event) {
+                is CallDetailsEvents.LoadMore -> {
+                    // Increment the counter to trigger the LaunchedEffect
+                    loadMoreEvent++
+                }
             }
         }
         
@@ -69,6 +127,9 @@ class CallDetailsPresenter @Inject constructor(
             override val callsList: StateFlow<AsyncData<List<Call>>> = callsList
             override val currentUserId: StateFlow<String?> = currentUserId
             override val initialCall: Call = callToUse
+            override val hasMoreToLoad: StateFlow<Boolean> = hasMoreToLoad
+            override val isLoadingMore: StateFlow<Boolean> = isLoadingMore
+            override val eventSink: (CallDetailsEvents) -> Unit = ::handleEvents
         }
     }
 
@@ -94,36 +155,61 @@ class CallDetailsPresenter @Inject constructor(
     private suspend fun loadCallDetailsForRoom(
         callsListState: MutableStateFlow<AsyncData<List<Call>>>,
         sessionId: SessionId?,
-        roomId: String
+        roomId: String,
+        page: Int?,
+        isInitialLoad: Boolean,
+        onDataLoaded: (List<Call>, Int?) -> Unit
     ) {
         if (sessionId == null) {
-            callsListState.value = AsyncData.Failure(IllegalStateException("No active session"))
+            if (isInitialLoad) {
+                callsListState.value = AsyncData.Failure(IllegalStateException("No active session"))
+            }
+            onDataLoaded(emptyList(), null)
             return
         }
         
-        callsListState.value = AsyncData.Loading()
+        if (isInitialLoad) {
+            callsListState.value = AsyncData.Loading()
+        }
         
         try {
-            // Get the calls for the specific room
+            // Get the calls for the specific room with pagination
             val result = callRepository.getCallDetails(
                 sessionId = sessionId, 
                 userId = sessionId.value,
-                roomId = roomId
+                roomId = roomId,
+                page = page
             )
             
             result.fold(
-                onSuccess = { calls ->
-                    Timber.d("Successfully loaded ${calls.size} calls for room $roomId")
-                    callsListState.value = AsyncData.Success(calls)
+                onSuccess = { paginatedResult ->
+                    Timber.d("Successfully loaded ${paginatedResult.calls.size} calls for room $roomId, page: $page")
+                    
+                    if (isInitialLoad) {
+                        callsListState.value = AsyncData.Success(paginatedResult.calls)
+                    }
+                    
+                    // Pass the data back to the caller
+                    onDataLoaded(paginatedResult.calls, paginatedResult.nextPage)
                 },
                 onFailure = { error ->
-                    Timber.e(error, "Error loading call details for room $roomId")
-                    callsListState.value = AsyncData.Failure(error)
+                    Timber.e(error, "Error loading call details for room $roomId, page: $page")
+                    
+                    if (isInitialLoad) {
+                        callsListState.value = AsyncData.Failure(error)
+                    }
+                    
+                    onDataLoaded(emptyList(), null)
                 }
             )
         } catch (e: Exception) {
-            Timber.e(e, "Exception loading call details for room $roomId")
-            callsListState.value = AsyncData.Failure(e)
+            Timber.e(e, "Exception loading call details for room $roomId, page: $page")
+            
+            if (isInitialLoad) {
+                callsListState.value = AsyncData.Failure(e)
+            }
+            
+            onDataLoaded(emptyList(), null)
         }
     }
 }

@@ -16,9 +16,10 @@ interface CallApiService {
      *
      * @param userId The ID of the user to get call details for
      * @param roomId Optional room ID to filter calls
+     * @param page Optional page number for pagination
      * @return API response containing call details
      */
-    suspend fun getCallDetails(userId: String, roomId: String?): ApiResponse<List<Call>>
+    suspend fun getCallDetails(userId: String, roomId: String? = null, page: Int? = null): ApiResponse<List<Call>>
 }
 
 /**
@@ -27,5 +28,6 @@ interface CallApiService {
 data class ApiResponse<T>(
     val data: T? = null,
     val error: String? = null,
-    val isSuccessful: Boolean = error == null
+    val isSuccessful: Boolean = error == null,
+    val nextPage: Int? = null
 )

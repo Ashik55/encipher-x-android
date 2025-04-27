@@ -28,7 +28,8 @@ interface CallApiService {
     @GET("call/{userId}")
     suspend fun getCallDetails(
         @Path("userId") userId: String?,
-        @Query("room_id") roomId: String?
+        @Query("room_id") roomId: String?,
+        @Query("page") page: Int? = null
     ): Response<CallDetailsResponse>
 
 }

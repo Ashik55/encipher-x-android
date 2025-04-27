@@ -11,6 +11,7 @@ import io.element.android.libraries.matrix.api.MatrixClient
 import io.element.android.libraries.matrix.api.MatrixClientProvider
 import io.element.android.libraries.matrix.api.core.SessionId
 import io.element.android.libraries.matrix.impl.call.model.Call as MatrixCall
+import io.element.android.libraries.matrix.impl.call.model.CallDetailsResponse
 import io.element.android.libraries.matrix.impl.call.services.CallApiService
 import javax.inject.Inject
 import com.squareup.anvil.annotations.ContributesBinding
@@ -19,16 +20,30 @@ import io.element.android.libraries.di.SingleIn
 import retrofit2.Response
 import timber.log.Timber
 
+/**
+ * Result of a paginated call details request, including the next page token if available.
+ */
+data class PaginatedCallResult(
+    val calls: List<Call>,
+    val nextPage: Int? = null
+)
+
 interface CallRepository {
     /**
-     * Get call details for a specific user.
+     * Get call details for a specific user with pagination support.
      *
      * @param sessionId The session ID to use
      * @param userId The user ID to get call history for
      * @param roomId Optional room ID to filter calls
-     * @return API response containing call details
+     * @param page Optional page number for pagination
+     * @return API response containing call details with pagination info
      */
-    suspend fun getCallDetails(sessionId: SessionId, userId: String, roomId: String? = null): Result<List<Call>>
+    suspend fun getCallDetails(
+        sessionId: SessionId, 
+        userId: String, 
+        roomId: String? = null,
+        page: Int? = null
+    ): Result<PaginatedCallResult>
 }
 
 @SingleIn(AppScope::class)
@@ -37,15 +52,23 @@ class DefaultCallRepository @Inject constructor(
     private val matrixCallApiService: CallApiService,
     private val matrixClientProvider: MatrixClientProvider
 ) : CallRepository {
-    override suspend fun getCallDetails(sessionId: SessionId, userId: String, roomId: String?): Result<List<Call>> = runCatching {
-        Timber.d("Fetching calls for user: $userId, room: $roomId")
+    override suspend fun getCallDetails(
+        sessionId: SessionId, 
+        userId: String, 
+        roomId: String?,
+        page: Int?
+    ): Result<PaginatedCallResult> = runCatching {
+        Timber.d("Fetching calls for user: $userId, room: $roomId, page: $page")
         
-        val response = matrixCallApiService.getCallDetails(userId, roomId)
+        val response = matrixCallApiService.getCallDetails(userId, roomId, page)
         
         if (response.isSuccessful) {
             val callsResponse = response.body()
             val calls = callsResponse?.calls?.filterNotNull() ?: emptyList()
-            calls.map { it.toCall() }
+            PaginatedCallResult(
+                calls = calls.map { it.toCall() },
+                nextPage = callsResponse?.next_page
+            )
         } else {
             Timber.e("Failed to fetch calls: ${response.code()} ${response.message()}")
             throw Exception("Failed to fetch calls: ${response.code()} ${response.message()}")
