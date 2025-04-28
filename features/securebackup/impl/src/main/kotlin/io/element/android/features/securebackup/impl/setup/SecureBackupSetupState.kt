@@ -18,6 +18,9 @@ data class SecureBackupSetupState(
     val setupState: SetupState,
     val isSavingToVault: Boolean,
     val vaultSaveAction: AsyncAction<Unit>,
+    val needsPasskeyValidation: Boolean = false,
+    val validatePasskeyAction: AsyncAction<Unit> = AsyncAction.Uninitialized,
+    val oldPassphrase: String = "",
     val eventSink: (SecureBackupSetupEvents) -> Unit
 )
 

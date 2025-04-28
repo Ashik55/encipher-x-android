@@ -104,18 +104,24 @@ fun SecureBackupSetupView(
         }
     }
     
+    // If in change mode and validation needed, don't auto-generate key
+    val shouldAutoGenerateKey = !(state.isChangeRecoveryKeyUserStory && state.needsPasskeyValidation)
+    
     // Auto-generate recovery key if not already generated or in progress
     LaunchedEffect(state.recoveryKeyViewState.formattedRecoveryKey, state.recoveryKeyViewState.inProgress) {
-        if (!state.recoveryKeyViewState.inProgress && state.recoveryKeyViewState.formattedRecoveryKey == null) {
+        if (shouldAutoGenerateKey && !state.recoveryKeyViewState.inProgress && state.recoveryKeyViewState.formattedRecoveryKey == null) {
             state.eventSink.invoke(SecureBackupSetupEvents.CreateRecoveryKey)
         }
     }
     
-    // Force show bottom sheet when recovery key is available
-    LaunchedEffect(formattedRecoveryKey) {
+    // Force show bottom sheet when recovery key is available - BUT only if validation is not needed OR already completed
+    LaunchedEffect(formattedRecoveryKey, state.needsPasskeyValidation) {
         if (formattedRecoveryKey != null) {
-            Timber.d("Recovery key available, showing bottom sheet")
-            showBottomSheet = true
+            Timber.d("Recovery key available, checking if we should show bottom sheet")
+            // Only show bottom sheet if we don't need validation or validation is done
+            val shouldShowSheet = !state.isChangeRecoveryKeyUserStory || !state.needsPasskeyValidation
+            Timber.d("Should show bottom sheet: $shouldShowSheet (isChange=${state.isChangeRecoveryKeyUserStory}, needsValidation=${state.needsPasskeyValidation})")
+            showBottomSheet = shouldShowSheet
         }
     }
     
@@ -128,57 +134,67 @@ fun SecureBackupSetupView(
         }
     }
     
-    NewFlowStepPage(
-        modifier = modifier,
-        onBackClick = onBackClick.takeIf { state.canGoBack() },
-        title = title(state),
-        subTitle = subtitle(state),
-        iconStyle = RecoveryKeyIcon.Style.Default(CompoundIcons.KeySolid()),
-        buttons = { 
-            // Add button to reopen bottom sheet if it's closed and recovery key is available
-            if (formattedRecoveryKey != null && !showBottomSheet) {
-                Button(
-                    text = stringResource(id = R.string.screen_recovery_key_vault_save_button),
-                    leadingIcon = IconSource.Vector(CompoundIcons.Key()),
-                    modifier = Modifier.fillMaxWidth(),
-                    onClick = {
-                        Timber.d("Button clicked to show bottom sheet")
-                        showBottomSheet = true
-                    }
-                )
-            }
-        },
-    ) {
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(top = 52.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
+    // Display passphrase validation UI when in change mode and validation needed
+    if (state.isChangeRecoveryKeyUserStory && state.needsPasskeyValidation) {
+        PassphraseValidationView(
+            state = state,
+            onBackClick = onBackClick,
+            modifier = modifier
+        )
+    } else {
+        // Regular recovery key setup/change flow
+        NewFlowStepPage(
+            modifier = modifier,
+            onBackClick = onBackClick.takeIf { state.canGoBack() },
+            title = title(state),
+            subTitle = subtitle(state),
+            iconStyle = RecoveryKeyIcon.Style.Default(CompoundIcons.KeySolid()),
+            buttons = { 
+                // Add button to reopen bottom sheet if it's closed and recovery key is available
+                if (formattedRecoveryKey != null && !showBottomSheet) {
+                    Button(
+                        text = stringResource(id = R.string.screen_recovery_key_vault_save_button),
+                        leadingIcon = IconSource.Vector(CompoundIcons.Key()),
+                        modifier = Modifier.fillMaxWidth(),
+                        onClick = {
+                            Timber.d("Button clicked to show bottom sheet")
+                            showBottomSheet = true
+                        }
+                    )
+                }
+            },
         ) {
-            Text(
-                text = setupMessage,
-                textAlign = TextAlign.Center,
-                style = ElementTheme.typography.fontBodyLgMedium,
-                color = ElementTheme.colors.textPrimary,
-                modifier = Modifier.padding(horizontal = 24.dp)
-            )
-            
-            if (formattedRecoveryKey != null) {
-                Spacer(modifier = Modifier.height(16.dp))
-                
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = 52.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
                 Text(
-                    text = stringResource(id = R.string.screen_recovery_key_success),
+                    text = setupMessage,
                     textAlign = TextAlign.Center,
-                    style = ElementTheme.typography.fontBodyMdMedium,
-                    color = Color(0xFF0A8741),
+                    style = ElementTheme.typography.fontBodyLgMedium,
+                    color = ElementTheme.colors.textPrimary,
                     modifier = Modifier.padding(horizontal = 24.dp)
                 )
+                
+                if (formattedRecoveryKey != null) {
+                    Spacer(modifier = Modifier.height(16.dp))
+                    
+                    Text(
+                        text = stringResource(id = R.string.screen_recovery_key_success),
+                        textAlign = TextAlign.Center,
+                        style = ElementTheme.typography.fontBodyMdMedium,
+                        color = Color(0xFF0A8741),
+                        modifier = Modifier.padding(horizontal = 24.dp)
+                    )
+                }
             }
         }
     }
     
-    // Show bottom sheet when recovery key is generated
-    if (formattedRecoveryKey != null) {
+    // Show bottom sheet when recovery key is generated and validation is not needed or is completed
+    if (formattedRecoveryKey != null && (!state.isChangeRecoveryKeyUserStory || !state.needsPasskeyValidation)) {
         Timber.d("Attempting to show bottom sheet, showBottomSheet: $showBottomSheet")
         if (showBottomSheet) {
             ModalBottomSheet(
@@ -202,14 +218,20 @@ fun SecureBackupSetupView(
     AsyncActionView(
         async = state.vaultSaveAction,
         onSuccess = {
-//            showSnackbar(context, R.string.screen_recovery_key_vault_success)
             state.eventSink.invoke(SecureBackupSetupEvents.RecoveryKeyHasBeenSaved)
             // Auto-finish after successful vault save
             onSuccess()
         },
-        onErrorDismiss = {
-//            showSnackbar(context, R.string.screen_recovery_key_vault_error)
-        }
+        onErrorDismiss = {}
+    )
+    
+    // Display AsyncActionView for passkey validation action
+    AsyncActionView(
+        async = state.validatePasskeyAction,
+        onSuccess = {
+            // No action needed here as the validation state is already updated
+        },
+        onErrorDismiss = {}
     )
 }
 
@@ -493,13 +515,115 @@ private fun subtitle(state: SecureBackupSetupState): String {
     }
 }
 
-//private fun showSnackbar(context: Context, messageResId: Int) {
-//    Toast.makeText(
-//        context,
-//        context.getString(messageResId),
-//        Toast.LENGTH_SHORT
-//    ).show()
-//}
+@Composable
+private fun PassphraseValidationView(
+    state: SecureBackupSetupState,
+    onBackClick: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    NewFlowStepPage(
+        modifier = modifier,
+        onBackClick = onBackClick,
+        title = stringResource(id = R.string.screen_recovery_key_change_title),
+        subTitle = "Please verify your passphrase to change your recovery key",
+        iconStyle = RecoveryKeyIcon.Style.Default(CompoundIcons.KeySolid()),
+        buttons = {
+            Button(
+                text = "Continue",
+                enabled = state.oldPassphrase.isNotBlank() && !state.validatePasskeyAction.isLoading(),
+                leadingIcon = IconSource.Vector(CompoundIcons.ChevronRight()),
+                onClick = {
+                    state.eventSink(SecureBackupSetupEvents.ValidatePasskey)
+                },
+                modifier = Modifier.fillMaxWidth(),
+            )
+        },
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(top = 52.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            // Add descriptive text
+            Text(
+                text = "For security reasons, please enter your current passphrase to verify your identity before changing your recovery key.",
+                textAlign = TextAlign.Center,
+                style = ElementTheme.typography.fontBodyLgMedium,
+                color = ElementTheme.colors.textPrimary,
+                modifier = Modifier.padding(horizontal = 24.dp)
+            )
+            
+            Spacer(modifier = Modifier.height(32.dp))
+            
+            // Create a simplified version of input field
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 24.dp)
+            ) {
+                Text(
+                    text = "Current Passphrase",
+                    style = ElementTheme.typography.fontBodyMdMedium,
+                    color = ElementTheme.colors.textPrimary
+                )
+                
+                Spacer(modifier = Modifier.height(8.dp))
+                
+                // A simple password field with proper parameters
+                io.element.android.libraries.designsystem.theme.components.TextField(
+                    value = state.oldPassphrase,
+                    onValueChange = { value -> state.eventSink(SecureBackupSetupEvents.OldPassphraseChanged(value)) },
+                    placeholder = "Enter your current passphrase",
+                    visualTransformation = androidx.compose.ui.text.input.PasswordVisualTransformation(),
+                    keyboardOptions = androidx.compose.foundation.text.KeyboardOptions(
+                        keyboardType = androidx.compose.ui.text.input.KeyboardType.Password
+                    ),
+                    trailingIcon = if (state.oldPassphrase.isNotBlank()) {
+                        {
+                            io.element.android.libraries.designsystem.theme.components.IconButton(
+                                onClick = { state.eventSink(SecureBackupSetupEvents.OldPassphraseChanged("")) }
+                            ) {
+                                Icon(
+                                    imageVector = CompoundIcons.Close(),
+                                    contentDescription = "Clear",
+                                    tint = ElementTheme.colors.iconSecondary
+                                )
+                            }
+                        }
+                    } else null,
+                    modifier = Modifier.fillMaxWidth()
+                )
+                
+                if (state.validatePasskeyAction is AsyncAction.Failure) {
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Text(
+                        text = "Invalid passphrase. Please try again.",
+                        style = ElementTheme.typography.fontBodySmMedium,
+                        color = Color(0xFFB00020) // Error red
+                    )
+                }
+            }
+            
+            // Show loading state
+            if (state.validatePasskeyAction.isLoading()) {
+                Spacer(modifier = Modifier.height(24.dp))
+                CircularProgressIndicator(
+                    color = Color(0xFF0A8741),
+                    modifier = Modifier.size(32.dp)
+                )
+                
+                Spacer(modifier = Modifier.height(16.dp))
+                
+                Text(
+                    text = "Validating passphrase...",
+                    style = ElementTheme.typography.fontBodyMdMedium,
+                    color = ElementTheme.colors.textSecondary
+                )
+            }
+        }
+    }
+}
 
 @PreviewsDayNight
 @Composable

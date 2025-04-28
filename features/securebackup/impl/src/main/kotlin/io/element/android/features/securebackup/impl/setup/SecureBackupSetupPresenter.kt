@@ -10,6 +10,7 @@
 package io.element.android.features.securebackup.impl.setup
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
@@ -57,17 +58,60 @@ class SecureBackupSetupPresenter @AssistedInject constructor(
         var showSaveConfirmationDialog by remember { mutableStateOf(false) }
         var isVaultMode by remember { mutableStateOf(false) }
         var passphrase by remember { mutableStateOf("") }
+        var oldPassphrase by remember { mutableStateOf("") }
+        var needsPasskeyValidation by remember { mutableStateOf(false) }
         val vaultSaveAction = remember { mutableStateOf<AsyncAction<Unit>>(AsyncAction.Uninitialized) }
+        val validatePasskeyAction = remember { mutableStateOf<AsyncAction<Unit>>(AsyncAction.Uninitialized) }
+        
+        // Check if we need to validate passkeys when initializing in change mode
+        LaunchedEffect(Unit) {
+            if (isChangeRecoveryKeyUserStory) {
+                Timber.tag(loggerTagSetup.value).d("Checking if passkey validation is needed for recovery key change")
+                
+                try {
+                    // Check if a passkey exists for this user
+                    val passkeyService = matrixClient.passkeyService()
+                    val userId = matrixClient.sessionId.value
+                    Timber.tag(loggerTagSetup.value).d("Checking passkey for user: $userId")
+                    
+                    val hasPasskeyResponse = passkeyService.hasPasskey(userId)
+                    Timber.tag(loggerTagSetup.value).d("hasPasskey response: $hasPasskeyResponse")
+                    
+                    val hasPasskey = hasPasskeyResponse.getOrDefault(false)
+                    Timber.tag(loggerTagSetup.value).d("User has passkey: $hasPasskey")
+                    
+                    // Force set the validation flag for testing
+                    needsPasskeyValidation = true
+                    
+                    // Uncomment this line when done testing
+                    // needsPasskeyValidation = hasPasskey
+                    
+                    Timber.tag(loggerTagSetup.value).d("needsPasskeyValidation set to: $needsPasskeyValidation")
+                } catch (e: Exception) {
+                    Timber.tag(loggerTagSetup.value).e(e, "Failed to check if passkey exists")
+                    // Default to not requiring validation on error
+                    needsPasskeyValidation = false
+                }
+            }
+        }
 
         fun handleEvents(event: SecureBackupSetupEvents) {
             when (event) {
                 SecureBackupSetupEvents.CreateRecoveryKey -> {
+                    // If we're in change mode and need validation first, don't proceed
+                    if (isChangeRecoveryKeyUserStory && needsPasskeyValidation) {
+                        Timber.tag(loggerTagSetup.value).d("Skipping key creation - validation required first")
+                        // Don't proceed with key generation until validated
+                        return
+                    }
+                    Timber.tag(loggerTagSetup.value).d("Creating recovery key")
                     coroutineScope.createOrChangeRecoveryKey(stateAndDispatch)
                 }
                 SecureBackupSetupEvents.RecoveryKeyHasBeenSaved ->
                     stateAndDispatch.dispatchAction(SecureBackupSetupStateMachine.Event.UserSavedKey)
                 SecureBackupSetupEvents.DismissDialog -> {
                     showSaveConfirmationDialog = false
+                    validatePasskeyAction.value = AsyncAction.Uninitialized
                 }
                 SecureBackupSetupEvents.Done -> {
                     showSaveConfirmationDialog = true
@@ -84,9 +128,26 @@ class SecureBackupSetupPresenter @AssistedInject constructor(
                 SecureBackupSetupEvents.ToggleVaultMode -> {
                     isVaultMode = !isVaultMode
                 }
+                is SecureBackupSetupEvents.OldPassphraseChanged -> {
+                    oldPassphrase = event.passphrase
+                    Timber.tag(loggerTagSetup.value).d("Old passphrase changed: ${oldPassphrase.isNotBlank()}")
+                }
+                SecureBackupSetupEvents.ValidatePasskey -> {
+                    Timber.tag(loggerTagSetup.value).d("Validating passkey with passphrase, len=${oldPassphrase.length}")
+                    if (oldPassphrase.isNotBlank()) {
+                        coroutineScope.validatePasskey(validatePasskeyAction, oldPassphrase, needsPasskeyValidation) { validated ->
+                            Timber.tag(loggerTagSetup.value).d("Passkey validation result: $validated")
+                            needsPasskeyValidation = !validated
+                            Timber.tag(loggerTagSetup.value).d("needsPasskeyValidation updated to: $needsPasskeyValidation")
+                        }
+                    }
+                }
             }
         }
 
+        // Add extra debug log to check state values
+        Timber.tag(loggerTagSetup.value).d("Current state: isChangeRecoveryKeyUserStory=$isChangeRecoveryKeyUserStory, needsPasskeyValidation=$needsPasskeyValidation")
+        
         val recoveryKeyViewState = RecoveryKeyViewState(
             recoveryKeyUserStory = if (isChangeRecoveryKeyUserStory) RecoveryKeyUserStory.Change else RecoveryKeyUserStory.Setup,
             formattedRecoveryKey = setupState.recoveryKey(),
@@ -102,6 +163,9 @@ class SecureBackupSetupPresenter @AssistedInject constructor(
             showSaveConfirmationDialog = showSaveConfirmationDialog,
             isSavingToVault = vaultSaveAction.value.isLoading(),
             vaultSaveAction = vaultSaveAction.value,
+            needsPasskeyValidation = needsPasskeyValidation,
+            validatePasskeyAction = validatePasskeyAction.value,
+            oldPassphrase = oldPassphrase,
             eventSink = ::handleEvents
         )
     }
@@ -184,6 +248,40 @@ class SecureBackupSetupPresenter @AssistedInject constructor(
         } catch (e: Exception) {
             Timber.tag(loggerTagSetup.value).e(e, "Exception while saving passkey to vault: ${e.message}")
             vaultSaveAction.value = AsyncAction.Failure(e)
+        }
+    }
+    
+    private fun CoroutineScope.validatePasskey(
+        validatePasskeyAction: MutableState<AsyncAction<Unit>>,
+        oldPassphrase: String,
+        currentValidationState: Boolean,
+        onValidated: (Boolean) -> Unit
+    ) = launch {
+        validatePasskeyAction.value = AsyncAction.Loading
+        
+        try {
+            Timber.tag(loggerTagSetup.value).d("Attempting to validate existing passkey")
+            val service = matrixClient.passkeyService()
+            
+            // Attempt to retrieve the passkey with the provided passphrase
+            val result = service.retrievePasskey(oldPassphrase)
+            
+            result.fold(
+                onSuccess = { recoveryKey ->
+                    Timber.tag(loggerTagSetup.value).d("Successfully validated passkey with passphrase")
+                    // If we get here, the passphrase is valid
+                    validatePasskeyAction.value = AsyncAction.Success(Unit)
+                    // No longer need validation
+                    onValidated(true)
+                },
+                onFailure = { error ->
+                    Timber.tag(loggerTagSetup.value).e(error, "Failed to validate passkey: ${error.message}")
+                    validatePasskeyAction.value = AsyncAction.Failure(error)
+                }
+            )
+        } catch (e: Exception) {
+            Timber.tag(loggerTagSetup.value).e(e, "Exception while validating passkey: ${e.message}")
+            validatePasskeyAction.value = AsyncAction.Failure(e)
         }
     }
 }

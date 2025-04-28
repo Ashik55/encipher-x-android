@@ -17,4 +17,8 @@ sealed interface SecureBackupSetupEvents {
     data class PassphraseChanged(val passphrase: String) : SecureBackupSetupEvents
     data object SaveToVault : SecureBackupSetupEvents
     data object ToggleVaultMode : SecureBackupSetupEvents
+    
+    // New events for passkey validation
+    data class OldPassphraseChanged(val passphrase: String) : SecureBackupSetupEvents
+    data object ValidatePasskey : SecureBackupSetupEvents
 }
