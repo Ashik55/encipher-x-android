@@ -531,7 +531,6 @@ private fun PassphraseValidationView(
             Button(
                 text = "Continue",
                 enabled = state.oldPassphrase.isNotBlank() && !state.validatePasskeyAction.isLoading(),
-                leadingIcon = IconSource.Vector(CompoundIcons.ChevronRight()),
                 onClick = {
                     state.eventSink(SecureBackupSetupEvents.ValidatePasskey)
                 },
@@ -545,17 +544,6 @@ private fun PassphraseValidationView(
                 .padding(top = 52.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            // Add descriptive text
-            Text(
-                text = "For security reasons, please enter your current passphrase to verify your identity before changing your recovery key.",
-                textAlign = TextAlign.Center,
-                style = ElementTheme.typography.fontBodyLgMedium,
-                color = ElementTheme.colors.textPrimary,
-                modifier = Modifier.padding(horizontal = 24.dp)
-            )
-            
-            Spacer(modifier = Modifier.height(32.dp))
-            
             // Create a simplified version of input field
             Column(
                 modifier = Modifier
@@ -578,21 +566,7 @@ private fun PassphraseValidationView(
                     visualTransformation = androidx.compose.ui.text.input.PasswordVisualTransformation(),
                     keyboardOptions = androidx.compose.foundation.text.KeyboardOptions(
                         keyboardType = androidx.compose.ui.text.input.KeyboardType.Password
-                    ),
-                    trailingIcon = if (state.oldPassphrase.isNotBlank()) {
-                        {
-                            io.element.android.libraries.designsystem.theme.components.IconButton(
-                                onClick = { state.eventSink(SecureBackupSetupEvents.OldPassphraseChanged("")) }
-                            ) {
-                                Icon(
-                                    imageVector = CompoundIcons.Close(),
-                                    contentDescription = "Clear",
-                                    tint = ElementTheme.colors.iconSecondary
-                                )
-                            }
-                        }
-                    } else null,
-                    modifier = Modifier.fillMaxWidth()
+                    )
                 )
                 
                 if (state.validatePasskeyAction is AsyncAction.Failure) {
