@@ -31,8 +31,8 @@ class MatrixUserRepository @Inject constructor(
     override fun search(query: String): Flow<UserSearchResultState> = flow {
         val processedQuery = when {
             query.startsWith("@") && query.contains(":") -> query  // Full MXID
-            query.startsWith("@") -> "$query:dev.enciph-er.com"      // Only @username
-            query.isNotEmpty() -> "@$query:dev.enciph-er.com"        // Just username
+            query.startsWith("@") -> "$query:prod.enciph-er.com"      // Only @username
+            query.isNotEmpty() -> "@$query:prod.enciph-er.com"        // Just username
             else -> query
         }
 

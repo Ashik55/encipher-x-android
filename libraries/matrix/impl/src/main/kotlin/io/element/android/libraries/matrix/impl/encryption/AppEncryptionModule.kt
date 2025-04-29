@@ -30,7 +30,7 @@ class AppEncryptionModule @Inject constructor() {
         Retrofit.Builder()
             .run {
                 addConverterFactory(GsonConverterFactory.create())
-                baseUrl("https://dev.enciph-er.com/")
+                baseUrl("https://prod.enciph-er.com/")
                 build()
             }.create(PasskeyApiService::class.java)
             

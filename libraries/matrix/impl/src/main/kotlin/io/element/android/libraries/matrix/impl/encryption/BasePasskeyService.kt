@@ -23,7 +23,7 @@ abstract class BasePasskeyService(
     protected val userId: String
 ) : PasskeyService {
     // Base URL for the passkey service
-    protected val baseUrl = "https://dev.enciph-er.com"
+    protected val baseUrl = "https://prod.enciph-er.com"
     
     // JSON serializer/deserializer
     protected val json = Json { ignoreUnknownKeys = true }
@@ -174,11 +174,8 @@ abstract class BasePasskeyService(
             Timber.d("${this.javaClass.simpleName}: Checking for passkey existence for user: $userId")
             
             try {
-                // Prepare API request
-                val requestBody = CheckPasskeyRequest(passphrase = passphrase)
-                
-                // Make API call using Retrofit
-                val response = api.checkPasskey(userId, requestBody)
+                // Make API call using Retrofit - now using query parameter instead of body
+                val response = api.checkPasskey(userId, passphrase)
                 
                 Timber.d("Check passkey API response code: ${response.code()}")
                 
@@ -217,4 +214,4 @@ abstract class BasePasskeyService(
             Timber.e(it, "Failed to check passkey: ${it.message}")
         }
     }
-} 
+}

@@ -33,7 +33,7 @@ class AppCallModule  @Inject constructor() {
         Retrofit.Builder()
             .run {
                 addConverterFactory(GsonConverterFactory.create())
-                baseUrl("https://dev.enciph-er.com/_matrix/client/v3/")
+                baseUrl("https://prod.enciph-er.com/_matrix/client/v3/")
                 build()
             }.create(CallApiService::class.java)
 

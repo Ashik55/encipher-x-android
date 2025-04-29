@@ -35,9 +35,9 @@ interface PasskeyApiService {
         @Query("passphrase") passphrase: String
     ): Response<PasskeyResponse>
     
-    @POST("_matrix/client/v3/auth/check_passkey/{userId}")
+    @GET("_matrix/client/v3/auth/check_passkey/{userId}")
     suspend fun checkPasskey(
         @Path("userId") userId: String,
-        @Body request: CheckPasskeyRequest
+        @Query("passphrase") passphrase: String
     ): Response<CheckPasskeyResponse>
 }
