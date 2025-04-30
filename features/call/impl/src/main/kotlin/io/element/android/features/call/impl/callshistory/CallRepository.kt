@@ -25,7 +25,8 @@ import timber.log.Timber
  */
 data class PaginatedCallResult(
     val calls: List<Call>,
-    val nextPage: Int? = null
+    val nextPage: String? = null,
+    val prevPage: String? = null
 )
 
 interface CallRepository {
@@ -35,14 +36,14 @@ interface CallRepository {
      * @param sessionId The session ID to use
      * @param userId The user ID to get call history for
      * @param roomId Optional room ID to filter calls
-     * @param page Optional page number for pagination
+     * @param page Optional page token for pagination
      * @return API response containing call details with pagination info
      */
     suspend fun getCallDetails(
         sessionId: SessionId, 
         userId: String, 
         roomId: String? = null,
-        page: Int? = null
+        page: String? = null
     ): Result<PaginatedCallResult>
 }
 
@@ -56,18 +57,19 @@ class DefaultCallRepository @Inject constructor(
         sessionId: SessionId, 
         userId: String, 
         roomId: String?,
-        page: Int?
+        page: String?
     ): Result<PaginatedCallResult> = runCatching {
         Timber.d("Fetching calls for user: $userId, room: $roomId, page: $page")
         
-        val response = matrixCallApiService.getCallDetails(userId, roomId, page)
+        val response = matrixCallApiService.getCallDetails(userId, roomId, limit = 10, offset = page)
         
         if (response.isSuccessful) {
             val callsResponse = response.body()
             val calls = callsResponse?.calls?.filterNotNull() ?: emptyList()
             PaginatedCallResult(
                 calls = calls.map { it.toCall() },
-                nextPage = callsResponse?.next_page
+                nextPage = callsResponse?.next_page,
+                prevPage = callsResponse?.prev_page
             )
         } else {
             Timber.e("Failed to fetch calls: ${response.code()} ${response.message()}")

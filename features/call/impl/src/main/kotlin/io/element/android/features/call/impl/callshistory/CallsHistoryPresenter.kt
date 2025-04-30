@@ -37,7 +37,7 @@ class CallsHistoryPresenter @Inject constructor(
         val isLoadingMore = remember { MutableStateFlow(false) }
         
         var retryCount by remember { mutableStateOf(0) }
-        var nextPage by remember { mutableStateOf<Int?>(null) }
+        var nextPageToken by remember { mutableStateOf<String?>(null) }
         var currentCalls by remember { mutableStateOf<List<Call>>(emptyList()) }
         var sessionIdValue by remember { mutableStateOf<SessionId?>(null) }
         
@@ -53,10 +53,10 @@ class CallsHistoryPresenter @Inject constructor(
                 sessionId = sessionId,
                 page = null,
                 isInitialLoad = true,
-                onDataLoaded = { calls, nextPageToken ->
+                onDataLoaded = { calls, nextPage, prevPage ->
                     currentCalls = calls
-                    nextPage = nextPageToken
-                    hasMoreToLoad.value = nextPageToken != null
+                    nextPageToken = nextPage
+                    hasMoreToLoad.value = nextPage != null
                 }
             )
             
@@ -66,26 +66,26 @@ class CallsHistoryPresenter @Inject constructor(
         
         // Handle loading more content with LaunchedEffect
         LaunchedEffect(loadMoreEvent) {
-            if (loadMoreEvent > 0 && hasMoreToLoad.value && !isLoadingMore.value && nextPage != null) {
-                Timber.d("Starting to load next page: $nextPage, current items: ${currentCalls.size}")
+            if (loadMoreEvent > 0 && hasMoreToLoad.value && !isLoadingMore.value && nextPageToken != null) {
+                Timber.d("Starting to load next page: $nextPageToken, current items: ${currentCalls.size}")
                 isLoadingMore.value = true
                 
                 // Load the next page of calls
                 loadCallHistory(
                     callsListState = callsList,
                     sessionId = sessionIdValue,
-                    page = nextPage,
+                    page = nextPageToken,
                     isInitialLoad = false,
-                    onDataLoaded = { newCalls, nextPageToken ->
+                    onDataLoaded = { newCalls, nextPage, prevPage ->
                         // Append the new calls to the existing list
                         val combinedList = currentCalls + newCalls
-                        Timber.d("Loaded ${newCalls.size} more items, new total: ${combinedList.size}, hasMore: ${nextPageToken != null}")
+                        Timber.d("Loaded ${newCalls.size} more items, new total: ${combinedList.size}, hasMore: ${nextPage != null}")
                         currentCalls = combinedList
                         callsList.value = AsyncData.Success(combinedList)
                         
                         // Update pagination state
-                        nextPage = nextPageToken
-                        hasMoreToLoad.value = nextPageToken != null
+                        nextPageToken = nextPage
+                        hasMoreToLoad.value = nextPage != null
                         isLoadingMore.value = false
                     }
                 )
@@ -116,15 +116,15 @@ class CallsHistoryPresenter @Inject constructor(
     private suspend fun loadCallHistory(
         callsListState: MutableStateFlow<AsyncData<List<Call>>>,
         sessionId: SessionId?,
-        page: Int? = null,
+        page: String? = null,
         isInitialLoad: Boolean = true,
-        onDataLoaded: (List<Call>, Int?) -> Unit = { _, _ -> }
+        onDataLoaded: (List<Call>, String?, String?) -> Unit = { _, _, _ -> }
     ) {
         if (sessionId == null) {
             if (isInitialLoad) {
                 callsListState.value = AsyncData.Failure(IllegalStateException("No active session"))
             }
-            onDataLoaded(emptyList(), null)
+            onDataLoaded(emptyList(), null, null)
             return
         }
         
@@ -145,7 +145,7 @@ class CallsHistoryPresenter @Inject constructor(
                     }
                     
                     // Pass the data back to the caller
-                    onDataLoaded(paginatedResult.calls, paginatedResult.nextPage)
+                    onDataLoaded(paginatedResult.calls, paginatedResult.nextPage, paginatedResult.prevPage)
                 },
                 onFailure = { error ->
                     Timber.e(error, "Error loading call history, page: $page")
@@ -154,7 +154,7 @@ class CallsHistoryPresenter @Inject constructor(
                         callsListState.value = AsyncData.Failure(error)
                     }
                     
-                    onDataLoaded(emptyList(), null)
+                    onDataLoaded(emptyList(), null, null)
                 }
             )
         } catch (e: Exception) {
@@ -164,7 +164,7 @@ class CallsHistoryPresenter @Inject constructor(
                 callsListState.value = AsyncData.Failure(e)
             }
             
-            onDataLoaded(emptyList(), null)
+            onDataLoaded(emptyList(), null, null)
         }
     }
 

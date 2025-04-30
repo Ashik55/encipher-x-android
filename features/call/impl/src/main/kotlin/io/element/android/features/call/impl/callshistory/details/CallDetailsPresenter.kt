@@ -46,7 +46,7 @@ class CallDetailsPresenter @Inject constructor(
         val hasMoreToLoad = remember { MutableStateFlow(true) }
         val isLoadingMore = remember { MutableStateFlow(false) }
         
-        var nextPage by remember { mutableStateOf<Int?>(null) }
+        var nextPageToken by remember { mutableStateOf<String?>(null) }
         var currentCalls by remember { mutableStateOf<List<Call>>(emptyList()) }
         var retryCount by remember { mutableStateOf(0) }
         var sessionIdValue by remember { mutableStateOf<SessionId?>(null) }
@@ -73,10 +73,10 @@ class CallDetailsPresenter @Inject constructor(
                     roomId = roomId,
                     page = null,
                     isInitialLoad = true,
-                    onDataLoaded = { calls, nextPageToken ->
+                    onDataLoaded = { calls, nextPage, prevPage ->
                         currentCalls = calls
-                        nextPage = nextPageToken
-                        hasMoreToLoad.value = nextPageToken != null
+                        nextPageToken = nextPage
+                        hasMoreToLoad.value = nextPage != null
                     }
                 )
             } ?: run {
@@ -88,7 +88,7 @@ class CallDetailsPresenter @Inject constructor(
 
         // Handle loading more content with LaunchedEffect
         LaunchedEffect(loadMoreEvent) {
-            if (loadMoreEvent > 0 && hasMoreToLoad.value && !isLoadingMore.value && nextPage != null && callToUse.room_id != null) {
+            if (loadMoreEvent > 0 && hasMoreToLoad.value && !isLoadingMore.value && nextPageToken != null && callToUse.room_id != null) {
                 isLoadingMore.value = true
                 
                 // Load the next page of calls
@@ -97,16 +97,17 @@ class CallDetailsPresenter @Inject constructor(
                         callsListState = callsList,
                         sessionId = sessionIdValue,
                         roomId = roomId,
-                        page = nextPage,
+                        page = nextPageToken,
                         isInitialLoad = false,
-                        onDataLoaded = { newCalls, nextPageToken ->
+                        onDataLoaded = { newCalls, nextPage, prevPage ->
                             // Append the new calls to the existing list
-                            currentCalls = currentCalls + newCalls
-                            callsList.value = AsyncData.Success(currentCalls)
+                            val combinedList = currentCalls + newCalls
+                            currentCalls = combinedList
+                            callsList.value = AsyncData.Success(combinedList)
                             
                             // Update pagination state
-                            nextPage = nextPageToken
-                            hasMoreToLoad.value = nextPageToken != null
+                            nextPageToken = nextPage
+                            hasMoreToLoad.value = nextPage != null
                             isLoadingMore.value = false
                         }
                     )
@@ -156,15 +157,15 @@ class CallDetailsPresenter @Inject constructor(
         callsListState: MutableStateFlow<AsyncData<List<Call>>>,
         sessionId: SessionId?,
         roomId: String,
-        page: Int?,
+        page: String?,
         isInitialLoad: Boolean,
-        onDataLoaded: (List<Call>, Int?) -> Unit
+        onDataLoaded: (List<Call>, String?, String?) -> Unit
     ) {
         if (sessionId == null) {
             if (isInitialLoad) {
                 callsListState.value = AsyncData.Failure(IllegalStateException("No active session"))
             }
-            onDataLoaded(emptyList(), null)
+            onDataLoaded(emptyList(), null, null)
             return
         }
         
@@ -190,7 +191,7 @@ class CallDetailsPresenter @Inject constructor(
                     }
                     
                     // Pass the data back to the caller
-                    onDataLoaded(paginatedResult.calls, paginatedResult.nextPage)
+                    onDataLoaded(paginatedResult.calls, paginatedResult.nextPage, paginatedResult.prevPage)
                 },
                 onFailure = { error ->
                     Timber.e(error, "Error loading call details for room $roomId, page: $page")
@@ -199,7 +200,7 @@ class CallDetailsPresenter @Inject constructor(
                         callsListState.value = AsyncData.Failure(error)
                     }
                     
-                    onDataLoaded(emptyList(), null)
+                    onDataLoaded(emptyList(), null, null)
                 }
             )
         } catch (e: Exception) {
@@ -209,7 +210,7 @@ class CallDetailsPresenter @Inject constructor(
                 callsListState.value = AsyncData.Failure(e)
             }
             
-            onDataLoaded(emptyList(), null)
+            onDataLoaded(emptyList(), null, null)
         }
     }
 }
