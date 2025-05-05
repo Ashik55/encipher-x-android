@@ -38,6 +38,9 @@ interface PreferencesEntryPoint : FeatureEntryPoint {
 
         @Parcelize
         data object DeactivateAccount : InitialTarget
+
+        @Parcelize
+        data class UserProfile(val matrixUser: io.element.android.libraries.matrix.api.user.MatrixUser) : InitialTarget
     }
 
     data class Params(val initialElement: InitialTarget) : NodeInputs

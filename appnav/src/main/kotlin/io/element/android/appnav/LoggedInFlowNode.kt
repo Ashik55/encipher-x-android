@@ -287,7 +287,8 @@ class LoggedInFlowNode @AssistedInject constructor(
                         }
                         
                         override fun onSettingsClick() {
-                            safePush(NavTarget.Settings())
+                            // Skip preferences and navigate directly to user profile edit
+                            safePush(NavTarget.Settings(PreferencesEntryPoint.InitialTarget.UserProfile(matrixClient.userProfile.value)))
                         }
                         
                         override fun onCreateRoomClick() {

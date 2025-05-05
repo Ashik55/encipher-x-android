@@ -47,4 +47,5 @@ internal fun PreferencesEntryPoint.InitialTarget.toNavTarget() = when (this) {
     PreferencesEntryPoint.InitialTarget.AdvancedSettings -> PreferencesFlowNode.NavTarget.AdvancedSettings
     PreferencesEntryPoint.InitialTarget.SignOut -> PreferencesFlowNode.NavTarget.SignOut
     PreferencesEntryPoint.InitialTarget.DeactivateAccount -> PreferencesFlowNode.NavTarget.AccountDeactivation
+    is PreferencesEntryPoint.InitialTarget.UserProfile -> PreferencesFlowNode.NavTarget.UserProfile(this.matrixUser)
 }
