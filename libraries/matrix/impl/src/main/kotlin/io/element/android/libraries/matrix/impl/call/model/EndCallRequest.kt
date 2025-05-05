@@ -7,11 +7,9 @@
 
 package io.element.android.libraries.matrix.impl.call.model
 
-data class CreateCallResponse(
-    val call_id: Long?,
-    val call_type: String?,
-    val caller_user_id: String?,
-    val created_ts: String?,
-//    val ended_ts: Str?,
-    val room_id: String?
+/**
+ * Request body for ending a call.
+ */
+data class EndCallRequest(
+    val call_id: Long
 )

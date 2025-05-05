@@ -65,6 +65,7 @@ import io.element.android.libraries.core.log.logger.LoggerTag
 import io.element.android.libraries.designsystem.theme.ElementThemeApp
 import io.element.android.libraries.designsystem.theme.components.CircularProgressIndicator
 import io.element.android.libraries.matrix.impl.call.model.CallRequestBody
+import io.element.android.libraries.matrix.impl.call.model.EndCallRequest
 import io.element.android.libraries.matrix.impl.call.services.CallApiService
 import io.element.android.libraries.preferences.api.store.AppPreferencesStore
 import org.jitsi.meet.sdk.JitsiMeetActivity
@@ -73,6 +74,9 @@ import org.jitsi.meet.sdk.JitsiMeetUserInfo
 import timber.log.Timber
 import java.net.URL
 import javax.inject.Inject
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 
 private val loggerTag = LoggerTag("ElementCallActivity")
 
@@ -112,26 +116,10 @@ class ElementCallActivity :
     private var eventSink: ((CallScreenEvents) -> Unit)? = null
 
     private var isAudioCall: Boolean? = null
-
-//    @RequiresApi(Build.VERSION_CODES.S)
-//    private val requiredPermissions = arrayOf(
-//        Manifest.permission.CAMERA,
-//        Manifest.permission.RECORD_AUDIO,
-//        Manifest.permission.BLUETOOTH_CONNECT
-//    )
-//
-//    private val permissionLauncher = registerForActivityResult(
-//        ActivityResultContracts.RequestMultiplePermissions()
-//    ) { permissions ->
-//        val allGranted = permissions.entries.all { it.value }
-//        if (!allGranted) {
-//            Toast.makeText(
-//                this,
-//                "Camera and microphone permissions are required for video conferencing",
-//                Toast.LENGTH_LONG
-//            ).show()
-//        }
-//    }
+    
+    // Store active call information
+    private var activeCallId: Long? = null
+    private var activeUserId: String? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -210,7 +198,8 @@ class ElementCallActivity :
                         val url = state.urlState.data
                         val (roomId, displayName, userId) = extractRoomIdAndDisplayName(url)
                         println("RoomName URL ==>> $roomId $displayName $userId")
-
+                        
+                        activeUserId = userId
 
                         if (isAudioCall != null) {
                             println("Creating call for primary user==>")
@@ -223,7 +212,10 @@ class ElementCallActivity :
                                     val data = response.body()
                                     Timber.tag("response ==>>>").d(data.toString())
                                     println("Call Created==>: $data")
-                                    // Update state or navigate to call screen
+                                    
+                                    // Store the call_id from the response
+                                    activeCallId = data?.call_id
+                                    Timber.tag("Active Call ID").d("Stored call_id: $activeCallId")
 
                                     if (roomId?.isNotBlank() == true) {
                                         joinJitsiMeeting(this@ElementCallActivity, roomId, displayName ?: "Anonymous", isAudioCall == true)
@@ -244,9 +236,13 @@ class ElementCallActivity :
                                 if (response.isSuccessful) {
                                     val firstCall = response.body()?.calls?.first()
                                     Timber.tag("response ==>>>").d(firstCall.toString())
+                                    
+                                    // Store the call_id from the response
+                                    activeCallId = firstCall?.call_id
+                                    Timber.tag("Active Call ID").d("Retrieved call_id: $activeCallId")
 
                                     if (roomId?.isNotBlank() == true && firstCall != null) {
-                                        joinJitsiMeeting(this@ElementCallActivity, roomId, displayName ?: "Anonymous", firstCall?.call_type == "audio")
+                                        joinJitsiMeeting(this@ElementCallActivity, roomId, displayName ?: "Anonymous", firstCall.call_type == "audio")
                                     }
 
                                     // Update state or navigate to call screen
@@ -257,13 +253,8 @@ class ElementCallActivity :
                                 println("Exception in createCall==>: ${e.localizedMessage}")
                             }
                         }
-
-//                        if (roomId?.isNotBlank() == true) {
-//                            joinJitsiMeeting(this@ElementCallActivity, roomId, displayName ?: "Anonymous")
-//                        }
                     }
                 }
-
 
                 Box(
                     modifier = Modifier
@@ -273,17 +264,6 @@ class ElementCallActivity :
                 ) {
                     CircularProgressIndicator(color = Color.White)
                 }
-
-//                CallScreenView(
-//                    context = this@ElementCallActivity, // Pass context
-//                    state = state,
-//                    pipState = pipState,
-//                    requestPermissions = { permissions, callback ->
-//                        requestPermissionCallback = callback
-//                        requestPermissionsLauncher.launch(permissions)
-//                    }
-//
-//                )
             }
         }
     }
@@ -385,6 +365,36 @@ class ElementCallActivity :
         CallForegroundService.stop(this)
         pictureInPicturePresenter.setPipView(null)
         androidx.localbroadcastmanager.content.LocalBroadcastManager.getInstance(this).unregisterReceiver(broadcastReceiver)
+        
+        // End the call when activity is destroyed if we have an active call ID
+        endActiveCall()
+    }
+    
+    /**
+     * End the active call by calling the PUT API with the stored call_id
+     */
+    private fun endActiveCall() {
+        if (activeCallId != null && activeUserId != null) {
+            Timber.tag("End Call").d("Ending call with ID: $activeCallId for user: $activeUserId")
+            
+            CoroutineScope(Dispatchers.IO).launch {
+                try {
+                    val response = callApiService.endCall(
+                        userId = activeUserId!!,
+                        requestBody = EndCallRequest(call_id = activeCallId!!)
+                    )
+                    
+                    if (response.isSuccessful) {
+                        val callData = response.body()
+                        Timber.tag("End Call").d("Call ended successfully: $callData")
+                    } else {
+                        Timber.tag("End Call").e("Failed to end call: ${response.code()} ${response.message()}")
+                    }
+                } catch (e: Exception) {
+                    Timber.tag("End Call").e(e, "Exception when ending call")
+                }
+            }
+        }
     }
 
     override fun finish() {
@@ -571,6 +581,8 @@ class ElementCallActivity :
                 }
                 org.jitsi.meet.sdk.BroadcastEvent.Type.CONFERENCE_TERMINATED -> {
                     Timber.tag(loggerTag.value).d("Conference Terminated: ${event.data}")
+                    // End the call when conference is terminated
+                    endActiveCall()
                     finish()
                 }
                 org.jitsi.meet.sdk.BroadcastEvent.Type.PARTICIPANT_JOINED -> {
@@ -578,6 +590,8 @@ class ElementCallActivity :
                 }
                 org.jitsi.meet.sdk.BroadcastEvent.Type.READY_TO_CLOSE -> {
                     Timber.tag(loggerTag.value).d("Ready to close: ${event.data}")
+                    // End the call when app is ready to close
+                    endActiveCall()
                 }
                 else -> {}
             }

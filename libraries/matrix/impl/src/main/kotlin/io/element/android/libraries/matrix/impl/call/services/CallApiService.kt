@@ -10,10 +10,13 @@ package io.element.android.libraries.matrix.impl.call.services
 import io.element.android.libraries.matrix.impl.call.model.CallDetailsResponse
 import io.element.android.libraries.matrix.impl.call.model.CallRequestBody
 import io.element.android.libraries.matrix.impl.call.model.CreateCallResponse
+import io.element.android.libraries.matrix.impl.call.model.EndCallRequest
+import io.element.android.libraries.matrix.impl.call.model.EndCallResponse
 import retrofit2.Response // Make sure this is from retrofit2, not okhttp3
 import retrofit2.http.Body
 import retrofit2.http.GET
 import retrofit2.http.POST
+import retrofit2.http.PUT
 import retrofit2.http.Path
 import retrofit2.http.Query
 
@@ -32,4 +35,10 @@ interface CallApiService {
         @Query("limit") limit: Int = 10,
         @Query("offset") offset: String? = null
     ): Response<CallDetailsResponse>
+    
+    @PUT("call/{userId}")
+    suspend fun endCall(
+        @Path("userId") userId: String,
+        @Body requestBody: EndCallRequest
+    ): Response<EndCallResponse>
 }
