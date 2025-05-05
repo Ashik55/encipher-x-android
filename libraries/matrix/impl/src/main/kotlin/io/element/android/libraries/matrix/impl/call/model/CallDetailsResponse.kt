@@ -9,6 +9,6 @@ package io.element.android.libraries.matrix.impl.call.model
 
 data class CallDetailsResponse(
     val calls: List<Call> = emptyList(),
-    val next_page: String? = null,
-    val prev_page: String? = null
+    val next_page_offset: String? = null,
+    val prev_page_offset: String? = null
 )

@@ -21,7 +21,7 @@ import retrofit2.Response
 import timber.log.Timber
 
 /**
- * Result of a paginated call details request, including the next page token if available.
+ * Result of a paginated call details request, including the next page info if available.
  */
 data class PaginatedCallResult(
     val calls: List<Call>,
@@ -66,10 +66,15 @@ class DefaultCallRepository @Inject constructor(
         if (response.isSuccessful) {
             val callsResponse = response.body()
             val calls = callsResponse?.calls?.filterNotNull() ?: emptyList()
+            
+            // Convert next_page to string for compatibility with existing code
+            val nextPageStr = callsResponse?.next_page_offset?.toString()
+            val prevPageStr = callsResponse?.prev_page_offset?.toString()
+            
             PaginatedCallResult(
                 calls = calls.map { it.toCall() },
-                nextPage = callsResponse?.next_page,
-                prevPage = callsResponse?.prev_page
+                nextPage = callsResponse?.next_page_offset,
+                prevPage = callsResponse?.prev_page_offset
             )
         } else {
             Timber.e("Failed to fetch calls: ${response.code()} ${response.message()}")
