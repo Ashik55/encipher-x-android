@@ -84,6 +84,7 @@ fun PreferencesRootView(
         modifier = modifier,
         onBackClick = onBackClick,
         title = stringResource(id = CommonStrings.common_settings),
+        showBackButton = false,
         snackbarHost = { SnackbarHost(snackbarHostState) }
     ) {
         UserPreferences(

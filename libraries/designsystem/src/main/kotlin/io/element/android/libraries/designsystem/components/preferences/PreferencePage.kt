@@ -37,6 +37,7 @@ fun PreferencePage(
     title: String,
     onBackClick: () -> Unit,
     modifier: Modifier = Modifier,
+    showBackButton: Boolean = true,
     snackbarHost: @Composable () -> Unit = {},
     content: @Composable ColumnScope.() -> Unit,
 ) {
@@ -50,6 +51,7 @@ fun PreferencePage(
             PreferenceTopAppBar(
                 title = title,
                 onBackClick = onBackClick,
+                showBackButton = showBackButton,
             )
         },
         snackbarHost = snackbarHost,
@@ -71,10 +73,13 @@ fun PreferencePage(
 private fun PreferenceTopAppBar(
     title: String,
     onBackClick: () -> Unit,
+    showBackButton: Boolean = true,
 ) {
     TopAppBar(
         navigationIcon = {
-            BackButton(onClick = onBackClick)
+            if (showBackButton) {
+                BackButton(onClick = onBackClick)
+            }
         },
         title = {
             Text(

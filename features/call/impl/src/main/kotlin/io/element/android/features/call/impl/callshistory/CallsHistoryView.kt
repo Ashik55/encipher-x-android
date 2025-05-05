@@ -72,6 +72,7 @@ import io.element.android.libraries.designsystem.components.navbar.BottomNavBar
 import io.element.android.libraries.designsystem.components.navbar.BottomNavRoute
 import io.element.android.libraries.designsystem.preview.ElementPreview
 import io.element.android.libraries.designsystem.preview.PreviewsDayNight
+import io.element.android.libraries.designsystem.theme.aliasScreenTitle
 import io.element.android.libraries.designsystem.theme.components.Button
 import io.element.android.libraries.designsystem.theme.components.ButtonSize
 import io.element.android.libraries.designsystem.theme.components.CustomProgressIndicator
@@ -197,8 +198,7 @@ fun CallsHistoryView(
                     title = {
                         Text(
                             text = "Calls",
-                            style = MaterialTheme.typography.headlineMedium,
-                            fontWeight = FontWeight.Bold,
+                            style = ElementTheme.typography.aliasScreenTitle,
                         )
                     },
                     actions = {
