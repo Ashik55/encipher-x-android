@@ -53,6 +53,7 @@ interface ActiveCallManager {
 
     /**
      * Registers an incoming call if there isn't an existing active call and posts a [CallState.Ringing] notification.
+     *
      * @param notificationData The data for the incoming call notification.
      */
     fun registerIncomingCall(notificationData: CallNotificationData)
@@ -82,6 +83,8 @@ class DefaultActiveCallManager @Inject constructor(
     private val defaultCurrentCallService: DefaultCurrentCallService,
 ) : ActiveCallManager {
     private var timedOutCallJob: Job? = null
+    // Store the most recently processed event ID to avoid duplicate notifications
+    private var lastProcessedEventId: String? = null
 
     override val activeCall = MutableStateFlow<ActiveCall?>(null)
 
@@ -91,11 +94,21 @@ class DefaultActiveCallManager @Inject constructor(
     }
 
     override fun registerIncomingCall(notificationData: CallNotificationData) {
+        // Check if this is the same event we just processed
+        if (notificationData.eventId.value == lastProcessedEventId) {
+            Timber.d("Duplicate call notification event detected, ignoring: ${notificationData.eventId.value}")
+            return
+        }
+        
+        // Store this event ID to prevent duplicate processing
+        lastProcessedEventId = notificationData.eventId.value
+        
         if (activeCall.value != null) {
             displayMissedCallNotification(notificationData)
             Timber.w("Already have an active call, ignoring incoming call: $notificationData")
             return
         }
+        
         activeCall.value = ActiveCall(
             callType = CallType.RoomCall(
                 sessionId = notificationData.sessionId,
@@ -104,6 +117,7 @@ class DefaultActiveCallManager @Inject constructor(
             callState = CallState.Ringing(notificationData),
         )
 
+        timedOutCallJob?.cancel()
         timedOutCallJob = coroutineScope.launch {
             showIncomingCallNotification(notificationData)
 
@@ -137,6 +151,9 @@ class DefaultActiveCallManager @Inject constructor(
         cancelIncomingCallNotification()
         timedOutCallJob?.cancel()
         activeCall.value = null
+        
+        // Reset the last processed event ID when call ends
+        lastProcessedEventId = null
     }
 
     override fun joinedCall(callType: CallType) {
@@ -147,6 +164,9 @@ class DefaultActiveCallManager @Inject constructor(
             callType = callType,
             callState = CallState.InCall,
         )
+        
+        // Reset the last processed event ID when call state changes
+        lastProcessedEventId = null
     }
 
     @SuppressLint("MissingPermission")
