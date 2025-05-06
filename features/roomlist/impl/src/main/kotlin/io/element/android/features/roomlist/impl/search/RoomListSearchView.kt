@@ -25,20 +25,11 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.TextFieldDefaults
-import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.drawBehind
-import androidx.compose.ui.focus.FocusRequester
-import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
 import androidx.compose.ui.input.nestedscroll.NestedScrollSource
 import androidx.compose.ui.input.nestedscroll.nestedScroll
@@ -56,22 +47,18 @@ import io.element.android.features.roomlist.impl.components.RoomSummaryRow
 import io.element.android.features.roomlist.impl.contentType
 import io.element.android.features.roomlist.impl.model.RoomListRoomSummary
 import io.element.android.libraries.androidutils.ui.hideKeyboard
-import io.element.android.libraries.designsystem.components.button.BackButton
 import io.element.android.libraries.designsystem.components.button.SuperButton
 import io.element.android.libraries.designsystem.modifiers.applyIf
 import io.element.android.libraries.designsystem.preview.ElementPreview
 import io.element.android.libraries.designsystem.preview.PreviewsDayNight
 import io.element.android.libraries.designsystem.theme.components.ButtonSize
-import io.element.android.libraries.designsystem.theme.components.FilledTextField
 import io.element.android.libraries.designsystem.theme.components.Icon
-import io.element.android.libraries.designsystem.theme.components.IconButton
-import io.element.android.libraries.designsystem.theme.components.Scaffold
+import io.element.android.libraries.designsystem.theme.components.SearchBar
+import io.element.android.libraries.designsystem.theme.components.SearchBarResultState
 import io.element.android.libraries.designsystem.theme.components.Text
-import io.element.android.libraries.designsystem.theme.components.TextField
-import io.element.android.libraries.designsystem.theme.components.TopAppBar
-import io.element.android.libraries.designsystem.utils.copy
 import io.element.android.libraries.matrix.api.core.RoomId
 import io.element.android.libraries.ui.strings.CommonStrings
+
 @Composable
 private fun rememberKeyboardDismissingConnection(localView: android.view.View): NestedScrollConnection {
     return remember {
@@ -140,7 +127,6 @@ internal fun RoomListSearchView(
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun RoomListSearchContent(
     state: RoomListSearchState,
@@ -151,115 +137,71 @@ private fun RoomListSearchContent(
 ) {
     val localView = LocalView.current
 
-    val borderColor = MaterialTheme.colorScheme.tertiary
-    val strokeWidth = 1.dp
-    fun onBackButtonClick() {
-        state.eventSink(RoomListSearchEvents.ToggleSearchVisibility)
-    }
-
     fun onRoomClick(room: RoomListRoomSummary) {
         onRoomClick(room.roomId)
     }
-    Scaffold(
-        topBar = {
-            TopAppBar(
-                modifier = Modifier.drawBehind {
-                    drawLine(
-                        color = borderColor,
-                        start = Offset(0f, size.height),
-                        end = Offset(size.width, size.height),
-                        strokeWidth = strokeWidth.value
-                    )
-                },
-                navigationIcon = { BackButton(onClick = ::onBackButtonClick) },
-                title = {
-                    val filter = state.query
-                    val focusRequester = FocusRequester()
-                    FilledTextField(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .focusRequester(focusRequester),
-                        value = filter,
-                        singleLine = true,
-                        onValueChange = { state.eventSink(RoomListSearchEvents.QueryChanged(it)) },
-                        colors = TextFieldDefaults.colors(
-                            focusedContainerColor = Color.Transparent,
-                            unfocusedContainerColor = Color.Transparent,
-                            disabledContainerColor = Color.Transparent,
-                            focusedIndicatorColor = Color.Transparent,
-                            unfocusedIndicatorColor = Color.Transparent,
-                            disabledIndicatorColor = Color.Transparent,
-                            errorIndicatorColor = Color.Transparent,
-                        ),
-                        trailingIcon = {
-                            if (filter.isNotEmpty()) {
-                                IconButton(onClick = {
-                                    state.eventSink(RoomListSearchEvents.ClearQuery)
-                                }) {
-                                    Icon(
-                                        imageVector = CompoundIcons.Close(),
-                                        contentDescription = stringResource(CommonStrings.action_cancel)
+
+    Box {
+        Image(
+            painter = painterResource(id = R.drawable.bg),
+            contentDescription = null,
+            modifier = Modifier
+                .fillMaxWidth()
+                .fillMaxHeight(),
+            contentScale = ContentScale.Crop
+        )
+
+        // Add keyboard dismissing box
+        Box(
+            modifier = Modifier
+                .keyboardDismissingClickable(localView)
+                .nestedScroll(keyboardDismissingScrollConnection)
+        ) {
+            Column(
+                modifier = Modifier
+                    .padding(top = 8.dp)
+            ) {
+                // Use our new minimal SearchBar component
+                SearchBar(
+                    query = state.query,
+                    onQueryChange = { state.eventSink(RoomListSearchEvents.QueryChanged(it)) },
+                    active = state.isSearchActive,
+                    onActiveChange = { active -> 
+                        if (!active) {
+                            state.eventSink(RoomListSearchEvents.ToggleSearchVisibility)
+                        }
+                    },
+                    placeHolderTitle = stringResource(CommonStrings.action_search),
+                    resultState = if (state.results.isEmpty()) 
+                        SearchBarResultState.NoResultsFound() 
+                    else 
+                        SearchBarResultState.Results(state.results),
+                    resultHandler = { results ->
+                        LazyColumn {
+                            if (state.displayRoomDirectorySearch) {
+                                item {
+                                    RoomDirectorySearchButton(
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .padding(vertical = 16.dp, horizontal = 16.dp),
+                                        onClick = onRoomDirectorySearchClick
                                     )
                                 }
                             }
-                        }
-                    )
-
-                    LaunchedEffect(state.isSearchActive) {
-                        if (state.isSearchActive) {
-                            focusRequester.requestFocus()
-                        }
-                    }
-                },
-                windowInsets = TopAppBarDefaults.windowInsets.copy(top = 0),
-                colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.Transparent)
-            )
-        }
-    ) { padding ->
-        Box {
-            Image(
-                painter = painterResource(id = R.drawable.bg),
-                contentDescription = null,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .fillMaxHeight(),
-                contentScale = ContentScale.Crop
-            )
-
-            // Add keyboard dismissing box
-            Box(
-                modifier = Modifier
-                    .keyboardDismissingClickable(localView)
-                    .nestedScroll(keyboardDismissingScrollConnection)
-            ) {
-                Column(
-                    modifier = Modifier
-                        .padding(padding)
-                        .consumeWindowInsets(padding)
-                ) {
-                    if (state.displayRoomDirectorySearch) {
-                        RoomDirectorySearchButton(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(vertical = 24.dp, horizontal = 16.dp),
-                            onClick = onRoomDirectorySearchClick
-                        )
-                    }
-                    LazyColumn(
-                        modifier = Modifier.weight(1f),
-                    ) {
-                        items(
-                            items = state.results,
-                            contentType = { room -> room.contentType() },
-                        ) { room ->
-                            RoomSummaryRow(
-                                room = room,
-                                onClick = ::onRoomClick,
-                                eventSink = eventSink,
-                            )
+                            
+                            items(
+                                items = results,
+                                contentType = { room -> room.contentType() },
+                            ) { room ->
+                                RoomSummaryRow(
+                                    room = room,
+                                    onClick = ::onRoomClick,
+                                    eventSink = eventSink,
+                                )
+                            }
                         }
                     }
-                }
+                )
             }
         }
     }

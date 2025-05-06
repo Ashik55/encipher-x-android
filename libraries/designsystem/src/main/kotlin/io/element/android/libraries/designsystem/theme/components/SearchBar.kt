@@ -16,10 +16,9 @@ import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -27,7 +26,6 @@ import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.TextFieldColors
@@ -56,7 +54,7 @@ import io.element.android.libraries.designsystem.preview.PreviewGroup
 import io.element.android.libraries.ui.strings.CommonStrings
 
 /**
- * An inline search bar component that shows search results within the same page.
+ * A minimal inline search bar component that shows search results within the same page.
  */
 @Composable
 fun <T> SearchBar(
@@ -69,7 +67,7 @@ fun <T> SearchBar(
     enabled: Boolean = true,
     showBackButton: Boolean = true,
     resultState: SearchBarResultState<T> = SearchBarResultState.Initial(),
-    shape: Shape = RoundedCornerShape(28.dp),
+    shape: Shape = RoundedCornerShape(32.dp),
     textFieldColors: TextFieldColors = ElementSearchBarDefaults.textFieldColors(),
     contentPrefix: @Composable ColumnScope.() -> Unit = {},
     contentSuffix: @Composable ColumnScope.() -> Unit = {},
@@ -79,7 +77,7 @@ fun <T> SearchBar(
     val focusRequester = remember { FocusRequester() }
 
     Column(modifier = modifier) {
-        // Search input field
+        // Search input field - more minimal with reduced height
         Card(
             shape = shape,
             colors = CardDefaults.cardColors(
@@ -90,12 +88,13 @@ fun <T> SearchBar(
             ),
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 16.dp, vertical = 8.dp)
+                .padding(horizontal = 16.dp, vertical = 4.dp)
+                .height(56.dp) // Reduced height for minimal design
         ) {
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = 8.dp, vertical = 4.dp),
+                    .padding(horizontal = 4.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 // Leading icon - back button or search icon
@@ -105,12 +104,14 @@ fun <T> SearchBar(
                             onActiveChange(false)
                             onQueryChange("")
                             focusManager.clearFocus() 
-                        }
+                        },
+                        modifier = Modifier.size(36.dp)
                     ) {
                         Icon(
                             imageVector = CompoundIcons.ArrowLeft(),
                             contentDescription = stringResource(CommonStrings.action_back),
-                            tint = ElementTheme.colors.iconSecondary
+                            tint = ElementTheme.colors.iconSecondary,
+                            modifier = Modifier.size(20.dp)
                         )
                     }
                 } else {
@@ -118,7 +119,9 @@ fun <T> SearchBar(
                         imageVector = CompoundIcons.Search(),
                         contentDescription = stringResource(CommonStrings.action_search),
                         tint = ElementTheme.colors.iconSecondary,
-                        modifier = Modifier.padding(start = 12.dp)
+                        modifier = Modifier
+                            .padding(start = 12.dp)
+                            .size(18.dp)
                     )
                 }
                 
@@ -126,7 +129,7 @@ fun <T> SearchBar(
                 Box(
                     modifier = Modifier
                         .weight(1f)
-                        .padding(horizontal = 8.dp)
+                        .padding(horizontal = 4.dp)
                 ) {
                     FilledTextField(
                         value = query,
@@ -137,11 +140,13 @@ fun <T> SearchBar(
                         placeholder = {
                             Text(
                                 text = placeHolderTitle,
-                                color = ElementTheme.colors.textSecondary
+                                color = ElementTheme.colors.textSecondary,
+                                style = ElementTheme.typography.fontBodyMdRegular
                             )
                         },
                         textStyle = LocalTextStyle.current.copy(
-                            color = ElementTheme.colors.textPrimary
+                            color = ElementTheme.colors.textPrimary,
+                            fontSize = ElementTheme.typography.fontBodyMdRegular.fontSize
                         ),
                         singleLine = true,
                         enabled = enabled,
@@ -167,17 +172,21 @@ fun <T> SearchBar(
                     }
                 }
                 
-                // Clear button when query is not empty
+                // Clear button when query is not empty - smaller for minimal UI
                 AnimatedVisibility(
                     visible = active && query.isNotEmpty(),
                     enter = fadeIn(),
                     exit = fadeOut()
                 ) {
-                    IconButton(onClick = { onQueryChange("") }) {
+                    IconButton(
+                        onClick = { onQueryChange("") },
+                        modifier = Modifier.size(36.dp)
+                    ) {
                         Icon(
                             imageVector = CompoundIcons.Close(),
                             contentDescription = stringResource(CommonStrings.action_clear),
-                            tint = ElementTheme.colors.iconSecondary
+                            tint = ElementTheme.colors.iconSecondary,
+                            modifier = Modifier.size(16.dp)
                         )
                     }
                 }
@@ -201,13 +210,14 @@ fun <T> SearchBar(
                     Box(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(vertical = 40.dp),
+                            .padding(vertical = 24.dp),
                         contentAlignment = Alignment.Center
                     ) {
                         Text(
                             text = stringResource(CommonStrings.common_no_results),
                             textAlign = TextAlign.Center,
                             color = ElementTheme.colors.textSecondary,
+                            style = ElementTheme.typography.fontBodySmRegular
                         )
                     }
                 }
