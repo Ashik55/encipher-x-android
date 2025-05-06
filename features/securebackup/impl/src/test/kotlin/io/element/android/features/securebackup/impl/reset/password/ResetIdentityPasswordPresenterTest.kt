@@ -11,6 +11,9 @@ import app.cash.molecule.RecompositionMode
 import app.cash.molecule.moleculeFlow
 import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
+import io.element.android.libraries.matrix.api.encryption.EncryptionService
+import io.element.android.libraries.matrix.test.FakeMatrixClient
+import io.element.android.libraries.matrix.test.encryption.FakeEncryptionService
 import io.element.android.libraries.matrix.test.encryption.FakeIdentityPasswordResetHandle
 import io.element.android.tests.testutils.lambda.lambdaRecorder
 import io.element.android.tests.testutils.testCoroutineDispatchers
@@ -80,8 +83,12 @@ class ResetIdentityPasswordPresenterTest {
 
     private fun TestScope.createPresenter(
         identityResetHandle: FakeIdentityPasswordResetHandle = FakeIdentityPasswordResetHandle(),
+        encryptionService: EncryptionService = FakeEncryptionService()
     ) = ResetIdentityPasswordPresenter(
         identityPasswordResetHandle = identityResetHandle,
+        matrixClient = FakeMatrixClient().apply {
+            givenEncryptionService(encryptionService)
+        },
         dispatchers = testCoroutineDispatchers(),
     )
 }

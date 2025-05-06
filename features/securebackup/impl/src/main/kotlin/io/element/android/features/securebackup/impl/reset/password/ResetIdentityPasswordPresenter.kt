@@ -16,12 +16,15 @@ import io.element.android.libraries.architecture.AsyncAction
 import io.element.android.libraries.architecture.Presenter
 import io.element.android.libraries.architecture.runCatchingUpdatingState
 import io.element.android.libraries.core.coroutine.CoroutineDispatchers
+import io.element.android.libraries.matrix.api.MatrixClient
 import io.element.android.libraries.matrix.api.encryption.IdentityPasswordResetHandle
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
+import timber.log.Timber
 
 class ResetIdentityPasswordPresenter(
     private val identityPasswordResetHandle: IdentityPasswordResetHandle,
+    private val matrixClient: MatrixClient,
     private val dispatchers: CoroutineDispatchers,
 ) : Presenter<ResetIdentityPasswordState> {
     @Composable
@@ -45,7 +48,30 @@ class ResetIdentityPasswordPresenter(
 
     private fun CoroutineScope.reset(password: String, action: MutableState<AsyncAction<Unit>>) = launch(dispatchers.io) {
         suspend {
-            identityPasswordResetHandle.resetPassword(password).getOrThrow()
+            val result = identityPasswordResetHandle.resetPassword(password).getOrThrow()
+            
+            // After successfully resetting the password and recovery key,
+            // generate a new key immediately instead of waiting for logout/login
+            refreshRecoveryState()
+            
+            result
         }.runCatchingUpdatingState(action)
+    }
+    
+    private suspend fun refreshRecoveryState() {
+        try {
+            Timber.d("Generating new recovery key after reset")
+            val encryptionService = matrixClient.encryptionService()
+            
+            // Generate a new recovery key
+            val result = encryptionService.enableRecovery(waitForBackupsToUpload = false)
+            if (result.isSuccess) {
+                Timber.d("Successfully generated new recovery key after reset")
+            } else {
+                Timber.e("Failed to generate new recovery key after reset: ${result.exceptionOrNull()}")
+            }
+        } catch (e: Exception) {
+            Timber.e(e, "Error refreshing recovery state after reset")
+        }
     }
 }
