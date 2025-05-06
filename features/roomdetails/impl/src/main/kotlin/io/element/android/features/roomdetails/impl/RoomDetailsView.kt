@@ -103,6 +103,7 @@ import io.element.android.services.analyticsproviders.api.trackers.captureIntera
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.collections.immutable.toPersistentList
+import androidx.compose.foundation.horizontalScroll
 
 @Composable
 fun RoomDetailsView(
@@ -463,8 +464,9 @@ private fun CustomMainActionsSection(
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = 16.dp),
-        horizontalArrangement = Arrangement.SpaceEvenly,
+            .padding(horizontal = 16.dp)
+            .horizontalScroll(rememberScrollState()),
+        horizontalArrangement = Arrangement.spacedBy(16.dp),
     ) {
         val roomNotificationSettings = state.roomNotificationSettings
         if (state.roomType is RoomDetailsType.Room) {
@@ -499,7 +501,21 @@ private fun CustomMainActionsSection(
                 )
             }
             
-            // Second row will be handled by Column layout below
+            if (state.roomCallState.hasPermissionToJoin()) {
+                // Audio call button
+                CustomMainActionButton(
+                    title = stringResource(CommonStrings.action_audio_call),
+                    imageVector = ImageVector.vectorResource(id = io.element.android.libraries.designsystem.R.drawable.ic_call),
+                    onClick = onAudioCallClick,
+                )
+                
+                // Video call button
+                CustomMainActionButton(
+                    title = stringResource(CommonStrings.action_video_call),
+                    imageVector = ImageVector.vectorResource(id = R.drawable.ic_video_call),
+                    onClick = onVideoCallClick,
+                )
+            }
         } else {
             // For DM view, keep current design
             if (state.canShowNotificationSettings && roomNotificationSettings != null) {
@@ -539,31 +555,6 @@ private fun CustomMainActionsSection(
                 )
             }
         }
-    }
-    
-    // For Room view (not DM), add audio/video call buttons below
-    if (state.roomType is RoomDetailsType.Room && state.roomCallState.hasPermissionToJoin()) {
-//        Spacer(modifier = Modifier.height(16.dp))
-//        Row(
-//            modifier = Modifier
-//                .fillMaxWidth()
-//                .padding(horizontal = 16.dp),
-//            horizontalArrangement = Arrangement.SpaceEvenly,
-//        ) {
-//            // Audio call button
-//            CustomMainActionButton(
-//                title = stringResource(CommonStrings.action_audio_call),
-//                imageVector = ImageVector.vectorResource(id = io.element.android.libraries.designsystem.R.drawable.ic_call),
-//                onClick = onAudioCallClick,
-//            )
-//            
-//            // Video call button
-//            CustomMainActionButton(
-//                title = stringResource(CommonStrings.action_video_call),
-//                imageVector = ImageVector.vectorResource(id = R.drawable.ic_video_call),
-//                onClick = onVideoCallClick,
-//            )
-//        }
     }
 }
 
