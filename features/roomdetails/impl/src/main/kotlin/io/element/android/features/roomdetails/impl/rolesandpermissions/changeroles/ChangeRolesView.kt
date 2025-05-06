@@ -121,8 +121,8 @@ fun ChangeRolesView(
     Box(modifier = modifier) {
         Scaffold(
             modifier = Modifier
-                .fillMaxSize(),
-//                .systemBarsPadding(),
+                .fillMaxSize()
+                .systemBarsPadding(),
             topBar = {
                 AnimatedVisibility(visible = !state.isSearchActive) {
                     TopAppBar(
@@ -157,19 +157,7 @@ fun ChangeRolesView(
                 }
             }
         ) { paddingValues ->
-
-            Box {
-                Image(
-                    painter = painterResource(id = R.drawable.bg),
-                    contentDescription = null,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .fillMaxHeight(),
-                    contentScale = ContentScale.Crop
-                )
-
-                // Add keyboard dismissing box
-                Box(
+            Box(
                     modifier = Modifier
                         .clickable(
                             interactionSource = remember { MutableInteractionSource() },
@@ -232,7 +220,6 @@ fun ChangeRolesView(
                         }
                     }
                 }
-            }
             }
         }
 
