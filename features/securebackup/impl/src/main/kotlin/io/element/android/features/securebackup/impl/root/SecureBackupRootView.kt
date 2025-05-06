@@ -7,14 +7,21 @@
 
 package io.element.android.features.securebackup.impl.root
 
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.progressSemantics
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
 import io.element.android.compound.theme.ElementTheme
+import io.element.android.compound.tokens.generated.CompoundIcons
 import io.element.android.features.securebackup.impl.R
 import io.element.android.libraries.architecture.AsyncData
 import io.element.android.libraries.designsystem.components.async.AsyncActionView
@@ -26,6 +33,7 @@ import io.element.android.libraries.designsystem.preview.PreviewsDayNight
 import io.element.android.libraries.designsystem.text.buildAnnotatedStringWithStyledPart
 import io.element.android.libraries.designsystem.theme.components.CircularProgressIndicator
 import io.element.android.libraries.designsystem.theme.components.HorizontalDivider
+import io.element.android.libraries.designsystem.theme.components.IconSource
 import io.element.android.libraries.designsystem.theme.components.ListItem
 import io.element.android.libraries.designsystem.theme.components.Text
 import io.element.android.libraries.designsystem.utils.snackbar.SnackbarHost
@@ -100,80 +108,127 @@ fun SecureBackupRootView(
         }
 
         HorizontalDivider()
-        // Setup recovery
+        
+        // Setup recovery - modernized UI
         when (state.recoveryState) {
             RecoveryState.UNKNOWN,
             RecoveryState.WAITING_FOR_SYNC -> Unit
             RecoveryState.DISABLED -> {
-                ListItem(
-                    headlineContent = {
-                        Text(
-                            text = stringResource(id = R.string.screen_chat_backup_recovery_action_setup),
-                        )
-                    },
-                    supportingContent = {
-                        Text(
-                            text = stringResource(id = R.string.screen_chat_backup_recovery_action_setup_description, state.appName),
-                        )
-                    },
-                    trailingContent = ListItemContent.Badge,
-                    enabled = state.isKeyStorageEnabled,
-                    alwaysClickable = true,
-                    onClick = {
-                        if (state.isKeyStorageEnabled) {
-                            onSetupClick()
-                        } else {
-                            state.eventSink.invoke(SecureBackupRootEvents.DisplayKeyStorageDisabledError)
-                        }
-                    },
-                )
+                Column(
+                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
+                ) {
+                    ListItem(
+                        headlineContent = {
+                            Text(
+                                text = stringResource(id = R.string.screen_chat_backup_recovery_action_setup),
+                                style = ElementTheme.typography.fontBodyLgMedium,
+                            )
+                        },
+                        supportingContent = {
+                            Text(
+                                text = stringResource(id = R.string.screen_chat_backup_recovery_action_setup_description, state.appName),
+                                style = ElementTheme.typography.fontBodyMdRegular,
+                            )
+                        },
+                        leadingContent = ListItemContent.Icon(
+                            IconSource.Vector(CompoundIcons.Key())
+                        ),
+                        trailingContent = ListItemContent.Icon(
+                            IconSource.Vector(CompoundIcons.ChevronRight())
+                        ),
+                        modifier = Modifier
+                            .clip(RoundedCornerShape(12.dp))
+                            .background(ElementTheme.colors.bgSubtleSecondary)
+                            .clickable(enabled = state.isKeyStorageEnabled) {
+                                if (state.isKeyStorageEnabled) {
+                                    onSetupClick()
+                                } else {
+                                    state.eventSink.invoke(SecureBackupRootEvents.DisplayKeyStorageDisabledError)
+                                }
+                            }
+                            .padding(vertical = 4.dp),
+                        enabled = state.isKeyStorageEnabled,
+                        alwaysClickable = true,
+                    )
+                }
             }
             RecoveryState.ENABLED -> {
-                ListItem(
-                    headlineContent = {
-                        Text(
-                            text = stringResource(id = R.string.screen_chat_backup_recovery_action_change),
-                        )
-                    },
-                    supportingContent = {
-                        Text(
-                            text = stringResource(id = R.string.screen_chat_backup_recovery_action_change_description),
-                        )
-                    },
-                    enabled = state.isKeyStorageEnabled,
-                    alwaysClickable = true,
-                    onClick = {
-                        if (state.isKeyStorageEnabled) {
-                            onChangeClick()
-                        } else {
-                            state.eventSink.invoke(SecureBackupRootEvents.DisplayKeyStorageDisabledError)
-                        }
-                    },
-                )
+                Column(
+                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
+                ) {
+                    ListItem(
+                        headlineContent = {
+                            Text(
+                                text = stringResource(id = R.string.screen_chat_backup_recovery_action_change),
+                                style = ElementTheme.typography.fontBodyLgMedium,
+                            )
+                        },
+                        supportingContent = {
+                            Text(
+                                text = stringResource(id = R.string.screen_chat_backup_recovery_action_change_description),
+                                style = ElementTheme.typography.fontBodyMdRegular,
+                            )
+                        },
+                        leadingContent = ListItemContent.Icon(
+                            IconSource.Vector(CompoundIcons.Edit())
+                        ),
+                        trailingContent = ListItemContent.Icon(
+                            IconSource.Vector(CompoundIcons.ChevronRight())
+                        ),
+                        modifier = Modifier
+                            .clip(RoundedCornerShape(12.dp))
+                            .background(ElementTheme.colors.bgSubtleSecondary)
+                            .clickable(enabled = state.isKeyStorageEnabled) {
+                                if (state.isKeyStorageEnabled) {
+                                    onChangeClick()
+                                } else {
+                                    state.eventSink.invoke(SecureBackupRootEvents.DisplayKeyStorageDisabledError)
+                                }
+                            }
+                            .padding(vertical = 4.dp),
+                        enabled = state.isKeyStorageEnabled,
+                        alwaysClickable = true,
+                    )
+                }
             }
             RecoveryState.INCOMPLETE ->
-                ListItem(
-                    headlineContent = {
-                        Text(
-                            text = stringResource(id = R.string.screen_chat_backup_recovery_action_confirm),
-                        )
-                    },
-                    supportingContent = {
-                        Text(
-                            text = stringResource(id = R.string.screen_chat_backup_recovery_action_confirm_description),
-                        )
-                    },
-                    trailingContent = ListItemContent.Badge,
-                    enabled = state.isKeyStorageEnabled,
-                    alwaysClickable = true,
-                    onClick = {
-                        if (state.isKeyStorageEnabled) {
-                            onConfirmRecoveryKeyClick()
-                        } else {
-                            state.eventSink.invoke(SecureBackupRootEvents.DisplayKeyStorageDisabledError)
-                        }
-                    },
-                )
+                Column(
+                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
+                ) {
+                    ListItem(
+                        headlineContent = {
+                            Text(
+                                text = stringResource(id = R.string.screen_chat_backup_recovery_action_confirm),
+                                style = ElementTheme.typography.fontBodyLgMedium,
+                            )
+                        },
+                        supportingContent = {
+                            Text(
+                                text = stringResource(id = R.string.screen_chat_backup_recovery_action_confirm_description),
+                                style = ElementTheme.typography.fontBodyMdRegular,
+                            )
+                        },
+                        leadingContent = ListItemContent.Icon(
+                            IconSource.Vector(CompoundIcons.CheckCircle())
+                        ),
+                        trailingContent = ListItemContent.Icon(
+                            IconSource.Vector(CompoundIcons.ChevronRight())
+                        ),
+                        modifier = Modifier
+                            .clip(RoundedCornerShape(12.dp))
+                            .background(ElementTheme.colors.bgSubtleSecondary)
+                            .clickable(enabled = state.isKeyStorageEnabled) {
+                                if (state.isKeyStorageEnabled) {
+                                    onConfirmRecoveryKeyClick()
+                                } else {
+                                    state.eventSink.invoke(SecureBackupRootEvents.DisplayKeyStorageDisabledError)
+                                }
+                            }
+                            .padding(vertical = 4.dp),
+                        enabled = state.isKeyStorageEnabled,
+                        alwaysClickable = true,
+                    )
+                }
         }
     }
 
