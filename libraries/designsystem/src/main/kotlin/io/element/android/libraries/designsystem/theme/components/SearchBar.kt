@@ -7,42 +7,57 @@
 
 package io.element.android.libraries.designsystem.theme.components
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.SearchBar
-import androidx.compose.material3.SearchBarColors
-import androidx.compose.material3.SearchBarDefaults
+import androidx.compose.material3.LocalTextStyle
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.TextFieldColors
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import io.element.android.compound.theme.ElementTheme
 import io.element.android.compound.tokens.generated.CompoundIcons
 import io.element.android.libraries.architecture.coverage.ExcludeFromCoverage
-import io.element.android.libraries.designsystem.components.button.BackButton
 import io.element.android.libraries.designsystem.preview.ElementThemedPreview
 import io.element.android.libraries.designsystem.preview.PreviewGroup
 import io.element.android.libraries.ui.strings.CommonStrings
 
-@OptIn(ExperimentalMaterial3Api::class)
+/**
+ * An inline search bar component that shows search results within the same page.
+ */
 @Composable
 fun <T> SearchBar(
     query: String,
@@ -54,86 +69,128 @@ fun <T> SearchBar(
     enabled: Boolean = true,
     showBackButton: Boolean = true,
     resultState: SearchBarResultState<T> = SearchBarResultState.Initial(),
-    shape: Shape = SearchBarDefaults.inputFieldShape,
-    tonalElevation: Dp = SearchBarDefaults.TonalElevation,
-    windowInsets: WindowInsets = SearchBarDefaults.windowInsets,
-    interactionSource: MutableInteractionSource = remember { MutableInteractionSource() },
-    borderWidth: Dp = 1.dp,
-    borderColor: Color = ElementTheme.materialColors.outline,
-    inactiveBarColors: SearchBarColors = ElementSearchBarDefaults.inactiveColors(),
-    activeBarColors: SearchBarColors = ElementSearchBarDefaults.activeColors(),
-    inactiveTextInputColors: TextFieldColors = ElementSearchBarDefaults.inactiveInputFieldColors(),
-    activeTextInputColors: TextFieldColors = ElementSearchBarDefaults.activeInputFieldColors(),
+    shape: Shape = RoundedCornerShape(28.dp),
+    textFieldColors: TextFieldColors = ElementSearchBarDefaults.textFieldColors(),
     contentPrefix: @Composable ColumnScope.() -> Unit = {},
     contentSuffix: @Composable ColumnScope.() -> Unit = {},
     resultHandler: @Composable ColumnScope.(T) -> Unit = {},
 ) {
     val focusManager = LocalFocusManager.current
+    val focusRequester = remember { FocusRequester() }
 
-    if (!active) {
-        onQueryChange("")
-        focusManager.clearFocus()
-    }
-
-    SearchBar(
-        inputField = {
-            SearchBarDefaults.InputField(
-                query = query,
-                onQueryChange = onQueryChange,
-                onSearch = { focusManager.clearFocus() },
-                expanded = active,
-                onExpandedChange = onActiveChange,
-                enabled = enabled,
-                placeholder = {
-                    Text(text = placeHolderTitle)
-                },
-                leadingIcon = if (showBackButton && active) {
-                    { BackButton(onClick = { onActiveChange(false) }) }
-                } else {
-                    null
-                },
-                trailingIcon = when {
-                    active && query.isNotEmpty() -> {
-                        {
-                            IconButton(onClick = { onQueryChange("") }) {
-                                Icon(
-                                    imageVector = CompoundIcons.Close(),
-                                    contentDescription = stringResource(CommonStrings.action_clear),
-                                )
-                            }
+    Column(modifier = modifier) {
+        // Search input field
+        Card(
+            shape = shape,
+            colors = CardDefaults.cardColors(
+                containerColor = if (active) 
+                    ElementTheme.colors.bgSubtlePrimary 
+                else 
+                    ElementTheme.colors.bgSubtleSecondary
+            ),
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp, vertical = 8.dp)
+        ) {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 8.dp, vertical = 4.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                // Leading icon - back button or search icon
+                if (showBackButton && active) {
+                    IconButton(
+                        onClick = { 
+                            onActiveChange(false)
+                            onQueryChange("")
+                            focusManager.clearFocus() 
                         }
+                    ) {
+                        Icon(
+                            imageVector = CompoundIcons.ArrowLeft(),
+                            contentDescription = stringResource(CommonStrings.action_back),
+                            tint = ElementTheme.colors.iconSecondary
+                        )
                     }
-
-                    !active -> {
-                        {
-                            Icon(
-                                imageVector = CompoundIcons.Search(),
-                                contentDescription = stringResource(CommonStrings.action_search),
-                                tint = ElementTheme.colors.iconTertiary,
-                            )
-                        }
-                    }
-
-                    else -> null
-                },
-                interactionSource = interactionSource,
-                colors = if (active) activeTextInputColors else inactiveTextInputColors,
-                modifier = if (!active) {
-                    Modifier.border(width = borderWidth, color = borderColor, shape = shape)
                 } else {
-                    Modifier
+                    Icon(
+                        imageVector = CompoundIcons.Search(),
+                        contentDescription = stringResource(CommonStrings.action_search),
+                        tint = ElementTheme.colors.iconSecondary,
+                        modifier = Modifier.padding(start = 12.dp)
+                    )
                 }
-            )
-        },
-        expanded = active,
-        onExpandedChange = onActiveChange,
-        modifier = modifier.padding(horizontal = if (!active) 16.dp else 0.dp),
-        shape = shape,
-        colors = if (active) activeBarColors else inactiveBarColors,
-        tonalElevation = tonalElevation,
-        windowInsets = windowInsets,
-        content = {
+                
+                // Search text field
+                Box(
+                    modifier = Modifier
+                        .weight(1f)
+                        .padding(horizontal = 8.dp)
+                ) {
+                    FilledTextField(
+                        value = query,
+                        onValueChange = onQueryChange,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .focusRequester(focusRequester),
+                        placeholder = {
+                            Text(
+                                text = placeHolderTitle,
+                                color = ElementTheme.colors.textSecondary
+                            )
+                        },
+                        textStyle = LocalTextStyle.current.copy(
+                            color = ElementTheme.colors.textPrimary
+                        ),
+                        singleLine = true,
+                        enabled = enabled,
+                        colors = textFieldColors,
+                        keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
+                        keyboardActions = KeyboardActions(
+                            onSearch = { focusManager.clearFocus() }
+                        )
+                    )
+
+                    // Make whole area clickable to activate search
+                    if (!active) {
+                        Box(
+                            modifier = Modifier
+                                .matchParentSize()
+                                .clickable(
+                                    interactionSource = remember { MutableInteractionSource() },
+                                    indication = null
+                                ) {
+                                    onActiveChange(true)
+                                }
+                        )
+                    }
+                }
+                
+                // Clear button when query is not empty
+                AnimatedVisibility(
+                    visible = active && query.isNotEmpty(),
+                    enter = fadeIn(),
+                    exit = fadeOut()
+                ) {
+                    IconButton(onClick = { onQueryChange("") }) {
+                        Icon(
+                            imageVector = CompoundIcons.Close(),
+                            contentDescription = stringResource(CommonStrings.action_clear),
+                            tint = ElementTheme.colors.iconSecondary
+                        )
+                    }
+                }
+            }
+        }
+
+        // Content prefix (shown when search is active)
+        if (active) {
             contentPrefix()
+        }
+
+        // Search results
+        if (active) {
             when (resultState) {
                 is SearchBarResultState.Results<T> -> {
                     resultHandler(resultState.results)
@@ -141,58 +198,50 @@ fun <T> SearchBar(
 
                 is SearchBarResultState.NoResultsFound<T> -> {
                     // No results found, show a message
-                    Spacer(Modifier.size(80.dp))
-
-                    Text(
-                        text = stringResource(CommonStrings.common_no_results),
-                        textAlign = TextAlign.Center,
-                        color = ElementTheme.colors.textSecondary,
-                        modifier = Modifier.fillMaxWidth()
-                    )
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(vertical = 40.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(
+                            text = stringResource(CommonStrings.common_no_results),
+                            textAlign = TextAlign.Center,
+                            color = ElementTheme.colors.textSecondary,
+                        )
+                    }
                 }
 
                 else -> {
-                    // Not searching - nothing to show.
+                    // Initial state, nothing to show.
                 }
             }
+            
             contentSuffix()
-        },
-    )
+        }
+    }
+
+    // Auto focus on search field when activated
+    LaunchedEffect(active) {
+        if (active) {
+            focusRequester.requestFocus()
+        } else {
+            focusManager.clearFocus()
+            onQueryChange("")
+        }
+    }
 }
 
 object ElementSearchBarDefaults {
-    @OptIn(ExperimentalMaterial3Api::class)
     @Composable
-    fun inactiveColors() = SearchBarDefaults.colors(
-        containerColor = ElementTheme.materialColors.surfaceVariant,
-        dividerColor = ElementTheme.materialColors.outline,
-    )
-
-    @Composable
-    fun inactiveInputFieldColors() = TextFieldDefaults.colors(
-        unfocusedPlaceholderColor = ElementTheme.colors.textDisabled,
-        focusedPlaceholderColor = ElementTheme.colors.textDisabled,
-        unfocusedLeadingIconColor = ElementTheme.materialColors.primary,
-        focusedLeadingIconColor = ElementTheme.materialColors.primary,
-        unfocusedTrailingIconColor = ElementTheme.materialColors.primary,
-        focusedTrailingIconColor = ElementTheme.materialColors.primary,
-    )
-
-    @OptIn(ExperimentalMaterial3Api::class)
-    @Composable
-    fun activeColors() = SearchBarDefaults.colors(
-        containerColor = Color.Transparent,
-        dividerColor = ElementTheme.materialColors.outline,
-    )
-
-    @Composable
-    fun activeInputFieldColors() = TextFieldDefaults.colors(
-        unfocusedPlaceholderColor = ElementTheme.colors.textDisabled,
-        focusedPlaceholderColor = ElementTheme.colors.textDisabled,
-        unfocusedLeadingIconColor = ElementTheme.materialColors.primary,
-        focusedLeadingIconColor = ElementTheme.materialColors.primary,
-        unfocusedTrailingIconColor = ElementTheme.materialColors.primary,
-        focusedTrailingIconColor = ElementTheme.materialColors.primary,
+    fun textFieldColors() = TextFieldDefaults.colors(
+        unfocusedContainerColor = Color.Transparent,
+        focusedContainerColor = Color.Transparent,
+        unfocusedPlaceholderColor = ElementTheme.colors.textSecondary,
+        focusedPlaceholderColor = ElementTheme.colors.textSecondary,
+        unfocusedIndicatorColor = Color.Transparent,
+        focusedIndicatorColor = Color.Transparent,
+        cursorColor = ElementTheme.colors.textPrimary
     )
 }
 
@@ -261,7 +310,8 @@ internal fun SearchBarActiveWithContentPreview() = ElementThemedPreview {
             Text(
                 text = "Content that goes before the search results",
                 modifier = Modifier
-                    .background(color = Color.Red)
+                    .background(color = MaterialTheme.colorScheme.primaryContainer)
+                    .padding(16.dp)
                     .fillMaxWidth()
             )
         },
@@ -269,7 +319,8 @@ internal fun SearchBarActiveWithContentPreview() = ElementThemedPreview {
             Text(
                 text = "Content that goes after the search results",
                 modifier = Modifier
-                    .background(color = Color.Blue)
+                    .background(color = MaterialTheme.colorScheme.tertiaryContainer)
+                    .padding(16.dp)
                     .fillMaxWidth()
             )
         }
@@ -277,13 +328,13 @@ internal fun SearchBarActiveWithContentPreview() = ElementThemedPreview {
         Text(
             text = "Results go here",
             modifier = Modifier
-                .background(color = Color.Green)
+                .background(color = MaterialTheme.colorScheme.secondaryContainer)
+                .padding(16.dp)
                 .fillMaxWidth()
         )
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 @ExcludeFromCoverage
 private fun ContentToPreview(
