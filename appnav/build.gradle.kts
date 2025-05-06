@@ -23,6 +23,7 @@ setupAnvil()
 
 dependencies {
     implementation(project(":features:call:impl"))
+    implementation(project(":libraries:indicator:api"))
     allFeaturesApi(project)
 
     implementation(projects.libraries.core)
@@ -37,6 +38,7 @@ dependencies {
     implementation(projects.libraries.designsystem)
     implementation(projects.libraries.matrixui)
     implementation(projects.libraries.uiStrings)
+    implementation(projects.libraries.indicator.api)
 
     implementation(libs.coil)
 

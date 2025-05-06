@@ -19,4 +19,7 @@ interface IndicatorService {
 
     @Composable
     fun showSettingChatBackupIndicator(): State<Boolean>
+    
+    @Composable
+    fun showBottomNavSettingsIndicator(): State<Boolean>
 }

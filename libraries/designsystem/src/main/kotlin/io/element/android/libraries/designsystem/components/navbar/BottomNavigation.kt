@@ -18,10 +18,13 @@ import io.element.android.libraries.designsystem.preview.ElementPreview
 import io.element.android.libraries.designsystem.preview.PreviewsDayNight
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.size
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.draw.blur
+import io.element.android.libraries.designsystem.atomic.atoms.RedIndicatorAtom
 import io.element.android.libraries.designsystem.theme.components.Icon
 
 enum class BottomNavRoute {
@@ -34,7 +37,8 @@ enum class BottomNavRoute {
 fun BottomNavBar(
     modifier: Modifier = Modifier,
     currentRoute: BottomNavRoute,
-    onRouteSelect: (BottomNavRoute) -> Unit
+    onRouteSelect: (BottomNavRoute) -> Unit,
+    showSettingsIndicator: Boolean = false
 ) {
     Box(modifier = modifier) {
         Box(
@@ -62,16 +66,28 @@ fun BottomNavBar(
                     selected = selected,
                     onClick = { onRouteSelect(route) },
                     icon = {
-                        Icon(
-                            imageVector = when (route) {
-                                BottomNavRoute.Home -> ImageVector.vectorResource(id = if (selected) R.drawable.ic_home_nav_filled else R.drawable.ic_home_nav)
-                                BottomNavRoute.Calls -> ImageVector.vectorResource(id = if (selected) R.drawable.ic_calls_nav_filled else R.drawable.ic_calls_nav)
-                                BottomNavRoute.Settings -> ImageVector.vectorResource(id = if (selected) R.drawable.ic_settings_nav_filled else R.drawable.ic_settings_nav)
-                            },
-                            contentDescription = route.name,
-                            tint = if (selected) selectedColor else Color.Gray,
-                            modifier = Modifier.size(28.dp)
-                        )
+                        Box {
+                            Icon(
+                                imageVector = when (route) {
+                                    BottomNavRoute.Home -> ImageVector.vectorResource(id = if (selected) R.drawable.ic_home_nav_filled else R.drawable.ic_home_nav)
+                                    BottomNavRoute.Calls -> ImageVector.vectorResource(id = if (selected) R.drawable.ic_calls_nav_filled else R.drawable.ic_calls_nav)
+                                    BottomNavRoute.Settings -> ImageVector.vectorResource(id = if (selected) R.drawable.ic_settings_nav_filled else R.drawable.ic_settings_nav)
+                                },
+                                contentDescription = route.name,
+                                tint = if (selected) selectedColor else Color.Gray,
+                                modifier = Modifier.size(28.dp)
+                            )
+                            
+                            // Show indicator for Settings icon when needed
+                            if (route == BottomNavRoute.Settings && showSettingsIndicator) {
+                                RedIndicatorAtom(
+                                    modifier = Modifier
+                                        .align(Alignment.TopEnd)
+                                        .offset(x = 3.dp, y = (-3).dp)
+                                        .size(8.dp)
+                                )
+                            }
+                        }
                     },
                     label = {
                         Text(
@@ -100,6 +116,16 @@ internal fun BottomNavBarPreview() = ElementPreview {
     BottomNavBar(
         currentRoute = BottomNavRoute.Home,
         onRouteSelect = {}
+    )
+}
+
+@PreviewsDayNight
+@Composable
+internal fun BottomNavBarWithIndicatorPreview() = ElementPreview {
+    BottomNavBar(
+        currentRoute = BottomNavRoute.Settings,
+        onRouteSelect = {},
+        showSettingsIndicator = true
     )
 }
 

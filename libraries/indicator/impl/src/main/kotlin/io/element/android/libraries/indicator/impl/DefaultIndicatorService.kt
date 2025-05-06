@@ -30,11 +30,10 @@ class DefaultIndicatorService @Inject constructor(
     @Composable
     override fun showRoomListTopBarIndicator(): State<Boolean> {
         val canVerifySession by sessionVerificationService.needsSessionVerification.collectAsState(initial = false)
-        val settingChatBackupIndicator = showSettingChatBackupIndicator()
-
+        
         return remember {
             derivedStateOf {
-                canVerifySession || settingChatBackupIndicator.value
+                canVerifySession
             }
         }
     }
@@ -54,6 +53,20 @@ class DefaultIndicatorService @Inject constructor(
                     RecoveryState.INCOMPLETE,
                 )
                 showForBackup || showForRecovery
+            }
+        }
+    }
+    
+    @Composable
+    override fun showBottomNavSettingsIndicator(): State<Boolean> {
+        val recoveryState by encryptionService.recoveryStateStateFlow.collectAsState()
+        
+        return remember {
+            derivedStateOf {
+                recoveryState in listOf(
+                    RecoveryState.DISABLED,
+                    RecoveryState.INCOMPLETE,
+                )
             }
         }
     }
