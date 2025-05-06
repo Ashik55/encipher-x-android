@@ -86,9 +86,7 @@ class ResetIdentityPasswordPresenterTest {
         encryptionService: EncryptionService = FakeEncryptionService()
     ) = ResetIdentityPasswordPresenter(
         identityPasswordResetHandle = identityResetHandle,
-        matrixClient = FakeMatrixClient().apply {
-            givenEncryptionService(encryptionService)
-        },
+        matrixClient = FakeMatrixClient(encryptionService = encryptionService as FakeEncryptionService),
         dispatchers = testCoroutineDispatchers(),
     )
 }
