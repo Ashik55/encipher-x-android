@@ -19,7 +19,6 @@ import io.element.android.libraries.architecture.NodeInputs
 import io.element.android.libraries.architecture.inputs
 import io.element.android.libraries.core.coroutine.CoroutineDispatchers
 import io.element.android.libraries.di.SessionScope
-import io.element.android.libraries.matrix.api.MatrixClient
 import io.element.android.libraries.matrix.api.encryption.IdentityPasswordResetHandle
 
 @ContributesNode(SessionScope::class)
@@ -27,13 +26,11 @@ class ResetIdentityPasswordNode @AssistedInject constructor(
     @Assisted buildContext: BuildContext,
     @Assisted plugins: List<Plugin>,
     coroutineDispatchers: CoroutineDispatchers,
-    matrixClient: MatrixClient,
 ) : Node(buildContext, plugins = plugins) {
     data class Inputs(val handle: IdentityPasswordResetHandle) : NodeInputs
 
     private val presenter = ResetIdentityPasswordPresenter(
         identityPasswordResetHandle = inputs<Inputs>().handle,
-        matrixClient = matrixClient,
         dispatchers = coroutineDispatchers
     )
 

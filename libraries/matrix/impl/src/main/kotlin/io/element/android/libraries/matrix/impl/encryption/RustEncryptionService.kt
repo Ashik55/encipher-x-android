@@ -19,6 +19,7 @@ import io.element.android.libraries.matrix.api.encryption.EncryptionService
 import io.element.android.libraries.matrix.api.encryption.IdentityResetHandle
 import io.element.android.libraries.matrix.api.encryption.RecoveryState
 import io.element.android.libraries.matrix.api.sync.SyncState
+import io.element.android.libraries.matrix.impl.encryption.services.PasskeyApiService
 import io.element.android.libraries.matrix.impl.sync.RustSyncService
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.channels.awaitClose
@@ -48,6 +49,7 @@ internal class RustEncryptionService(
     syncService: RustSyncService,
     sessionCoroutineScope: CoroutineScope,
     private val dispatchers: CoroutineDispatchers,
+    private val passkeyApiService: PasskeyApiService
 ) : EncryptionService {
     private val service: Encryption = client.encryption()
     private val sessionId = SessionId(client.session().userId)
@@ -197,7 +199,7 @@ internal class RustEncryptionService(
         return runCatching {
             service.resetIdentity()
         }.flatMap { handle ->
-            RustIdentityResetHandleFactory.create(sessionId, handle)
+            RustIdentityResetHandleFactory.create(sessionId, handle, passkeyApiService)
         }
     }
 

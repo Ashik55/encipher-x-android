@@ -40,4 +40,9 @@ interface PasskeyApiService {
         @Path("userId") userId: String,
         @Query("passphrase") passphrase: String
     ): Response<CheckPasskeyResponse>
+
+    @GET("_matrix/client/v3/auth/reset_passkey/{userId}")
+    suspend fun resetPasskey(
+        @Path("userId") userId: String
+    ): Response<Unit>
 }

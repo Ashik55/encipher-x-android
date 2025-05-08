@@ -15,6 +15,7 @@ import io.element.android.libraries.matrix.api.encryption.PasskeyService
 import io.element.android.libraries.matrix.impl.analytics.UtdTracker
 import io.element.android.libraries.matrix.impl.certificates.UserCertificatesProvider
 import io.element.android.libraries.matrix.impl.encryption.PasskeyServiceFactory
+import io.element.android.libraries.matrix.impl.encryption.services.PasskeyApiService
 import io.element.android.libraries.matrix.impl.paths.SessionPaths
 import io.element.android.libraries.matrix.impl.paths.getSessionPaths
 import io.element.android.libraries.matrix.impl.proxy.ProxyProvider
@@ -54,6 +55,7 @@ class RustMatrixClientFactory @Inject constructor(
     private val timelineEventTypeFilterFactory: TimelineEventTypeFilterFactory,
     private val clientBuilderProvider: ClientBuilderProvider,
     private val passkeyServiceFactory: PasskeyServiceFactory,
+    private val passkeyApiService: PasskeyApiService
 ) {
     private val sessionDelegate = RustClientSessionDelegate(sessionStore, appCoroutineScope, coroutineDispatchers)
 
@@ -104,6 +106,7 @@ class RustMatrixClientFactory @Inject constructor(
             timelineEventTypeFilterFactory = timelineEventTypeFilterFactory,
             featureFlagService = featureFlagService,
             passkeyService = passkeyService,
+            passkeyApiService = passkeyApiService
         ).also {
             Timber.tag(it.toString()).d("Creating Client with access token '$anonymizedAccessToken' and refresh token '$anonymizedRefreshToken'")
         }
