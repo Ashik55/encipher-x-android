@@ -23,7 +23,15 @@ data class SecureBackupRootState(
     val snackbarMessage: SnackbarMessage?,
     val eventSink: (SecureBackupRootEvents) -> Unit,
 ) {
-    // Always return true to keep key storage enabled
     val isKeyStorageEnabled: Boolean
-        get() = true
+        get() = when (backupState) {
+            BackupState.UNKNOWN -> doesBackupExistOnServer.dataOrNull() == true
+            BackupState.CREATING,
+            BackupState.ENABLING,
+            BackupState.RESUMING,
+            BackupState.DOWNLOADING,
+            BackupState.ENABLED -> true
+            BackupState.WAITING_FOR_SYNC,
+            BackupState.DISABLING -> false
+        }
 }

@@ -54,19 +54,6 @@ class SecureBackupRootPresenter @Inject constructor(
         LaunchedEffect(backupState) {
             if (backupState == BackupState.UNKNOWN) {
                 getKeyBackupStatus(doesBackupExistOnServerAction)
-                
-                // Wait for the backup status check to complete
-                doesBackupExistOnServerAction.value.dataOrNull()?.let { backupExists ->
-                    // If backup doesn't exist, automatically enable it
-                    if (!backupExists) {
-                        Timber.tag(loggerTagRoot.value).d("Auto-enabling key storage")
-                        localCoroutineScope.enableBackup(enableAction)
-                    }
-                }
-            } else if (backupState == BackupState.DISABLING) {
-                // Prevent disabling by re-enabling
-                Timber.tag(loggerTagRoot.value).d("Key storage is being disabled, re-enabling automatically")
-                localCoroutineScope.enableBackup(enableAction)
             }
         }
 
