@@ -202,11 +202,15 @@ fun CallsHistoryView(
                         )
                     },
                     actions = {
-                        IconButton(onClick = { isSearchActive = true }) {
-                            Icon(
-                                imageVector = CompoundIcons.Search(),
-                                contentDescription = "Search"
-                            )
+                        // Only show search icon when there are calls in history
+                        val hasCallsInHistory = callsListState is AsyncData.Success && (callsListState as AsyncData.Success<List<Call>>).data.isNotEmpty()
+                        if (hasCallsInHistory) {
+                            IconButton(onClick = { isSearchActive = true }) {
+                                Icon(
+                                    imageVector = CompoundIcons.Search(),
+                                    contentDescription = "Search"
+                                )
+                            }
                         }
                     }
                 )
