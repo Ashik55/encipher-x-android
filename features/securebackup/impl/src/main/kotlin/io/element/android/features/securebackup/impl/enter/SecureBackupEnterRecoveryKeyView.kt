@@ -50,28 +50,34 @@ fun SecureBackupEnterRecoveryKeyView(
     )
     
     // Handle vault passkey retrieval
-    AsyncActionView(
-        async = state.retrieveVaultAction,
-        onSuccess = {
+    when (val vaultAction = state.retrieveVaultAction) {
+        AsyncAction.Uninitialized -> {}
+        is AsyncAction.Loading -> {}
+        is AsyncAction.Success -> {
             Timber.d("Passkey retrieved successfully from vault")
-        },
-        errorTitle = { 
-            val isNoOpError = (state.retrieveVaultAction as? AsyncAction.Failure)?.error?.message?.contains("Vault feature is not available") == true
-            if (isNoOpError) {
+        }
+        is AsyncAction.Failure -> {
+            val isNoOpError = vaultAction.error.message?.contains("Vault feature is not available") == true
+            val errorTitle = if (isNoOpError) {
                 stringResource(id = R.string.screen_recovery_key_vault_unavailable_title)
             } else {
                 stringResource(id = R.string.screen_recovery_key_vault_retrieve_error_title)
             }
-        },
-        errorMessage = { error -> 
-            Timber.e("Displaying error message for passkey retrieval: ${error?.message}")
-            error?.message ?: stringResource(id = R.string.screen_recovery_key_vault_retrieve_error)
-        },
-        onErrorDismiss = { 
-            Timber.d("Error dialog dismissed, clearing action state")
-            state.eventSink(SecureBackupEnterRecoveryKeyEvents.ClearDialog) 
-        },
-    )
+            val errorMessage = vaultAction.error.message ?: stringResource(id = R.string.screen_recovery_key_vault_retrieve_error)
+            
+            Timber.e("Displaying error message for passkey retrieval: ${vaultAction.error.message}")
+            
+            io.element.android.libraries.designsystem.components.dialogs.ErrorDialog(
+                title = errorTitle,
+                content = errorMessage,
+                onSubmit = {
+                    Timber.d("Error dialog dismissed, clearing action state")
+                    state.eventSink(SecureBackupEnterRecoveryKeyEvents.ClearDialog)
+                }
+            )
+        }
+        is AsyncAction.Confirming -> {}
+    }
 
     NewFlowStepPage(
         modifier = modifier,
