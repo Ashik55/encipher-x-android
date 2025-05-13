@@ -14,6 +14,8 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import io.element.android.features.call.api.CurrentCall
+import io.element.android.features.call.api.CurrentCallService
 import io.element.android.libraries.architecture.AsyncData
 import io.element.android.libraries.architecture.Presenter
 import io.element.android.libraries.matrix.api.MatrixClientProvider
@@ -21,12 +23,14 @@ import io.element.android.libraries.matrix.api.core.SessionId
 import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.collectLatest
 import timber.log.Timber
 
 class CallsHistoryPresenter @Inject constructor(
     private val callRepository: CallRepository,
     private val matrixClientProvider: MatrixClientProvider,
-    private val activeSessionIdHolder: ActiveSessionIdHolder
+    private val activeSessionIdHolder: ActiveSessionIdHolder,
+    private val currentCallService: CurrentCallService
 ) : Presenter<CallsHistoryState> {
     @Composable
     override fun present(): CallsHistoryState {
@@ -43,6 +47,24 @@ class CallsHistoryPresenter @Inject constructor(
         
         // Event to trigger loading more content
         var loadMoreEvent by remember { mutableStateOf(0) }
+        
+        // Function to refresh call history
+        suspend fun refreshCallHistory() {
+            Timber.d("Refreshing call history")
+            sessionIdValue?.let { sessionId ->
+                loadCallHistory(
+                    callsListState = callsList,
+                    sessionId = sessionId,
+                    page = null,
+                    isInitialLoad = true,
+                    onDataLoaded = { calls, nextPage, prevPage ->
+                        currentCalls = calls
+                        nextPageToken = nextPage
+                        hasMoreToLoad.value = nextPage != null
+                    }
+                )
+            }
+        }
         
         LaunchedEffect(retryCount) {
             // Get the active session ID from the holder using the suspend function
@@ -62,6 +84,21 @@ class CallsHistoryPresenter @Inject constructor(
             
             // Store the user ID for determining outgoing calls
             currentUserId.value = sessionId?.value
+        }
+        
+        // Observe the current call state to refresh the call list when a call ends
+        LaunchedEffect(Unit) {
+            var previousCallState: CurrentCall? = null
+            
+            currentCallService.currentCall.collectLatest { currentCall ->
+                // If we had a call before and now we don't, refresh the call list
+                if (previousCallState != null && previousCallState != CurrentCall.None && currentCall == CurrentCall.None) {
+                    Timber.d("Call ended, refreshing call history")
+                    refreshCallHistory()
+                }
+                
+                previousCallState = currentCall
+            }
         }
         
         // Handle loading more content with LaunchedEffect
