@@ -13,6 +13,8 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import io.element.android.features.call.api.CurrentCall
+import io.element.android.features.call.api.CurrentCallService
 import io.element.android.features.call.impl.callshistory.ActiveSessionIdHolder
 import io.element.android.features.call.impl.callshistory.Call
 import io.element.android.features.call.impl.callshistory.CallRepository
@@ -22,6 +24,7 @@ import io.element.android.libraries.matrix.api.core.SessionId
 import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.collectLatest
 import timber.log.Timber
 
 /**
@@ -29,7 +32,8 @@ import timber.log.Timber
  */
 class CallDetailsPresenter @Inject constructor(
     private val callRepository: CallRepository,
-    private val activeSessionIdHolder: ActiveSessionIdHolder
+    private val activeSessionIdHolder: ActiveSessionIdHolder,
+    private val currentCallService: CurrentCallService
 ) : Presenter<CallDetailsState> {
 
     // Store the initial call that will be provided from the CallDetailsScreen
@@ -57,6 +61,27 @@ class CallDetailsPresenter @Inject constructor(
         // Event to trigger loading more content
         var loadMoreEvent by remember { mutableStateOf(0) }
         
+        // Function to refresh call details
+        suspend fun refreshCallDetails() {
+            Timber.d("Refreshing call details")
+            sessionIdValue?.let { sessionId ->
+                callToUse.room_id?.let { roomId ->
+                    loadCallDetailsForRoom(
+                        callsListState = callsList,
+                        sessionId = sessionId,
+                        roomId = roomId,
+                        page = null,
+                        isInitialLoad = true,
+                        onDataLoaded = { calls, nextPage, prevPage ->
+                            currentCalls = calls
+                            nextPageToken = nextPage
+                            hasMoreToLoad.value = nextPage != null
+                        }
+                    )
+                }
+            }
+        }
+        
         LaunchedEffect(retryCount) {
             // Get the active session ID from the holder using the suspend function
             val sessionId = activeSessionIdHolder.getActiveSessionId()
@@ -83,6 +108,21 @@ class CallDetailsPresenter @Inject constructor(
                 // If there's no room ID, just show this call
                 callsList.value = AsyncData.Success(listOf(callToUse))
                 hasMoreToLoad.value = false
+            }
+        }
+        
+        // Observe the current call state to refresh the call list when a call ends
+        LaunchedEffect(Unit) {
+            var previousCallState: CurrentCall? = null
+            
+            currentCallService.currentCall.collectLatest { currentCall ->
+                // If we had a call before and now we don't, refresh the call list
+                if (previousCallState != null && previousCallState != CurrentCall.None && currentCall == CurrentCall.None) {
+                    Timber.d("Call ended, refreshing call details")
+                    refreshCallDetails()
+                }
+                
+                previousCallState = currentCall
             }
         }
 
