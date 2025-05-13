@@ -18,6 +18,7 @@ import kotlinx.coroutines.flow.StateFlow
 
 class FakeRoomListService(
     var subscribeToVisibleRoomsLambda: (List<RoomId>) -> Unit = {},
+    var forceRefreshRoomListLambda: () -> Unit = {},
 ) : RoomListService {
     private val allRoomSummariesFlow = MutableStateFlow<List<RoomSummary>>(emptyList())
     private val allRoomsLoadingStateFlow = MutableStateFlow<RoomList.LoadingState>(RoomList.LoadingState.NotLoaded)
@@ -52,6 +53,10 @@ class FakeRoomListService(
 
     override suspend fun subscribeToVisibleRooms(roomIds: List<RoomId>) {
         subscribeToVisibleRoomsLambda(roomIds)
+    }
+
+    override suspend fun forceRefreshRoomList() {
+        forceRefreshRoomListLambda()
     }
 
     override val allRooms = SimplePagedRoomList(

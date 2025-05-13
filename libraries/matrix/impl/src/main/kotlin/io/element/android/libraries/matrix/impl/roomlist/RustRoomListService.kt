@@ -56,6 +56,14 @@ internal class RustRoomListService(
         roomSyncSubscriber.batchSubscribe(roomIds)
     }
 
+    /**
+     * Force a refresh of the room list.
+     * This is useful when a room is left and we want to ensure it's immediately removed from the list.
+     */
+    override suspend fun forceRefreshRoomList() {
+        allRooms.rebuildSummaries()
+    }
+
     override val allRooms: DynamicRoomList = roomListFactory.createRoomList(
         pageSize = DEFAULT_PAGE_SIZE,
         coroutineContext = sessionDispatcher,

@@ -32,8 +32,12 @@ class RustRoomPreview(
 
     override suspend fun leave(): Result<Unit> = runCatching {
         inner.leave()
-    }.onSuccess {
-        roomMembershipObserver?.notifyUserLeftRoom(info.roomId)
+            .also {
+                roomMembershipObserver?.notifyUserLeftRoom(info.roomId)
+                
+                // Force a forget to ensure the room disappears immediately
+                inner.forget()
+            }
     }
 
     override suspend fun forget(): Result<Unit> = runCatching {

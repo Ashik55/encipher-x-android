@@ -450,9 +450,20 @@ class RustMatrixRoom(
 
     override suspend fun leave(): Result<Unit> = withContext(roomDispatcher) {
         runCatching {
+            // Check if this is the last person in the room before leaving
+            val isLastPerson = joinedMemberCount == 1L
+            
             innerRoom.leave()
-        }.onSuccess {
-            roomMembershipObserver.notifyUserLeftRoom(roomId)
+                .also {
+                    // Notify that user left the room
+                    roomMembershipObserver.notifyUserLeftRoom(roomId)
+                    
+                    // If this was the last person, force a room list refresh
+                    if (isLastPerson) {
+                        // Force a forget to ensure the room disappears immediately
+                        innerRoom.forget()
+                    }
+                }
         }
     }
 

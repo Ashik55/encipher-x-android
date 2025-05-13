@@ -149,6 +149,7 @@ class LoggedInFlowNode @AssistedInject constructor(
     private val loggedInFlowProcessor = LoggedInEventProcessor(
         snackbarDispatcher,
         matrixClient.roomMembershipObserver(),
+        matrixClient
     )
 
     private val verificationListener = object : SessionVerificationServiceListener {

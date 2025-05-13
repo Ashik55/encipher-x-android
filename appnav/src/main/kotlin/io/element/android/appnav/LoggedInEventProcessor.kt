@@ -9,34 +9,37 @@ package io.element.android.appnav
 
 import io.element.android.libraries.designsystem.utils.snackbar.SnackbarDispatcher
 import io.element.android.libraries.designsystem.utils.snackbar.SnackbarMessage
+import io.element.android.libraries.matrix.api.MatrixClient
 import io.element.android.libraries.matrix.api.room.RoomMembershipObserver
 import io.element.android.libraries.ui.strings.CommonStrings
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.flow.filter
-import kotlinx.coroutines.flow.launchIn
-import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 class LoggedInEventProcessor @Inject constructor(
     private val snackbarDispatcher: SnackbarDispatcher,
     roomMembershipObserver: RoomMembershipObserver,
+    private val matrixClient: MatrixClient,
 ) {
     private var observingJob: Job? = null
 
     private val displayLeftRoomMessage = roomMembershipObserver.updates
-        .map { !it.isUserInRoom }
 
     fun observeEvents(coroutineScope: CoroutineScope) {
         observingJob = coroutineScope.launch {
             displayLeftRoomMessage
-                .filter { it }
-                .onEach {
-                    displayMessage(CommonStrings.common_current_user_left_room)
+                .collect { update ->
+                    if (!update.isUserInRoom) {
+                        displayMessage(CommonStrings.common_current_user_left_room)
+                        
+                        // Force refresh the room list if needed
+                        if (update.forceRefreshRoomList) {
+                            matrixClient.roomListService.forceRefreshRoomList()
+                        }
+                    }
                 }
-                .launchIn(this)
         }
     }
 

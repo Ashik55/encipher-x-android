@@ -52,6 +52,12 @@ interface RoomListService {
     suspend fun subscribeToVisibleRooms(roomIds: List<RoomId>)
 
     /**
+     * Force a refresh of the room list.
+     * This is useful when a room is left and we want to ensure it's immediately removed from the list.
+     */
+    suspend fun forceRefreshRoomList()
+
+    /**
      * Returns a [DynamicRoomList] object of all rooms we want to display.
      * If you want to get a filtered room list, consider using [createRoomList].
      */
