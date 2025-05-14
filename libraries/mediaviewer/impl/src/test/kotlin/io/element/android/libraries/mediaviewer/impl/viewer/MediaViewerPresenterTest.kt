@@ -660,6 +660,45 @@ class MediaViewerPresenterTest {
     }
 
     @Test
+    fun `present - no snackbar displayed when only single item exists`() = runTest {
+        val mediaGalleryDataSource = FakeMediaGalleryDataSource(
+            startLambda = { },
+        )
+        val presenter = createMediaViewerPresenter(
+            mediaGalleryDataSource = mediaGalleryDataSource,
+        )
+        presenter.test {
+            awaitFirstItem()
+            // Only one item with a loading indicator
+            mediaGalleryDataSource.emitGroupedMediaItems(
+                AsyncData.Success(
+                    GroupedMediaItems(
+                        imageAndVideoItems = persistentListOf(aForwardLoadingIndicator),
+                        fileItems = persistentListOf(),
+                    )
+                )
+            )
+            val updatedState = awaitItem()
+            // User is on that single loading item
+            updatedState.eventSink(
+                MediaViewerEvents.OnNavigateTo(0)
+            )
+            skipItems(1)
+            // data source claims that there is no more items to load 
+            mediaGalleryDataSource.emitGroupedMediaItems(
+                AsyncData.Success(
+                    GroupedMediaItems(
+                        imageAndVideoItems = persistentListOf(),
+                        fileItems = persistentListOf(),
+                    )
+                )
+            )
+            val finalState = awaitItem()
+            assertThat(finalState.snackbarMessage).isNull()
+        }
+    }
+
+    @Test
     fun `present - no snackbar displayed when there is no more items but not displaying a loading item`() = runTest {
         val mediaGalleryDataSource = FakeMediaGalleryDataSource(
             startLambda = { },
@@ -749,6 +788,30 @@ class MediaViewerPresenterTest {
             val finalState = awaitItem()
             assertThat(finalState.mediaBottomSheetState).isEqualTo(MediaBottomSheetState.Hidden)
             onViewInTimelineClickLambda.assertions().isCalledOnce().with(value(AN_EVENT_ID))
+        }
+    }
+
+    @Test
+    fun `present - no snackbar displayed when viewing a single media item`() = runTest {
+        val mediaGalleryDataSource = FakeMediaGalleryDataSource(
+            startLambda = { },
+        )
+        val presenter = createMediaViewerPresenter(
+            mediaGalleryDataSource = mediaGalleryDataSource,
+        )
+        presenter.test {
+            awaitFirstItem()
+            // Only one media item
+            mediaGalleryDataSource.emitGroupedMediaItems(
+                AsyncData.Success(
+                    GroupedMediaItems(
+                        imageAndVideoItems = persistentListOf(anImage),
+                        fileItems = persistentListOf(),
+                    )
+                )
+            )
+            val updatedState = awaitItem()
+            assertThat(updatedState.snackbarMessage).isNull()
         }
     }
 
