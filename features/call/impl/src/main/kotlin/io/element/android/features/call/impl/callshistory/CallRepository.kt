@@ -51,7 +51,6 @@ interface CallRepository {
 @ContributesBinding(AppScope::class)
 class DefaultCallRepository @Inject constructor(
     private val matrixCallApiService: CallApiService,
-    private val matrixClientProvider: MatrixClientProvider
 ) : CallRepository {
     override suspend fun getCallDetails(
         sessionId: SessionId, 
@@ -65,11 +64,7 @@ class DefaultCallRepository @Inject constructor(
         
         if (response.isSuccessful) {
             val callsResponse = response.body()
-            val calls = callsResponse?.calls?.filterNotNull() ?: emptyList()
-            
-            // Convert next_page to string for compatibility with existing code
-            val nextPageStr = callsResponse?.next_page_offset?.toString()
-            val prevPageStr = callsResponse?.prev_page_offset?.toString()
+            val calls = callsResponse?.calls?: emptyList()
             
             PaginatedCallResult(
                 calls = calls.map { it.toCall() },
