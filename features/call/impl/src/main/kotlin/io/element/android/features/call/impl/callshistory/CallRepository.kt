@@ -61,7 +61,7 @@ class DefaultCallRepository @Inject constructor(
     ): Result<PaginatedCallResult> = runCatching {
         Timber.d("Fetching calls for user: $userId, room: $roomId, page: $page")
         
-        val response = matrixCallApiService.getCallDetails(userId, roomId, limit = 10, offset = page)
+        val response = matrixCallApiService.getCallDetails(userId, roomId, limit = 15, offset = page)
         
         if (response.isSuccessful) {
             val callsResponse = response.body()
