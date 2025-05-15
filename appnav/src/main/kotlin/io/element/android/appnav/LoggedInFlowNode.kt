@@ -578,12 +578,23 @@ class LoggedInFlowNode @AssistedInject constructor(
         val activity = LocalContext.current as? Activity
         val showSettingsIndicator by indicatorService.showBottomNavSettingsIndicator()
 
-        BackHandler(
-            enabled = activeNavTarget == NavTarget.RoomList
-        ) {
-            activity?.let {
-                if (!it.isFinishing) {
-                    it.finish()
+        BackHandler {
+            when (activeNavTarget) {
+                is NavTarget.RoomList -> {
+                    // If we're already on the home screen, quit the app
+                    activity?.let {
+                        if (!it.isFinishing) {
+                            it.finish()
+                        }
+                    }
+                }
+                is NavTarget.Calls, is NavTarget.Settings -> {
+                    // If we're on Settings or Calls, navigate to RoomList
+                    safeReplace(NavTarget.RoomList)
+                }
+                else -> {
+                    // For any other screen, just navigate up
+                    backstack.pop()
                 }
             }
         }
