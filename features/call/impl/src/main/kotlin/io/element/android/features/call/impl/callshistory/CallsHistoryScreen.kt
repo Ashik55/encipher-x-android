@@ -62,7 +62,7 @@ class CallsHistoryScreen @AssistedInject constructor(
     
     private fun onBottomNavigationRouteSelected(route: BottomNavRoute) {
         when (route) {
-            BottomNavRoute.Home -> navigateTo(route)
+            BottomNavRoute.Chats -> navigateTo(route)
             BottomNavRoute.Settings -> navigateTo(route)
             BottomNavRoute.Calls -> {} // Already on calls screen, do nothing
         }

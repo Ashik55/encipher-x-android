@@ -51,7 +51,7 @@ class CallsHistoryNode @AssistedInject constructor(
     private fun onBottomNavigationRouteSelected(route: BottomNavRoute) {
         val callbacks = plugins<Callback>()
         when (route) {
-            BottomNavRoute.Home -> callbacks.forEach { it.onHomeClick() }
+            BottomNavRoute.Chats -> callbacks.forEach { it.onHomeClick() }
             BottomNavRoute.Settings -> callbacks.forEach { it.onSettingsClick() }
             BottomNavRoute.Calls -> { /* Already on calls screen, do nothing */ }
         }

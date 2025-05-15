@@ -613,10 +613,10 @@ class LoggedInFlowNode @AssistedInject constructor(
         }
 
         val currentRoute = when (activeNavTarget) {
-            is NavTarget.RoomList -> BottomNavRoute.Home
+            is NavTarget.RoomList -> BottomNavRoute.Chats
             is NavTarget.Calls -> BottomNavRoute.Calls
             is NavTarget.Settings -> BottomNavRoute.Settings
-            else -> BottomNavRoute.Home
+            else -> BottomNavRoute.Chats
         }
 
         Scaffold(
@@ -627,7 +627,7 @@ class LoggedInFlowNode @AssistedInject constructor(
                         onRouteSelect = { route ->
                             if (currentRoute != route) {
                                 when (route) {
-                                    BottomNavRoute.Home -> safeReplace(NavTarget.RoomList)
+                                    BottomNavRoute.Chats -> safeReplace(NavTarget.RoomList)
                                     BottomNavRoute.Calls -> safeReplace(NavTarget.Calls)
                                     BottomNavRoute.Settings -> safeReplace(NavTarget.Settings())
                                 }
