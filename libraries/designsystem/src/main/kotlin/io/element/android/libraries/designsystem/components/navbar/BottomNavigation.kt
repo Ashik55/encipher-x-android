@@ -61,6 +61,7 @@ fun BottomNavBar(
                 val selected = route == currentRoute
 
                 val iconColor = if (selected) primaryColor else unselectedColor
+                val textColor = if (selected) primaryColor else unselectedColor
 
                 Column(
                     modifier = Modifier
@@ -96,13 +97,13 @@ fun BottomNavBar(
                             Icon(
                                 imageVector = when (route) {
                                     BottomNavRoute.Chats -> ImageVector.vectorResource(
-                                        id = if (selected) R.drawable.ic_home_nav_filled else R.drawable.ic_home_nav
+                                        id = if (selected) R.drawable.message_circle else R.drawable.message_circle
                                     )
                                     BottomNavRoute.Calls -> ImageVector.vectorResource(
-                                        id = if (selected) R.drawable.ic_calls_nav_filled else R.drawable.ic_calls_nav
+                                        id = if (selected) R.drawable.phone else R.drawable.phone
                                     )
                                     BottomNavRoute.Settings -> ImageVector.vectorResource(
-                                        id = if (selected) R.drawable.ic_settings_nav_filled else R.drawable.ic_settings_nav
+                                        id = if (selected) R.drawable.cog else R.drawable.cog
                                     )
                                 },
                                 contentDescription = route.name,
@@ -122,18 +123,16 @@ fun BottomNavBar(
                         }
                     }
 
-                    // Label
-                    if (!selected) {
-                        Text(
-                            text = route.name,
-                            modifier = Modifier.height(16.dp),
-                            color = iconColor,
-                            textAlign = TextAlign.Center,
-                            fontSize = 11.sp,
-                            fontWeight = FontWeight.SemiBold,
-                            maxLines = 1
-                        )
-                    }
+                    // Label - now shown for both selected and unselected items
+                    Text(
+                        text = route.name,
+                        modifier = Modifier.height(16.dp),
+                        color = textColor,
+                        textAlign = TextAlign.Center,
+                        fontSize = 11.sp,
+                        fontWeight = FontWeight.SemiBold,
+                        maxLines = 1
+                    )
                 }
             }
         }
