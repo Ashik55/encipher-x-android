@@ -8,6 +8,7 @@
 package io.element.android.features.call.impl.callshistory
 
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -59,6 +60,7 @@ import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
@@ -305,17 +307,19 @@ fun CallsHistoryView(
                                     horizontalAlignment = Alignment.CenterHorizontally,
                                     verticalArrangement = Arrangement.Center
                                 ) {
-                                    Icon(
-                                        imageVector = if (searchQuery.isNotEmpty()) 
-                                            CompoundIcons.Search()
-                                        else 
-                                            ImageVector.vectorResource(id = DSR.drawable.ic_call),
-                                        contentDescription = null,
-                                        modifier = Modifier.size(54.dp),
-                                        tint = ElementTheme.colors.iconSecondary
-                                    )
-                                    
-                                    Spacer(modifier = Modifier.height(16.dp))
+                                    if (searchQuery.isNotEmpty()) {
+                                        Image(
+                                            painter = painterResource(id = DSR.drawable.no_call),
+                                            contentDescription = null,
+                                            modifier = Modifier.size(154.dp)
+                                        )
+                                    } else {
+                                        Image(
+                                            painter = painterResource(id = DSR.drawable.no_call),
+                                            contentDescription = null,
+                                            modifier = Modifier.size(154.dp)
+                                        )
+                                    }
                                     
                                     Text(
                                         text = if (searchQuery.isNotEmpty()) 
@@ -340,7 +344,7 @@ fun CallsHistoryView(
                                     )
                                     
                                     if (searchQuery.isNotEmpty()) {
-                                        Spacer(modifier = Modifier.height(32.dp))
+                                        Spacer(modifier = Modifier.height(16.dp))
                                         
                                         Button(
                                             text = "Clear search",
