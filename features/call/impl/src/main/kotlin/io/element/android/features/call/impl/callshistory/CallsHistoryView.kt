@@ -10,12 +10,14 @@ package io.element.android.features.call.impl.callshistory
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
@@ -284,11 +286,54 @@ fun CallsHistoryView(
                             .fillMaxSize()
                             .padding(paddingValues)
                     ) {
-                        Text(
-                            text = if (searchQuery.isNotEmpty()) "No matching results found" else "No calls in your history",
-                            style = MaterialTheme.typography.bodyLarge,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
+                        Column(
+                            modifier = Modifier.padding(horizontal = 60.dp),
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                            verticalArrangement = Arrangement.Center
+                        ) {
+                            Icon(
+                                imageVector = if (searchQuery.isNotEmpty()) 
+                                    CompoundIcons.Search()
+                                else 
+                                    ImageVector.vectorResource(id = DSR.drawable.ic_call),
+                                contentDescription = null,
+                                modifier = Modifier.size(54.dp),
+                                tint = ElementTheme.colors.iconSecondary
+                            )
+                            
+                            Spacer(modifier = Modifier.height(16.dp))
+                            
+                            Text(
+                                text = if (searchQuery.isNotEmpty()) 
+                                    "No matching results" 
+                                else 
+                                    "No calls yet",
+                                style = ElementTheme.typography.fontHeadingMdBold,
+                                color = ElementTheme.colors.textPrimary,
+                                textAlign = TextAlign.Center
+                            )
+                            
+                            Spacer(modifier = Modifier.height(16.dp))
+                            
+                            Text(
+                                text = if (searchQuery.isNotEmpty())
+                                    "Try adjusting your search terms"
+                                else
+                                    "When you make or receive calls, they'll appear here",
+                                style = ElementTheme.typography.fontBodyLgRegular,
+                                color = ElementTheme.colors.textSecondary,
+                                textAlign = TextAlign.Center
+                            )
+                            
+                            if (searchQuery.isNotEmpty()) {
+                                Spacer(modifier = Modifier.height(32.dp))
+                                
+                                Button(
+                                    text = "Clear search",
+                                    onClick = { searchQuery = "" }
+                                )
+                            }
+                        }
                     }
                 } else {
                     CallHistoryList(
