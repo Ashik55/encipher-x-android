@@ -61,7 +61,7 @@ fun BottomNavBar(
                 val selected = route == currentRoute
 
                 val iconColor = if (selected) primaryColor else unselectedColor
-                val textColor = if (selected) primaryColor else unselectedColor
+                val textColor = unselectedColor
 
                 Column(
                     modifier = Modifier
@@ -123,7 +123,6 @@ fun BottomNavBar(
                         }
                     }
 
-                    // Label - now shown for both selected and unselected items
                     Text(
                         text = route.name,
                         modifier = Modifier.height(16.dp),
