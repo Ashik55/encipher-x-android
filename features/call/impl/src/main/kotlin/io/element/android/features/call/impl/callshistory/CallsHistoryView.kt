@@ -10,6 +10,7 @@ package io.element.android.features.call.impl.callshistory
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -104,6 +105,15 @@ fun CallsHistoryView(
     val focusRequester = remember { FocusRequester() }
     val keyboardController = LocalSoftwareKeyboardController.current
     val focusManager = LocalFocusManager.current
+    val interactionSource = remember { MutableInteractionSource() }
+
+    val dismissSearch = {
+        focusManager.clearFocus()
+        keyboardController?.hide()
+        if (searchQuery.isEmpty()) {
+            isSearchActive = false
+        }
+    }
 
     LaunchedEffect(isSearchActive) {
         if (isSearchActive) {
@@ -175,8 +185,7 @@ fun CallsHistoryView(
                             ),
                             keyboardActions = KeyboardActions(
                                 onSearch = {
-                                    focusManager.clearFocus()
-                                    keyboardController?.hide()
+                                    dismissSearch()
                                 }
                             )
                         )
@@ -223,148 +232,151 @@ fun CallsHistoryView(
                 currentRoute = currentRoute,
                 onRouteSelect = onRouteSelect
             )
-        }
-    ) { paddingValues ->
-        when (callsListState) {
-            is AsyncData.Loading -> {
-                Box(
-                    contentAlignment = Alignment.Center,
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(paddingValues)
-                ) {
-                    CustomProgressIndicator()
-                }
-            }
-            
-            is AsyncData.Failure -> {
-                val error = (callsListState as AsyncData.Failure)
-                Box(
-                    contentAlignment = Alignment.Center,
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(paddingValues)
-                ) {
-                    Column(
-                        horizontalAlignment = Alignment.CenterHorizontally
-                    ) {
-                        Text(
-                            text = error.error.message ?: "Unknown error occurred",
-                            style = MaterialTheme.typography.bodyLarge,
-                            color = MaterialTheme.colorScheme.error
-                        )
-                        Spacer(modifier = Modifier.padding(8.dp))
-                        Button(
-                            text = "Retry",
-                            onClick = { /* Trigger retry */ },
-                            size = ButtonSize.Medium
-                        )
-                    }
-                }
-            }
-            
-            is AsyncData.Success -> {
-                val calls = (callsListState as AsyncData.Success<List<Call>>).data
-                val filteredCalls = if (searchQuery.isNotEmpty()) {
-                    calls.filter { call ->
-                        val name = if(call.is_caller == true){
-                            if(call.room_name == null) getDisplayNamesString(call.receiver_display_names) else call.room_name
-                        } else {
-                            if(call.room_name == null) call.caller_display_name.toString() else call.room_name
-                        }
-                        
-                        name.contains(searchQuery, ignoreCase = true)
-                    }
-                } else {
-                    calls
-                }
-                
-                if (filteredCalls.isEmpty()) {
-                    Box(
-                        contentAlignment = Alignment.Center,
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .padding(paddingValues)
-                    ) {
-                        Column(
-                            modifier = Modifier.padding(horizontal = 60.dp),
-                            horizontalAlignment = Alignment.CenterHorizontally,
-                            verticalArrangement = Arrangement.Center
+        },
+        content = { paddingValues ->
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(paddingValues)
+                    .clickable(
+                        interactionSource = interactionSource,
+                        indication = null,
+                        enabled = isSearchActive,
+                        onClick = { dismissSearch() }
+                    )
+            ) {
+                when (callsListState) {
+                    is AsyncData.Loading -> {
+                        Box(
+                            contentAlignment = Alignment.Center,
+                            modifier = Modifier.fillMaxSize()
                         ) {
-                            Icon(
-                                imageVector = if (searchQuery.isNotEmpty()) 
-                                    CompoundIcons.Search()
-                                else 
-                                    ImageVector.vectorResource(id = DSR.drawable.ic_call),
-                                contentDescription = null,
-                                modifier = Modifier.size(54.dp),
-                                tint = ElementTheme.colors.iconSecondary
-                            )
-                            
-                            Spacer(modifier = Modifier.height(16.dp))
-                            
-                            Text(
-                                text = if (searchQuery.isNotEmpty()) 
-                                    "No matching results" 
-                                else 
-                                    "No calls yet",
-                                style = ElementTheme.typography.fontHeadingMdBold,
-                                color = ElementTheme.colors.textPrimary,
-                                textAlign = TextAlign.Center
-                            )
-                            
-                            Spacer(modifier = Modifier.height(16.dp))
-                            
-                            Text(
-                                text = if (searchQuery.isNotEmpty())
-                                    "Try adjusting your search terms"
-                                else
-                                    "When you make or receive calls, they'll appear here",
-                                style = ElementTheme.typography.fontBodyLgRegular,
-                                color = ElementTheme.colors.textSecondary,
-                                textAlign = TextAlign.Center
-                            )
-                            
-                            if (searchQuery.isNotEmpty()) {
-                                Spacer(modifier = Modifier.height(32.dp))
-                                
+                            CustomProgressIndicator()
+                        }
+                    }
+                    
+                    is AsyncData.Failure -> {
+                        val error = (callsListState as AsyncData.Failure)
+                        Box(
+                            contentAlignment = Alignment.Center,
+                            modifier = Modifier.fillMaxSize()
+                        ) {
+                            Column(
+                                horizontalAlignment = Alignment.CenterHorizontally
+                            ) {
+                                Text(
+                                    text = error.error.message ?: "Unknown error occurred",
+                                    style = MaterialTheme.typography.bodyLarge,
+                                    color = MaterialTheme.colorScheme.error
+                                )
+                                Spacer(modifier = Modifier.padding(8.dp))
                                 Button(
-                                    text = "Clear search",
-                                    onClick = { searchQuery = "" }
+                                    text = "Retry",
+                                    onClick = { /* Trigger retry */ },
+                                    size = ButtonSize.Medium
                                 )
                             }
                         }
                     }
-                } else {
-                    CallHistoryList(
-                        calls = filteredCalls,
-                        currentUserId = currentUserId,
-                        hasMoreToLoad = hasMoreToLoad,
-                        isLoadingMore = isLoadingMore,
-                        onItemClick = { call -> call.room_id?.let { onRoomDetailsClick(it) } },
-                        onStartCall = onStartCall,
-                        onCallDetailsClick = onCallDetailsClick,
-                        onLoadMore = { state.eventSink(CallsHistoryEvents.LoadMore) },
-                        isSearchActive = isSearchActive,
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .padding(paddingValues)
-                    )
-                }
-            }
-            
-            AsyncData.Uninitialized -> {
-                Box(
-                    contentAlignment = Alignment.Center,
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(paddingValues)
-                ) {
-                    CustomProgressIndicator()
+                    
+                    is AsyncData.Success -> {
+                        val calls = (callsListState as AsyncData.Success<List<Call>>).data
+                        val filteredCalls = if (searchQuery.isNotEmpty()) {
+                            calls.filter { call ->
+                                val name = if(call.is_caller == true){
+                                    if(call.room_name == null) getDisplayNamesString(call.receiver_display_names) else call.room_name
+                                } else {
+                                    if(call.room_name == null) call.caller_display_name.toString() else call.room_name
+                                }
+                                
+                                name.contains(searchQuery, ignoreCase = true)
+                            }
+                        } else {
+                            calls
+                        }
+                        
+                        if (filteredCalls.isEmpty()) {
+                            Box(
+                                contentAlignment = Alignment.Center,
+                                modifier = Modifier.fillMaxSize()
+                            ) {
+                                Column(
+                                    modifier = Modifier.padding(horizontal = 60.dp),
+                                    horizontalAlignment = Alignment.CenterHorizontally,
+                                    verticalArrangement = Arrangement.Center
+                                ) {
+                                    Icon(
+                                        imageVector = if (searchQuery.isNotEmpty()) 
+                                            CompoundIcons.Search()
+                                        else 
+                                            ImageVector.vectorResource(id = DSR.drawable.ic_call),
+                                        contentDescription = null,
+                                        modifier = Modifier.size(54.dp),
+                                        tint = ElementTheme.colors.iconSecondary
+                                    )
+                                    
+                                    Spacer(modifier = Modifier.height(16.dp))
+                                    
+                                    Text(
+                                        text = if (searchQuery.isNotEmpty()) 
+                                            "No matching results" 
+                                        else 
+                                            "No calls yet",
+                                        style = ElementTheme.typography.fontHeadingMdBold,
+                                        color = ElementTheme.colors.textPrimary,
+                                        textAlign = TextAlign.Center
+                                    )
+                                    
+                                    Spacer(modifier = Modifier.height(16.dp))
+                                    
+                                    Text(
+                                        text = if (searchQuery.isNotEmpty())
+                                            "No calls found matching your search"
+                                        else
+                                            "When you make or receive calls, they'll appear here",
+                                        style = ElementTheme.typography.fontBodyLgRegular,
+                                        color = ElementTheme.colors.textSecondary,
+                                        textAlign = TextAlign.Center
+                                    )
+                                    
+                                    if (searchQuery.isNotEmpty()) {
+                                        Spacer(modifier = Modifier.height(32.dp))
+                                        
+                                        Button(
+                                            text = "Clear search",
+                                            onClick = { searchQuery = "" }
+                                        )
+                                    }
+                                }
+                            }
+                        } else {
+                            CallHistoryList(
+                                calls = filteredCalls,
+                                currentUserId = currentUserId,
+                                hasMoreToLoad = hasMoreToLoad,
+                                isLoadingMore = isLoadingMore,
+                                onItemClick = { call -> call.room_id?.let { onRoomDetailsClick(it) } },
+                                onStartCall = onStartCall,
+                                onCallDetailsClick = onCallDetailsClick,
+                                onLoadMore = { state.eventSink(CallsHistoryEvents.LoadMore) },
+                                isSearchActive = isSearchActive,
+                                modifier = Modifier.fillMaxSize()
+                            )
+                        }
+                    }
+                    
+                    AsyncData.Uninitialized -> {
+                        Box(
+                            contentAlignment = Alignment.Center,
+                            modifier = Modifier.fillMaxSize()
+                        ) {
+                            CustomProgressIndicator()
+                        }
+                    }
                 }
             }
         }
-    }
+    )
 }
 
 @Composable
