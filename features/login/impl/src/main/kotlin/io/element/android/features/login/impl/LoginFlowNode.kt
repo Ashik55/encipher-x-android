@@ -39,6 +39,7 @@ import io.element.android.libraries.architecture.NodeInputs
 import io.element.android.libraries.architecture.createNode
 import io.element.android.libraries.architecture.inputs
 import io.element.android.libraries.di.AppScope
+import io.element.android.libraries.matrix.api.auth.MatrixAuthenticationService
 import io.element.android.libraries.matrix.api.auth.OidcDetails
 import io.element.android.libraries.oidc.api.OidcAction
 import io.element.android.libraries.oidc.api.OidcActionFlow
@@ -55,6 +56,7 @@ class LoginFlowNode @AssistedInject constructor(
     private val defaultLoginUserStory: DefaultLoginUserStory,
     private val oidcActionFlow: OidcActionFlow,
     private val oidcEntryPoint: OidcEntryPoint,
+    private val authenticationService: MatrixAuthenticationService,
 ) : BaseFlowNode<LoginFlowNode.NavTarget>(
     backstack = BackStack(
         initialElement = NavTarget.Root,
@@ -123,7 +125,18 @@ class LoginFlowNode @AssistedInject constructor(
                 if (inputs.flowType == LoginFlowType.SIGN_IN_QR_CODE) {
                     createNode<QrCodeLoginFlowNode>(buildContext)
                 } else {
-                    resolve(NavTarget.ConfirmAccountProvider, buildContext)
+                    // Set the default account provider and connect to server
+                    accountProviderDataSource.setDefaultAccountProvider()
+                    
+                    // Connect to the server - this should happen in the background
+                    // when the password screen is shown
+                    lifecycleScope.launch {
+                        val homeserverUrl = accountProviderDataSource.flow().value.url
+                        authenticationService.setHomeserver(homeserverUrl)
+                    }
+                    
+                    // Go directly to password login screen
+                    createNode<LoginPasswordNode>(buildContext)
                 }
             }
             NavTarget.ConfirmAccountProvider -> {

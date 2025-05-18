@@ -22,6 +22,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Text
 import androidx.compose.ui.unit.sp
 import androidx.compose.material.TabRowDefaults.Divider
@@ -86,6 +87,13 @@ fun LoginPasswordView(
             state.loginAction is AsyncData.Loading
         }
     }
+    
+    val isConnectingToServer by remember(state.serverConnectionStatus) {
+        derivedStateOf {
+            state.serverConnectionStatus is AsyncData.Loading
+        }
+    }
+    
     val focusManager = LocalFocusManager.current
 
     fun submit() {
@@ -139,42 +147,61 @@ fun LoginPasswordView(
             )
 
             Spacer(Modifier.height(40.dp))
+            
+            // Show server connection loading indicator
+            if (isConnectingToServer) {
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(16.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    CircularProgressIndicator()
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Text(
+                        text = stringResource(R.string.connecting_to_server),
+                        style = ElementTheme.typography.fontBodyMdRegular,
+                        color = MaterialTheme.colorScheme.secondary,
+                        textAlign = TextAlign.Center
+                    )
+                }
+            } else {
+                Text(
+                    text = stringResource(R.string.where_your_conversations_live),
+                    fontSize = 16.sp,
+                    color = MaterialTheme.colorScheme.secondary,
+                    modifier = Modifier
+                        .padding(top = 4.dp)
+                        .fillMaxWidth()
+                        .wrapContentHeight()
+                )
 
-            Text(
-                text = stringResource(R.string.where_your_conversations_live),
-                fontSize = 16.sp,
-                color = MaterialTheme.colorScheme.secondary,
-                modifier = Modifier
-                    .padding(top = 4.dp)
-                    .fillMaxWidth()
-                    .wrapContentHeight()
-            )
+                Text(
+                    text = stringResource(
+                        id = R.string.screen_account_provider,
+                        state.accountProvider.title
+                    ),
+                    fontSize = 16.sp,
+                    style = ElementTheme.typography.fontBodyLgMedium,
+                    color = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier
+                        .padding(top = 4.dp)
+                        .fillMaxWidth()
+                        .wrapContentHeight()
+                )
 
-            Text(
-                text = stringResource(
-                    id = R.string.screen_account_provider,
-                    state.accountProvider.title
-                ),
-                fontSize = 16.sp,
-                style = ElementTheme.typography.fontBodyLgMedium,
-                color = MaterialTheme.colorScheme.primary,
-                modifier = Modifier
-                    .padding(top = 4.dp)
-                    .fillMaxWidth()
-                    .wrapContentHeight()
-            )
+                Spacer(Modifier.height(8.dp))
 
-            Spacer(Modifier.height(8.dp))
+                Divider(color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.12f), thickness = 1.dp)
 
-            Divider(color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.12f), thickness = 1.dp)
+                Spacer(Modifier.height(40.dp))
 
-            Spacer(Modifier.height(40.dp))
-
-            LoginForm(
-                state = state,
-                isLoading = isLoading,
-                onSubmit = ::submit
-            )
+                LoginForm(
+                    state = state,
+                    isLoading = isLoading || isConnectingToServer,
+                    onSubmit = ::submit
+                )
+            }
             // Min spacing
             Spacer(Modifier.height(24.dp))
             // Flexible spacing to keep the submit button at the bottom

@@ -8,4 +8,5 @@
 <resources>
     <string name="where_your_conversations_live">Where your conversations live</string>
     <string name="welcome_back">Welcome Back!</string>
+    <string name="connecting_to_server">Connecting to server…</string>
 </resources>

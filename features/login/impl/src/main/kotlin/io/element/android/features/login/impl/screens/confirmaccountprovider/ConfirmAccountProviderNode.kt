@@ -7,7 +7,11 @@
 
 package io.element.android.features.login.impl.screens.confirmaccountprovider
 
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import com.bumble.appyx.core.modality.BuildContext
@@ -22,6 +26,23 @@ import io.element.android.libraries.architecture.NodeInputs
 import io.element.android.libraries.architecture.inputs
 import io.element.android.libraries.di.AppScope
 import io.element.android.libraries.matrix.api.auth.OidcDetails
+
+// This is a replacement for the removed ConfirmAccountProviderView
+@Composable
+private fun ConfirmAccountProviderView(
+//    state: ConfirmAccountProviderState,
+//    onOidcDetails: (OidcDetails) -> Unit,
+//    onNeedLoginPassword: () -> Unit,
+//    onLearnMoreClick: () -> Unit,
+//    onCreateAccountContinue: (url: String) -> Unit,
+//    onChange: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    // Just show a loading indicator - this screen should be skipped in normal flow
+    Box(modifier = modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+        CircularProgressIndicator()
+    }
+}
 
 @ContributesNode(AppScope::class)
 class ConfirmAccountProviderNode @AssistedInject constructor(
@@ -67,14 +88,14 @@ class ConfirmAccountProviderNode @AssistedInject constructor(
     override fun View(modifier: Modifier) {
         val state = presenter.present()
         val context = LocalContext.current
-        ConfirmAccountProviderView(
-            state = state,
-            modifier = modifier,
-            onOidcDetails = ::onOidcDetails,
-            onNeedLoginPassword = ::onLoginPasswordNeeded,
-            onCreateAccountContinue = ::onCreateAccountContinue,
-            onChange = ::onChangeAccountProvider,
-            onLearnMoreClick = { openLearnMorePage(context) },
-        )
+//        ConfirmAccountProviderView(
+//            state = state,
+//            modifier = modifier,
+//            onOidcDetails = ::onOidcDetails,
+//            onNeedLoginPassword = ::onLoginPasswordNeeded,
+//            onCreateAccountContinue = ::onCreateAccountContinue,
+//            onChange = ::onChangeAccountProvider,
+//            onLearnMoreClick = { openLearnMorePage(context) },
+//        )
     }
 }

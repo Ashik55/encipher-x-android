@@ -17,12 +17,14 @@ data class LoginPasswordState(
     val accountProvider: AccountProvider,
     val formState: LoginFormState,
     val loginAction: AsyncData<SessionId>,
+    val serverConnectionStatus: AsyncData<Unit> = AsyncData.Uninitialized,
     val eventSink: (LoginPasswordEvents) -> Unit
 ) {
     val submitEnabled: Boolean
         get() = loginAction !is AsyncData.Failure &&
             formState.login.isNotEmpty() &&
-            formState.password.isNotEmpty()
+            formState.password.isNotEmpty() &&
+            serverConnectionStatus is AsyncData.Success
 }
 
 @Parcelize

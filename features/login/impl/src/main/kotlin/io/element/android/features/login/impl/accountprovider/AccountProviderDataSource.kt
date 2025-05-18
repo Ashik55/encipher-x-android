@@ -44,4 +44,11 @@ class AccountProviderDataSource @Inject constructor(
     fun userSelection(data: AccountProvider) {
         accountProvider.tryEmit(data)
     }
+
+    /**
+     * Sets the default account provider.
+     */
+    fun setDefaultAccountProvider() {
+        accountProvider.tryEmit(defaultAccountProvider)
+    }
 }

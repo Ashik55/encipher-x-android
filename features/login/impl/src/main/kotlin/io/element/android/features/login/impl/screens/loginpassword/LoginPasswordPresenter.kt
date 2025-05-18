@@ -8,6 +8,7 @@
 package io.element.android.features.login.impl.screens.loginpassword
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -36,11 +37,26 @@ class LoginPasswordPresenter @Inject constructor(
         val loginAction: MutableState<AsyncData<SessionId>> = remember {
             mutableStateOf(AsyncData.Uninitialized)
         }
-
+        
+        // Track server connection status
+        val serverConnectionStatus: MutableState<AsyncData<Unit>> = remember {
+            mutableStateOf(AsyncData.Loading())
+        }
+        
         val formState = rememberSaveable {
             mutableStateOf(LoginFormState.Default)
         }
         val accountProvider by accountProviderDataSource.flow().collectAsState()
+        
+        // Check server connection on first load
+        LaunchedEffect(Unit) {
+            val homeserverDetails = authenticationService.getHomeserverDetails()
+            serverConnectionStatus.value = if (homeserverDetails != null) {
+                AsyncData.Success(Unit)
+            } else {
+                AsyncData.Loading()
+            }
+        }
 
         fun handleEvents(event: LoginPasswordEvents) {
             when (event) {
@@ -61,6 +77,7 @@ class LoginPasswordPresenter @Inject constructor(
             accountProvider = accountProvider,
             formState = formState.value,
             loginAction = loginAction.value,
+            serverConnectionStatus = serverConnectionStatus.value,
             eventSink = ::handleEvents
         )
     }
