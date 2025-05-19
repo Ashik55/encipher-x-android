@@ -5,6 +5,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
@@ -61,7 +62,7 @@ fun BottomNavBar(
                 val selected = route == currentRoute
 
                 val iconColor = if (selected) primaryColor else unselectedColor
-                val textColor = unselectedColor
+                val textColor = if (selected) Color.Black else unselectedColor
 
                 Column(
                     modifier = Modifier
@@ -79,12 +80,12 @@ fun BottomNavBar(
                         modifier = Modifier.padding(bottom = 4.dp),
                         contentAlignment = Alignment.Center
                     ) {
-                        // Background glow for selected item (optional)
+                        // Pill-shaped background for selected item
                         if (selected) {
                             Box(
                                 modifier = Modifier
-                                    .size(44.dp)
-                                    .clip(CircleShape)
+                                    .size(width = 60.dp, height = 30.dp)
+                                    .clip(RoundedCornerShape(15.dp))
                                     .background(
                                         if (isDarkTheme) primaryColor.copy(alpha = 0.12f)
                                         else primaryColor.copy(alpha = 0.08f)
@@ -108,7 +109,7 @@ fun BottomNavBar(
                                 },
                                 contentDescription = route.name,
                                 tint = iconColor,
-                                modifier = Modifier.size(26.dp)
+                                modifier = Modifier.size(24.dp)
                             )
 
                             // Red indicator for Settings
