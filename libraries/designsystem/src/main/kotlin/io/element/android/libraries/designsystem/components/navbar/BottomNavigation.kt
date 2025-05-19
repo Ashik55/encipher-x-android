@@ -128,7 +128,7 @@ fun BottomNavBar(
 
                     Text(
                         text = route.name,
-                        modifier = Modifier.height(16.dp),
+                        modifier = Modifier.padding(vertical = 2.dp),
                         color = textColor,
                         textAlign = TextAlign.Center,
                         fontSize = 11.sp,
