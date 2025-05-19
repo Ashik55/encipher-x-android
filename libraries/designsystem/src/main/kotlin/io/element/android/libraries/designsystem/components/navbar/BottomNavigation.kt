@@ -62,7 +62,9 @@ fun BottomNavBar(
                 val selected = route == currentRoute
 
                 val iconColor = if (selected) primaryColor else unselectedColor
-                val textColor = if (selected) Color.Black else unselectedColor
+                val textColor = if (selected) {
+                    if (isDarkTheme) Color.White else Color.Black
+                } else unselectedColor
 
                 Column(
                     modifier = Modifier
