@@ -37,10 +37,10 @@ class AnalyticsOptInNode @AssistedInject constructor(
         val activity = requireNotNull(LocalActivity.current)
         val isDark = ElementTheme.isLightTheme.not()
         val state = presenter.present()
-//        AnalyticsOptInView(
-//            state = state,
-//            modifier = modifier,
-//            onClickTerms = { onClickTerms(activity, isDark) },
-//        )
+        AnalyticsOptInView(
+            state = state,
+            modifier = modifier,
+            onClickTerms = { onClickTerms(activity, isDark) },
+        )
     }
 }
