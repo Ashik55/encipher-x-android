@@ -115,12 +115,21 @@ class FtueFlowNode @AssistedInject constructor(
             NavTarget.NotificationsOptIn -> {
                 val callback = object : NotificationsOptInNode.Callback {
                     override fun onNotificationsOptInFinished() {
-                        moveToNextStepIfNeeded()
+                        // Set analytics opt-in as already asked to skip it
+                        lifecycleScope.launch {
+                            analyticsService.setDidAskUserConsent()
+                            moveToNextStepIfNeeded()
+                        }
                     }
                 }
                 createNode<NotificationsOptInNode>(buildContext, listOf(callback))
             }
             NavTarget.AnalyticsOptIn -> {
+                // This should not be reached, but if it is, auto-decline and move on
+                lifecycleScope.launch {
+                    analyticsService.setDidAskUserConsent()
+                    moveToNextStepIfNeeded()
+                }
                 analyticsEntryPoint.createNode(this, buildContext)
             }
             NavTarget.LockScreenSetup -> {
@@ -136,7 +145,7 @@ class FtueFlowNode @AssistedInject constructor(
         }
     }
 
-    private fun moveToNextStepIfNeeded() = lifecycleScope.launch {
+    private fun moveToNextStepIfNeeded(): kotlinx.coroutines.Job = lifecycleScope.launch {
         when (ftueState.getNextStep()) {
             FtueStep.WaitingForInitialState -> {
                 backstack.newRoot(NavTarget.Placeholder)
@@ -148,7 +157,8 @@ class FtueFlowNode @AssistedInject constructor(
                 backstack.newRoot(NavTarget.NotificationsOptIn)
             }
             FtueStep.AnalyticsOptIn -> {
-                backstack.replace(NavTarget.AnalyticsOptIn)
+                analyticsService.setDidAskUserConsent()
+                moveToNextStepIfNeeded()
             }
             FtueStep.LockscreenSetup -> {
                 backstack.newRoot(NavTarget.LockScreenSetup)

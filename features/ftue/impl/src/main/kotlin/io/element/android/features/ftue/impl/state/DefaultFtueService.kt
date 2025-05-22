@@ -94,11 +94,7 @@ class DefaultFtueService @Inject constructor(
             } else {
                 getNextStep(FtueStep.LockscreenSetup)
             }
-            FtueStep.LockscreenSetup -> if (needsAnalyticsOptIn()) {
-                FtueStep.AnalyticsOptIn
-            } else {
-                getNextStep(FtueStep.AnalyticsOptIn)
-            }
+            FtueStep.LockscreenSetup -> null
             FtueStep.AnalyticsOptIn -> null
         }
 

@@ -37,6 +37,10 @@ class AnalyticsOptInNode @AssistedInject constructor(
         val activity = requireNotNull(LocalActivity.current)
         val isDark = ElementTheme.isLightTheme.not()
         val state = presenter.present()
+        
+        // Auto decline analytics instead of showing the view
+        state.eventSink(io.element.android.features.analytics.api.AnalyticsOptInEvents.EnableAnalytics(false))
+        
 //        AnalyticsOptInView(
 //            state = state,
 //            modifier = modifier,
