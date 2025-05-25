@@ -88,8 +88,43 @@ class NotificationBroadcastReceiverHandler @Inject constructor(
     }
 
     private fun handleRejectRoom(sessionId: SessionId, roomId: RoomId) = appCoroutineScope.launch {
-        val client = matrixClientProvider.getOrRestore(sessionId).getOrNull() ?: return@launch
-        client.getRoom(roomId)?.leave()
+        Timber.tag(loggerTag.value).d("handleRejectRoom: Starting rejection for room ${roomId.value} in session ${sessionId.value}")
+
+        val client = matrixClientProvider.getOrRestore(sessionId).getOrNull()
+        if (client == null) {
+            Timber.tag(loggerTag.value).e("handleRejectRoom: Failed to get client for session ${sessionId.value}")
+            return@launch
+        }
+
+        Timber.tag(loggerTag.value).d("handleRejectRoom: Client obtained, attempting to get pending room ${roomId.value}")
+
+        val pendingRoom = client.getPendingRoom(roomId)
+        if (pendingRoom == null) {
+            Timber.tag(loggerTag.value).e("handleRejectRoom: No pending room found for ${roomId.value}. Attempting to check regular room...")
+
+            val regularRoom = client.getRoom(roomId)
+            if (regularRoom != null) {
+                Timber.tag(loggerTag.value).w("handleRejectRoom: Found regular room instead of pending room for ${roomId.value}, attempting to leave...")
+                regularRoom.leave().onSuccess {
+                    Timber.tag(loggerTag.value).i("handleRejectRoom: Successfully left regular room ${roomId.value}")
+                }.onFailure { error ->
+                    Timber.tag(loggerTag.value).e(error, "handleRejectRoom: Failed to leave regular room ${roomId.value}")
+                }
+            } else {
+                Timber.tag(loggerTag.value).e("handleRejectRoom: No room (pending or regular) found for ${roomId.value}")
+            }
+            return@launch
+        }
+
+        Timber.tag(loggerTag.value).d("handleRejectRoom: Pending room found, attempting to leave ${roomId.value}")
+
+        pendingRoom.use { room ->
+            room.leave().onSuccess {
+                Timber.tag(loggerTag.value).i("handleRejectRoom: Successfully rejected/left pending room ${roomId.value}")
+            }.onFailure { error ->
+                Timber.tag(loggerTag.value).e(error, "handleRejectRoom: Failed to reject/leave pending room ${roomId.value}")
+            }
+        }
     }
 
     private fun handleMarkAsRead(sessionId: SessionId, roomId: RoomId) = appCoroutineScope.launch {
