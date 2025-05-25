@@ -60,6 +60,7 @@ class SecureBackupSetupPresenter @AssistedInject constructor(
         var passphrase by remember { mutableStateOf("") }
         var oldPassphrase by remember { mutableStateOf("") }
         var needsPasskeyValidation by remember { mutableStateOf(false) }
+        var showPassphraseRequiredDialog by remember { mutableStateOf(false) }
         val vaultSaveAction = remember { mutableStateOf<AsyncAction<Unit>>(AsyncAction.Uninitialized) }
         val validatePasskeyAction = remember { mutableStateOf<AsyncAction<Unit>>(AsyncAction.Uninitialized) }
         
@@ -142,6 +143,14 @@ class SecureBackupSetupPresenter @AssistedInject constructor(
                         }
                     }
                 }
+                SecureBackupSetupEvents.ShowPassphraseRequiredDialog -> {
+                    Timber.tag(loggerTagSetup.value).d("Showing passphrase required dialog")
+                    showPassphraseRequiredDialog = true
+                }
+                SecureBackupSetupEvents.DismissPassphraseRequiredDialog -> {
+                    Timber.tag(loggerTagSetup.value).d("Dismissing passphrase required dialog")
+                    showPassphraseRequiredDialog = false
+                }
             }
         }
 
@@ -166,6 +175,7 @@ class SecureBackupSetupPresenter @AssistedInject constructor(
             needsPasskeyValidation = needsPasskeyValidation,
             validatePasskeyAction = validatePasskeyAction.value,
             oldPassphrase = oldPassphrase,
+            showPassphraseRequiredDialog = showPassphraseRequiredDialog,
             eventSink = ::handleEvents
         )
     }

@@ -2,7 +2,18 @@
  * Copyright 2023, 2024 New Vector Ltd.
  *
  * SPDX-License-Identifier: AGPL-3.0-only OR LicenseRef-Element-Commercial
- * Please see LICENSE files in the repository root for full details.
+ * Please see LICENSE files i    // Display passphrase validation UI when in change mode and validation needed
+    if (state.isChangeRecoveryKeyUserStory && state.needsPasskeyValidation) {
+        PassphraseValidationView(
+            state = state,
+            onBackClick = handleBackClick,
+            modifier = modifier
+        )
+    } else {
+        // Regular recovery key setup/change flow
+        NewFlowStepPage(
+            modifier = modifier,
+            onBackClick = handleBackClick,tory root for full details.
  */
 
 package io.element.android.features.securebackup.impl.setup
@@ -71,6 +82,7 @@ import io.element.android.libraries.designsystem.theme.components.Text
 import timber.log.Timber
 import androidx.compose.ui.graphics.Color
 import kotlin.math.roundToInt
+import androidx.activity.compose.BackHandler
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -82,6 +94,24 @@ fun SecureBackupSetupView(
 ) {
     val context = LocalContext.current
     val formattedRecoveryKey = state.recoveryKeyViewState.formattedRecoveryKey
+    
+    // Handle back navigation - check if passphrase is required
+    val handleBackClick = {
+        val recoveryKeyGenerated = formattedRecoveryKey != null
+        val passphraseEntered = state.recoveryKeyViewState.passphrase.isNotBlank()
+        val isInValidationMode = state.isChangeRecoveryKeyUserStory && state.needsPasskeyValidation
+        
+        Timber.d("Back click - recoveryKeyGenerated: $recoveryKeyGenerated, passphraseEntered: $passphraseEntered, isInValidationMode: $isInValidationMode")
+        
+        // Show dialog if recovery key is generated but passphrase not set (and not in validation mode)
+        if (recoveryKeyGenerated && !passphraseEntered && !isInValidationMode) {
+            Timber.d("Showing passphrase required dialog")
+            state.eventSink.invoke(SecureBackupSetupEvents.ShowPassphraseRequiredDialog)
+        } else {
+            Timber.d("Proceeding with back navigation")
+            onBackClick()
+        }
+    }
     
     // Track if bottom sheet should be shown (when recovery key is available)
     var showBottomSheet by remember { mutableStateOf(false) }
@@ -138,14 +168,19 @@ fun SecureBackupSetupView(
     if (state.isChangeRecoveryKeyUserStory && state.needsPasskeyValidation) {
         PassphraseValidationView(
             state = state,
-            onBackClick = onBackClick,
+            onBackClick = handleBackClick,
             modifier = modifier
         )
     } else {
+        // Add BackHandler to intercept system back gesture without showing back icon
+        BackHandler {
+            handleBackClick()
+        }
+        
         // Regular recovery key setup/change flow
         NewFlowStepPage(
             modifier = modifier,
-            onBackClick = onBackClick.takeIf { state.canGoBack() },
+            onBackClick = null, // Hide back icon but handle system back gesture above
             title = title(state),
             subTitle = subtitle(state),
             iconStyle = RecoveryKeyIcon.Style.Default(CompoundIcons.KeySolid()),
@@ -233,6 +268,21 @@ fun SecureBackupSetupView(
         },
         onErrorDismiss = {}
     )
+    
+    // Show passphrase required dialog when user tries to leave without setting passphrase
+    if (state.showPassphraseRequiredDialog) {
+        ConfirmationDialog(
+            title = "Must setup passphrase",
+            content = "You must set up a passphrase before leaving this screen to secure your recovery key.",
+            submitText = "OK",
+            onSubmitClick = {
+                state.eventSink.invoke(SecureBackupSetupEvents.DismissPassphraseRequiredDialog)
+            },
+            onDismiss = {
+                state.eventSink.invoke(SecureBackupSetupEvents.DismissPassphraseRequiredDialog)
+            }
+        )
+    }
 }
 
 @Composable

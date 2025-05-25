@@ -40,6 +40,10 @@ fun aSecureBackupSetupState(
     recoveryKeyViewState = setupState.toRecoveryKeyViewState(),
     isSavingToVault = isSavingToVault,
     vaultSaveAction = vaultSaveAction,
+    needsPasskeyValidation = false,
+    validatePasskeyAction = AsyncAction.Uninitialized,
+    oldPassphrase = "",
+    showPassphraseRequiredDialog = false,
     eventSink = {}
 )
 
