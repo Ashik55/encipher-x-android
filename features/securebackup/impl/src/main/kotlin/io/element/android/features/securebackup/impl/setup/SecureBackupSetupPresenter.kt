@@ -143,6 +143,10 @@ class SecureBackupSetupPresenter @AssistedInject constructor(
                         }
                     }
                 }
+                SecureBackupSetupEvents.DismissValidationError -> {
+                    Timber.tag(loggerTagSetup.value).d("Dismissing validation error")
+                    validatePasskeyAction.value = AsyncAction.Uninitialized
+                }
                 SecureBackupSetupEvents.ShowPassphraseRequiredDialog -> {
                     Timber.tag(loggerTagSetup.value).d("Showing passphrase required dialog")
                     showPassphraseRequiredDialog = true

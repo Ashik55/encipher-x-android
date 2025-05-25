@@ -266,7 +266,9 @@ fun SecureBackupSetupView(
         onSuccess = {
             // No action needed here as the validation state is already updated
         },
-        onErrorDismiss = {}
+        onErrorDismiss = {
+            state.eventSink(SecureBackupSetupEvents.DismissValidationError)
+        }
     )
     
     // Show passphrase required dialog when user tries to leave without setting passphrase
@@ -618,15 +620,6 @@ private fun PassphraseValidationView(
                         keyboardType = androidx.compose.ui.text.input.KeyboardType.Password
                     )
                 )
-                
-                if (state.validatePasskeyAction is AsyncAction.Failure) {
-                    Spacer(modifier = Modifier.height(8.dp))
-                    Text(
-                        text = "Invalid passphrase. Please try again.",
-                        style = ElementTheme.typography.fontBodySmMedium,
-                        color = Color(0xFFB00020) // Error red
-                    )
-                }
             }
             
             // Show loading state

@@ -21,6 +21,7 @@ sealed interface SecureBackupSetupEvents {
     // New events for passkey validation
     data class OldPassphraseChanged(val passphrase: String) : SecureBackupSetupEvents
     data object ValidatePasskey : SecureBackupSetupEvents
+    data object DismissValidationError : SecureBackupSetupEvents
     
     // New events for handling back navigation
     data object ShowPassphraseRequiredDialog : SecureBackupSetupEvents
