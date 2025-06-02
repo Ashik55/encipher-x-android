@@ -19,6 +19,9 @@ import io.element.android.libraries.core.coroutine.CoroutineDispatchers
 import io.element.android.libraries.matrix.api.encryption.IdentityPasswordResetHandle
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withTimeout
+import kotlinx.coroutines.TimeoutCancellationException
+import kotlin.time.Duration.Companion.seconds
 
 class ResetIdentityPasswordPresenter(
     private val identityPasswordResetHandle: IdentityPasswordResetHandle,
@@ -45,7 +48,13 @@ class ResetIdentityPasswordPresenter(
 
     private fun CoroutineScope.reset(password: String, action: MutableState<AsyncAction<Unit>>) = launch(dispatchers.io) {
         suspend {
-            identityPasswordResetHandle.resetPassword(password).getOrThrow()
+            try {
+                withTimeout(10.seconds) {
+                    identityPasswordResetHandle.resetPassword(password).getOrThrow()
+                }
+            } catch (e: TimeoutCancellationException) {
+                throw Exception("Operation timed out. Please try again.")
+            }
         }.runCatchingUpdatingState(action)
     }
 }
