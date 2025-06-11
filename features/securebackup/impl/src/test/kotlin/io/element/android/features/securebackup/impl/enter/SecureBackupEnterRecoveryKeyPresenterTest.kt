@@ -17,6 +17,7 @@ import io.element.android.features.securebackup.impl.tools.RecoveryKeyTools
 import io.element.android.libraries.architecture.AsyncAction
 import io.element.android.libraries.matrix.api.encryption.EncryptionService
 import io.element.android.libraries.matrix.test.AN_EXCEPTION
+import io.element.android.libraries.matrix.test.FakeMatrixClient
 import io.element.android.libraries.matrix.test.encryption.FakeEncryptionService
 import io.element.android.tests.testutils.WarmUpRule
 import kotlinx.coroutines.test.runTest
@@ -92,5 +93,6 @@ class SecureBackupEnterRecoveryKeyPresenterTest {
     ) = SecureBackupEnterRecoveryKeyPresenter(
         encryptionService = encryptionService,
         recoveryKeyTools = RecoveryKeyTools(),
+        matrixClient = FakeMatrixClient(),
     )
 }

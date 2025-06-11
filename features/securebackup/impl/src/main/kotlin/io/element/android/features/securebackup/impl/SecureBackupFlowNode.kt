@@ -31,12 +31,19 @@ import io.element.android.libraries.architecture.BaseFlowNode
 import io.element.android.libraries.architecture.appyx.canPop
 import io.element.android.libraries.architecture.createNode
 import io.element.android.libraries.di.SessionScope
+import io.element.android.libraries.di.annotations.SessionCoroutineScope
+import io.element.android.libraries.preferences.api.store.SessionPreferencesStore
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.launch
 import kotlinx.parcelize.Parcelize
+import timber.log.Timber
 
 @ContributesNode(SessionScope::class)
 class SecureBackupFlowNode @AssistedInject constructor(
     @Assisted buildContext: BuildContext,
     @Assisted plugins: List<Plugin>,
+    private val sessionPreferencesStore: SessionPreferencesStore,
+    @SessionCoroutineScope private val coroutineScope: CoroutineScope,
 ) : BaseFlowNode<SecureBackupFlowNode.NavTarget>(
     backstack = BackStack(
         initialElement = when (plugins.filterIsInstance<SecureBackupEntryPoint.Params>().first().initialElement) {
@@ -98,13 +105,25 @@ class SecureBackupFlowNode @AssistedInject constructor(
                 val inputs = SecureBackupSetupNode.Inputs(
                     isChangeRecoveryKeyUserStory = false,
                 )
-                createNode<SecureBackupSetupNode>(buildContext, listOf(inputs))
+                val callback = object : SecureBackupSetupNode.Callback {
+                    override fun onSetupCompleted() {
+                        // When vault save is complete, trigger the callback to notify FTUE flow
+                        callbacks.forEach { it.onDone() }
+                    }
+                }
+                createNode<SecureBackupSetupNode>(buildContext, listOf(inputs, callback))
             }
             NavTarget.Change -> {
                 val inputs = SecureBackupSetupNode.Inputs(
                     isChangeRecoveryKeyUserStory = true,
                 )
-                createNode<SecureBackupSetupNode>(buildContext, listOf(inputs))
+                val callback = object : SecureBackupSetupNode.Callback {
+                    override fun onSetupCompleted() {
+                        // When vault save is complete for change recovery key, trigger the callback
+                        callbacks.forEach { it.onDone() }
+                    }
+                }
+                createNode<SecureBackupSetupNode>(buildContext, listOf(inputs, callback))
             }
             NavTarget.Disable -> {
                 createNode<SecureBackupDisableNode>(buildContext)
@@ -122,8 +141,17 @@ class SecureBackupFlowNode @AssistedInject constructor(
                 createNode<SecureBackupEnterRecoveryKeyNode>(buildContext, plugins = listOf(callback))
             }
             is NavTarget.ResetIdentity -> {
+                // Set the skip flag immediately when reset identity flow starts
+                // This ensures it's set before any FTUE checks happen
+                Timber.d("SecureBackup", "Starting reset identity - setting skip flag immediately")
+                coroutineScope.launch {
+                    sessionPreferencesStore.setSkipRecoveryKeySetupAfterReset(true)
+                    Timber.d("SecureBackup", "Skip flag set to true at start of reset")
+                }
+                
                 val callback = object : ResetIdentityFlowNode.Callback {
                     override fun onDone() {
+                        Timber.d("SecureBackup", "Reset identity completed")
                         callbacks.forEach { it.onDone() }
                     }
                 }

@@ -15,7 +15,10 @@ import io.element.android.features.ftue.impl.state.DefaultFtueService
 import io.element.android.features.ftue.impl.state.FtueStep
 import io.element.android.features.lockscreen.api.LockScreenService
 import io.element.android.features.lockscreen.test.FakeLockScreenService
+import io.element.android.features.securebackup.api.RecoveryKeySetupService
+import io.element.android.libraries.matrix.api.encryption.EncryptionService
 import io.element.android.libraries.matrix.api.verification.SessionVerificationService
+import io.element.android.libraries.matrix.test.encryption.FakeEncryptionService
 import io.element.android.libraries.matrix.api.verification.SessionVerifiedStatus
 import io.element.android.libraries.matrix.test.verification.FakeSessionVerificationService
 import io.element.android.libraries.permissions.api.PermissionStateProvider
@@ -31,6 +34,21 @@ import io.element.android.tests.testutils.lambda.value
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
+
+class FakeRecoveryKeySetupService : RecoveryKeySetupService {
+    private var shouldTrigger = false
+    private var hasPasskeys = false
+    private var isHandled = false
+
+    fun setShouldTriggerRecoveryKeySetup(shouldTrigger: Boolean) {
+        this.shouldTrigger = shouldTrigger
+    }
+    
+    override suspend fun shouldTriggerRecoveryKeySetup(): Boolean = shouldTrigger
+    override suspend fun hasExistingPasskeys(): Boolean = hasPasskeys
+    override suspend fun markRecoveryKeySetupHandled() { isHandled = true }
+    override suspend fun isRecoveryKeySetupHandled(): Boolean = isHandled
+}
 
 class DefaultFtueServiceTest {
     @Test
@@ -103,11 +121,15 @@ class DefaultFtueServiceTest {
         val analyticsService = FakeAnalyticsService()
         val permissionStateProvider = FakePermissionStateProvider(permissionGranted = false)
         val lockScreenService = FakeLockScreenService()
+        val recoveryKeySetupService = FakeRecoveryKeySetupService().apply {
+            setShouldTriggerRecoveryKeySetup(true) // Enable recovery key setup for this test
+        }
         val service = createDefaultFtueService(
             sessionVerificationService = sessionVerificationService,
             analyticsService = analyticsService,
             permissionStateProvider = permissionStateProvider,
             lockScreenService = lockScreenService,
+            recoveryKeySetupService = recoveryKeySetupService,
         )
         val steps = mutableListOf<FtueStep?>()
 
@@ -123,6 +145,10 @@ class DefaultFtueServiceTest {
         steps.add(service.getNextStep(steps.lastOrNull()))
         lockScreenService.setIsPinSetup(true)
 
+        // Recovery key setup
+        steps.add(service.getNextStep(steps.lastOrNull()))
+        recoveryKeySetupService.setShouldTriggerRecoveryKeySetup(false) // Mark it as handled
+
         // Analytics opt in
         steps.add(service.getNextStep(steps.lastOrNull()))
         analyticsService.setDidAskUserConsent()
@@ -134,6 +160,7 @@ class DefaultFtueServiceTest {
             FtueStep.SessionVerification,
             FtueStep.NotificationsOptIn,
             FtueStep.LockscreenSetup,
+            FtueStep.RecoveryKeySetup,
             FtueStep.AnalyticsOptIn,
             // Final state
             null,
@@ -146,11 +173,16 @@ class DefaultFtueServiceTest {
         val analyticsService = FakeAnalyticsService()
         val permissionStateProvider = FakePermissionStateProvider(permissionGranted = false)
         val lockScreenService = FakeLockScreenService()
+        val recoveryKeySetupService = FakeRecoveryKeySetupService().apply {
+            setShouldTriggerRecoveryKeySetup(true) // Enable recovery key setup
+        }
+
         val service = createDefaultFtueService(
             sessionVerificationService = sessionVerificationService,
             analyticsService = analyticsService,
             permissionStateProvider = permissionStateProvider,
             lockScreenService = lockScreenService,
+            recoveryKeySetupService = recoveryKeySetupService,
         )
 
         // Skip first 3 steps
@@ -158,6 +190,10 @@ class DefaultFtueServiceTest {
         permissionStateProvider.setPermissionGranted()
         lockScreenService.setIsPinSetup(true)
 
+        assertThat(service.getNextStep()).isEqualTo(FtueStep.RecoveryKeySetup)
+
+        // Now skip recovery key setup by configuring it to not trigger
+        recoveryKeySetupService.setShouldTriggerRecoveryKeySetup(false)
         assertThat(service.getNextStep()).isEqualTo(FtueStep.AnalyticsOptIn)
 
         analyticsService.setDidAskUserConsent()
@@ -169,17 +205,25 @@ class DefaultFtueServiceTest {
         val sessionVerificationService = FakeSessionVerificationService()
         val analyticsService = FakeAnalyticsService()
         val lockScreenService = FakeLockScreenService()
+        val recoveryKeySetupService = FakeRecoveryKeySetupService().apply {
+            setShouldTriggerRecoveryKeySetup(true) // Enable recovery key setup initially
+        }
 
         val service = createDefaultFtueService(
             sdkIntVersion = Build.VERSION_CODES.M,
             sessionVerificationService = sessionVerificationService,
             analyticsService = analyticsService,
             lockScreenService = lockScreenService,
+            recoveryKeySetupService = recoveryKeySetupService,
         )
 
         sessionVerificationService.emitVerifiedStatus(SessionVerifiedStatus.Verified)
         lockScreenService.setIsPinSetup(true)
 
+        assertThat(service.getNextStep()).isEqualTo(FtueStep.RecoveryKeySetup)
+
+        // Skip recovery key setup
+        recoveryKeySetupService.setShouldTriggerRecoveryKeySetup(false)
         assertThat(service.getNextStep()).isEqualTo(FtueStep.AnalyticsOptIn)
 
         analyticsService.setDidAskUserConsent()
@@ -233,6 +277,8 @@ class DefaultFtueServiceTest {
         permissionStateProvider: PermissionStateProvider = FakePermissionStateProvider(permissionGranted = false),
         lockScreenService: LockScreenService = FakeLockScreenService(),
         sessionPreferencesStore: SessionPreferencesStore = InMemorySessionPreferencesStore(),
+        recoveryKeySetupService: RecoveryKeySetupService = FakeRecoveryKeySetupService(),
+        encryptionService: EncryptionService = FakeEncryptionService(),
         // First version where notification permission is required
         sdkIntVersion: Int = Build.VERSION_CODES.TIRAMISU,
     ) = DefaultFtueService(
@@ -243,5 +289,7 @@ class DefaultFtueServiceTest {
         permissionStateProvider = permissionStateProvider,
         lockScreenService = lockScreenService,
         sessionPreferencesStore = sessionPreferencesStore,
+        recoveryKeySetupService = recoveryKeySetupService,
+        encryptionService = encryptionService,
     )
 }

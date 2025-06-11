@@ -31,5 +31,8 @@ interface SessionPreferencesStore {
     suspend fun setCompressMedia(compress: Boolean)
     fun doesCompressMedia(): Flow<Boolean>
 
+    suspend fun setSkipRecoveryKeySetupAfterReset(skip: Boolean)
+    fun isRecoveryKeySetupSkippedAfterReset(): Flow<Boolean>
+
     suspend fun clear()
 }

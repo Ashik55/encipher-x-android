@@ -12,6 +12,7 @@ import androidx.compose.ui.Modifier
 import com.bumble.appyx.core.modality.BuildContext
 import com.bumble.appyx.core.node.Node
 import com.bumble.appyx.core.plugin.Plugin
+import com.bumble.appyx.core.plugin.plugins
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedInject
 import io.element.android.anvilannotations.ContributesNode
@@ -29,11 +30,16 @@ class SecureBackupSetupNode @AssistedInject constructor(
     presenterFactory: SecureBackupSetupPresenter.Factory,
     private val snackbarDispatcher: SnackbarDispatcher,
 ) : Node(buildContext, plugins = plugins) {
+    interface Callback : Plugin {
+        fun onSetupCompleted()
+    }
+
     data class Inputs(
         val isChangeRecoveryKeyUserStory: Boolean,
     ) : NodeInputs
 
     private val inputs = inputs<Inputs>()
+    private val callbacks = plugins<Callback>()
 
     private val presenter = presenterFactory.create(inputs.isChangeRecoveryKeyUserStory)
 
@@ -44,6 +50,8 @@ class SecureBackupSetupNode @AssistedInject constructor(
             state = state,
             onSuccess = {
                 postSuccessSnackbar()
+                // Notify callbacks that setup is completed (triggers FTUE progression)
+                callbacks.forEach { it.onSetupCompleted() }
                 navigateUp()
             },
             onBackClick = ::navigateUp,

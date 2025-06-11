@@ -19,6 +19,7 @@ class InMemorySessionPreferencesStore(
     isRenderTypingNotificationsEnabled: Boolean = true,
     isSessionVerificationSkipped: Boolean = false,
     doesCompressMedia: Boolean = true,
+    isRecoveryKeySetupSkippedAfterReset: Boolean = false,
 ) : SessionPreferencesStore {
     private val isSharePresenceEnabled = MutableStateFlow(isSharePresenceEnabled)
     private val isSendPublicReadReceiptsEnabled = MutableStateFlow(isSendPublicReadReceiptsEnabled)
@@ -27,6 +28,7 @@ class InMemorySessionPreferencesStore(
     private val isRenderTypingNotificationsEnabled = MutableStateFlow(isRenderTypingNotificationsEnabled)
     private val isSessionVerificationSkipped = MutableStateFlow(isSessionVerificationSkipped)
     private val doesCompressMedia = MutableStateFlow(doesCompressMedia)
+    private val isRecoveryKeySetupSkippedAfterReset = MutableStateFlow(isRecoveryKeySetupSkippedAfterReset)
     var clearCallCount = 0
         private set
 
@@ -71,6 +73,12 @@ class InMemorySessionPreferencesStore(
     override suspend fun setCompressMedia(compress: Boolean) = doesCompressMedia.emit(compress)
 
     override fun doesCompressMedia(): Flow<Boolean> = doesCompressMedia
+
+    override suspend fun setSkipRecoveryKeySetupAfterReset(skip: Boolean) {
+        isRecoveryKeySetupSkippedAfterReset.tryEmit(skip)
+    }
+
+    override fun isRecoveryKeySetupSkippedAfterReset(): Flow<Boolean> = isRecoveryKeySetupSkippedAfterReset
 
     override suspend fun clear() {
         clearCallCount++

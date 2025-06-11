@@ -21,7 +21,6 @@ import com.bumble.appyx.core.node.Node
 import com.bumble.appyx.core.plugin.Plugin
 import com.bumble.appyx.navmodel.backstack.BackStack
 import com.bumble.appyx.navmodel.backstack.operation.newRoot
-import com.bumble.appyx.navmodel.backstack.operation.replace
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedInject
 import io.element.android.anvilannotations.ContributesNode
@@ -31,12 +30,15 @@ import io.element.android.features.ftue.impl.sessionverification.FtueSessionVeri
 import io.element.android.features.ftue.impl.state.DefaultFtueService
 import io.element.android.features.ftue.impl.state.FtueStep
 import io.element.android.features.lockscreen.api.LockScreenEntryPoint
+import io.element.android.features.securebackup.api.RecoveryKeySetupService
+import io.element.android.features.securebackup.api.SecureBackupEntryPoint
 import io.element.android.libraries.architecture.BackstackView
 import io.element.android.libraries.architecture.BaseFlowNode
 import io.element.android.libraries.architecture.createNode
 import io.element.android.libraries.designsystem.theme.components.CircularProgressIndicator
 import io.element.android.libraries.di.AppScope
 import io.element.android.libraries.di.SessionScope
+import io.element.android.libraries.preferences.api.store.SessionPreferencesStore
 import io.element.android.services.analytics.api.AnalyticsService
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -46,6 +48,7 @@ import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import kotlinx.parcelize.Parcelize
+import timber.log.Timber
 
 @ContributesNode(SessionScope::class)
 class FtueFlowNode @AssistedInject constructor(
@@ -55,6 +58,9 @@ class FtueFlowNode @AssistedInject constructor(
     private val analyticsEntryPoint: AnalyticsEntryPoint,
     private val analyticsService: AnalyticsService,
     private val lockScreenEntryPoint: LockScreenEntryPoint,
+    private val secureBackupEntryPoint: SecureBackupEntryPoint,
+    private val recoveryKeySetupService: RecoveryKeySetupService,
+    private val sessionPreferencesStore: SessionPreferencesStore,
 ) : BaseFlowNode<FtueFlowNode.NavTarget>(
     backstack = BackStack(
         initialElement = NavTarget.Placeholder,
@@ -79,6 +85,9 @@ class FtueFlowNode @AssistedInject constructor(
 
         @Parcelize
         data object LockScreenSetup : NavTarget
+
+        @Parcelize
+        data object RecoveryKeySetup : NavTarget
     }
 
     override fun onBuilt() {
@@ -142,28 +151,59 @@ class FtueFlowNode @AssistedInject constructor(
                     .callback(callback)
                     .build()
             }
+            NavTarget.RecoveryKeySetup -> {
+                val callback = object : SecureBackupEntryPoint.Callback {
+                    override fun onDone() {
+                        lifecycleScope.launch {
+                            // Mark recovery key setup as handled when vault save is complete
+                            recoveryKeySetupService.markRecoveryKeySetupHandled()
+                            // Reset the skip flag since user actually completed recovery key setup
+                            sessionPreferencesStore.setSkipRecoveryKeySetupAfterReset(false)
+                            // Automatically move to next step in FTUE flow
+                            moveToNextStepIfNeeded()
+                        }
+                    }
+                }
+                secureBackupEntryPoint.nodeBuilder(this, buildContext)
+                    .params(SecureBackupEntryPoint.Params(SecureBackupEntryPoint.InitialTarget.SetUpRecovery))
+                    .callback(callback)
+                    .build()
+            }
         }
     }
 
     private fun moveToNextStepIfNeeded(): kotlinx.coroutines.Job = lifecycleScope.launch {
-        when (ftueState.getNextStep()) {
+        val nextStep = ftueState.getNextStep()
+        Timber.d("FTUE", "moveToNextStepIfNeeded: nextStep=$nextStep")
+        when (nextStep) {
             FtueStep.WaitingForInitialState -> {
+                Timber.d("FTUE", "Moving to Placeholder")
                 backstack.newRoot(NavTarget.Placeholder)
             }
             FtueStep.SessionVerification -> {
+                Timber.d("FTUE", "Moving to SessionVerification")
                 backstack.newRoot(NavTarget.SessionVerification)
             }
             FtueStep.NotificationsOptIn -> {
+                Timber.d("FTUE", "Moving to NotificationsOptIn")
                 backstack.newRoot(NavTarget.NotificationsOptIn)
             }
             FtueStep.AnalyticsOptIn -> {
+                Timber.d("FTUE", "Moving to AnalyticsOptIn")
                 analyticsService.setDidAskUserConsent()
                 moveToNextStepIfNeeded()
             }
             FtueStep.LockscreenSetup -> {
+                Timber.d("FTUE", "Moving to LockscreenSetup")
                 backstack.newRoot(NavTarget.LockScreenSetup)
             }
-            null -> Unit
+            FtueStep.RecoveryKeySetup -> {
+                Timber.d("FTUE", "Moving to RecoveryKeySetup")
+                backstack.newRoot(NavTarget.RecoveryKeySetup)
+            }
+            null -> {
+                Timber.d("FTUE", "FTUE completed - no more steps")
+            }
         }
     }
 

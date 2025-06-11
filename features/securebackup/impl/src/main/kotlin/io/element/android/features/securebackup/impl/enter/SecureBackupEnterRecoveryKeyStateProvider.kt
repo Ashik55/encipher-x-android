@@ -66,6 +66,7 @@ fun aSecureBackupEnterRecoveryKeyState(
     retrieveVaultAction: AsyncAction<String> = AsyncAction.Uninitialized,
     isVaultMode: Boolean = false,
     isSubmitEnabled: Boolean = true,
+    eventSink: (SecureBackupEnterRecoveryKeyEvents) -> Unit = {},
 ): SecureBackupEnterRecoveryKeyState {
     return SecureBackupEnterRecoveryKeyState(
         recoveryKeyViewState = recoveryKeyViewState,
@@ -73,6 +74,6 @@ fun aSecureBackupEnterRecoveryKeyState(
         retrieveVaultAction = retrieveVaultAction,
         isVaultMode = isVaultMode,
         isSubmitEnabled = isSubmitEnabled,
-        eventSink = {}
+        eventSink = eventSink
     )
 }

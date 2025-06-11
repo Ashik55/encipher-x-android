@@ -14,9 +14,12 @@ import com.squareup.anvil.annotations.ContributesBinding
 import io.element.android.features.ftue.api.state.FtueService
 import io.element.android.features.ftue.api.state.FtueState
 import io.element.android.features.lockscreen.api.LockScreenService
+import io.element.android.features.securebackup.api.RecoveryKeySetupService
 import io.element.android.libraries.di.SessionScope
 import io.element.android.libraries.di.SingleIn
 import io.element.android.libraries.di.annotations.SessionCoroutineScope
+import io.element.android.libraries.matrix.api.encryption.EncryptionService
+import io.element.android.libraries.matrix.api.encryption.RecoveryState
 import io.element.android.libraries.matrix.api.verification.SessionVerificationService
 import io.element.android.libraries.matrix.api.verification.SessionVerifiedStatus
 import io.element.android.libraries.permissions.api.PermissionStateProvider
@@ -31,6 +34,7 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
+import timber.log.Timber
 import javax.inject.Inject
 
 @ContributesBinding(SessionScope::class)
@@ -43,6 +47,8 @@ class DefaultFtueService @Inject constructor(
     private val lockScreenService: LockScreenService,
     private val sessionVerificationService: SessionVerificationService,
     private val sessionPreferencesStore: SessionPreferencesStore,
+    private val recoveryKeySetupService: RecoveryKeySetupService,
+    private val encryptionService: EncryptionService,
 ) : FtueService {
     override val state = MutableStateFlow<FtueState>(FtueState.Unknown)
 
@@ -70,6 +76,15 @@ class DefaultFtueService @Inject constructor(
             .distinctUntilChanged()
             .onEach { updateState() }
             .launchIn(sessionCoroutineScope)
+
+        // Listen for recovery setup completion to automatically navigate to the next step
+        encryptionService.recoveryStateStateFlow
+            .onEach { recoveryState ->
+                if (recoveryState == RecoveryState.ENABLED) {
+                    updateState()
+                }
+            }
+            .launchIn(sessionCoroutineScope)
     }
 
     suspend fun getNextStep(currentStep: FtueStep? = null): FtueStep? =
@@ -94,7 +109,16 @@ class DefaultFtueService @Inject constructor(
             } else {
                 getNextStep(FtueStep.LockscreenSetup)
             }
-            FtueStep.LockscreenSetup -> null
+            FtueStep.LockscreenSetup -> if (shouldTriggerRecoveryKeySetup()) {
+                FtueStep.RecoveryKeySetup
+            } else {
+                getNextStep(FtueStep.RecoveryKeySetup)
+            }
+            FtueStep.RecoveryKeySetup -> if (needsAnalyticsOptIn()) {
+                FtueStep.AnalyticsOptIn
+            } else {
+                getNextStep(FtueStep.AnalyticsOptIn)
+            }
             FtueStep.AnalyticsOptIn -> null
         }
 
@@ -133,6 +157,27 @@ class DefaultFtueService @Inject constructor(
     }
 
     @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
+    internal suspend fun shouldTriggerRecoveryKeySetup(): Boolean {
+        return try {
+            // Skip recovery key setup if user came from reset identity flow
+            val skipAfterReset = sessionPreferencesStore.isRecoveryKeySetupSkippedAfterReset().first()
+            Timber.d("FTUE", "shouldTriggerRecoveryKeySetup: skipAfterReset=$skipAfterReset")
+            if (skipAfterReset) {
+                Timber.d("FTUE", "Skipping recovery key setup - user came from reset identity")
+                return false
+            }
+            
+            val shouldTrigger = recoveryKeySetupService.shouldTriggerRecoveryKeySetup()
+            Timber.d("FTUE", "shouldTriggerRecoveryKeySetup: regular check=$shouldTrigger")
+            return shouldTrigger
+        } catch (e: Exception) {
+            Timber.e("FTUE", "Error checking recovery key setup requirement", e)
+            // Default to not triggering on error
+            false
+        }
+    }
+
+    @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
     internal suspend fun updateState() {
         val nextStep = getNextStep()
         state.value = when {
@@ -149,4 +194,5 @@ sealed interface FtueStep {
     data object NotificationsOptIn : FtueStep
     data object AnalyticsOptIn : FtueStep
     data object LockscreenSetup : FtueStep
+    data object RecoveryKeySetup : FtueStep
 }

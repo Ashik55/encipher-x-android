@@ -16,6 +16,7 @@ import io.element.android.features.securebackup.impl.setup.views.RecoveryKeyView
 import io.element.android.libraries.matrix.api.encryption.EnableRecoveryProgress
 import io.element.android.libraries.matrix.api.encryption.EncryptionService
 import io.element.android.libraries.matrix.test.A_RECOVERY_KEY
+import io.element.android.libraries.matrix.test.FakeMatrixClient
 import io.element.android.libraries.matrix.test.encryption.FakeEncryptionService
 import io.element.android.tests.testutils.WarmUpRule
 import kotlinx.coroutines.test.runTest
@@ -159,6 +160,7 @@ class SecureBackupSetupPresenterTest {
             isChangeRecoveryKeyUserStory = isChangeRecoveryKeyUserStory,
             stateMachine = SecureBackupSetupStateMachine(),
             encryptionService = encryptionService,
+            matrixClient = FakeMatrixClient(),
         )
     }
 }

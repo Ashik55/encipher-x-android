@@ -155,12 +155,14 @@ fun SecureBackupSetupView(
         }
     }
     
-    // Automatically hide bottom sheet when save is successful
+    // Automatically hide bottom sheet and proceed when save is successful
     LaunchedEffect(state.vaultSaveAction) {
         if (state.vaultSaveAction is AsyncAction.Success) {
             // Give a small delay to let the user see the success state
             kotlinx.coroutines.delay(1500)
             showBottomSheet = false
+            // Automatically proceed to next step after successful vault save
+            onSuccess()
         }
     }
     
@@ -242,7 +244,13 @@ fun SecureBackupSetupView(
                 BottomSheetContent(
                     state = state,
                     onSave = {
-                        // We don't close immediately, we'll let the LaunchedEffect do it after success
+                        // This will be handled automatically by LaunchedEffect when vault save succeeds
+                        // Just mark the key as saved if manually triggered
+                        if (state.vaultSaveAction is AsyncAction.Success) {
+                            state.eventSink.invoke(SecureBackupSetupEvents.RecoveryKeyHasBeenSaved)
+                            showBottomSheet = false
+                            onSuccess()
+                        }
                     }
                 )
             }
@@ -253,9 +261,9 @@ fun SecureBackupSetupView(
     AsyncActionView(
         async = state.vaultSaveAction,
         onSuccess = {
+            // Mark recovery key as saved in the state machine
             state.eventSink.invoke(SecureBackupSetupEvents.RecoveryKeyHasBeenSaved)
-            // Auto-finish after successful vault save
-            onSuccess()
+            // Note: Automatic progression to next step is handled by LaunchedEffect above
         },
         onErrorDismiss = {}
     )
@@ -366,7 +374,10 @@ private fun BottomSheetContent(
             
             io.element.android.libraries.designsystem.theme.components.Button(
                 text = stringResource(id = CommonStrings.action_done),
-                onClick = onSave,
+                onClick = {
+                    // Trigger immediate progression when user clicks Done after successful vault save
+                    onSave()
+                },
                 modifier = Modifier.fillMaxWidth()
             )
         }
