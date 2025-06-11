@@ -99,7 +99,12 @@ class DefaultFtueService @Inject constructor(
             } else {
                 getNextStep(FtueStep.SessionVerification)
             }
-            FtueStep.SessionVerification -> if (shouldAskNotificationPermissions()) {
+            FtueStep.SessionVerification -> if (shouldTriggerRecoveryKeySetup()) {
+                FtueStep.RecoveryKeySetup
+            } else {
+                getNextStep(FtueStep.RecoveryKeySetup)
+            }
+            FtueStep.RecoveryKeySetup -> if (shouldAskNotificationPermissions()) {
                 FtueStep.NotificationsOptIn
             } else {
                 getNextStep(FtueStep.NotificationsOptIn)
@@ -109,12 +114,7 @@ class DefaultFtueService @Inject constructor(
             } else {
                 getNextStep(FtueStep.LockscreenSetup)
             }
-            FtueStep.LockscreenSetup -> if (shouldTriggerRecoveryKeySetup()) {
-                FtueStep.RecoveryKeySetup
-            } else {
-                getNextStep(FtueStep.RecoveryKeySetup)
-            }
-            FtueStep.RecoveryKeySetup -> if (needsAnalyticsOptIn()) {
+            FtueStep.LockscreenSetup -> if (needsAnalyticsOptIn()) {
                 FtueStep.AnalyticsOptIn
             } else {
                 getNextStep(FtueStep.AnalyticsOptIn)

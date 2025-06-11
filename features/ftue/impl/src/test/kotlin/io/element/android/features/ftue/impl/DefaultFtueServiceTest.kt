@@ -137,6 +137,10 @@ class DefaultFtueServiceTest {
         steps.add(service.getNextStep(steps.lastOrNull()))
         sessionVerificationService.emitVerifiedStatus(SessionVerifiedStatus.NotVerified)
 
+        // Recovery key setup
+        steps.add(service.getNextStep(steps.lastOrNull()))
+        recoveryKeySetupService.setShouldTriggerRecoveryKeySetup(false) // Mark it as handled
+
         // Notifications opt in
         steps.add(service.getNextStep(steps.lastOrNull()))
         permissionStateProvider.setPermissionGranted()
@@ -144,10 +148,6 @@ class DefaultFtueServiceTest {
         // Entering PIN code
         steps.add(service.getNextStep(steps.lastOrNull()))
         lockScreenService.setIsPinSetup(true)
-
-        // Recovery key setup
-        steps.add(service.getNextStep(steps.lastOrNull()))
-        recoveryKeySetupService.setShouldTriggerRecoveryKeySetup(false) // Mark it as handled
 
         // Analytics opt in
         steps.add(service.getNextStep(steps.lastOrNull()))
@@ -158,9 +158,9 @@ class DefaultFtueServiceTest {
 
         assertThat(steps).containsExactly(
             FtueStep.SessionVerification,
+            FtueStep.RecoveryKeySetup,
             FtueStep.NotificationsOptIn,
             FtueStep.LockscreenSetup,
-            FtueStep.RecoveryKeySetup,
             FtueStep.AnalyticsOptIn,
             // Final state
             null,
