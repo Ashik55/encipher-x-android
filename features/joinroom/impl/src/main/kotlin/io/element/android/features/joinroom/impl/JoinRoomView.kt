@@ -52,6 +52,7 @@ import io.element.android.libraries.designsystem.components.AnnouncementType
 import io.element.android.libraries.designsystem.components.BigIcon
 import io.element.android.libraries.designsystem.components.LockIcon
 import io.element.android.libraries.designsystem.components.async.AsyncActionView
+import io.element.android.libraries.designsystem.components.avatar.Avatar
 import io.element.android.libraries.designsystem.components.avatar.AvatarSize
 import io.element.android.libraries.designsystem.components.avatar.NewAvatar
 import io.element.android.libraries.designsystem.components.button.BackButton
@@ -543,10 +544,7 @@ private fun JoinRoomTopBar(
                         modifier = titleModifier,
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        NewAvatar(
-                            avatarData = contentState.avatarData(AvatarSize.TimelineRoom),
-                            isDm = contentState.isDm
-                        )
+                        Avatar(avatarData = contentState.avatarData(AvatarSize.TimelineRoom))
                         Text(
                             modifier = Modifier.padding(horizontal = 8.dp),
                             text = contentState.name,

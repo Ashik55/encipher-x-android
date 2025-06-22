@@ -190,7 +190,7 @@ private fun RoomSummaryScaffoldRow(
         CompositeAvatar(
             avatarData = room.avatarData,
             heroes = room.heroes,
-            isDm = if (room.displayType == RoomSummaryDisplayType.INVITE && !room.isDm) false else room.isDm
+            isDm = room.isDm
         )
         Spacer(modifier = Modifier.width(16.dp))
         Column(

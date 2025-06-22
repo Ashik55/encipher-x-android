@@ -15,8 +15,7 @@ package io.element.android.libraries.matrix.api.room
  * @param activeMembersCount the number of active members in the room (joined or invited)
  */
 fun isDm(isDirect: Boolean, activeMembersCount: Int): Boolean {
-    // Only check the member count, ignoring the isDirect flag
-    return activeMembersCount <= 2
+    return isDirect && activeMembersCount <= 2
 }
 
 /**

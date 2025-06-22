@@ -546,10 +546,9 @@ private fun RoomAvatarAndNameRow(
         modifier = modifier, verticalAlignment = Alignment.CenterVertically
     ) {
         if (isDm) {
-            CompositeAvatar(
+            NewCompositeAvatar(
                 avatarData = roomAvatar,
                 heroes = heroes,
-                isDm = true
             )
         } else {
             CompositeAvatar(
