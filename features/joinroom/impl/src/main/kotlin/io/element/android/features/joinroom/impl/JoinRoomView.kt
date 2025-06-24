@@ -483,8 +483,15 @@ private fun DefaultLoadedContent(
     RoomPreviewOrganism(
         modifier = modifier,
         avatar = {
+            val inviteSender = (contentState.joinAuthorisationStatus as? JoinAuthorisationStatus.IsInvited)?.inviteSender
+            val avatarData = if (contentState.isDm && inviteSender != null) {
+                // For DMs with an invite, use the invite sender's avatar
+                inviteSender.avatarData.copy(size = AvatarSize.RoomHeader)
+            } else {
+                contentState.avatarData(AvatarSize.RoomHeader)
+            }
             NewAvatar(
-                contentState.avatarData(AvatarSize.RoomHeader),
+                avatarData,
                 isDm = contentState.isDm
             )
         },
