@@ -53,6 +53,7 @@ import io.element.android.libraries.designsystem.components.BigIcon
 import io.element.android.libraries.designsystem.components.LockIcon
 import io.element.android.libraries.designsystem.components.async.AsyncActionView
 import io.element.android.libraries.designsystem.components.avatar.Avatar
+import io.element.android.libraries.designsystem.components.avatar.AvatarData
 import io.element.android.libraries.designsystem.components.avatar.AvatarSize
 import io.element.android.libraries.designsystem.components.avatar.NewAvatar
 import io.element.android.libraries.designsystem.components.button.BackButton
@@ -399,7 +400,15 @@ private fun UnknownRoomContent(
     RoomPreviewOrganism(
         modifier = modifier,
         avatar = {
-            Spacer(modifier = Modifier.size(AvatarSize.RoomHeader.dp))
+            NewAvatar(
+                avatarData = AvatarData(
+                    id = "",
+                    name = null,
+                    url = null,
+                    size = AvatarSize.RoomHeader
+                ),
+                isDm = false
+            )
         },
         title = {
             RoomPreviewTitleAtom(stringResource(R.string.screen_join_room_title_no_preview))
@@ -418,7 +427,15 @@ private fun IncompleteContent(
     RoomPreviewOrganism(
         modifier = modifier,
         avatar = {
-            PlaceholderAtom(width = AvatarSize.RoomHeader.dp, height = AvatarSize.RoomHeader.dp)
+            NewAvatar(
+                avatarData = AvatarData(
+                    id = roomIdOrAlias.identifier,
+                    name = null,
+                    url = null,
+                    size = AvatarSize.RoomHeader
+                ),
+                isDm = false
+            )
         },
         title = {
             when (roomIdOrAlias) {
