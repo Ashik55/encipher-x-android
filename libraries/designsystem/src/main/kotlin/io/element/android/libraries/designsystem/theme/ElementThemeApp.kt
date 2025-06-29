@@ -36,7 +36,7 @@ fun ElementThemeApp(
     val theme by remember {
         appPreferencesStore.getThemeFlow().mapToTheme()
     }
-        .collectAsState(initial = Theme.System)
+        .collectAsState(initial = Theme.Light)
     LaunchedEffect(theme) {
         AppCompatDelegate.setDefaultNightMode(
             when (theme) {

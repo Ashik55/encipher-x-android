@@ -38,11 +38,13 @@ class AdvancedSettingsPresenter @Inject constructor(
         val doesCompressMedia by sessionPreferencesStore
             .doesCompressMedia()
             .collectAsState(initial = true)
-        val theme by remember {
-            appPreferencesStore.getThemeFlow().mapToTheme()
+
+        // Always set Light theme as default
+        localCoroutineScope.launch {
+            appPreferencesStore.setTheme(Theme.Light.name)
         }
-            .collectAsState(initial = Theme.System)
-        var showChangeThemeDialog by remember { mutableStateOf(false) }
+//            .collectAsState(initial = Theme.System)
+//        var showChangeThemeDialog by remember { mutableStateOf(false) }
 
         fun handleEvents(event: AdvancedSettingsEvents) {
             when (event) {
@@ -55,12 +57,12 @@ class AdvancedSettingsPresenter @Inject constructor(
                 is AdvancedSettingsEvents.SetCompressMedia -> localCoroutineScope.launch {
                     sessionPreferencesStore.setCompressMedia(event.compress)
                 }
-                AdvancedSettingsEvents.CancelChangeTheme -> showChangeThemeDialog = false
-                AdvancedSettingsEvents.ChangeTheme -> showChangeThemeDialog = true
-                is AdvancedSettingsEvents.SetTheme -> localCoroutineScope.launch {
-                    appPreferencesStore.setTheme(event.theme.name)
-                    showChangeThemeDialog = false
-                }
+//                AdvancedSettingsEvents.CancelChangeTheme -> showChangeThemeDialog = false
+//                AdvancedSettingsEvents.ChangeTheme -> showChangeThemeDialog = true
+//                is AdvancedSettingsEvents.SetTheme -> localCoroutineScope.launch {
+//                    appPreferencesStore.setTheme(event.theme.name)
+//                    showChangeThemeDialog = false
+//                }
             }
         }
 
@@ -68,8 +70,8 @@ class AdvancedSettingsPresenter @Inject constructor(
             isDeveloperModeEnabled = isDeveloperModeEnabled,
             isSharePresenceEnabled = isSharePresenceEnabled,
             doesCompressMedia = doesCompressMedia,
-            theme = theme,
-            showChangeThemeDialog = showChangeThemeDialog,
+//            theme = theme,
+//            showChangeThemeDialog = showChangeThemeDialog,
             eventSink = { handleEvents(it) }
         )
     }

@@ -49,30 +49,30 @@ class AdvancedSettingsViewTest {
         }
     }
 
-    @Test
-    fun `clicking on Appearance emits the expected event`() {
-        val eventsRecorder = EventsRecorder<AdvancedSettingsEvents>()
-        rule.setAdvancedSettingsView(
-            state = aAdvancedSettingsState(
-                eventSink = eventsRecorder
-            ),
-        )
-        rule.clickOn(CommonStrings.common_appearance)
-        eventsRecorder.assertSingle(AdvancedSettingsEvents.ChangeTheme)
-    }
-
-    @Test
-    fun `clicking on other theme emits the expected event`() {
-        val eventsRecorder = EventsRecorder<AdvancedSettingsEvents>()
-        rule.setAdvancedSettingsView(
-            state = aAdvancedSettingsState(
-                eventSink = eventsRecorder,
-                showChangeThemeDialog = true
-            ),
-        )
-        rule.clickOn(CommonStrings.common_dark)
-        eventsRecorder.assertSingle(AdvancedSettingsEvents.SetTheme(Theme.Dark))
-    }
+//    @Test
+//    fun `clicking on Appearance emits the expected event`() {
+//        val eventsRecorder = EventsRecorder<AdvancedSettingsEvents>()
+//        rule.setAdvancedSettingsView(
+//            state = aAdvancedSettingsState(
+//                eventSink = eventsRecorder
+//            ),
+//        )
+//        rule.clickOn(CommonStrings.common_appearance)
+//        eventsRecorder.assertSingle(AdvancedSettingsEvents.ChangeTheme)
+//    }
+//
+//    @Test
+//    fun `clicking on other theme emits the expected event`() {
+//        val eventsRecorder = EventsRecorder<AdvancedSettingsEvents>()
+//        rule.setAdvancedSettingsView(
+//            state = aAdvancedSettingsState(
+//                eventSink = eventsRecorder,
+//                showChangeThemeDialog = true
+//            ),
+//        )
+//        rule.clickOn(CommonStrings.common_dark)
+//        eventsRecorder.assertSingle(AdvancedSettingsEvents.SetTheme(Theme.Dark))
+//    }
 
 //    @Test
 //    fun `clicking on View source emits the expected event`() {

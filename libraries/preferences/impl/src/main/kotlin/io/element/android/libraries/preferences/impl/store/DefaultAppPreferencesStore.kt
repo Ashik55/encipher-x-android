@@ -77,7 +77,7 @@ class DefaultAppPreferencesStore @Inject constructor(
 
     override fun getThemeFlow(): Flow<String?> {
         return store.data.map { prefs ->
-            prefs[themeKey]
+            prefs[themeKey] ?: "Light"
         }
     }
 

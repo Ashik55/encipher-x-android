@@ -46,11 +46,9 @@ fun AdvancedSettingsView(
                 Text(text = stringResource(id = CommonStrings.common_appearance))
             },
             trailingContent = ListItemContent.Text(
-                state.theme.toHumanReadable()
+                stringResource(id = CommonStrings.common_light)
             ),
-            onClick = {
-                state.eventSink(AdvancedSettingsEvents.ChangeTheme)
-            }
+            enabled = false
         )
 //        ListItem(
 //            headlineContent = {
@@ -100,39 +98,39 @@ fun AdvancedSettingsView(
         )
     }
 
-    if (state.showChangeThemeDialog) {
-        SingleSelectionDialog(
-            options = getOptions(),
-            initialSelection = themes.indexOf(state.theme),
-            onSelectOption = {
-                state.eventSink(
-                    AdvancedSettingsEvents.SetTheme(
-                        themes[it]
-                    )
-                )
-            },
-            onDismissRequest = { state.eventSink(AdvancedSettingsEvents.CancelChangeTheme) },
-        )
-    }
+//    if (state.showChangeThemeDialog) {
+//        SingleSelectionDialog(
+//            options = getOptions(),
+//            initialSelection = themes.indexOf(state.theme),
+//            onSelectOption = {
+//                state.eventSink(
+//                    AdvancedSettingsEvents.SetTheme(
+//                        themes[it]
+//                    )
+//                )
+//            },
+//            onDismissRequest = { state.eventSink(AdvancedSettingsEvents.CancelChangeTheme) },
+//        )
+//    }
 }
 
-@Composable
-private fun getOptions(): ImmutableList<ListOption> {
-    return themes.map {
-        ListOption(title = it.toHumanReadable())
-    }.toImmutableList()
-}
-
-@Composable
-private fun Theme.toHumanReadable(): String {
-    return stringResource(
-        id = when (this) {
-            Theme.System -> CommonStrings.common_system
-            Theme.Dark -> CommonStrings.common_dark
-            Theme.Light -> CommonStrings.common_light
-        }
-    )
-}
+//@Composable
+//private fun getOptions(): ImmutableList<ListOption> {
+//    return themes.map {
+//        ListOption(title = it.toHumanReadable())
+//    }.toImmutableList()
+//}
+//
+//@Composable
+//private fun Theme.toHumanReadable(): String {
+//    return stringResource(
+//        id = when (this) {
+//            Theme.System -> CommonStrings.common_system
+//            Theme.Dark -> CommonStrings.common_dark
+//            Theme.Light -> CommonStrings.common_light
+//        }
+//    )
+//}
 
 @PreviewsDayNight
 @Composable

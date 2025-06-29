@@ -15,7 +15,7 @@ open class AdvancedSettingsStateProvider : PreviewParameterProvider<AdvancedSett
         get() = sequenceOf(
             aAdvancedSettingsState(),
             aAdvancedSettingsState(isDeveloperModeEnabled = true),
-            aAdvancedSettingsState(showChangeThemeDialog = true),
+//            aAdvancedSettingsState(showChangeThemeDialog = true),
             aAdvancedSettingsState(isSharePresenceEnabled = true),
             aAdvancedSettingsState(doesCompressMedia = true),
         )
@@ -25,13 +25,13 @@ fun aAdvancedSettingsState(
     isDeveloperModeEnabled: Boolean = false,
     isSharePresenceEnabled: Boolean = false,
     doesCompressMedia: Boolean = false,
-    showChangeThemeDialog: Boolean = false,
+//    showChangeThemeDialog: Boolean = false,
     eventSink: (AdvancedSettingsEvents) -> Unit = {},
 ) = AdvancedSettingsState(
     isDeveloperModeEnabled = isDeveloperModeEnabled,
     isSharePresenceEnabled = isSharePresenceEnabled,
     doesCompressMedia = doesCompressMedia,
-    theme = Theme.System,
-    showChangeThemeDialog = showChangeThemeDialog,
+//    theme = Theme.System,
+//    showChangeThemeDialog = showChangeThemeDialog,
     eventSink = eventSink
 )
