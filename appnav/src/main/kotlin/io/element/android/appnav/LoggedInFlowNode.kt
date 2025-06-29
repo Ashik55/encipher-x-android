@@ -330,7 +330,7 @@ class LoggedInFlowNode @AssistedInject constructor(
                     roomDescription = Optional.empty(),
                     serverNames = emptyList(),
                     trigger = Optional.empty(),
-                    initialElement = RoomNavigationTarget.Messages()
+                    initialElement = navTarget.initialElement
                 )
                 val callback = object : JoinedRoomLoadedFlowNode.Callback {
                     override fun onOpenRoom(roomId: RoomId) {
