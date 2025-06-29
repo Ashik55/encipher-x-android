@@ -363,13 +363,13 @@ private fun BottomSheetContent(
                     .padding(bottom = 16.dp)
             )
             
-            Text(
-                text = stringResource(id = R.string.screen_recovery_key_vault_success),
-                textAlign = TextAlign.Center,
-                style = ElementTheme.typography.fontBodyMdMedium,
-                color = Color(0xFF0A8741),
-            )
-            
+//            Text(
+//                text = stringResource(id = R.string.screen_recovery_key_vault_success),
+//                textAlign = TextAlign.Center,
+//                style = ElementTheme.typography.fontBodyMdMedium,
+//                color = Color(0xFF0A8741),
+//            )
+//
             Spacer(modifier = Modifier.height(24.dp))
             
             io.element.android.libraries.designsystem.theme.components.Button(
