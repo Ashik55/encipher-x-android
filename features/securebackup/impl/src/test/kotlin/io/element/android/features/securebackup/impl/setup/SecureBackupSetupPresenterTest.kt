@@ -42,6 +42,7 @@ class SecureBackupSetupPresenterTest {
                     recoveryKeyUserStory = RecoveryKeyUserStory.Setup,
                     formattedRecoveryKey = null,
                     inProgress = false,
+                    isVaultMode = false,
                 )
             )
         }
@@ -65,6 +66,7 @@ class SecureBackupSetupPresenterTest {
                     recoveryKeyUserStory = RecoveryKeyUserStory.Setup,
                     formattedRecoveryKey = null,
                     inProgress = true,
+                    isVaultMode = false,
                 )
             )
             encryptionService.emitEnableRecoveryProgress(EnableRecoveryProgress.Done(A_RECOVERY_KEY))
@@ -75,6 +77,7 @@ class SecureBackupSetupPresenterTest {
                     recoveryKeyUserStory = RecoveryKeyUserStory.Setup,
                     formattedRecoveryKey = A_RECOVERY_KEY,
                     inProgress = false,
+                    isVaultMode = false,
                 )
             )
             createdState.eventSink.invoke(SecureBackupSetupEvents.RecoveryKeyHasBeenSaved)
@@ -105,6 +108,7 @@ class SecureBackupSetupPresenterTest {
                     recoveryKeyUserStory = RecoveryKeyUserStory.Change,
                     formattedRecoveryKey = null,
                     inProgress = false,
+                    isVaultMode = false,
                 )
             )
         }
@@ -129,6 +133,7 @@ class SecureBackupSetupPresenterTest {
                     recoveryKeyUserStory = RecoveryKeyUserStory.Change,
                     formattedRecoveryKey = null,
                     inProgress = true,
+                    isVaultMode = false,
                 )
             )
             val createdState = awaitItem()
@@ -138,6 +143,7 @@ class SecureBackupSetupPresenterTest {
                     recoveryKeyUserStory = RecoveryKeyUserStory.Change,
                     formattedRecoveryKey = FakeEncryptionService.FAKE_RECOVERY_KEY,
                     inProgress = false,
+                    isVaultMode = false,
                 )
             )
             createdState.eventSink.invoke(SecureBackupSetupEvents.RecoveryKeyHasBeenSaved)

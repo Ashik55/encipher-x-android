@@ -35,6 +35,7 @@ import io.element.android.libraries.architecture.BaseFlowNode
 import io.element.android.libraries.architecture.createNode
 import io.element.android.libraries.designsystem.components.ProgressDialog
 import io.element.android.libraries.di.SessionScope
+import io.element.android.libraries.matrix.api.encryption.EncryptionService
 import io.element.android.libraries.matrix.api.encryption.IdentityOidcResetHandle
 import io.element.android.libraries.matrix.api.encryption.IdentityPasswordResetHandle
 import io.element.android.libraries.oidc.api.OidcEntryPoint
@@ -50,6 +51,7 @@ class ResetIdentityFlowNode @AssistedInject constructor(
     @Assisted buildContext: BuildContext,
     @Assisted plugins: List<Plugin>,
     private val resetIdentityFlowManager: ResetIdentityFlowManager,
+    private val encryptionService: EncryptionService,
     private val coroutineScope: CoroutineScope,
     private val oidcEntryPoint: OidcEntryPoint,
 ) : BaseFlowNode<ResetIdentityFlowNode.NavTarget>(
@@ -122,6 +124,18 @@ class ResetIdentityFlowNode @AssistedInject constructor(
     }
 
     private fun CoroutineScope.startReset() = launch {
+        // First, forcefully disable  key storage ("Allow Key Storage" option)
+        Timber.d("ResetIdentity: Forcefully disabling key storage before starting reset process")
+        encryptionService.disableRecovery().fold(
+            onSuccess = {
+                Timber.d("ResetIdentity: Successfully disabled key storage")
+            },
+            onFailure = { error ->
+                Timber.w(error, "ResetIdentity: Failed to disable key storage, continuing with reset anyway")
+            }
+        )
+
+        // Then proceed with the normal reset identity flow
         resetIdentityFlowManager.getResetHandle()
             .collectLatest { state ->
                 when (state) {

@@ -42,6 +42,7 @@ class SecureBackupEnterRecoveryKeyPresenterTest {
                     recoveryKeyUserStory = RecoveryKeyUserStory.Enter,
                     formattedRecoveryKey = "",
                     inProgress = false,
+                    isVaultMode = true,
                 )
             )
         }
@@ -63,6 +64,7 @@ class SecureBackupEnterRecoveryKeyPresenterTest {
                     recoveryKeyUserStory = RecoveryKeyUserStory.Enter,
                     formattedRecoveryKey = "1234",
                     inProgress = false,
+                    isVaultMode = true,
                 )
             )
             encryptionService.givenRecoverFailure(AN_EXCEPTION)
