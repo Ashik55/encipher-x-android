@@ -81,6 +81,7 @@ fun TimelineItemEventContent.canReact(): Boolean =
         is TimelineItemRedactedContent,
         is TimelineItemLegacyCallInviteContent,
         is TimelineItemCallNotifyContent,
+        is TimelineItemCallEndedContent,
         TimelineItemUnknownContent -> false
     }
 

@@ -8,6 +8,7 @@
 package io.element.android.features.messages.impl.timeline.factories.event
 
 import io.element.android.features.messages.impl.timeline.model.event.TimelineItemCallNotifyContent
+import io.element.android.features.messages.impl.timeline.model.event.TimelineItemCallEndedContent
 import io.element.android.features.messages.impl.timeline.model.event.TimelineItemEventContent
 import io.element.android.features.messages.impl.timeline.model.event.TimelineItemLegacyCallInviteContent
 import io.element.android.features.messages.impl.timeline.model.event.TimelineItemUnknownContent
@@ -45,12 +46,17 @@ class TimelineItemContentFactory @Inject constructor(
             is FailedToParseMessageLikeContent -> failedToParseMessageFactory.create(itemContent)
             is FailedToParseStateContent -> failedToParseStateFactory.create(itemContent)
             is MessageContent -> {
-                val senderDisambiguatedDisplayName = eventTimelineItem.senderProfile.getDisambiguatedDisplayName(eventTimelineItem.sender)
-                messageFactory.create(
-                    content = itemContent,
-                    senderDisambiguatedDisplayName = senderDisambiguatedDisplayName,
-                    eventId = eventTimelineItem.eventId,
-                )
+                // Check if this is a "Call ended" message
+                if (itemContent.body == "Call ended") {
+                    TimelineItemCallEndedContent()
+                } else {
+                    val senderDisambiguatedDisplayName = eventTimelineItem.senderProfile.getDisambiguatedDisplayName(eventTimelineItem.sender)
+                    messageFactory.create(
+                        content = itemContent,
+                        senderDisambiguatedDisplayName = senderDisambiguatedDisplayName,
+                        eventId = eventTimelineItem.eventId,
+                    )
+                }
             }
             is ProfileChangeContent -> profileChangeFactory.create(eventTimelineItem)
             is RedactedContent -> redactedMessageFactory.create(itemContent)

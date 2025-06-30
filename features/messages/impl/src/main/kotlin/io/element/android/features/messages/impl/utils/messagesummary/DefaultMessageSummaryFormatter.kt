@@ -12,6 +12,7 @@ import com.squareup.anvil.annotations.ContributesBinding
 import io.element.android.features.messages.impl.timeline.model.TimelineItem
 import io.element.android.features.messages.impl.timeline.model.event.TimelineItemAudioContent
 import io.element.android.features.messages.impl.timeline.model.event.TimelineItemCallNotifyContent
+import io.element.android.features.messages.impl.timeline.model.event.TimelineItemCallEndedContent
 import io.element.android.features.messages.impl.timeline.model.event.TimelineItemEncryptedContent
 import io.element.android.features.messages.impl.timeline.model.event.TimelineItemFileContent
 import io.element.android.features.messages.impl.timeline.model.event.TimelineItemImageContent
@@ -58,6 +59,7 @@ class DefaultMessageSummaryFormatter @Inject constructor(
             is TimelineItemAudioContent -> context.getString(CommonStrings.common_audio)
             is TimelineItemLegacyCallInviteContent -> context.getString(CommonStrings.common_unsupported_call)
             is TimelineItemCallNotifyContent -> context.getString(CommonStrings.common_call_started)
+            is TimelineItemCallEndedContent -> "Call ended"
         }.take(MAX_SAFE_LENGTH)
     }
 }

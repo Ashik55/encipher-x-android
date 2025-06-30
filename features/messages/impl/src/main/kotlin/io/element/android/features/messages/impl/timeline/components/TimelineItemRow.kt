@@ -24,6 +24,7 @@ import io.element.android.features.messages.impl.timeline.components.event.Timel
 import io.element.android.features.messages.impl.timeline.components.layout.ContentAvoidingLayoutData
 import io.element.android.features.messages.impl.timeline.model.TimelineItem
 import io.element.android.features.messages.impl.timeline.model.event.TimelineItemCallNotifyContent
+import io.element.android.features.messages.impl.timeline.model.event.TimelineItemCallEndedContent
 import io.element.android.features.messages.impl.timeline.model.event.TimelineItemLegacyCallInviteContent
 import io.element.android.features.messages.impl.timeline.model.event.TimelineItemStateContent
 import io.element.android.features.messages.impl.timeline.protection.TimelineProtectionEvent
@@ -110,6 +111,13 @@ internal fun TimelineItemRow(
                             onLongClick = onLongClick,
                             onJoinCallClick = onJoinCallClick,
                             isLastMessage = isLastOutgoingMessage
+                        )
+                    }
+                    is TimelineItemCallEndedContent -> {
+                        TimelineItemCallEndedView(
+                            modifier = Modifier.padding(start = 16.dp, end = 16.dp, top = 16.dp),
+                            event = timelineItem,
+                            onLongClick = onLongClick,
                         )
                     }
                     else -> {

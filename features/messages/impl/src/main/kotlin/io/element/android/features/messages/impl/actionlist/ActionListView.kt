@@ -58,6 +58,7 @@ import io.element.android.features.messages.impl.crypto.sendfailure.VerifiedUser
 import io.element.android.features.messages.impl.timeline.components.MessageShieldView
 import io.element.android.features.messages.impl.timeline.model.TimelineItem
 import io.element.android.features.messages.impl.timeline.model.event.TimelineItemAudioContent
+import io.element.android.features.messages.impl.timeline.model.event.TimelineItemCallEndedContent
 import io.element.android.features.messages.impl.timeline.model.event.TimelineItemCallNotifyContent
 import io.element.android.features.messages.impl.timeline.model.event.TimelineItemEncryptedContent
 import io.element.android.features.messages.impl.timeline.model.event.TimelineItemFileContent
@@ -318,6 +319,9 @@ private fun MessageSummary(
         }
         is TimelineItemCallNotifyContent -> {
             content = { ContentForBody(stringResource(CommonStrings.common_call_started)) }
+        }
+        is TimelineItemCallEndedContent -> {
+            content = { ContentForBody("Call ended") }
         }
     }
     Row(modifier = modifier) {
