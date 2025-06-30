@@ -141,7 +141,7 @@
   <string name="common_blocked_users">"Blocked Users"</string>
   <string name="common_bubbles">"Bubbles"</string>
   <string name="common_call_invite">"Call in progress (unsupported)"</string>
-  <string name="common_call_started">"Call Started"</string>
+  <string name="common_call_started">"Call started"</string>
   <string name="common_chat_backup">"Chat Backup"</string>
   <string name="common_copied_to_clipboard">"Copied to clipboard"</string>
   <string name="common_copyright">"Copyright"</string>
