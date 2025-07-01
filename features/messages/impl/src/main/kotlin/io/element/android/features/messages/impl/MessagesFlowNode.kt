@@ -19,6 +19,7 @@ import com.bumble.appyx.core.node.node
 import com.bumble.appyx.core.plugin.Plugin
 import com.bumble.appyx.core.plugin.plugins
 import com.bumble.appyx.navmodel.backstack.BackStack
+import com.bumble.appyx.navmodel.backstack.operation.newRoot
 import com.bumble.appyx.navmodel.backstack.operation.push
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedInject
@@ -376,11 +377,8 @@ class MessagesFlowNode @AssistedInject constructor(
     }
 
     private fun viewInTimeline(eventId: EventId) {
-        val permalinkData = PermalinkData.RoomLink(
-            roomIdOrAlias = room.roomId.toRoomIdOrAlias(),
-            eventId = eventId,
-        )
-        callbacks.forEach { it.onPermalinkClick(permalinkData, pushToBackstack = false) }
+        // Navigate back to the main messages screen first, then focus on the event
+        backstack.newRoot(NavTarget.Messages(focusedEventId = eventId))
     }
 
     private fun processEventClick(
