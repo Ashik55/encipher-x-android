@@ -175,7 +175,7 @@ private fun DefaultRoomListTopBar(
 //                    .aspectRatio(2.2f)
                     .height(232.dp)
                     .paint(
-                        painter = painterResource(id = if(ElementTheme.isLightTheme) R.drawable.home_top_bg else R.drawable.home_top_bg_night),
+                        painter = painterResource(id = R.drawable.home_top_bg),
                         contentScale = ContentScale.FillBounds
                     )
 //                    .onSizeChanged {

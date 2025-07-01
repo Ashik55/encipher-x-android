@@ -37,11 +37,7 @@ import io.element.android.libraries.designsystem.preview.PreviewsDayNight
 fun OnboardingBackground() {
     Box(modifier = Modifier.fillMaxSize()) {
         val isLightTheme = ElementTheme.isLightTheme
-        val backgroundImage = if (isLightTheme) {
-            R.drawable.onboarding_background
-        } else {
-            R.drawable.onboarding_background_dark
-        }
+        val backgroundImage = R.drawable.onboarding_background
 
         Box(
             modifier = Modifier.fillMaxSize(),
