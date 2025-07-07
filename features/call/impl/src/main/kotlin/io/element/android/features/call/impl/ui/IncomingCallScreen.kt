@@ -8,6 +8,8 @@
 package io.element.android.features.call.impl.ui
 
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -19,6 +21,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.runtime.remember
 import androidx.compose.material3.FilledIconButton
 import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.runtime.Composable
@@ -57,7 +60,15 @@ internal fun IncomingCallScreen(
 ) {
     OnboardingBackground()
     Column(
-        modifier = Modifier.fillMaxSize(),
+        modifier = Modifier
+            .fillMaxSize()
+            .clickable(
+                interactionSource = remember { MutableInteractionSource() },
+                indication = null // Remove ripple effect
+            ) {
+                // Consume click events on the background to prevent accidental call answering
+                // Do nothing - this prevents any accidental clicks from triggering actions
+            },
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Bottom
     ) {
@@ -65,7 +76,14 @@ internal fun IncomingCallScreen(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(start = 20.dp, end = 20.dp, top = 124.dp)
-                .weight(1f),
+                .weight(1f)
+                .clickable(
+                    interactionSource = remember { MutableInteractionSource() },
+                    indication = null // Remove ripple effect
+                ) {
+                    // Consume click events to prevent accidental call answering
+                    // Do nothing - this prevents any accidental clicks on user info area
+                },
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Avatar(
@@ -137,7 +155,7 @@ private fun ActionButton(
             modifier = Modifier
                 .size(size + borderSize)
                 .border(borderSize, borderColor, CircleShape),
-            onClick = onClick,
+            onClick = onClick, // Only the actual button triggers the action
             colors = IconButtonDefaults.filledIconButtonColors(
                 containerColor = backgroundColor,
                 contentColor = Color.White,

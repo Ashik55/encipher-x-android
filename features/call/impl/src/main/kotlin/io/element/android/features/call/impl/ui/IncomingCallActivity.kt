@@ -7,6 +7,10 @@
 
 package io.element.android.features.call.impl.ui
 
+import android.media.AudioAttributes
+import android.media.AudioManager
+import android.media.Ringtone
+import android.media.RingtoneManager
 import android.os.Bundle
 import android.view.WindowManager
 import androidx.activity.compose.setContent
@@ -26,6 +30,7 @@ import io.element.android.libraries.preferences.api.store.AppPreferencesStore
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
+import timber.log.Timber
 import javax.inject.Inject
 
 /**
@@ -37,6 +42,7 @@ class IncomingCallActivity : AppCompatActivity() {
          * Extra key for the notification data.
          */
         const val EXTRA_NOTIFICATION_DATA = "EXTRA_NOTIFICATION_DATA"
+        private const val TAG = "IncomingCallActivity"
     }
 
     @Inject
@@ -51,10 +57,16 @@ class IncomingCallActivity : AppCompatActivity() {
     @Inject
     lateinit var enterpriseService: EnterpriseService
 
+    private var ringtone: Ringtone? = null
+    private var audioManager: AudioManager? = null
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
         applicationContext.bindings<CallBindings>().inject(this)
+
+        // Initialize audio manager
+        audioManager = getSystemService(AUDIO_SERVICE) as AudioManager
 
         // Set flags so it can be displayed in the lock screen
         @Suppress("DEPRECATION")
@@ -67,6 +79,9 @@ class IncomingCallActivity : AppCompatActivity() {
 
         val notificationData = intent?.let { IntentCompat.getParcelableExtra(it, EXTRA_NOTIFICATION_DATA, CallNotificationData::class.java) }
         if (notificationData != null) {
+            // Start ringtone when activity is created
+            startRingtone()
+            
             setContent {
                 ElementThemeApp(
                     appPreferencesStore = appPreferencesStore,
@@ -87,15 +102,81 @@ class IncomingCallActivity : AppCompatActivity() {
 
         activeCallManager.activeCall
             .filter { it?.callState !is CallState.Ringing }
-            .onEach { finish() }
+            .onEach { 
+                stopRingtone()
+                finish() 
+            }
             .launchIn(lifecycleScope)
     }
 
+    override fun onDestroy() {
+        super.onDestroy()
+        stopRingtone()
+    }
+
+    override fun onPause() {
+        super.onPause()
+        // Don't stop ringtone on pause - keep it playing even if user navigates away
+        Timber.tag(TAG).d("Activity paused, but keeping ringtone active")
+    }
+
+    override fun onResume() {
+        super.onResume()
+        // Ensure ringtone is still playing when returning to activity
+        if (ringtone?.isPlaying != true) {
+            Timber.tag(TAG).d("Resuming activity - restarting ringtone if needed")
+            startRingtone()
+        }
+    }
+
+    private fun startRingtone() {
+        try {
+            stopRingtone() // Stop any existing ringtone first
+            
+            val ringtoneUri = RingtoneManager.getActualDefaultRingtoneUri(this, RingtoneManager.TYPE_RINGTONE)
+            if (ringtoneUri != null) {
+                ringtone = RingtoneManager.getRingtone(this, ringtoneUri).apply {
+                    // Set audio attributes for call ringtone
+                    if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.P) {
+                        audioAttributes = AudioAttributes.Builder()
+                            .setUsage(AudioAttributes.USAGE_NOTIFICATION_RINGTONE)
+                            .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
+                            .build()
+                    }
+                    
+                    // Start playing the ringtone
+                    play()
+                    Timber.tag(TAG).d("Started ringtone playback")
+                }
+            } else {
+                Timber.tag(TAG).w("No ringtone URI available")
+            }
+        } catch (e: Exception) {
+            Timber.tag(TAG).e(e, "Failed to start ringtone")
+        }
+    }
+
+    private fun stopRingtone() {
+        try {
+            ringtone?.let { ringtone ->
+                if (ringtone.isPlaying) {
+                    ringtone.stop()
+                    Timber.tag(TAG).d("Stopped ringtone playback")
+                }
+            }
+            ringtone = null
+        } catch (e: Exception) {
+            Timber.tag(TAG).e(e, "Failed to stop ringtone")
+        }
+    }
+
     private fun onAnswer(notificationData: CallNotificationData) {
+        stopRingtone()
         elementCallEntryPoint.startCall(CallType.RoomCall(notificationData.sessionId, notificationData.roomId))
     }
 
     private fun onCancel() {
+        stopRingtone()
         val activeCall = activeCallManager.activeCall.value ?: return
         activeCallManager.hungUpCall(callType = activeCall.callType)
     }

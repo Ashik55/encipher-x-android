@@ -145,7 +145,8 @@ class RingingCallNotificationCreator @Inject constructor(
                 }
             }
             .setTimeoutAfter(ElementCallConfig.RINGING_CALL_DURATION_SECONDS.seconds.inWholeMilliseconds)
-            .setContentIntent(answerIntent)
+            // Remove setContentIntent to prevent clicking anywhere on notification from answering
+            // .setContentIntent(answerIntent) // REMOVED: This was causing accidental call answering
             .setDeleteIntent(declineIntent)
             .setFullScreenIntent(fullScreenIntent, true)
             .build()
