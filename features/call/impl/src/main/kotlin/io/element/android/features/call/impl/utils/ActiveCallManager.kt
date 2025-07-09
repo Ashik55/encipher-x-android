@@ -8,6 +8,7 @@
 package io.element.android.features.call.impl.utils
 
 import android.annotation.SuppressLint
+import android.content.Context
 import androidx.annotation.VisibleForTesting
 import androidx.core.app.NotificationManagerCompat
 import com.squareup.anvil.annotations.ContributesBinding
@@ -16,6 +17,8 @@ import io.element.android.features.call.api.CallType
 import io.element.android.features.call.api.CurrentCall
 import io.element.android.features.call.impl.notifications.CallNotificationData
 import io.element.android.features.call.impl.notifications.RingingCallNotificationCreator
+import io.element.android.features.call.impl.services.IncomingCallForegroundService
+import io.element.android.libraries.di.ApplicationContext
 import io.element.android.libraries.di.AppScope
 import io.element.android.libraries.di.SingleIn
 import io.element.android.libraries.matrix.api.MatrixClientProvider
@@ -77,6 +80,7 @@ interface ActiveCallManager {
 @SingleIn(AppScope::class)
 @ContributesBinding(AppScope::class)
 class DefaultActiveCallManager @Inject constructor(
+    @ApplicationContext private val context: Context,
     private val coroutineScope: CoroutineScope,
     private val onMissedCallNotificationHandler: OnMissedCallNotificationHandler,
     private val ringingCallNotificationCreator: RingingCallNotificationCreator,
@@ -127,6 +131,10 @@ class DefaultActiveCallManager @Inject constructor(
 
         timedOutCallJob?.cancel()
         timedOutCallJob = coroutineScope.launch {
+            // Start the foreground service for persistent notification
+            startIncomingCallForegroundService(notificationData)
+            
+            // Also show the regular ringing notification
             showIncomingCallNotification(notificationData)
 
             // Wait for the ringing call to time out
@@ -145,6 +153,7 @@ class DefaultActiveCallManager @Inject constructor(
         activeCall.value = null
 
         cancelIncomingCallNotification()
+        stopIncomingCallForegroundService()
 
         if (displayMissedCallNotification) {
             displayMissedCallNotification(notificationData)
@@ -166,6 +175,7 @@ class DefaultActiveCallManager @Inject constructor(
         }
         
         cancelIncomingCallNotification()
+        stopIncomingCallForegroundService()
         timedOutCallJob?.cancel()
         activeCall.value = null
         
@@ -176,6 +186,7 @@ class DefaultActiveCallManager @Inject constructor(
 
     override fun joinedCall(callType: CallType) {
         cancelIncomingCallNotification()
+        stopIncomingCallForegroundService()
         timedOutCallJob?.cancel()
 
         activeCall.value = ActiveCall(
@@ -253,6 +264,28 @@ class DefaultActiveCallManager @Inject constructor(
                 roomId = notificationData.roomId,
                 eventId = notificationData.eventId,
             )
+        }
+    }
+
+    /**
+     * Starts the foreground service for persistent incoming call notification.
+     */
+    private fun startIncomingCallForegroundService(notificationData: CallNotificationData) {
+        try {
+            IncomingCallForegroundService.startService(context, notificationData)
+        } catch (e: Exception) {
+            Timber.e(e, "Failed to start incoming call foreground service")
+        }
+    }
+
+    /**
+     * Stops the foreground service for persistent incoming call notification.
+     */
+    private fun stopIncomingCallForegroundService() {
+        try {
+            IncomingCallForegroundService.stopService(context)
+        } catch (e: Exception) {
+            Timber.e(e, "Failed to stop incoming call foreground service")
         }
     }
 
