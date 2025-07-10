@@ -27,7 +27,8 @@ data class Call(
     val is_caller: Boolean? = null,
     val receiver_user_ids: List<String>? = null,
     val receiver_display_names: Map<String, String>? = null,
-    val receiver_avatars: Map<String, String>? = null
+    val receiver_avatars: Map<String, String>? = null,
+    val isDm: Boolean = false
 ) : Parcelable {
     
     constructor(parcel: Parcel) : this(
@@ -44,7 +45,8 @@ data class Call(
         is_caller = parcel.readValue(Boolean::class.java.classLoader) as? Boolean,
         receiver_user_ids = parcel.createStringArrayList(),
         receiver_display_names = readStringMap(parcel),
-        receiver_avatars = readStringMap(parcel)
+        receiver_avatars = readStringMap(parcel),
+        isDm = parcel.readBoolean()
     )
 
     override fun writeToParcel(parcel: Parcel, flags: Int) {
@@ -62,6 +64,7 @@ data class Call(
         parcel.writeStringList(receiver_user_ids)
         writeStringMap(parcel, receiver_display_names)
         writeStringMap(parcel, receiver_avatars)
+        parcel.writeBoolean(isDm)
     }
 
     override fun describeContents(): Int {

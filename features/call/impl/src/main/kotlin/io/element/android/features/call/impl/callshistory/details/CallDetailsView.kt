@@ -56,6 +56,7 @@ import io.element.android.libraries.architecture.AsyncData
 import io.element.android.libraries.designsystem.components.avatar.Avatar
 import io.element.android.libraries.designsystem.components.avatar.AvatarData
 import io.element.android.libraries.designsystem.components.avatar.AvatarSize
+import io.element.android.libraries.designsystem.components.avatar.NewAvatar
 import io.element.android.libraries.designsystem.preview.ElementPreview
 import io.element.android.libraries.designsystem.preview.PreviewsDayNight
 import io.element.android.libraries.designsystem.theme.components.HorizontalDivider
@@ -117,13 +118,14 @@ fun CallDetailsView(
                     .padding(16.dp)
             ) {
                 // Avatar
-                Avatar(
+                NewAvatar(
                     avatarData = AvatarData(
                         id = contactInfo.userId ?: contactInfo.roomId,
                         name = contactInfo.displayName,
                         url = contactInfo.avatarUrl,
                         size = AvatarSize.UserHeader
-                    )
+                    ),
+                    isDm = initialCall.isDm // Use isDm for proper placeholder (DM or group)
                 )
                 
                 Spacer(modifier = Modifier.height(16.dp))
@@ -348,16 +350,16 @@ private data class ContactInfo(
 private fun extractContactInfo(call: Call, currentUserId: String?): ContactInfo {
     val isOutgoingCall = currentUserId == call.caller_user_id
     
-    return if (call.room_name != null) {
-        // This is a room call
+    return if (!call.isDm) {
+        // This is a group call
         ContactInfo(
-            displayName = call.room_name,
+            displayName = call.room_name ?: "Group Call",
             avatarUrl = call.room_avatar,
             roomId = call.room_id ?: "",
             userId = null
         )
     } else if (isOutgoingCall) {
-        // This is an outgoing direct call
+        // This is an outgoing DM call
         val receiverName = call.receiver_display_names?.values?.joinToString(", ") ?: "Unknown"
         val receiverId = call.receiver_user_ids?.firstOrNull()
         val avatar = call.receiver_avatars?.values?.firstOrNull()
@@ -369,7 +371,7 @@ private fun extractContactInfo(call: Call, currentUserId: String?): ContactInfo 
             userId = receiverId
         )
     } else {
-        // This is an incoming direct call
+        // This is an incoming DM call
         ContactInfo(
             displayName = call.caller_display_name ?: "Unknown",
             avatarUrl = call.caller_avatar,

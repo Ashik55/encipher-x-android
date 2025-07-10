@@ -73,6 +73,7 @@ import io.element.android.libraries.architecture.AsyncData
 import io.element.android.libraries.designsystem.components.avatar.Avatar
 import io.element.android.libraries.designsystem.components.avatar.AvatarData
 import io.element.android.libraries.designsystem.components.avatar.AvatarSize
+import io.element.android.libraries.designsystem.components.avatar.NewAvatar
 import io.element.android.libraries.designsystem.components.navbar.BottomNavBar
 import io.element.android.libraries.designsystem.components.navbar.BottomNavRoute
 import io.element.android.libraries.designsystem.preview.ElementPreview
@@ -286,12 +287,12 @@ fun CallsHistoryView(
                         val filteredCalls = if (searchQuery.isNotEmpty()) {
                             calls.filter { call ->
                                 val name = if(call.is_caller == true){
-                                    if(call.room_name == null) getDisplayNamesString(call.receiver_display_names) else call.room_name
+                                    if(call.room_name == null) getDisplayNamesString(call.receiver_display_names) ?: "Unknown" else call.room_name
                                 } else {
-                                    if(call.room_name == null) call.caller_display_name.toString() else call.room_name
+                                    if(call.room_name == null) call.caller_display_name ?: "Unknown" else call.room_name
                                 }
                                 
-                                name.contains(searchQuery, ignoreCase = true)
+                                name?.contains(searchQuery, ignoreCase = true) == true
                             }
                         } else {
                             calls
@@ -486,22 +487,44 @@ fun CallItem(
         verticalAlignment = Alignment.CenterVertically
     ) {
         // Avatar
-        Avatar(
+        NewAvatar(
             avatarData = AvatarData(
-                id =  if(call.room_name == null) call.receiver_user_ids.toString() else " ",
-                name = if(call.is_caller == true){
-                    if(call.room_name == null) getDisplayNamesString(call.receiver_display_names) else call.room_name
+                id = if (call.isDm) {
+                    // For DM calls: use the other person's ID
+                    if (call.is_caller == true) {
+                        call.receiver_user_ids?.firstOrNull() ?: call.room_id ?: ""
+                    } else {
+                        call.caller_user_id ?: call.room_id ?: ""
+                    }
                 } else {
-                    if(call.room_name == null) call.caller_display_name.toString() else call.room_name
+                    // For group calls: use room ID
+                    call.room_id ?: ""
                 },
-
-                url = if(call.is_caller == true){
-                    if(call.room_avatar == null) getDisplayNamesString(call.receiver_avatars) else call.room_avatar
+                name = if (call.isDm) {
+                    // For DM calls: show the other person's name
+                    if (call.is_caller == true) {
+                        getDisplayNamesString(call.receiver_display_names) ?: "Unknown"
+                    } else {
+                        call.caller_display_name ?: "Unknown"
+                    }
                 } else {
-                    if(call.room_avatar == null) (call.caller_avatar) else call.room_avatar
+                    // For group calls: show room name
+                    call.room_name ?: "Group Call"
+                },
+                url = if (call.isDm) {
+                    // For DM calls: use the other person's avatar
+                    if (call.is_caller == true) {
+                        getDisplayAvatarsString(call.receiver_avatars)
+                    } else {
+                        call.caller_avatar
+                    }
+                } else {
+                    // For group calls: use room avatar
+                    call.room_avatar
                 },
                 size = AvatarSize.CallList
-            )
+            ),
+            isDm = call.isDm // Use isDm for proper placeholder
         )
         
         Spacer(modifier = Modifier.width(16.dp))
@@ -513,10 +536,16 @@ fun CallItem(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
-                    text = if(call.is_caller == true){
-                        if(call.room_name == null) getDisplayNamesString(call.receiver_display_names) else call.room_name
+                    text = if (call.isDm) {
+                        // For DM calls: show the other person's name
+                        if (call.is_caller == true) {
+                            getDisplayNamesString(call.receiver_display_names) ?: "Unknown"
+                        } else {
+                            call.caller_display_name ?: "Unknown"
+                        }
                     } else {
-                        if(call.room_name == null) call.caller_display_name.toString() else call.room_name
+                        // For group calls: show room name
+                        call.room_name ?: "Group Call"
                     },
                     style = MaterialTheme.typography.titleMedium,
                     maxLines = 1,
@@ -580,10 +609,19 @@ fun CallItem(
 /*
  * Helper function to convert receiver display names map to a readable string
  */
-private fun getDisplayNamesString(displayNames: Map<String, String>?): String {
-    if (displayNames.isNullOrEmpty()) return "Unknown"
+private fun getDisplayNamesString(displayNames: Map<String, String>?): String? {
+    if (displayNames.isNullOrEmpty()) return null
     
     return displayNames.values.joinToString(", ")
+}
+
+/*
+ * Helper function to get the first avatar URL from receiver avatars map
+ */
+private fun getDisplayAvatarsString(avatars: Map<String, String>?): String? {
+    if (avatars.isNullOrEmpty()) return null
+    
+    return avatars.values.firstOrNull()
 }
 
 private fun extractNameFromUserId(userId: String?): String {

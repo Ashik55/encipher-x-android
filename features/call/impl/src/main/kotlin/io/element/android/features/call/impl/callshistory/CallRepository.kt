@@ -9,7 +9,9 @@ package io.element.android.features.call.impl.callshistory
 
 import io.element.android.libraries.matrix.api.MatrixClient
 import io.element.android.libraries.matrix.api.MatrixClientProvider
+import io.element.android.libraries.matrix.api.core.RoomId
 import io.element.android.libraries.matrix.api.core.SessionId
+import io.element.android.libraries.matrix.api.room.isDm
 import io.element.android.libraries.matrix.impl.call.model.Call as MatrixCall
 import io.element.android.libraries.matrix.impl.call.model.CallDetailsResponse
 import io.element.android.libraries.matrix.impl.call.services.CallApiService
@@ -51,6 +53,7 @@ interface CallRepository {
 @ContributesBinding(AppScope::class)
 class DefaultCallRepository @Inject constructor(
     private val matrixCallApiService: CallApiService,
+    private val matrixClientProvider: MatrixClientProvider,
 ) : CallRepository {
     override suspend fun getCallDetails(
         sessionId: SessionId, 
@@ -66,8 +69,11 @@ class DefaultCallRepository @Inject constructor(
             val callsResponse = response.body()
             val calls = callsResponse?.calls?: emptyList()
             
+            // Get MatrixClient to determine isDm for each call
+            val matrixClient = matrixClientProvider.getOrRestore(sessionId).getOrNull()
+            
             PaginatedCallResult(
-                calls = calls.map { it.toCall() },
+                calls = calls.map { it.toCall(matrixClient) },
                 nextPage = callsResponse?.next_page_offset,
                 prevPage = callsResponse?.prev_page_offset
             )
@@ -77,7 +83,7 @@ class DefaultCallRepository @Inject constructor(
         }
     }
     
-    private fun MatrixCall.toCall() = Call(
+    private suspend fun MatrixCall.toCall(matrixClient: MatrixClient?) = Call(
         call_id = call_id?.toLong(),
         call_type = call_type,
         caller_user_id = caller_user_id,
@@ -91,6 +97,25 @@ class DefaultCallRepository @Inject constructor(
         is_caller = is_caller,
         receiver_user_ids = receiver_user_ids,
         receiver_display_names = receiver_display_names,
-        receiver_avatars = receiver_avatars
+        receiver_avatars = receiver_avatars,
+        isDm = determineDmStatus(matrixClient)
     )
+    
+    private suspend fun MatrixCall.determineDmStatus(matrixClient: MatrixClient?): Boolean {
+        return try {
+            val roomIdString = room_id
+            if (matrixClient == null || roomIdString.isNullOrEmpty()) {
+                // Fallback: use old logic as backup
+                room_name == null
+            } else {
+                val roomId = RoomId(roomIdString)
+                val room = matrixClient.getRoom(roomId)
+                room?.isDm ?: false
+            }
+        } catch (e: Exception) {
+            Timber.e(e, "Error determining isDm for room: $room_id, falling back to old logic")
+            // Fallback: use old logic if MatrixClient fails
+            room_name == null
+        }
+    }
 }
