@@ -39,9 +39,9 @@ import io.element.android.compound.tokens.generated.CompoundIcons
 import io.element.android.features.call.impl.R
 import io.element.android.features.call.impl.notifications.CallNotificationData
 import io.element.android.libraries.designsystem.background.OnboardingBackground
-import io.element.android.libraries.designsystem.components.avatar.Avatar
 import io.element.android.libraries.designsystem.components.avatar.AvatarData
 import io.element.android.libraries.designsystem.components.avatar.AvatarSize
+import io.element.android.libraries.designsystem.components.avatar.NewAvatar
 import io.element.android.libraries.designsystem.preview.ElementPreview
 import io.element.android.libraries.designsystem.preview.PreviewsDayNight
 import io.element.android.libraries.designsystem.theme.components.Icon
@@ -50,7 +50,9 @@ import io.element.android.libraries.matrix.api.core.EventId
 import io.element.android.libraries.matrix.api.core.RoomId
 import io.element.android.libraries.matrix.api.core.SessionId
 import io.element.android.libraries.matrix.api.core.UserId
+import io.element.android.libraries.matrix.api.room.isDm
 import io.element.android.libraries.ui.strings.CommonStrings
+import timber.log.Timber
 
 @Composable
 internal fun IncomingCallScreen(
@@ -86,23 +88,43 @@ internal fun IncomingCallScreen(
                 },
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Avatar(
+            // Use the reliable isDm value from notification data
+            val isDm = notificationData.isDm
+            
+            // Log for debugging placeholder behavior
+            Timber.tag("PlaceholderCall").d("isDm: $isDm, roomName: ${notificationData.roomName}, senderName: ${notificationData.senderName}")
+            
+            NewAvatar(
                 avatarData = AvatarData(
-                    id = notificationData.senderId.value,
-                    name = notificationData.senderName,
-                    url = notificationData.avatarUrl,
+                    // For DM calls: use sender info, for group calls: use room info
+                    id = if (isDm) notificationData.senderId.value else notificationData.roomId.value,
+                    name = if (isDm) notificationData.senderName else notificationData.roomName,
+                    url = notificationData.avatarUrl, // This already contains the correct avatar (room or sender)
                     size = AvatarSize.IncomingCall,
-                )
+                ),
+                isDm = isDm // Show DM placeholder for DM calls, group placeholder for group calls
             )
             Spacer(modifier = Modifier.height(24.dp))
             Text(
-                text = notificationData.roomName ?: notificationData.senderId.value,
+                text = if (isDm) {
+                    // For DM calls: show sender name
+                    notificationData.senderName ?: notificationData.senderId.value
+                } else {
+                    // For group calls: show room name
+                    notificationData.roomName ?: notificationData.roomId.value
+                },
                 style = ElementTheme.typography.fontHeadingMdBold,
                 textAlign = TextAlign.Center,
             )
             Spacer(modifier = Modifier.height(8.dp))
             Text(
-                text = stringResource(R.string.screen_incoming_call_subtitle_android),
+                text = if (isDm) {
+                    // For DM calls: show standard incoming call subtitle
+                    stringResource(R.string.screen_incoming_call_subtitle_android)
+                } else {
+                    // For group calls: show who is calling in the group
+                    "Incoming call from ${notificationData.senderName ?: notificationData.senderId.value}"
+                },
                 style = ElementTheme.typography.fontBodyLgRegular,
                 color = ElementTheme.colors.textSecondary,
                 textAlign = TextAlign.Center,
@@ -192,6 +214,7 @@ internal fun IncomingCallScreenPreview() = ElementPreview {
             notificationChannelId = "incoming_call",
             timestamp = 0L,
             textContent = null,
+            isDm = false,
         ),
         onAnswer = {},
         onCancel = {},

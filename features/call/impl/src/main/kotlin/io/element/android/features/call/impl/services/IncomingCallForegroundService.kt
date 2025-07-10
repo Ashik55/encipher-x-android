@@ -252,8 +252,15 @@ class IncomingCallForegroundService : Service() {
         val senderName = notificationData.senderName ?: notificationData.senderId.value
         
         // Create caller person object without avatar (for immediate display)
+        // For group calls, use room name; for direct calls, use sender name
+        val displayName = if (roomName != "Unknown Room" && roomName != senderName) {
+            roomName // Group call - show room name
+        } else {
+            senderName // Direct call - show sender name
+        }
+        
         val callerPerson = Person.Builder()
-            .setName(senderName)
+            .setName(displayName)
             .setImportant(true)
             .build()
         
@@ -279,8 +286,15 @@ class IncomingCallForegroundService : Service() {
         }
         
         // Create caller person object with avatar
+        // For group calls, use room name; for direct calls, use sender name
+        val displayName = if (roomName != "Unknown Room" && roomName != senderName) {
+            roomName // Group call - show room name
+        } else {
+            senderName // Direct call - show sender name
+        }
+        
         val callerPerson = Person.Builder()
-            .setName(senderName)
+            .setName(displayName)
             .setImportant(true)
             .apply {
                 if (largeIcon != null) {
@@ -350,9 +364,16 @@ class IncomingCallForegroundService : Service() {
         val bigText = "📞 Incoming call from $senderName" + 
             if (roomName != "Unknown Room" && roomName != senderName) " in $roomName" else ""
         
+        // For notification title, show who's calling for both group and direct calls
+        val notificationTitle = if (roomName != "Unknown Room" && roomName != senderName) {
+            "📞 $senderName in $roomName" // Group call - show "Sender in Room"
+        } else {
+            "📞 $senderName" // Direct call - show just sender
+        }
+        
         return NotificationCompat.Builder(this, CHANNEL_ID)
             .setSmallIcon(CommonDrawables.ic_notification_small)
-            .setContentTitle("📞 $senderName")
+            .setContentTitle(notificationTitle)
             .setContentText(contentText)
             .setSubText("Tap to answer")
             .setContentIntent(callIntent!!)

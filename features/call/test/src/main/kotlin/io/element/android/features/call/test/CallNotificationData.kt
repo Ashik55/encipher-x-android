@@ -31,6 +31,7 @@ fun aCallNotificationData(
     notificationChannelId: String = "channel_id",
     timestamp: Long = 0L,
     textContent: String? = null,
+    isDm: Boolean = false,
 ): CallNotificationData = CallNotificationData(
     sessionId = sessionId,
     roomId = roomId,
@@ -42,4 +43,5 @@ fun aCallNotificationData(
     notificationChannelId = notificationChannelId,
     timestamp = timestamp,
     textContent = textContent,
+    isDm = isDm,
 )

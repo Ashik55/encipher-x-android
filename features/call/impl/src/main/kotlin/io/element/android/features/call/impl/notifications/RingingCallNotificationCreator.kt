@@ -27,8 +27,10 @@ import io.element.android.libraries.matrix.api.core.EventId
 import io.element.android.libraries.matrix.api.core.RoomId
 import io.element.android.libraries.matrix.api.core.SessionId
 import io.element.android.libraries.matrix.api.core.UserId
+import io.element.android.libraries.matrix.api.room.isDm
 import io.element.android.libraries.matrix.ui.media.ImageLoaderHolder
 import io.element.android.libraries.push.api.notifications.NotificationBitmapLoader
+import kotlinx.coroutines.runBlocking
 import timber.log.Timber
 import javax.inject.Inject
 import kotlin.time.Duration.Companion.seconds
@@ -81,6 +83,18 @@ class RingingCallNotificationCreator @Inject constructor(
         val imageLoader = imageLoaderHolder.get(matrixClient)
         val largeIcon = notificationBitmapLoader.getUserIcon(roomAvatarUrl, imageLoader)
 
+        // Determine if this is a DM call using runBlocking since we need the result immediately for notification
+        val isDm = try {
+            runBlocking {
+                val room = matrixClient.getRoom(roomId)
+                room?.isDm ?: false
+            }
+        } catch (e: Exception) {
+            Timber.tag(TAG).e(e, "Error determining room type, defaulting to group call")
+            false // Default to group call if we can't determine
+        }
+        Timber.tag(TAG).d("Room isDm: $isDm for roomId: $roomId")
+
         val caller = Person.Builder()
             .setName(senderDisplayName)
             .setIcon(largeIcon)
@@ -99,6 +113,7 @@ class RingingCallNotificationCreator @Inject constructor(
             notificationChannelId = notificationChannelId,
             timestamp = timestamp,
             textContent = textContent,
+            isDm = isDm,
         )
 
         val declineIntent = PendingIntentCompat.getBroadcast(
