@@ -100,8 +100,15 @@ fun ChangeRolesView(
     modifier: Modifier = Modifier,
 ) {
     val latestNavigateUp by rememberUpdatedState(newValue = navigateUp)
+    
+    // Handle exit when search is not active
     BackHandler(enabled = !state.isSearchActive) {
         state.eventSink(ChangeRolesEvent.Exit)
+    }
+    
+    // Handle search deactivation when search is active
+    BackHandler(enabled = state.isSearchActive) {
+        state.eventSink(ChangeRolesEvent.ToggleSearchActive)
     }
 
     val localView = LocalView.current
@@ -112,6 +119,10 @@ fun ChangeRolesView(
             override fun onPreScroll(available: Offset, source: NestedScrollSource): Offset {
                 if (available.y != 0f) {
                     localView.hideKeyboard()
+                    // Also deactivate search when scrolling
+                    if (state.isSearchActive) {
+                        state.eventSink(ChangeRolesEvent.ToggleSearchActive)
+                    }
                 }
                 return Offset.Zero
             }
@@ -159,17 +170,24 @@ fun ChangeRolesView(
         ) { paddingValues ->
             Box(
                     modifier = Modifier
+                        .fillMaxSize()
                         .clickable(
                             interactionSource = remember { MutableInteractionSource() },
                             indication = null
                         ) {
                             localView.hideKeyboard()
+                            // Also deactivate search when tapping outside
+                            if (state.isSearchActive) {
+                                state.eventSink(ChangeRolesEvent.ToggleSearchActive)
+                            }
                         }
                         .nestedScroll(keyboardDismissingScrollConnection)
                 )
                 {
                 Column(
-                    modifier = Modifier.padding(paddingValues),
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(paddingValues),
                 ) {
                     val lazyListState = rememberLazyListState()
                     SearchBar(

@@ -7,6 +7,7 @@
 
 package io.element.android.features.createroom.impl.root
 
+import androidx.activity.compose.BackHandler
 import androidx.annotation.DrawableRes
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
@@ -67,6 +68,11 @@ fun CreateRoomRootView(
 //    onBottomNavigation: (BottomNavRoute) -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    // Handle system back button when search is active
+    BackHandler(enabled = state.userListState.isSearchActive) {
+        state.userListState.eventSink(io.element.android.features.createroom.impl.userlist.UserListEvents.OnSearchActiveChanged(false))
+    }
+    
     val localView = LocalView.current
 
     // Create a nested scroll connection that hides keyboard on scroll
@@ -75,6 +81,10 @@ fun CreateRoomRootView(
             override fun onPreScroll(available: Offset, source: NestedScrollSource): Offset {
                 if (available.y != 0f) {
                     localView.hideKeyboard()
+                    // Also deactivate search when scrolling
+                    if (state.userListState.isSearchActive) {
+                        state.userListState.eventSink(io.element.android.features.createroom.impl.userlist.UserListEvents.OnSearchActiveChanged(false))
+                    }
                 }
                 return Offset.Zero
             }
@@ -108,17 +118,23 @@ fun CreateRoomRootView(
             // Add keyboard dismissing box
             Box(
                 modifier = Modifier
+                    .fillMaxSize()
                     .clickable(
                         interactionSource = remember { MutableInteractionSource() },
                         indication = null
                     ) {
                         localView.hideKeyboard()
+                        // Also deactivate search when tapping outside
+                        if (state.userListState.isSearchActive) {
+                            state.userListState.eventSink(io.element.android.features.createroom.impl.userlist.UserListEvents.OnSearchActiveChanged(false))
+                        }
                     }
                     .nestedScroll(keyboardDismissingScrollConnection)
             ){
 
             Column(
                 modifier = Modifier
+                    .fillMaxSize()
                     .padding(paddingValues)
                     .consumeWindowInsets(paddingValues),
                 verticalArrangement = Arrangement.spacedBy(8.dp),

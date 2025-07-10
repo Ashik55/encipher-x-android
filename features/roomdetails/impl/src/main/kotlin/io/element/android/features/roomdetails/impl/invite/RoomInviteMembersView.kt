@@ -7,6 +7,7 @@
 
 package io.element.android.features.roomdetails.impl.invite
 
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -16,6 +17,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
@@ -70,6 +72,11 @@ fun RoomInviteMembersView(
     onSubmitClick: (List<MatrixUser>) -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    // Handle system back button when search is active
+    BackHandler(enabled = state.isSearchActive) {
+        state.eventSink(RoomInviteMembersEvents.OnSearchActiveChanged(false))
+    }
+    
     val localView = LocalView.current
 
     // Create a nested scroll connection that hides keyboard on scroll
@@ -78,6 +85,10 @@ fun RoomInviteMembersView(
             override fun onPreScroll(available: Offset, source: NestedScrollSource): Offset {
                 if (available.y != 0f) {
                     localView.hideKeyboard()
+                    // Also deactivate search when scrolling
+                    if (state.isSearchActive) {
+                        state.eventSink(RoomInviteMembersEvents.OnSearchActiveChanged(false))
+                    }
                 }
                 return Offset.Zero
             }
@@ -114,18 +125,23 @@ fun RoomInviteMembersView(
             // Add keyboard dismissing box
             Box(
                 modifier = Modifier
+                    .fillMaxSize()
                     .clickable(
                         interactionSource = remember { MutableInteractionSource() },
                         indication = null
                     ) {
                         localView.hideKeyboard()
+                        // Also deactivate search when tapping outside
+                        if (state.isSearchActive) {
+                            state.eventSink(RoomInviteMembersEvents.OnSearchActiveChanged(false))
+                        }
                     }
                     .nestedScroll(keyboardDismissingScrollConnection)
             ) {
 
                 Column(
                     modifier = Modifier
-                        .fillMaxWidth()
+                        .fillMaxSize()
                         .padding(padding)
                         .consumeWindowInsets(padding),
                     verticalArrangement = Arrangement.spacedBy(16.dp),
