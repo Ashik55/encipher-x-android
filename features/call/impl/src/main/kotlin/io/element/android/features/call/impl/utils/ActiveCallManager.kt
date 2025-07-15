@@ -109,6 +109,13 @@ class DefaultActiveCallManager @Inject constructor(
             return
         }
         
+        // Additional time-based check to prevent rapid successive calls
+        val currentTime = System.currentTimeMillis()
+        if (callRingingStartTime != null && (currentTime - callRingingStartTime!!) < 1000) {
+            Timber.d("Rapid successive call detected, ignoring: ${notificationData.eventId.value}")
+            return
+        }
+        
         // Store this event ID to prevent duplicate processing
         lastProcessedEventId = notificationData.eventId.value
         
@@ -131,11 +138,12 @@ class DefaultActiveCallManager @Inject constructor(
 
         timedOutCallJob?.cancel()
         timedOutCallJob = coroutineScope.launch {
-            // Start the foreground service for persistent notification
+            // Start the foreground service for persistent notification (with sound as fallback)
             startIncomingCallForegroundService(notificationData)
             
-            // Also show the regular ringing notification
-            showIncomingCallNotification(notificationData)
+            // Don't show the regular ringing notification to avoid double sound
+            // The foreground service handles both notification and ringtone
+            // showIncomingCallNotification(notificationData)
 
             // Wait for the ringing call to time out
             delay(ElementCallConfig.RINGING_CALL_DURATION_SECONDS.seconds)
@@ -159,8 +167,9 @@ class DefaultActiveCallManager @Inject constructor(
             displayMissedCallNotification(notificationData)
         }
         
-        // Clear ringing start time when call times out
+        // Clear both ringing start time and last processed event ID when call times out
         callRingingStartTime = null
+        lastProcessedEventId = null
     }
 
     override fun hungUpCall(callType: CallType) {

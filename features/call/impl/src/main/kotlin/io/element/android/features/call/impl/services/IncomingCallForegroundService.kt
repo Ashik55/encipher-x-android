@@ -73,6 +73,10 @@ class IncomingCallForegroundService : Service() {
         private const val CHANNEL_ID = "INCOMING_CALL_FOREGROUND_SERVICE"
         private const val CHANNEL_NAME = "Incoming Call Service"
         
+        // Track if we've already created a ringing call recently to prevent double ringing
+        private var lastRingTime: Long = 0
+        private const val RING_DEBOUNCE_TIME_MS = 2000 // 2 seconds
+        
         fun startService(context: Context, notificationData: CallNotificationData) {
             try {
                 val intent = Intent(context, IncomingCallForegroundService::class.java).apply {
@@ -203,8 +207,8 @@ class IncomingCallForegroundService : Service() {
     private fun startIncomingCallService(notificationData: CallNotificationData) {
         currentNotificationData = notificationData
         
-        // Start ringtone
-        startRingtone()
+        // Don't start manual ringtone - let the notification channel handle sound
+        // startRingtone()
         
         val notificationId = NotificationIdProvider.getForegroundServiceNotificationId(
             ForegroundServiceType.INCOMING_CALL
@@ -396,10 +400,11 @@ class IncomingCallForegroundService : Service() {
                     .setDeclineButtonColorHint(0xFFFF4444.toInt())
             )
             .apply {
-                // Set sound and vibration
-                if (ringtoneUri != null) {
-                    setSound(ringtoneUri, AudioManager.STREAM_RING)
-                }
+                // Don't set sound on individual notification - let the channel handle it
+                // Setting sound here AND on channel can cause double sound
+                // if (ringtoneUri != null) {
+                //     setSound(ringtoneUri, AudioManager.STREAM_RING)
+                // }
                 
                 // Custom vibration pattern (short pause, long vibration, short pause, long vibration)
                 setVibrate(longArrayOf(0, 1000, 500, 1000))
@@ -417,9 +422,18 @@ class IncomingCallForegroundService : Service() {
     
     /**
      * Starts playing the ringtone for the incoming call.
+     * Uses debouncing to prevent multiple ringtones from playing simultaneously.
      */
     private fun startRingtone() {
         try {
+            val currentTime = System.currentTimeMillis()
+            
+            // Check if we recently started a ringtone to prevent double ringing
+            if (currentTime - lastRingTime < RING_DEBOUNCE_TIME_MS) {
+                Timber.tag(TAG).d("Skipping ringtone - too soon after last ring (${currentTime - lastRingTime}ms)")
+                return
+            }
+            
             stopRingtone() // Stop any existing ringtone first
             
             val ringtoneUri = RingtoneManager.getActualDefaultRingtoneUri(this, RingtoneManager.TYPE_RINGTONE)
@@ -437,6 +451,7 @@ class IncomingCallForegroundService : Service() {
                     // Start playing the ringtone
                     if (!isPlaying) {
                         play()
+                        lastRingTime = currentTime
                         Timber.tag(TAG).d("Started ringtone playback")
                     }
                 }

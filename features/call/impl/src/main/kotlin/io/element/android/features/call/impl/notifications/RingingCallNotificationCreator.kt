@@ -150,6 +150,7 @@ class RingingCallNotificationCreator @Inject constructor(
             .setWhen(timestamp)
             .setOngoing(true)
             .setShowWhen(false)
+            .setOnlyAlertOnce(false)  // Allow alert on each new call, but prevent double alerts for same call
             .apply {
                 if (textContent != null) {
                     setContentText(textContent)
