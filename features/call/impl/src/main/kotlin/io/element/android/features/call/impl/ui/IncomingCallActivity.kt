@@ -19,6 +19,7 @@ import io.element.android.features.call.impl.di.CallBindings
 import io.element.android.features.call.impl.notifications.CallNotificationData
 import io.element.android.features.call.impl.utils.ActiveCallManager
 import io.element.android.features.call.impl.utils.CallState
+import io.element.android.features.call.impl.utils.IntentProvider
 import io.element.android.features.enterprise.api.EnterpriseService
 import io.element.android.libraries.architecture.bindings
 import io.element.android.libraries.designsystem.theme.ElementThemeApp
@@ -103,7 +104,10 @@ class IncomingCallActivity : AppCompatActivity() {
     }
 
     private fun onAnswer(notificationData: CallNotificationData) {
-        elementCallEntryPoint.startCall(CallType.RoomCall(notificationData.sessionId, notificationData.roomId))
+        // For incoming call, we need to set up the call with incoming configuration
+        // Create intent with incoming call flag
+        val intent = IntentProvider.createIntent(this, CallType.RoomCall(notificationData.sessionId, notificationData.roomId), null, true)
+        startActivity(intent)
     }
 
     private fun onCancel() {

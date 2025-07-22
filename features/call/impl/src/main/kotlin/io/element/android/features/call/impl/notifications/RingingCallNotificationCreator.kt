@@ -101,7 +101,7 @@ class RingingCallNotificationCreator @Inject constructor(
             .setImportant(true)
             .build()
 
-        val answerIntent = IntentProvider.getPendingIntent(context, CallType.RoomCall(sessionId, roomId))
+        val answerIntent = IntentProvider.getPendingIntent(context, CallType.RoomCall(sessionId, roomId), null, true)
         val notificationData = CallNotificationData(
             sessionId = sessionId,
             roomId = roomId,

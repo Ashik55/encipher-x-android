@@ -116,6 +116,7 @@ class ElementCallActivity :
     private var eventSink: ((CallScreenEvents) -> Unit)? = null
 
     private var isAudioCall: Boolean? = null
+    private var isIncomingCall: Boolean = false
     
     // Store active call information
     private var activeCallId: Long? = null
@@ -125,7 +126,9 @@ class ElementCallActivity :
         super.onCreate(savedInstanceState)
 
         isAudioCall = intent?.extras?.get(DefaultElementCallEntryPoint.IS_AUDIO_CALL) as? Boolean
+        isIncomingCall = intent?.extras?.get(DefaultElementCallEntryPoint.IS_INCOMING_CALL) as? Boolean ?: false
         Timber.tag("isAudioCall ==>>>").d(isAudioCall.toString())
+        Timber.tag("isIncomingCall ==>>>").d(isIncomingCall.toString())
         // Request permissions
 //        permissionLauncher.launch(requiredPermissions)
 
@@ -294,17 +297,37 @@ class ElementCallActivity :
                 this.displayName = displayName
             }
 
-            val options = JitsiMeetConferenceOptions.Builder()
-                .setServerURL(URL("https://meet.prod.enciph-er.com/"))
-                .setRoom(roomName)
-                .setAudioOnly(isAudioCall)
-                .setUserInfo(jitsiMeetUserInfo)
-                .setFeatureFlag("welcomepage.enabled", false)
-                .setFeatureFlag("prejoinpage.enabled", false)
-                .setFeatureFlag("toolbox.alwaysVisible", false)
-                .setFeatureFlag("reactions.enabled", false)
-                .setFeatureFlag("chat.enabled", false)
-                .build()
+            val options = if (isIncomingCall) {
+                // Incoming call configuration
+                JitsiMeetConferenceOptions.Builder()
+                    .setServerURL(URL("https://meet.prod.enciph-er.com/"))
+                    .setRoom(roomName)
+                    .setAudioOnly(isAudioCall)
+                    .setUserInfo(jitsiMeetUserInfo)
+                    .setFeatureFlag("welcomepage.enabled", false)
+                    .setFeatureFlag("prejoinpage.enabled", false)
+                    .setFeatureFlag("toolbox.alwaysVisible", false)
+                    .setFeatureFlag("reactions.enabled", false)
+                    .setFeatureFlag("chat.enabled", false)
+                    .setConfigOverride("callDirection", "incoming")
+                    .setConfigOverride("isOutgoingCall", false)
+                    .build()
+            } else {
+                // Outgoing call configuration
+                JitsiMeetConferenceOptions.Builder()
+                    .setServerURL(URL("https://meet.prod.enciph-er.com/"))
+                    .setRoom(roomName)
+                    .setAudioOnly(isAudioCall)
+                    .setUserInfo(jitsiMeetUserInfo)
+                    .setFeatureFlag("welcomepage.enabled", false)
+                    .setFeatureFlag("prejoinpage.enabled", false)
+                    .setFeatureFlag("toolbox.alwaysVisible", false)
+                    .setFeatureFlag("reactions.enabled", false)
+                    .setFeatureFlag("chat.enabled", false)
+                    .setConfigOverride("callDirection", "outgoing")
+                    .setConfigOverride("isOutgoingCall", true)
+                    .build()
+            }
 
             JitsiMeetActivity.launch(context, options)
         } catch (e: Exception) {

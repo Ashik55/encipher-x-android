@@ -191,12 +191,15 @@ private fun joinJitsiMeeting(context: Context, roomName: String, displayName: St
     println("RoomName URL ==>> $roomName")
 
     try {
-        val options = JitsiMeetConferenceOptions.Builder()
+        // Outgoing call configuration
+        val outgoingCallOptions = JitsiMeetConferenceOptions.Builder()
             .setServerURL(URL("https://meet.jit.si"))
             .setRoom("ashik5575")
             .setAudioMuted(false)
             .setVideoMuted(false)
             .setAudioOnly(false)
+            .setConfigOverride("callDirection", "outgoing")
+            .setConfigOverride("isOutgoingCall", true)
             .apply {
                 if (displayName.isNotBlank()) {
                     setUserInfo(JitsiMeetUserInfo().apply {
@@ -207,7 +210,7 @@ private fun joinJitsiMeeting(context: Context, roomName: String, displayName: St
             .build()
 
         // Launch Jitsi Meet activity
-        JitsiMeetActivity.launch(context, options)
+        JitsiMeetActivity.launch(context, outgoingCallOptions)
 
     } catch (e: Exception) {
         Toast.makeText(context, "Error joining meeting: ${e.message}", Toast.LENGTH_LONG).show()
