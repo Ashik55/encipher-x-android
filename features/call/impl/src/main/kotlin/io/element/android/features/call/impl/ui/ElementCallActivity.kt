@@ -57,6 +57,7 @@ import io.element.android.features.call.impl.pip.PictureInPictureState
 import io.element.android.features.call.impl.pip.PipView
 import io.element.android.features.call.impl.services.CallForegroundService
 import io.element.android.features.call.impl.utils.CallIntentDataParser
+import io.element.android.features.call.impl.utils.ActiveCallManager
 import io.element.android.features.enterprise.api.EnterpriseService
 import io.element.android.libraries.architecture.AsyncData
 import io.element.android.libraries.architecture.Presenter
@@ -95,8 +96,10 @@ class ElementCallActivity :
     @Inject lateinit var appPreferencesStore: AppPreferencesStore
     @Inject lateinit var enterpriseService: EnterpriseService
     @Inject lateinit var pictureInPicturePresenter: PictureInPicturePresenter
+    @Inject lateinit var activeCallManager: ActiveCallManager
 
     @Inject lateinit var callApiService: CallApiService
+    @Inject lateinit var authenticationService: io.element.android.libraries.matrix.api.auth.MatrixAuthenticationService
 
     private lateinit var presenter: Presenter<CallScreenState>
 
@@ -203,6 +206,17 @@ class ElementCallActivity :
                         println("RoomName URL ==>> $roomId $displayName $userId")
                         
                         activeUserId = userId
+
+                        // AUTH CHECK: Block call join if not authenticated
+                        val isAuthenticated = kotlinx.coroutines.runBlocking {
+                            val sessionId = authenticationService.getLatestSessionId()
+                            sessionId != null
+                        }
+                        if (!isAuthenticated) {
+                            Toast.makeText(this@ElementCallActivity, "You must be logged in to join a call.", Toast.LENGTH_LONG).show()
+                            finish()
+                            return@LaunchedEffect
+                        }
 
                         if (isAudioCall != null) {
                             println("Creating call for primary user==>")
