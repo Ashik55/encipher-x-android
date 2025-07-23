@@ -368,36 +368,79 @@ class DefaultActiveCallManager @Inject constructor(
      */
     @OptIn(ExperimentalCoroutinesApi::class)
     private fun observeCallEndedMessages() {
+        var lastProcessedCallEndedEventId: String? = null
+        activeCall
+            .filterNotNull()
+            .filter { it.callState is CallState.Ringing && it.callType is CallType.RoomCall }
+            .onEach { activeCall ->
+                val callType = activeCall.callType as CallType.RoomCall
+                val notificationData = (activeCall.callState as? CallState.Ringing)?.notificationData ?: return@onEach
+                val callStartedTimestamp = notificationData.timestamp
+                val callStartedEventId = notificationData.eventId.value
+                Timber.d("[TimelineObserver] Call started eventId=$callStartedEventId, timestamp=$callStartedTimestamp")
+                coroutineScope.launch {
+                    val matrixClient = matrixClientProvider.getOrRestore(callType.sessionId).getOrNull()
+                    val room = matrixClient?.getRoom(callType.roomId)
+                    val timeline = room?.liveTimeline
+                    timeline?.timelineItems?.collect { items ->
+                        // Find the most recent 'Call ended' message
+                        val callEndedEvent = items.asReversed().firstOrNull { item ->
+                            item is io.element.android.libraries.matrix.api.timeline.MatrixTimelineItem.Event &&
+                            (item.event.content as? io.element.android.libraries.matrix.api.timeline.item.event.MessageContent)?.body == "Call ended"
+                        } as? io.element.android.libraries.matrix.api.timeline.MatrixTimelineItem.Event
+                        if (callEndedEvent != null) {
+                            val endedTimestamp = callEndedEvent.event.timestamp
+                            val endedEventId = callEndedEvent.event.eventId?.value
+                            Timber.d("[TimelineObserver] Found 'Call ended' eventId=$endedEventId, timestamp=$endedTimestamp")
+                            if (endedEventId != null && endedEventId == lastProcessedCallEndedEventId) {
+                                Timber.d("[TimelineObserver] Already processed this 'Call ended' event, skipping.")
+                                return@collect
+                            }
+                            if (endedTimestamp > callStartedTimestamp) {
+                                Timber.d("[TimelineObserver] Relevant 'Call ended' message detected in timeline - ringtone stopped for room")
+                                lastProcessedCallEndedEventId = endedEventId
+                                timedOutCallJob?.cancel()
+                                incomingCallTimedOut(displayMissedCallNotification = false)
+                                return@collect // Stop observing after handling
+                            } else {
+                                Timber.d("[TimelineObserver] 'Call ended' event is older than call started, ignoring.")
+                            }
+                        } else {
+                            Timber.d("[TimelineObserver] No 'Call ended' message found in timeline.")
+                        }
+                    }
+                }
+            }
+            .launchIn(coroutineScope)
+
+        // Temporarily comment out the old roomInfoFlow logic for testing
+        /*
         activeCall
             .filterNotNull()
             .filter { it.callState is CallState.Ringing && it.callType is CallType.RoomCall }
             .flatMapLatest { activeCall ->
                 val callType = activeCall.callType as CallType.RoomCall
                 val ringingStartTime = callRingingStartTime ?: System.currentTimeMillis()
-                
-                // Monitor room state for call cancellation by observing room info changes
-                // Only react to changes that happen after the call started ringing
                 matrixClientProvider.getOrRestore(callType.sessionId).getOrNull()
                     ?.getRoom(callType.roomId)
                     ?.roomInfoFlow
-                    ?.drop(1) // Skip the initial state to only react to changes that happen after ringing starts
-                    ?.filter { 
-                        // Only react to state changes that happen after ringing started
-                        System.currentTimeMillis() - ringingStartTime > 1000 // At least 1 second after ringing started
+                    ?.drop(1)
+                    ?.filter {
+                        System.currentTimeMillis() - ringingStartTime > 1000
                     }
                     ?.map { roomInfo ->
-                        // If the room no longer has an active call, it means the call was cancelled
                         !roomInfo.hasRoomCall
                     }
                     ?: flowOf(false)
             }
             .filter { callWasCancelled -> callWasCancelled }
             .onEach {
-                Timber.d("Call ended message delivered - ringtone stopped for room")
+                Timber.d("[RoomInfoFlowFallback] Call ended message delivered - ringtone stopped for room (roomInfoFlow fallback)")
                 timedOutCallJob?.cancel()
                 incomingCallTimedOut(displayMissedCallNotification = false)
             }
             .launchIn(coroutineScope)
+        */
     }
 }
 
