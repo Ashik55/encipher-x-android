@@ -18,6 +18,10 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -128,6 +132,9 @@ private fun RoomListScaffold(
     val appBarState = rememberTopAppBarState()
     val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior(appBarState)
     val snackbarHostState = rememberSnackbarHostState(snackbarMessage = state.snackbarMessage)
+    
+    // Track if we should hide the "My Chats" text based on scroll state
+    val hideMyChatsText = remember { mutableStateOf(false) }
 
     Scaffold(
         modifier = modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
@@ -143,6 +150,7 @@ private fun RoomListScaffold(
                 displayMenuItems = state.displayActions,
                 displayFilters = state.displayFilters,
                 filtersState = state.filtersState,
+                hideMyChatsText = hideMyChatsText.value,
             )
         },
 //        bottomBar = {
@@ -160,6 +168,7 @@ private fun RoomListScaffold(
                 onConfirmRecoveryKeyClick = onConfirmRecoveryKeyClick,
                 onRoomClick = ::onRoomClick,
                 onCreateRoomClick = onCreateRoomClick,
+                onScrollStateChanged = { shouldHide -> hideMyChatsText.value = shouldHide },
 //                onMigrateToNativeSlidingSyncClick = onMigrateToNativeSlidingSyncClick,
                 modifier = Modifier
                     .padding(padding)

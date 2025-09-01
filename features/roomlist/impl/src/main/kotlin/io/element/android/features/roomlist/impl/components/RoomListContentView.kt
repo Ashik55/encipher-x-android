@@ -66,6 +66,7 @@ fun RoomListContentView(
     onConfirmRecoveryKeyClick: () -> Unit,
     onRoomClick: (RoomListRoomSummary) -> Unit,
     onCreateRoomClick: () -> Unit,
+    onScrollStateChanged: (Boolean) -> Unit = {},
     modifier: Modifier = Modifier,
 ) {
     Box(modifier = modifier) {
@@ -92,6 +93,7 @@ fun RoomListContentView(
                     onSetUpRecoveryClick = onSetUpRecoveryClick,
                     onConfirmRecoveryKeyClick = onConfirmRecoveryKeyClick,
                     onRoomClick = onRoomClick,
+                    onScrollStateChanged = onScrollStateChanged,
                 )
             }
         }
@@ -162,6 +164,7 @@ private fun RoomsView(
     onSetUpRecoveryClick: () -> Unit,
     onConfirmRecoveryKeyClick: () -> Unit,
     onRoomClick: (RoomListRoomSummary) -> Unit,
+    onScrollStateChanged: (Boolean) -> Unit = {},
     modifier: Modifier = Modifier,
 ) {
     if (state.summaries.isEmpty() && filtersState.hasAnyFilterSelected) {
@@ -176,6 +179,7 @@ private fun RoomsView(
             onSetUpRecoveryClick = onSetUpRecoveryClick,
             onConfirmRecoveryKeyClick = onConfirmRecoveryKeyClick,
             onRoomClick = onRoomClick,
+            onScrollStateChanged = onScrollStateChanged,
             modifier = modifier.fillMaxSize(),
         )
     }
@@ -188,6 +192,7 @@ private fun RoomsViewList(
     onSetUpRecoveryClick: () -> Unit,
     onConfirmRecoveryKeyClick: () -> Unit,
     onRoomClick: (RoomListRoomSummary) -> Unit,
+    onScrollStateChanged: (Boolean) -> Unit = {},
     modifier: Modifier = Modifier,
 ) {
     val lazyListState = rememberLazyListState()
@@ -202,6 +207,21 @@ private fun RoomsViewList(
     val updatedEventSink by rememberUpdatedState(newValue = eventSink)
     LaunchedEffect(visibleRange) {
         updatedEventSink(RoomListEvents.UpdateVisibleRange(visibleRange))
+    }
+    
+    // Track scroll state to hide/show "My Chats" text
+    val shouldHideMyChatsText by remember {
+        derivedStateOf {
+            val firstVisibleItemIndex = lazyListState.firstVisibleItemIndex
+            val firstVisibleItemScrollOffset = lazyListState.firstVisibleItemScrollOffset
+            
+            // Hide text when scrolling past the first item or when there's small scroll offset
+            firstVisibleItemIndex > 0 || firstVisibleItemScrollOffset > 20
+        }
+    }
+    
+    LaunchedEffect(shouldHideMyChatsText) {
+        onScrollStateChanged(shouldHideMyChatsText)
     }
     LazyColumn(
         state = lazyListState,

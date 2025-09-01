@@ -34,6 +34,11 @@ import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
@@ -102,6 +107,7 @@ fun RoomListTopBar(
     displayMenuItems: Boolean,
     displayFilters: Boolean,
     filtersState: RoomListFiltersState,
+    hideMyChatsText: Boolean = false,
     modifier: Modifier = Modifier,
 ) {
     DefaultRoomListTopBar(
@@ -115,6 +121,7 @@ fun RoomListTopBar(
         displayMenuItems = displayMenuItems,
         displayFilters = displayFilters,
         filtersState = filtersState,
+        hideMyChatsText = hideMyChatsText,
         modifier = modifier,
     )
 }
@@ -132,6 +139,7 @@ private fun DefaultRoomListTopBar(
     displayMenuItems: Boolean,
     displayFilters: Boolean,
     filtersState: RoomListFiltersState,
+    hideMyChatsText: Boolean = false,
     modifier: Modifier = Modifier,
 ) {
     // We need this to manually clip the top app bar in preview mode
@@ -153,6 +161,35 @@ private fun DefaultRoomListTopBar(
 
     val statusBarPadding = with(LocalDensity.current) { WindowInsets.statusBars.getTop(this).toDp() }
 
+    // Animate height to reduce extra gap when "My Chats" is hidden
+    val animatedHeight by animateDpAsState(
+        targetValue = if (hideMyChatsText) 184.dp else 232.dp,
+        animationSpec = tween(durationMillis = 250),
+        label = "topBarHeight"
+    )
+    
+    val animatedTopPadding by animateDpAsState(
+        targetValue = if (hideMyChatsText) 8.dp else 16.dp,
+        animationSpec = tween(durationMillis = 300),
+        label = "topPadding"
+    )
+    
+    val animatedBottomPadding by animateDpAsState(
+        targetValue = if (hideMyChatsText) 8.dp else 16.dp,
+        animationSpec = tween(durationMillis = 300),
+        label = "bottomPadding"
+    )
+    
+    val animatedFiltersVerticalPadding by animateDpAsState(
+        targetValue = if (hideMyChatsText) 8.dp else 16.dp,
+        animationSpec = tween(durationMillis = 300),
+        label = "filtersVerticalPadding"
+    )
+    
+    // Filters keep their default height/padding; no animation applied
+    
+    // Text visibility is animated without reserving space when hidden
+
     Box(modifier = modifier) {
         val collapsedTitleTextStyle = ElementTheme.typography.aliasScreenTitle
         val expandedTitleTextStyle = ElementTheme.typography.fontHeadingLgBold.copy(
@@ -173,7 +210,7 @@ private fun DefaultRoomListTopBar(
                 modifier = Modifier
                     .fillMaxWidth()
 //                    .aspectRatio(2.2f)
-                    .height(232.dp)
+                    .height(animatedHeight)
                     .paint(
                         painter = painterResource(id = R.drawable.home_top_bg),
                         contentScale = ContentScale.FillBounds
@@ -212,7 +249,12 @@ private fun DefaultRoomListTopBar(
             ) {
                 Box(
                     modifier = Modifier
-                        .padding(start = 16.dp, top = 16.dp, bottom = 16.dp, end = 8.dp)
+                        .padding(
+                            start = 16.dp, 
+                            top = animatedTopPadding, 
+                            bottom = animatedBottomPadding, 
+                            end = 8.dp
+                        )
                         .height(56.dp)
                 ) {
                     TopAppBar(
@@ -321,23 +363,59 @@ private fun DefaultRoomListTopBar(
                         windowInsets = WindowInsets(0.dp),
                     )
                 }
-                Text(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 16.dp,),
-                    text = "My Chats",
-                    maxLines = 1,
-                    style = ElementTheme.typography.fontHeadingLgBold,
-                    overflow = TextOverflow.Ellipsis,
-                    color = ElementTheme.materialColors.primary,
-
-                    )
-
                 if (displayFilters) {
-                    RoomListFiltersView(
-                        state = filtersState,
-                        modifier = Modifier.padding(vertical = 16.dp)
-                    )
+                    // Always show "My Chats" text with animation
+                    AnimatedVisibility(
+                        visible = !hideMyChatsText,
+                        enter = fadeIn(animationSpec = tween(200)),
+                        exit = fadeOut(animationSpec = tween(200))
+                    ) {
+                        Text(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = 16.dp,),
+                            text = "My Chats",
+                            maxLines = 1,
+                            style = ElementTheme.typography.fontHeadingLgBold,
+                            overflow = TextOverflow.Ellipsis,
+                            color = ElementTheme.materialColors.primary,
+                        )
+                    }
+                    
+                    // Filters with animated positioning and sizing
+                    AnimatedVisibility(
+                        visible = true,
+                        enter = fadeIn(animationSpec = tween(200)),
+                        exit = fadeOut(animationSpec = tween(200))
+                    ) {
+                        RoomListFiltersView(
+                            state = filtersState,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(
+                                    top = animatedFiltersVerticalPadding,
+                                    bottom = animatedFiltersVerticalPadding
+                                )
+                        )
+                    }
+                } else {
+                    // When filters are disabled, just show "My Chats" text
+                    AnimatedVisibility(
+                        visible = !hideMyChatsText,
+                        enter = fadeIn(animationSpec = tween(200)),
+                        exit = fadeOut(animationSpec = tween(200))
+                    ) {
+                        Text(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = 16.dp,),
+                            text = "My Chats",
+                            maxLines = 1,
+                            style = ElementTheme.typography.fontHeadingLgBold,
+                            overflow = TextOverflow.Ellipsis,
+                            color = ElementTheme.materialColors.primary,
+                        )
+                    }
                 }
             }
         }
@@ -403,6 +481,7 @@ internal fun DefaultRoomListTopBarPreview() = ElementPreview {
         displayMenuItems = true,
         displayFilters = true,
         filtersState = aRoomListFiltersState(),
+        hideMyChatsText = false,
         onMenuActionClick = {},
     )
 }
@@ -421,6 +500,7 @@ internal fun DefaultRoomListTopBarWithIndicatorPreview() = ElementPreview {
         displayMenuItems = true,
         displayFilters = true,
         filtersState = aRoomListFiltersState(),
+        hideMyChatsText = false,
         onMenuActionClick = {},
     )
 }
