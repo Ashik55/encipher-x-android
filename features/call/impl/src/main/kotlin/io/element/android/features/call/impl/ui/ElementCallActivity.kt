@@ -75,9 +75,10 @@ import org.jitsi.meet.sdk.JitsiMeetUserInfo
 import timber.log.Timber
 import java.net.URL
 import javax.inject.Inject
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import androidx.lifecycle.lifecycleScope
+import kotlinx.coroutines.CoroutineScope
 
 private val loggerTag = LoggerTag("ElementCallActivity")
 
@@ -218,56 +219,54 @@ class ElementCallActivity :
                             return@LaunchedEffect
                         }
 
-                        if (isAudioCall != null) {
-                            println("Creating call for primary user==>")
-                            try {
-                                val response = callApiService.createCall(
-                                    userId = userId,
-                                    body = CallRequestBody(room_id = roomId, call_type = if (isAudioCall == true) "audio" else "video")
-                                )
-                                if (response.isSuccessful) {
-                                    val data = response.body()
-                                    Timber.tag("response ==>>>").d(data.toString())
-                                    println("Call Created==>: $data")
-                                    
-                                    // Store the call_id from the response
-                                    activeCallId = data?.call_id
-                                    Timber.tag("Active Call ID").d("Stored call_id: $activeCallId")
+                        // Launch Jitsi immediately to avoid waiting on backend calls
+                        if (roomId?.isNotBlank() == true) {
+                            // If we know whether it's audio-only, use it; otherwise default to video
+                            val audioOnly = isAudioCall == true
+                            joinJitsiMeeting(this@ElementCallActivity, roomId, displayName ?: "Anonymous", audioOnly)
+                        }
 
-                                    if (roomId?.isNotBlank() == true) {
-                                        joinJitsiMeeting(this@ElementCallActivity, roomId, displayName ?: "Anonymous", isAudioCall == true)
+                        // Perform backend call creation/fetch in background without blocking Jitsi launch
+                        this@ElementCallActivity.lifecycleScope.launch(Dispatchers.IO) {
+                            if (isAudioCall != null) {
+                                println("Creating call for primary user==>")
+                                try {
+                                    val response = callApiService.createCall(
+                                        userId = userId,
+                                        body = CallRequestBody(room_id = roomId, call_type = if (isAudioCall == true) "audio" else "video")
+                                    )
+                                    if (response.isSuccessful) {
+                                        val data = response.body()
+                                        Timber.tag("response ==>>>").d(data.toString())
+                                        println("Call Created==>: $data")
+                                        // Store the call_id from the response
+                                        activeCallId = data?.call_id
+                                        Timber.tag("Active Call ID").d("Stored call_id: $activeCallId")
+                                    } else {
+                                        println("Create call failed==>: ${response.errorBody()}")
                                     }
-                                } else {
-                                    println("Create call failed==>: ${response.errorBody()}")
+                                } catch (e: Exception) {
+                                    println("Exception in createCall==>: ${e.localizedMessage}")
                                 }
-                            } catch (e: Exception) {
-                                println("Exception in createCall==>: ${e.localizedMessage}")
-                            }
-                        } else {
-                            println("get call details==>")
-                            try {
-                                val response = callApiService.getCallDetails(
-                                    userId = userId,
-                                    roomId = roomId
-                                )
-                                if (response.isSuccessful) {
-                                    val firstCall = response.body()?.calls?.first()
-                                    Timber.tag("response ==>>>").d(firstCall.toString())
-                                    
-                                    // Store the call_id from the response
-                                    activeCallId = firstCall?.call_id
-                                    Timber.tag("Active Call ID").d("Retrieved call_id: $activeCallId")
-
-                                    if (roomId?.isNotBlank() == true && firstCall != null) {
-                                        joinJitsiMeeting(this@ElementCallActivity, roomId, displayName ?: "Anonymous", firstCall.call_type == "audio")
+                            } else {
+                                println("get call details==>")
+                                try {
+                                    val response = callApiService.getCallDetails(
+                                        userId = userId,
+                                        roomId = roomId
+                                    )
+                                    if (response.isSuccessful) {
+                                        val firstCall = response.body()?.calls?.first()
+                                        Timber.tag("response ==>>>").d(firstCall.toString())
+                                        // Store the call_id from the response
+                                        activeCallId = firstCall?.call_id
+                                        Timber.tag("Active Call ID").d("Retrieved call_id: $activeCallId")
+                                    } else {
+                                        println("Create call failed==>: ${response.errorBody()}")
                                     }
-
-                                    // Update state or navigate to call screen
-                                } else {
-                                    println("Create call failed==>: ${response.errorBody()}")
+                                } catch (e: Exception) {
+                                    println("Exception in createCall==>: ${e.localizedMessage}")
                                 }
-                            } catch (e: Exception) {
-                                println("Exception in createCall==>: ${e.localizedMessage}")
                             }
                         }
                     }
