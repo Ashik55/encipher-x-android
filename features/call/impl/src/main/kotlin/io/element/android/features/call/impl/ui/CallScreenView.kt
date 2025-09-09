@@ -119,21 +119,20 @@ internal fun CallScreenView(
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .background(
-                    if(ElementTheme.isLightTheme) Color(0xFFFFFFFF) else Color(0xFF111317)
-                )
+                .background(Color.Black)
                 .padding(padding)
                 .consumeWindowInsets(padding),
         ) {
             when (state.urlState) {
-                AsyncData.Uninitialized, is AsyncData.Loading ->
-                    ProgressDialog(text = stringResource(id = CommonStrings.common_please_wait))
-                is AsyncData.Failure ->
-                    ErrorDialog(
-                        content = state.urlState.error.message.orEmpty(),
-                        onSubmit = { state.eventSink(CallScreenEvents.Hangup) },
-                    )
-                is AsyncData.Success -> Unit // Jitsi will launch automatically
+                AsyncData.Uninitialized, is AsyncData.Loading -> {
+                    Unit
+                }
+                is AsyncData.Failure -> {
+                    Unit
+                }
+                is AsyncData.Success -> {
+                    Unit
+                }
             }
 
             //Element Call

@@ -44,6 +44,9 @@
             <meta-data
                 android:name='androidx.lifecycle.ProcessLifecycleInitializer'
                 android:value='androidx.startup' />
+            <meta-data
+                android:name="io.element.android.features.call.impl.initializers.JitsiCallInitializer"
+                android:value="androidx.startup" />
         </provider>
 
         <activity
