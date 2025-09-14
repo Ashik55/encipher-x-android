@@ -5,8 +5,10 @@
  * Please see LICENSE files in the repository root for full details.
  */
 
-package io.element.android.features.call.impl.ui
+// COMMENTED OUT: Testing instant performance without fake UI components
+// package io.element.android.features.call.impl.ui
 
+/*
 import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.infiniteRepeatable
@@ -411,3 +413,4 @@ internal fun FakeConferenceUIPreviewAudio() = ElementPreview {
         roomName = "Quick Call"
     )
 }
+*/

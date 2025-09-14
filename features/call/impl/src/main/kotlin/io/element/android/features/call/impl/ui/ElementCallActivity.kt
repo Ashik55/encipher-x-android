@@ -250,12 +250,12 @@ class ElementCallActivity :
                     }
                 }
 
-                // ✅ FAKE UI - Display immediately while everything loads
-                FakeConferenceUI(
-                    isAudioCall = isAudioCall == true,
-                    participantName = currentRoomName.value,
-                    roomName = intent?.getStringExtra("ROOM_NAME") ?: currentRoomName.value
-                )
+                // ✅ FAKE UI - COMMENTED OUT for instant performance testing
+                // FakeConferenceUI(
+                //     isAudioCall = isAudioCall == true,
+                //     participantName = currentRoomName.value,
+                //     roomName = intent?.getStringExtra("ROOM_NAME") ?: currentRoomName.value
+                // )
             }
         }
     }
