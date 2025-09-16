@@ -326,8 +326,7 @@ class ElementCallActivity :
         try {
             // ✅ Launch Jitsi in background while fake UI remains visible
             lifecycleScope.launch(Dispatchers.Main) {
-                // Small delay to ensure fake UI is fully visible
-                delay(200)
+                // Launch immediately to reduce first-call latency
                 
                 // Launch Jitsi Meet Activity with NO animation
                 val jitsiIntent = Intent(this@ElementCallActivity, JitsiMeetActivity::class.java).apply {
