@@ -43,7 +43,31 @@ class DefaultElementCallEntryPoint @Inject constructor(
 
     override fun startCall(callType: CallType, isAudioCall: Boolean?) {
         Timber.tag(TAG).i("🚀 Starting INSTANT call of type: $callType (WhatsApp-like speed)")
-        context.startActivity(IntentProvider.createIntent(context, callType, isAudioCall, false))
+        
+        when (callType) {
+            is CallType.RoomCall -> {
+                // Launch coroutine to fetch room name from Matrix SDK before starting call
+                coroutineScope.launch {
+                    try {
+                        val matrixClient = matrixClientProvider.getOrRestore(callType.sessionId).getOrNull()
+                        val room = matrixClient?.getRoom(callType.roomId)
+                        val roomName = room?.displayName ?: room?.roomId?.value ?: "Conference"
+                        Timber.tag(TAG).i("Starting call with room name: $roomName for roomId: ${callType.roomId}")
+                        
+                        // Now start the activity with the proper room name available
+                        context.startActivity(IntentProvider.createIntent(context, callType, isAudioCall, false, roomName))
+                    } catch (e: Exception) {
+                        Timber.tag(TAG).e(e, "Error fetching room name, starting call anyway")
+                        // Fallback: start call without room name
+                        context.startActivity(IntentProvider.createIntent(context, callType, isAudioCall, false))
+                    }
+                }
+            }
+            else -> {
+                // For non-room calls, proceed immediately
+                context.startActivity(IntentProvider.createIntent(context, callType, isAudioCall, false))
+            }
+        }
     }
 
     override fun handleIncomingCall(

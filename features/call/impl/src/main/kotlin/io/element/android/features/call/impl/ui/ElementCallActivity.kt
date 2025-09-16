@@ -119,6 +119,7 @@ class ElementCallActivity :
 
     private var isAudioCall: Boolean? = null
     private var isIncomingCall: Boolean = false
+    private var roomNameFromIntent: String? = null
     
     // Store active call information
     private var activeCallId: Long? = null
@@ -129,7 +130,8 @@ class ElementCallActivity :
 
         isAudioCall = intent?.extras?.get(DefaultElementCallEntryPoint.IS_AUDIO_CALL) as? Boolean
         isIncomingCall = intent?.extras?.get(DefaultElementCallEntryPoint.IS_INCOMING_CALL) as? Boolean ?: false
-        Timber.tag("CallActivity").d("Audio call: $isAudioCall, Incoming: $isIncomingCall")
+        roomNameFromIntent = intent?.getStringExtra("EXTRA_ROOM_NAME")
+        Timber.tag("CallActivity").d("Audio call: $isAudioCall, Incoming: $isIncomingCall, Room name: $roomNameFromIntent")
 
         applicationContext.bindings<CallBindings>().inject(this)
 
@@ -158,7 +160,7 @@ class ElementCallActivity :
 
         setContent {
             // State to track the current room name for fake UI
-            val currentRoomName = remember { mutableStateOf("Conference") }
+            val currentRoomName = remember { mutableStateOf(roomNameFromIntent ?: "Conference") }
             
             ElementThemeApp(
                 appPreferencesStore = appPreferencesStore,
@@ -199,10 +201,13 @@ class ElementCallActivity :
                         if (roomId?.isNotBlank() == true) {
                             val audioOnly = isAudioCall == true
                             
+                            // Use room name from intent if available, fallback to displayName or formatted roomId
+                            val conferenceRoomName = roomNameFromIntent ?: displayName?.takeIf { it.isNotBlank() } ?: formatRoomName(roomId)
+                            
                             // Launch Jitsi in background with a small delay to let fake UI render first
                             launch {
                                 delay(100) // Just enough time for fake UI to appear
-                                joinJitsiMeetingInstant(this@ElementCallActivity, roomId, displayName ?: "Anonymous", audioOnly)
+                                joinJitsiMeetingInstant(this@ElementCallActivity, conferenceRoomName, displayName ?: "Anonymous", audioOnly)
                             }
                         }
 

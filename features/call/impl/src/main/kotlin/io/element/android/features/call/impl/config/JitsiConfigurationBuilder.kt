@@ -48,6 +48,8 @@ object JitsiConfigurationBuilder {
                 applyCallDirectionConfig(isIncomingCall)
                 // Apply audio/video specific config
                 applyMediaConfig(isAudioCall)
+                // Apply room display name configuration - show actual room name
+                applyRoomDisplayNameConfig(roomName)
             }
             .build()
     }
@@ -127,6 +129,19 @@ object JitsiConfigurationBuilder {
     }
     
     /**
+     * Applies room display name configuration to show the actual room name in the header.
+     * This ensures the mobile app shows the exact room name instead of formatted versions.
+     */
+    private fun JitsiMeetConferenceOptions.Builder.applyRoomDisplayNameConfig(roomDisplayName: String) {
+        // Set callDisplayName to show the actual room name (e.g., "Group")
+        // This takes priority over the room name in the getConferenceName function
+        setConfigOverride("callDisplayName", roomDisplayName)
+        
+        // Also set as subject for additional coverage
+        setSubject(roomDisplayName)
+    }
+    
+    /**
      * Creates conference options with minimal configuration for testing.
      */
     fun createMinimalOptions(roomName: String): JitsiMeetConferenceOptions {
@@ -145,5 +160,40 @@ object JitsiConfigurationBuilder {
         Timber.tag(TAG).d(
             "Creating Jitsi config - Room: $roomName, Audio: $isAudioCall, Incoming: $isIncomingCall"
         )
+    }
+    
+    /**
+     * Formats a room name to create a user-friendly display name for the header.
+     * Converts Matrix room IDs and other technical identifiers into readable names.
+     */
+    private fun formatRoomDisplayName(roomName: String): String {
+        return when {
+            roomName.isBlank() -> "Conference"
+            
+            // Handle Matrix room IDs (e.g., "!abcd1234:matrix.org" -> "Room abcd1234")
+            roomName.startsWith("!") && roomName.contains(":") -> {
+                val roomId = roomName.substringAfter("!").substringBefore(":")
+                if (roomId.length > 8) {
+                    "Room ${roomId.take(8)}..."
+                } else {
+                    "Room $roomId"
+                }
+            }
+            
+            // Handle long room names by truncating
+            roomName.length > 25 -> {
+                "${roomName.take(22)}..."
+            }
+            
+            // Clean up technical room names by replacing common separators
+            else -> {
+                roomName.replace("-", " ")
+                    .replace("_", " ")
+                    .split(" ")
+                    .joinToString(" ") { word -> 
+                        word.lowercase().replaceFirstChar { it.uppercase() }
+                    }
+            }
+        }
     }
 }

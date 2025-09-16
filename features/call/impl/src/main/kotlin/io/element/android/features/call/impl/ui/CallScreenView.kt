@@ -199,6 +199,9 @@ private fun joinJitsiMeeting(context: Context, roomName: String, displayName: St
             .setAudioOnly(false)
             .setConfigOverride("callDirection", "outgoing")
             .setConfigOverride("isOutgoingCall", true)
+            // Set callDisplayName to show actual room name (e.g., "Group")
+            .setConfigOverride("callDisplayName", roomName)
+            .setSubject(roomName)
             .apply {
                 if (displayName.isNotBlank()) {
                     setUserInfo(JitsiMeetUserInfo().apply {

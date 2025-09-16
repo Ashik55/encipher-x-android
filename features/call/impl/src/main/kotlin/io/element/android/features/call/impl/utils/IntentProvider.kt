@@ -16,18 +16,21 @@ import io.element.android.features.call.impl.DefaultElementCallEntryPoint
 import io.element.android.features.call.impl.ui.ElementCallActivity
 
 internal object IntentProvider {
-    fun createIntent(context: Context, callType: CallType, isAudioCall: Boolean?, isIncomingCall: Boolean = false): Intent = Intent(context, ElementCallActivity::class.java).apply {
+    fun createIntent(context: Context, callType: CallType, isAudioCall: Boolean?, isIncomingCall: Boolean = false, roomName: String? = null): Intent = Intent(context, ElementCallActivity::class.java).apply {
         putExtra(DefaultElementCallEntryPoint.EXTRA_CALL_TYPE, callType)
         putExtra(DefaultElementCallEntryPoint.IS_AUDIO_CALL, isAudioCall)
         putExtra(DefaultElementCallEntryPoint.IS_INCOMING_CALL, isIncomingCall)
+        if (roomName != null) {
+            putExtra("EXTRA_ROOM_NAME", roomName)
+        }
         addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_NO_USER_ACTION)
     }
 
-    fun getPendingIntent(context: Context, callType: CallType, isAudioCall: Boolean? = null, isIncomingCall: Boolean = false): PendingIntent {
+    fun getPendingIntent(context: Context, callType: CallType, isAudioCall: Boolean? = null, isIncomingCall: Boolean = false, roomName: String? = null): PendingIntent {
         return PendingIntentCompat.getActivity(
             context,
             DefaultElementCallEntryPoint.REQUEST_CODE,
-            createIntent(context, callType, isAudioCall, isIncomingCall),
+            createIntent(context, callType, isAudioCall, isIncomingCall, roomName),
             PendingIntent.FLAG_CANCEL_CURRENT,
             false
         )!!
