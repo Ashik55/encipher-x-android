@@ -329,8 +329,14 @@ class ElementCallActivity :
                 // Small delay to ensure fake UI is fully visible
                 delay(200)
                 
-                // Launch Jitsi Meet Activity
-                JitsiMeetActivity.launch(context, options)
+                // Launch Jitsi Meet Activity with NO animation
+                val jitsiIntent = Intent(this@ElementCallActivity, JitsiMeetActivity::class.java).apply {
+                    action = "org.jitsi.meet.CONFERENCE"
+                    putExtra("JitsiMeetConferenceOptions", options)
+                    addFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION)
+                }
+                startActivity(jitsiIntent)
+                this@ElementCallActivity.overridePendingTransition(0, 0)
                 
                 Timber.tag(loggerTag.value).d("✅ Jitsi launched with extended fake UI coverage")
                 
@@ -347,7 +353,14 @@ class ElementCallActivity :
                 val fallbackOptions = JitsiConfigurationBuilder.createMinimalOptions(
                     roomName = roomName
                 )
-                JitsiMeetActivity.launch(context, fallbackOptions)
+                // Launch Jitsi Meet Activity (fallback) with NO animation
+                val jitsiIntent = Intent(this@ElementCallActivity, JitsiMeetActivity::class.java).apply {
+                    action = "org.jitsi.meet.CONFERENCE"
+                    putExtra("JitsiMeetConferenceOptions", fallbackOptions)
+                    addFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION)
+                }
+                startActivity(jitsiIntent)
+                this@ElementCallActivity.overridePendingTransition(0, 0)
             } catch (fallbackError: Exception) {
                 Timber.tag(loggerTag.value).e(fallbackError, "Fallback Jitsi launch failed")
             }
@@ -447,6 +460,8 @@ class ElementCallActivity :
     override fun finish() {
         // Also remove the task from recents
         finishAndRemoveTask()
+        // Disable transition animation when finishing and returning from Jitsi
+        overridePendingTransition(0, 0)
     }
 
     override fun close() {
