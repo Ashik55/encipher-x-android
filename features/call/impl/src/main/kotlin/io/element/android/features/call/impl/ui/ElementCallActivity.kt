@@ -201,8 +201,8 @@ class ElementCallActivity :
                         if (roomId?.isNotBlank() == true) {
                             val audioOnly = isAudioCall == true
                             
-                            // Use room name from intent if available, fallback to displayName or formatted roomId
-                            val conferenceRoomName = roomNameFromIntent ?: displayName?.takeIf { it.isNotBlank() } ?: formatRoomName(roomId)
+                            // Always use the real roomId as the conference identifier for a stable session
+                            val conferenceRoomName = roomId
                             
                             // Launch Jitsi in background with a small delay to let fake UI render first
                             launch {
@@ -344,9 +344,7 @@ class ElementCallActivity :
                 
                 Timber.tag(loggerTag.value).d("✅ Jitsi launched with extended fake UI coverage")
                 
-                // Delay before finishing to allow smooth transition
-                delay(8000) // Show fake UI for 8 seconds on mobile to cover all loading
-                finish()
+                // Do not auto-finish the host activity; rely on Jitsi broadcast events to end session
             }
             
         } catch (e: Exception) {

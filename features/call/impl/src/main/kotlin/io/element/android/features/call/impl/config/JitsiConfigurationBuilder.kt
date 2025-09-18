@@ -60,7 +60,6 @@ object JitsiConfigurationBuilder {
     fun createDefaultOptions(): JitsiMeetConferenceOptions {
         return JitsiMeetConferenceOptions.Builder()
             .setServerURL(URL(SERVER_URL))
-            .setRoom("preload_dummy_room")
             .apply {
                 // Apply common instant UI configuration only
                 applyInstantUIConfig()

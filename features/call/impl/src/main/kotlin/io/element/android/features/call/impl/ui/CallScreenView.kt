@@ -26,6 +26,8 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -81,12 +83,14 @@ internal fun CallScreenView(
         }
     }
 
-    // Launch Jitsi meeting when the state has a valid URL
+    // Launch Jitsi meeting when the state has a valid URL (guard one-time launch)
+    var launched by androidx.compose.runtime.remember { androidx.compose.runtime.mutableStateOf(false) }
     LaunchedEffect(state.urlState) {
-        if (state.urlState is AsyncData.Success) {
+        if (!launched && state.urlState is AsyncData.Success) {
             val url = state.urlState.data
             if (url.isNotBlank()) {
-                joinJitsiMeeting(context, url, "User Display Name") // Adjust display name as needed
+                launched = true
+                joinJitsiMeeting(context, url, "User Display Name")
             }
         }
     }
@@ -190,10 +194,10 @@ private fun joinJitsiMeeting(context: Context, roomName: String, displayName: St
     println("RoomName URL ==>> $roomName")
 
     try {
-        // Outgoing call configuration
+        // Outgoing call configuration (use app server and provided room)
         val outgoingCallOptions = JitsiMeetConferenceOptions.Builder()
-            .setServerURL(URL("https://meet.jit.si"))
-            .setRoom("ashik5575")
+            .setServerURL(URL("https://meet.prod.enciph-er.com/"))
+            .setRoom(roomName)
             .setAudioMuted(false)
             .setVideoMuted(false)
             .setAudioOnly(false)
