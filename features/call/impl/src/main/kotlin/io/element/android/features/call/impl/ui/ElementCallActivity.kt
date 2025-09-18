@@ -128,6 +128,7 @@ class ElementCallActivity :
     private var activeCallId: Long? = null
     private var activeUserId: String? = null
     private var activeRoomId: String? = null
+    private var hasCleanedUpCall: Boolean = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -433,8 +434,8 @@ class ElementCallActivity :
         pictureInPicturePresenter.setPipView(null)
         androidx.localbroadcastmanager.content.LocalBroadcastManager.getInstance(this).unregisterReceiver(broadcastReceiver)
         
-        // End the call when activity is destroyed if we have an active call ID
-        endActiveCall()
+        // Ensure single, centralized cleanup
+        cleanupAfterCallEnd()
     }
     
     /**
@@ -482,6 +483,37 @@ class ElementCallActivity :
                 Timber.tag("CallEnd").e(e, "Error sending call ended message")
             }
         }
+    }
+
+    private fun cleanupAfterCallEnd() {
+        if (hasCleanedUpCall) return
+        hasCleanedUpCall = true
+
+        // Send exactly one "Call ended" message
+        when (webViewTarget.value) {
+            is CallType.RoomCall -> {
+                // Presenter/ActiveCallManager handles sending for RoomCall. Avoid duplicate here.
+            }
+            is CallType.ExternalUrl, null -> {
+                // For ExternalUrl (and unknown when we still have roomId), send from here
+                if (activeRoomId != null) sendCallEndedMessage()
+            }
+        }
+
+        // Ensure backend call record is ended
+        endActiveCall()
+
+        // Request Jitsi to hang up and clear
+        try {
+            val hangupBroadcastIntent = org.jitsi.meet.sdk.BroadcastIntentHelper.buildHangUpIntent()
+            androidx.localbroadcastmanager.content.LocalBroadcastManager.getInstance(applicationContext).sendBroadcast(hangupBroadcastIntent)
+        } catch (_: Throwable) {
+        }
+
+        // Clear local state
+        activeCallId = null
+        activeUserId = null
+        activeRoomId = null
     }
 
     override fun finish() {
@@ -645,10 +677,7 @@ class ElementCallActivity :
 
     override fun hangUp() {
         eventSink?.invoke(CallScreenEvents.Hangup)
-        // Proactively send "Call ended" message for ExternalUrl flows as well
-        sendCallEndedMessage()
-        val hangupBroadcastIntent = org.jitsi.meet.sdk.BroadcastIntentHelper.buildHangUpIntent()
-        androidx.localbroadcastmanager.content.LocalBroadcastManager.getInstance(applicationContext).sendBroadcast(hangupBroadcastIntent)
+        cleanupAfterCallEnd()
     }
 
     private fun registerForBroadcastMessages() {
@@ -673,8 +702,7 @@ class ElementCallActivity :
                 org.jitsi.meet.sdk.BroadcastEvent.Type.CONFERENCE_TERMINATED -> {
                     Timber.tag(loggerTag.value).d("Conference Terminated: ${event.data}")
                     // End the call when conference is terminated
-                    sendCallEndedMessage()
-                    endActiveCall()
+                    cleanupAfterCallEnd()
                     finish()
                 }
                 org.jitsi.meet.sdk.BroadcastEvent.Type.PARTICIPANT_JOINED -> {
@@ -683,8 +711,7 @@ class ElementCallActivity :
                 org.jitsi.meet.sdk.BroadcastEvent.Type.READY_TO_CLOSE -> {
                     Timber.tag(loggerTag.value).d("Ready to close: ${event.data}")
                     // End the call when app is ready to close
-                    sendCallEndedMessage()
-                    endActiveCall()
+                    cleanupAfterCallEnd()
                 }
                 else -> {}
             }
