@@ -66,6 +66,8 @@ import io.element.android.libraries.designsystem.theme.components.CircularProgre
 import io.element.android.libraries.matrix.impl.call.model.CallRequestBody
 import io.element.android.libraries.matrix.impl.call.model.EndCallRequest
 import io.element.android.libraries.matrix.impl.call.services.CallApiService
+import io.element.android.libraries.matrix.api.MatrixClientProvider
+import io.element.android.libraries.matrix.api.core.RoomId
 import io.element.android.libraries.preferences.api.store.AppPreferencesStore
 import org.jitsi.meet.sdk.JitsiMeetActivity
 import org.jitsi.meet.sdk.JitsiMeetConferenceOptions
@@ -99,6 +101,7 @@ class ElementCallActivity :
 
     @Inject lateinit var callApiService: CallApiService
     @Inject lateinit var authenticationService: io.element.android.libraries.matrix.api.auth.MatrixAuthenticationService
+    @Inject lateinit var matrixClientProvider: MatrixClientProvider
 
     private lateinit var presenter: Presenter<CallScreenState>
 
@@ -124,6 +127,7 @@ class ElementCallActivity :
     // Store active call information
     private var activeCallId: Long? = null
     private var activeUserId: String? = null
+    private var activeRoomId: String? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -185,6 +189,7 @@ class ElementCallActivity :
                         currentRoomName.value = displayName?.takeIf { it.isNotBlank() } ?: formatRoomName(roomId)
                         
                         activeUserId = userId
+                        activeRoomId = roomId
 
                         // AUTH CHECK: Block call join if not authenticated
                         val isAuthenticated = kotlinx.coroutines.runBlocking {
@@ -459,6 +464,26 @@ class ElementCallActivity :
         }
     }
 
+    private fun sendCallEndedMessage() {
+        val roomIdValue = activeRoomId ?: return
+        lifecycleScope.launch(Dispatchers.IO) {
+            try {
+                val sessionId = authenticationService.getLatestSessionId() ?: return@launch
+                val client = matrixClientProvider.getOrRestore(sessionId).getOrNull()
+                val room = client?.getRoom(RoomId(roomIdValue))
+                room?.sendMessage(
+                    body = "Call ended",
+                    htmlBody = null,
+                    intentionalMentions = emptyList()
+                )?.onFailure { error ->
+                    Timber.tag("CallEnd").e(error, "Failed to send call ended message")
+                }
+            } catch (e: Exception) {
+                Timber.tag("CallEnd").e(e, "Error sending call ended message")
+            }
+        }
+    }
+
     override fun finish() {
         // Also remove the task from recents
         finishAndRemoveTask()
@@ -620,6 +645,8 @@ class ElementCallActivity :
 
     override fun hangUp() {
         eventSink?.invoke(CallScreenEvents.Hangup)
+        // Proactively send "Call ended" message for ExternalUrl flows as well
+        sendCallEndedMessage()
         val hangupBroadcastIntent = org.jitsi.meet.sdk.BroadcastIntentHelper.buildHangUpIntent()
         androidx.localbroadcastmanager.content.LocalBroadcastManager.getInstance(applicationContext).sendBroadcast(hangupBroadcastIntent)
     }
@@ -646,6 +673,7 @@ class ElementCallActivity :
                 org.jitsi.meet.sdk.BroadcastEvent.Type.CONFERENCE_TERMINATED -> {
                     Timber.tag(loggerTag.value).d("Conference Terminated: ${event.data}")
                     // End the call when conference is terminated
+                    sendCallEndedMessage()
                     endActiveCall()
                     finish()
                 }
@@ -655,6 +683,7 @@ class ElementCallActivity :
                 org.jitsi.meet.sdk.BroadcastEvent.Type.READY_TO_CLOSE -> {
                     Timber.tag(loggerTag.value).d("Ready to close: ${event.data}")
                     // End the call when app is ready to close
+                    sendCallEndedMessage()
                     endActiveCall()
                 }
                 else -> {}

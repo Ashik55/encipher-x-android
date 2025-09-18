@@ -173,6 +173,16 @@ class CallScreenPresenter @AssistedInject constructor(
                         sendHangupMessage(widgetId, interceptor)
                         isJoinedCall = false
                     } else {
+                        // If we are still in preload/connecting and the user ends the call,
+                        // proactively notify the room that the call ended (like Jitsi does)
+                        // instead of relying only on disposal timing.
+                        coroutineScope.launch(dispatchers.io) {
+                            try {
+                                activeCallManager.hungUpCall(callType)
+                            } catch (_: Throwable) {
+                                // Best-effort; ignore errors when notifying call end
+                            }
+                        }
                         coroutineScope.launch {
                             close(callWidgetDriver.value, navigator)
                         }
