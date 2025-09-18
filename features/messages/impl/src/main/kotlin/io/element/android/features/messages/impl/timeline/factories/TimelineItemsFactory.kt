@@ -51,7 +51,19 @@ class TimelineItemsFactory @AssistedInject constructor(
         cacheInvalidator = TimelineItemsCacheInvalidator()
     ) { old, new ->
         if (old is MatrixTimelineItem.Event && new is MatrixTimelineItem.Event) {
-            old.uniqueId == new.uniqueId
+            val oldEventId = old.event.eventId
+            val newEventId = new.event.eventId
+            when {
+                oldEventId != null && newEventId != null -> oldEventId == newEventId
+                else -> {
+                    val oldTxnId = old.event.transactionId
+                    val newTxnId = new.event.transactionId
+                    when {
+                        oldTxnId != null && newTxnId != null -> oldTxnId == newTxnId
+                        else -> old.uniqueId == new.uniqueId
+                    }
+                }
+            }
         } else {
             false
         }
@@ -64,9 +76,38 @@ class TimelineItemsFactory @AssistedInject constructor(
         roomMembers: List<RoomMember>,
     ) = withContext(dispatchers.computation) {
         lock.withLock {
-            diffCacheUpdater.updateWith(timelineItems)
-            buildAndEmitTimelineItemStates(timelineItems, roomMembers)
+            val sanitizedTimelineItems = deduplicateTimelineItems(timelineItems)
+            diffCacheUpdater.updateWith(sanitizedTimelineItems)
+            buildAndEmitTimelineItemStates(sanitizedTimelineItems, roomMembers)
         }
+    }
+
+    /**
+     * Removes duplicated timeline items that represent the same Matrix event.
+     * Uses stable identifiers in priority order: eventId, then transactionId, and finally uniqueId.
+     */
+    private fun deduplicateTimelineItems(items: List<MatrixTimelineItem>): List<MatrixTimelineItem> {
+        val seen = HashSet<String>()
+        val result = ArrayList<MatrixTimelineItem>(items.size)
+        for (item in items) {
+            val key = when (item) {
+                is MatrixTimelineItem.Event -> {
+                    val eventId = item.event.eventId?.value
+                    val txnId = item.event.transactionId?.value
+                    when {
+                        eventId != null -> "e:" + eventId
+                        txnId != null -> "t:" + txnId
+                        else -> "u:" + item.uniqueId.value
+                    }
+                }
+                is MatrixTimelineItem.Virtual -> "v:" + item.uniqueId.value
+                MatrixTimelineItem.Other -> "o"
+            }
+            if (seen.add(key)) {
+                result.add(item)
+            }
+        }
+        return result
     }
 
     private suspend fun buildAndEmitTimelineItemStates(
