@@ -558,6 +558,20 @@ class ElementCallActivity :
             } else {
                 Timber.tag(loggerTag.value).d("Set the call type and create the presenter")
                 webViewTarget.value = callType
+                // Capture roomId immediately so first-call hangup can send message
+                when (callType) {
+                    is CallType.RoomCall -> {
+                        activeRoomId = callType.roomId.value
+                    }
+                    is CallType.ExternalUrl -> {
+                        val parsed = parseUrl(callType.url)
+                        val targetUrl = parsed ?: callType.url
+                        val (rid, _, _) = extractRoomIdAndDisplayName(targetUrl)
+                        if (!rid.isNullOrBlank()) {
+                            activeRoomId = rid
+                        }
+                    }
+                }
                 presenter = presenterFactory.create(
                     callType,
                     false,
@@ -574,6 +588,20 @@ class ElementCallActivity :
             } else {
                 // Starting the same call again, should not happen, the UI is preventing this. But maybe when using external links.
                 Timber.tag(loggerTag.value).d("Starting the same call again, do nothing")
+                // Still ensure roomId is captured if it wasn't yet
+                if (activeRoomId.isNullOrBlank()) {
+                    when (callType) {
+                        is CallType.RoomCall -> activeRoomId = callType.roomId.value
+                        is CallType.ExternalUrl -> {
+                            val parsed = parseUrl(callType.url)
+                            val targetUrl = parsed ?: callType.url
+                            val (rid, _, _) = extractRoomIdAndDisplayName(targetUrl)
+                            if (!rid.isNullOrBlank()) {
+                                activeRoomId = rid
+                            }
+                        }
+                    }
+                }
             }
         }
     }
