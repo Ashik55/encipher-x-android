@@ -466,7 +466,7 @@ private fun CustomMainActionsSection(
             .fillMaxWidth()
             .padding(horizontal = 16.dp)
             .horizontalScroll(rememberScrollState()),
-        horizontalArrangement = Arrangement.spacedBy(16.dp),
+        horizontalArrangement = Arrangement.spacedBy(16.dp, Alignment.CenterHorizontally),
     ) {
         val roomNotificationSettings = state.roomNotificationSettings
         if (state.roomType is RoomDetailsType.Room) {
