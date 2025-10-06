@@ -151,6 +151,7 @@ class RoomDetailsNode @AssistedInject constructor(
                 RoomDetailsAction.AddTopic -> onEditRoomDetails()
             }
         }
+        
 
         RoomDetailsView(
             state = state,
